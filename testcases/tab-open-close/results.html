@@ -1,0 +1,75 @@
+
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: Tab Open/Close Study: Results</title>
+</head>
+<body>
+
+<div id="container">
+
+	<div id="content-standalone">
+	
+		<div id="intro">
+		
+			<h1>Test Pilot: Tab Open/Close Study: Results</h1>
+			
+			<p>These are some results from the <a href="https://testpilot.mozillalabs.com/testcases/tab-open-close.html">Test Pilot Tab Open/Close Study</a>.  The graphs on this page are based on the data submissions we received from approximately 5,000 users of Firefox 3.5 during the period between September 3 and September 24, 2009.</p>
+			<p>Graph images are thumbnails: click any one to see it full-size.</p>
+			<p>Contents:</p>
+			<ol><li><a href="#minmax">Minimum, Average, and Maximum Tabs Open per User</a></li>
+			  <li><a href="#lifespans">Tab Lifespans</a></li>
+			  <li><a href="#close-switch">Switching on Tab Closure</a></li>
+                        </ol>
+
+			<p>If you would like to do your own analaysis of the data from this tab study, you can <a href="aggregated-data.html">download samples of it here</a>.
+		</div>
+
+
+		<div id="data"> 
+
+<h2><a name="minmax">Minimum, Average, and Maximum Tabs Open per User:</a></h2>
+<h3>Question: How many tabs do users have open at a time?</h3>
+<p class="callout"><a href="graphs/min-max-avg-tabs-open.png"><img src="graphs/min-max-avg-tabs-open-thumb.png"/></a></p>
+<h3>Explanation:</h3>
+<p>The x-axis is the number of tabs; the y-axis is a probability density - i.e. the area under a part of the curve represents the number of users who had that many tabs open.</p>
+<p>The red line represents the fewest tabs that the user had open at any time during the week; the blue line is the greatest number of tabs the user had open at any time during the week.
+<p>The green line is a time-weighted mean representing the average number of tabs over the course of the week.  Time-weighted means that, for example, if you have 2 tabs open for a day and then 10 tabs open for an hour, the average will be much closer to 2 than to 10.</p>
+<p>This calculation does not exclude idle time.  So, for example, the tabs that the user leaves open overnight while sleeping are given exactly the same weight as the tabs that the user has open when actively using the browser.  In principle we should be able to identify idle time from the data that we already have, so we should be able to do a follow-up analysis where idle time is excluded, and see whether that makes a big difference or not.</p>
+<h3>Analysis:</h3>
+<p>Note that the greatest number of users had an average of less than 5 tabs open at a time.  The vast majority of the area under the green curve is in the region below 10 tabs.  However, the <i>maximum</i> tabs curve just keeps going and going; this plot stops at 30 but there are plenty of users who have many more than 30 tabs open at a maximum.  So while 10 tabs or less may be the most common state, there's effectively no upper bound on how many tabs people do open at a time.</p>
+
+
+<h2><a name="lifespans">Tab Lifespans:</a></h2>
+<h3>Question: How long does an individual tab stay open on average?</h3>
+<p class="callout"><a href="graphs/tab-lifespans.png"><img src="graphs/tab-lifespans-thumb.png"/></a></p>
+<h3>Explanation:</h3>
+<p>The x-axis is the tab lifespan (i.e. the time between when it was opened and when it was closed); the y-axis is the number of tabs in the data set that had that lifespan.</p>
+<p>Note that the y-axis is logarithmic - the lines are at 10, 100, 1000, 10,000, etc.</p>
+<p>There were some tabs in the dataset that were already open when the study began, or that were still open when the study ended.  We treated these tabs as having a lifespan that began when the study did, or ended when the study did, even though this is not accurate, because it was the best estimate we could make.  This means that we are actually underestimating the lifespans of very long tabs.  There are probably plenty of tabs that stayed open for the entire 7-day duration of the study, for example, which were entirely missed by our instrumentation, since it only follows open and close events.</p>
+<h3>Analysis:</h3>
+<p>Overall, tab lifetimes appear to obey a power law distribution, with an extremely high spike of short-lived tabs followed by a long tail of increasingly longer-lived tabs.</p>
+<p>Because the y-axis is logarithmic, the high spike of very short-lived tabs, ones that were open for less than one minute, is even higher than it appears at first glance.  It would be interesting to investigate why there are so many short-lived tabs.  How many of these are tabs opened by mistake, or tabs opened to search results that were immediately dismissed as not what the user wanted?  How many of them are pages where the user simply read everything they needed to read in a few tens of seconds and then closed the tab satisfied?</p>
+<p>Like the plot above, this analysis does not exclude idle time.  Those long tab lifespans surely include many hours when the browser is not being used.  It will be interesting to see how it differs if we exclude idle time.</p>
+
+
+<h2><a name="close-switch">Switching on Tab Closure:</a></h2>
+<h3>Question: When a user closes a tab, Firefox automatically switches to another tab (call it the 'default' tab).  Is this default tab usually the one that the user wants or not?</h3>
+<p class="callout"><a href="graphs/close-switch-stats.png"><img src="graphs/close-switch-stats-thumb.png"/></a></p>
+<h3>Explanation:</h3>
+<p>This graph looks at how often the user stays on the default tab, as opposed to how often they immediately switch away.  "Immediately" is a bit of a fuzzy concept, so we look at the probability of the user switching away within 1 second, within 2 seconds, within 3 seconds, etc.</p>
+<p>The data was further broken down into cases where the default tab belonged to the same site as the closed tab (blue line), versus cases where they belonged to two different sites (red line). ("Same site" in this case means the domain name is the same, e.g. "www.mozilla.org/community" and "www.mozilla.org/projects" are the same site.)</p>
+<h3>Analysis:</h3>
+<p>Does being the same site or a different site make any difference in a user's likelihood of staying on the default tab?</p>
+<p>Apparently, it does.  If the default tab is a different site from the closed tab, the user is around 77% likely to stay on the default tab for at least 5 seconds; but if the default tab is on the same site, this probability climbs to about 85%.</p>
+<p>In the future, it would be interesting to look at the tab that the user switch <i>to</i> when switching away from the default tab, and how likely this tab is to be the same site as the closed tab or as the default tab.</p>
+
+		</div>
+	
+	</div>
+
+</div>
+
+</body>
+</html>

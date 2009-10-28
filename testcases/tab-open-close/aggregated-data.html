@@ -1,0 +1,118 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: Tab Open/Close Study: Aggregated Data Samples</title>
+</head>
+<body>
+
+<div id="container">
+
+	<div id="content-standalone">
+	
+		<div id="intro">
+		
+			<h1>Test Pilot: Tab Open/Close Study: Aggregated Data Samples</h1>
+			
+			<h2>Test Description </h2>
+			
+			<ul>
+			<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/tab-open-close.html">Tab Open/Close study </a>.</li>
+			<li>Test duration: 1 week*</li>
+			<li>Test type: Global</li>
+			<li>Firefox versions covered: 3.5 only</li>
+			<li>Data submission: over 5000 test sets submitted from 50+ locales,  September 3rd - 24th, 2009.</li>
+			</ul>
+			
+			<p>*  (i.e. for each user, data collection began when they installed the extension and ended 1 week later)</p>
+		
+		</div>
+		
+		<div id="data"> 
+		
+			<h2> Test Results </h2>
+			
+			<p>We are working on analyzing the data, and our results will be available online soon. For example, we've used the data to estimate the average number of tabs that are open in Firefox at a time, as well as the length of time that the average tab remains open.</p>
+			
+			<p>There's a lot more we can do with this data. If you have questions about it, ideas for how to analyze it, or derived metrics that you would be interested in seeing, please join the <a href="http://groups.google.com/group/mozilla-labs-testpilot"> Test Pilot Discussion Group </a>.  If you generate any statistics or charts from the data, we would of course look forward to seeing those posted in the discussion group as well.</p>
+			
+			<h2> Test Data </h2>
+			<p>Anyone is welcome to download and use the aggregated data files below.</p>
+			
+			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+			
+			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+			
+			<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">Lines</span></td><td><span class="headers">N (Number of users)</span></td><td><span class="headers">Description</span></td></tr>
+			<tr><td><a href="outfiles/fire_gestures_users_50_percent.csv.gz">fire_gestures_users_50_percent.csv.gz</a></td><td>2762 Kb</td><td>418998</td><td>95</td><td>50% sample of participants who use the extension Fire Gestures</td></tr>
+			<tr><td><a href="outfiles/fox_tab_users_50_percent.csv.gz">fox_tab_users_50_percent_csv.gz</a></td><td>3220 Kb</td><td>487662</td><td>116</td><td>50% sample of participants who use the extension Fox Tab</td></tr>
+			
+			<tr><td><a href="outfiles/linux_users_30_percent.csv.gz">linux_users_30_percent.csv.gz</a></td><td>4336 Kb</td><td>654722</td><td>126</td><td>30% sample of participants who use Firefox on Mac OS</td></tr>
+			<tr><td><a href="outfiles/linux_users_50_percent.csv.gz">linux_users_50_percent.csv.gz</a></td><td>6735 Kb</td><td>1014779</td><td>211</td><td>50% sample of participants who use Firefox on Linux</td></tr>
+			<tr><td><a href="outfiles/mac_users_30_percent.csv.gz">mac_users_30_percent.csv.gz</a></td><td>4107 Kb</td><td>626155</td><td>138</td><td>30% sample of participants who use Firefox on Mac OS</td></tr>
+			
+			<tr><td><a href="outfiles/mac_users_50_percent.csv.gz">mac_users_50_percent.csv.gz</a></td><td>7233 Kb</td><td>1094391</td><td>230</td><td>50% sample of participants who use Firefox on Mac OS</td></tr>
+			<tr><td><a href="outfiles/tab_mix_plus_users_50_percent.csv.gz">tab_mix_plus_users_50_percent.csv.gz</a></td><td>7620 Kb</td><td>1159570</td><td>226</td><td>50% sample of participants who use the extension Tab Mix Plus</td></tr>
+			<tr><td><a href="outfiles/tree_style_tab_users_70_percent.csv.gz">tree_style_tab_users_70_percent.csv.gz</a></td><td>1849 Kb</td><td>271087</td><td>50</td><td>70% sample of participants who use the extension Tree Style Tabs</td></tr>
+			
+			<tr><td><a href="outfiles/vanilla_firefox_users_10_percent.csv.gz">vanilla_firefox_users_10_percent.csv.gz</a></td><td>9186 Kb</td><td>1394007</td><td>313</td><td>10% sample of participants who use Firefox without tab-altering extensions</td></tr>
+			<tr><td><a href="outfiles/vanilla_firefox_users_30_percent.csv.gz">vanilla_firefox_users_30_percent.csv.gz</a></td><td>26917 Kb</td><td>4079992</td><td>939</td><td>30% sample of participants who use Firefox without tab-altering extensions</td></tr>
+			<tr><td><a href="outfiles/windows_users_10_percent.csv.gz">windows_users_10_percent.csv.gz</a></td><td>11391 Kb</td><td>1727403</td><td>387</td><td>10% sample of participants who use Firefox on Windows</td></tr>
+			
+			<tr><td><a href="outfiles/windows_users_30_percent.csv.gz">windows_users_30_percent.csv.gz</a></td><td>35622 Kb</td><td>5417540</td><td>1162</td><td>30% sample of participants who use Firefox on Windows</td></tr>
+			</table>
+			
+			<h3>How to read the data</h3>
+			
+			The data is in CSV (comma-separated value) format.  The first line of the file contains the column names.  A chunk of sample data might look like this:
+			
+			<pre>
+			user, event_code, tab_position, tab_window, ui_method, tab_site_hash, num_tabs, timestamp
+			1, 6, 3, 1, 0, 1, 4, 1252974367669
+			1, 5, 0, 1, 1, 0, 4, 1252974422507
+			1, 10,0, 1, 0, 0, 0, 1252974427743
+			1, 9, 0, 1, 0, 0, 1, 1253668079410
+			1, 6, 0, 1, 0, 0, 1, 1253668079792
+			1, 1, 1, 1, 2, 0, 2, 1253668084072
+			1, 5, 1, 1, 2, 0, 2, 1253668084102
+			1, 1, 2, 1, 2, 0, 3, 1253668084427
+			1, 5, 2, 1, 2, 0, 3, 1253668084471
+			1, 1, 3, 1, 2, 0, 4, 1253668084531
+			1, 5, 3, 1, 2, 0, 4, 1253668084568
+			</pre>
+			
+			Each row represents a single event in which a user interacted with the Firefox tabs bar.
+			Here's what the columns mean.
+			
+			
+			<ol><li><strong>user:</strong> All rows that have the same user number came from the same submission.  Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.)  These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</li>
+			<li><strong>event_code:</strong> Can be interpreted using the following table:<br/>
+			<ol><li>(1) OPEN_EVENT: a new tab was opened.</li>
+				<li>(2) CLOSE_EVENT: a tab was closed.</li>
+				<li>(3) DRAG_EVENT: user began dragging a tab away from its current location.</li>
+				<li>(4) DROP_EVENT: a dragged tab was dropped into a new location.</li>
+				<li>(5) SWITCH_EVENT: the tab became the active tab, either because the user switched to it manually, or because of automatic browser behavior (i.e. opening a new tab usually generates an automatic switch to that tab.)</li>
+				<li>(6) LOAD_EVENT: the URL displayed in the tab changed, whether because of a click on a link, a URL entered into the location bar, etc.</li>
+				<li>(7) Not used. (Reserved for future use.)</li>
+				<li>(8) Not used. (Reserved for future use.)</li>
+				<li>(9) OPEN_WINDOW_EVENT: a new browser window was opened.</li>
+				<li>(10) CLOSE_WINDOW_EVENT: an open browser window was closed.</li></ol></li>
+			
+			<li><strong>tab_position:</strong> the position of the affected tab within the window.  They are numbered left to right, starting at 0.  Be aware that these position numbers are ephemeral: the position of a tab can change several times between when it is opened and when it is closed, due to drag-drop events, or due to tabs being opened or closed to the left of the tab in question.  If you want to track a single tab over time, you will need to keep track of changes in its position.</li>
+			<li><strong>tab_window:</strong> a number identifying the window to which the tab belongs.  The first window opened during the session will be numbered 1, and the window ids increase from there.</li>
+			<li><strong>ui_method:</strong> Reserved for future use.  Ignore the numbers in this column for now.</li>
+			<li><strong>tab_site_hash:</strong> Identifies the 'tab group' to which the tab belongs.  Tabs which have the same number in this column are open to pages in the same domain.  For example, if a user had three tabs open to different pages on the www.mozilla.org site, those three tabs would all have the same number in the tab_site_hash column, but a tab open to a site beginning with labs.mozilla.com would have a different number.  The actual number is an index into a client-side hash of the domain name, so it should not be possible to recover from this number any information about actual URLs visited.</li>
+			<li><strong>num_tabs:</strong> The number of tabs which were open in the same window after this event was processed.  It's per-window, so if you want the number of tabs open in all windows you will need to sum this value across multiple windows.  If the event changed the number of tabs (e.g. OPEN_EVENT, CLOSE_EVENT) then the number in num_tabs represents the state after that event.</li>
+			
+			<li><strong>timestamp:</strong> The time at which the event occured, given in milliseconds since epoch.</li>
+			</ol>
+			
+			<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
+			
+		</div>
+	
+	</div>
+
+</div>
+
+</body></html>

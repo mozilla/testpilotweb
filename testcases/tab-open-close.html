@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>Mozilla Labs Test Pilot</title>
+	<link rel="stylesheet" type="text/css" media="all" href="../css/screen.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="../css/subpage.css" />
+
+</head>
+<body>
+
+		<div id="container">
+		
+			<div id="logo"><a href="http://labs.mozilla.com"><img src="../images/logo.png" border="0"></a></div>
+			
+			<div id="content">
+			
+				<div class="button">
+			
+					<span class="menuItem"><a href="../index.html">Home</a></span>
+					<span class="menuItem"><a href="../principles.html">Guiding Principles</a></span>
+					<span class="menuItem"><a href="../privacy.html">Privacy Policy</a></span>
+					<span class="menuOn"><a href="tab-open-close.html">Test Cases</a></span>
+				
+				</div>
+				
+				<div id="subContentTestCases">
+			                <p class="spacer_sm">	
+					<h1>Tab Open/Close Study</h1>
+
+					<ul><li><a href="tab-open-close/results.html">Analysis of data</a></li>
+					<li><a href="tab-open-close/aggregated-data.html">Aggregated data samples for download</a></li></ul>
+					
+					<h2>Introduction</h2>
+
+					<p>Tabbed browsing is now the standard interface offered by all major web browsers, and it‘s been argued that the browsing experience becomes difficult to manage when more than a handful of tabs are opened. For this test, we would like to explore what would be the best default browser behavior after users close or open a tab when many tabs are open. We will simply log user action types and time stamp when they interact with tabs. Through these log data, we may be able to detect certain patterns that help us design the default browser behavior that works best for most users.   
+					</p>
+				        <p>One thing to note is that Firefox tab behaviors may be dramatically changed by different tab-related add-ons. In order to distinguish test data from browsers with such add-ons and browsers without them, the data that is uploaded will include information about add-ons that are installed.  </p>
+						<div class="indent bold">
+						Test Champion: <a href="http://limi.net/about "> Alexander Limi </a>, User Experience Designer in Mozilla<br>
+						Test Duration: 1 week<br>
+						Test Type: Global.  
+						</div>
+					
+					<p>This test is not localized to any other languages yet. If you have any questions for this test or are interested to help us improve test metrics, please join us in the <a href="http://groups.google.com/group/mozilla-labs-testpilot">Test Pilot discussion group</a>.
+					
+					<p class="spacer_sm">
+					
+					<h2>Test Detail</h2>
+					
+					 <div class="question_callout">
+					
+						<p><span class="bolder">Question 1: What would be the best default tab behavior after users close a tab? </span> 
+						
+						<p><span class="bold">Background:</span> 
+						<p>In the past, we have observed that people close a tab in different contexts, for example:
+						  
+							<li>When people finish using the tab: e.g. users close the tab when they finish watching a video. </li>
+							<li>When people organize browser tabs: e.g. users close some less important or less used tabs when there are too many tabs open in a browser. </li>
+							<li>When people temporarily hide a tab: e. g. users close a tab when he detects someone is passing by; he would like to open it again when nobody is watching. </li>
+						
+						<p>For different contexts, people have different intentions after closing a tab, for example:
+							<li>open another interesting tab</li>
+							<li>return to a task in progress in another tab</li>
+							<li>close another less important or less used tab</li>
+							<li>open whatever tab</li>
+							<li>open the most often used tab</li>
+						 
+						<p><span class="bold">Main Data Type:</span> 
+						<p>To understand user interactions with current Fx design, we will record and timestamp interactions that open, close, or switch tabs.  We will not record the URLs that are loaded in any tab; we will record only the fact of whether or not two tabs belong to the same site, in order to see whether this makes a difference.
+						
+					</div>
+					
+					 <div class="question_callout">
+					
+						<p><span class="bolder">Question 2:  What should be default placement when users open a new tab? </span>  
+						<p>We have observed that people open a tab for different reasons, for example:
+							<li>Open a new blank tab to type URL or to perform search</li>
+							<li>Open a new tab through links within current tab</li>
+						
+						<p>We also notice that people do one of the following actions after they open a new tab:
+							<li>drag the newly opened tab next to a particular tab </li>
+							<li>drag the newly opened tab to a new window</li>
+						
+						<p><span class="bold">Main Data Type:</span>  
+						<p>For this test, we would like to explore what we can do to support people open a new tab in a meaningful way. We will record and timestamp tab open, close, and drag-and-drop events.
+						
+					</div>
+					
+				</div>
+				
+					
+			</div>
+			
+			<div id="footer"><img class="mozLogo" src="../images/mozilla-logo.png">Copyright &copy; 2005-2009 Mozilla. All rights reserved. &nbsp; &nbsp; <a href="http://labs.mozilla.com/">Mozilla Labs</a> &nbsp; &nbsp; <a href="http://www.mozilla.com/en-US/privacy-policy.html">Privacy Policy</a> &nbsp; &nbsp; <a href="http://www.mozilla.com/en-US/about/legal.html">Legal Notices</a></div>
+		
+		</div>
+
+</body>
+</html>
+

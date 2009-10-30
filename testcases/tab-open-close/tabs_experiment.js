@@ -141,7 +141,7 @@ exports.Observer.prototype = {
     let handler = function(event) {
       method.call(self, event);
     };
-    container.addEventListener(eventName, handler, catchDuringCapture);
+    container.addEventListener(eventName, handler, catchCap);
 
     this._registeredListeners.push(
       {container: container, eventName: eventName, handler: handler,

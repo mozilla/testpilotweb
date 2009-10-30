@@ -173,7 +173,7 @@ exports.Observer.prototype = {
     // For URL loads, we register a DOMContentLoaded on the appcontent:
     let appcontent = this._window.document.getElementById("appcontent");
     if (appcontent) {
-      this._listen(appContent, "DOMContentLoaded", this.onUrlLoad, true);
+      this._listen(appcontent, "DOMContentLoaded", this.onUrlLoad, true);
     }
 
     // Record the window-opening event:

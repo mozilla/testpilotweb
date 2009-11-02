@@ -158,7 +158,7 @@ exports.Observer.prototype = {
   install: function TabsExperimentObserver_install() {
     let browser = this._window.getBrowser();
     let container = browser.tabContainer;
-    console.info("Installing tabsExperimentObserver on a window!\n");
+    console.info("Installing tabsExperimentObserver on a window!");
     // Can we catch the click event during the capturing phase??
     // last argument of addEventListener is true to catch during capture, false to catch during bubbling.
 
@@ -201,7 +201,7 @@ exports.Observer.prototype = {
     // Record the window-closing event:
     // (TODO uninstall is not always the result of a window close... these
     // are two separate things now)
-    console.info("Uninstalling tabsExperimentObserver.\n");
+    console.info("Uninstalling tabsExperimentObserver.");
     let windowId = this._windowId;
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
@@ -211,19 +211,19 @@ exports.Observer.prototype = {
   },
 
   onClick: function TabsExperimentObserver_onClick(event) {
-    console.info("You clicked on tabs bar.\n");
+    console.info("You clicked on tabs bar.");
     this._lastEventWasClick = true;
   },
 
   onMouseUp: function TabsExperimentObserver_onMouseUp(event) {
-    console.info("You released your click on the tabs bar.\n");
+    console.info("You released your click on the tabs bar.");
     this._lastEventWasClick = false;
   },
 
   onDragStart: function TabsExperimentObserver_onDragStart(event) {
-    console.info("You started dragging a tab.\n");
+    console.info("You started dragging a tab.");
     let index = event.target.parentNode.getIndexOfItem(event.target);
-    console.info("Index is " + index + "\n");
+    console.info("Index is " + index);
     let windowId = this._windowId;
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.DRAG_EVENT,
@@ -236,9 +236,9 @@ exports.Observer.prototype = {
   },
 
   onDrop: function TabsExperimentObserver_onDrop(event) {
-    console.info("You dropped a dragged tab.\n");
+    console.info("You dropped a dragged tab.");
     let index = event.target.parentNode.getIndexOfItem(event.target);
-    console.info("Index is " + index + "\n");
+    console.info("Index is " + index );
     let windowId = this._windowId;
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.DROP_EVENT,
@@ -288,11 +288,11 @@ exports.Observer.prototype = {
   },
 
   onTabOpened: function TabsExperimentObserver_onTabOpened(event) {
-    console.info("Tab opened. Last event was click? " + this._lastEventWasClick + "\n");
+    console.info("Tab opened. Last event was click? " + this._lastEventWasClick );
     // TODO Not registering click here on open events -- because mouse up and
     // mousedown both happen before the tab open event.
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
-    console.info("Recording uiMethod of " + uiMethod + "\n");
+    console.info("Recording uiMethod of " + uiMethod );
     let index = event.target.parentNode.getIndexOfItem(event.target);
     let windowId = this._windowId;
     let url = this.getUrlInTab(index);
@@ -318,7 +318,7 @@ exports.Observer.prototype = {
   },
 
   onTabClosed: function TabsExperimentObserver_onTabClosed(event) {
-    console.info("Tab closed.\n");
+    console.info("Tab closed.");
     let index = event.target.parentNode.getIndexOfItem(event.target);
     let windowId = this._windowId;
     // TODO not registering click here on close events.
@@ -341,10 +341,10 @@ exports.Observer.prototype = {
     // matic?
     let index = event.target.parentNode.getIndexOfItem(event.target);
     let windowId = this._windowId;
-    console.info("Tab selected.  Last event was click? " + this._lastEventWasClick + "\n");
+    console.info("Tab selected.  Last event was click? " + this._lastEventWasClick );
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
 
-    console.info("Recording uiMethod of " + uiMethod + "\n");
+    console.info("Recording uiMethod of " + uiMethod );
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.SWITCH_EVENT,
       timestamp: Date.now(),

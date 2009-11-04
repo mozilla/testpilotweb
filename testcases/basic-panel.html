@@ -3,94 +3,81 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>Mozilla Labs Test Pilot</title>
-	<link rel="stylesheet" type="text/css" media="all" href="css/screen.css" />
-	<link rel="stylesheet" type="text/css" media="all" href="css/subpage.css" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>Mozilla Labs Test Pilot</title>
+  <link rel="stylesheet" type="text/css" media="all" href="../css/screen.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="../css/subpage.css" />
 
 </head>
 <body>
 
-		<div id="container">
-		
-			<div id="logo"><a href="http://labs.mozilla.com"><img src="../images/logo.png" border="0"></a></div>
-			
-			<div id="content">
-			
-				<div class="button">
-			
-					<span class="menuItem"><a href="../index.html">Home</a></span>
-					<span class="menuItem"><a href="../principles.html">Guiding Principles</a></span>
-					<span class="menuItem"><a href="../privacy.html">Privacy Policy</a></span>
-					<span class="menuOn"><a href="tab-open-close.html">Test Cases</a></span>
-				
-				</div>
-				
-				<div id="subContentTestCases">
-			                <p class="spacer_sm">	
-					<h1>A Week in the Life of a Browser</h1>
-					
-					<h2>Introduction</h2>
-
-					<p>How much time do you spend on the Web through your browser everyday? Longer than spending in your car? </p>
-				        <p>How do you use your browser in the morning, noon, evening, weekend? Do you use it the same way as you will use it in a year? </p>
-				        <p>Is your browser robust enough to work for you smoothly all the time?    </p>
+  <div id="container">
+    <div id="logo"><a href="http://labs.mozilla.com">
+       <img src="../images/logo.png" border="0"></a>
+    </div>
+    <div id="content">
+      <div class="button">
+	<span class="menuItem"><a href="../index.html">Home</a></span>
+	<span class="menuItem"><a href="../principles.html">Guiding Principles</a></span>
+	<span class="menuItem"><a href="../privacy.html">Privacy Policy</a></span>
+	<span class="menuOn"><a href="tab-open-close.html">Test Cases</a></span>
+      </div>
+      <div id="subContentTestCases">
+        <p class="spacer_sm">	
+	<h1>A Week in the Life of a Browser</h1>
+	<h2>Introduction</h2>
+        <p>How much time do you spend on the Web through your browser every day? More time than you spend in your car? </p>
+        <p>How do you use your browser in the morning, the afternoon, the evening, the weekend? Do you use it the same way now as you used it a year ago? </p>
+	<p>Is your browser robust enough to work for you smoothly all the time?</p>
 				  
-				  <p>For this study, we would like to explore what a browser does to facilitate its user using the Web through a year. We will periodically collect your usage on the browser for a week and run the same study again every second month.  The main goal is to explore if the browser has been used differently over time, which may help us design a better browser that works adaptively. This study is inspired by several test proposals that we received in the past months, e.g. <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Overall_performance">Overall Performance </a>, <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Memory_usage">Memory Usage</a>, and <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Window_Metrics">Window Metrics</a>. </p>
+        <p>For this study, we would like to explore what Firefox does to facilitate its user using the Web through a year. We will periodically collect your usage on the browser for a week and run the same study again every second month.  The main goal is to explore if the browser has been used differently over time, which may help us design a better browser that works adaptively. This study is inspired by several test proposals that we received in the past months, e.g. <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Overall_performance">Overall Performance </a>, <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Memory_usage">Memory Usage</a>, and <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Window_Metrics">Window Metrics</a>.</p>
 				  
-						<div class="indent bold">
-						Test Champion:<a href="http://twitter.com/jinghuaz">Jinghua Zhang </a>, Usability Catalyst in Mozilla Labs<br>
-						Test Duration: Periodical study*, run 1 week every 60 days <br>
-						*For the periodical study, users can choose to opt in or out the study at any time. Each study phase is independent and equally important to us. Your data at any phase will be as valuable as the data that people choose to always submit during the entire study.    
-						</div>
+        <div class="indent bold">
+	Test Champion:<a href="http://twitter.com/jinghuaz">Jinghua Zhang </a>, Usability Catalyst in Mozilla Labs<br/>
+	Test Duration: Periodical study*, run 1 week every 60 days <br/>
+	*For the periodical study, users can choose to opt in or out the study at any time. Each study phase is independent and equally important to us. Your data at any phase will be as valuable as the data that people choose to always submit during the entire study.
+	</div>
 					
-					<p>This test is not localized to any other languages yet. If you have any questions for this test or are interested to help us improve test metrics, please join us in the <a href="http://groups.google.com/group/mozilla-labs-testpilot">Test Pilot discussion group</a>.
+	<p>This test is not localized to any other languages yet. If you have any questions for this test or are interested to help us improve test metrics, please join us in the <a href="http://groups.google.com/group/mozilla-labs-testpilot">Test Pilot discussion group</a>.</p>
 					
-					<p class="spacer_sm">
-					
-					<h2>Study Detail</h2>
-					
-					 <div class="question_callout">
-					
-						<p><span class="bolder">Question 1: How does a browser get start? </span> 
+	<p class="spacer_sm"/>
+	<h2>Study Detail</h2>
+        <div class="question_callout">
+          <p><span class="bolder">Question 1: How does a browser get start?</span></p>
 						
-						<p>In the everyday life of a browser,it can be activated for different occasions: waken up from idle mode after a weekend, restarted after installation of a new add-on, opened again after the crash, etc.. Meanwhile, people have different expecations when they activate a browser. Do you know:
-                                                        <li>How long the browser is activated through the week?</li>
-					                <li>When and how often does the browser start and restart? </li> 
-							<li>How often that a browser start with session restored? How many tabs are stored? Does session restore succeed?</li>
-							<li>Whether most users activate their browsers on morning or in the evening? </li>
-						 
-						<p><span class="bold">Main Data Type:</span> 
-						<p>To understand how user starts with the Firefox browser, we will record and timestamp when Firefox is activated and stopped  We will not record the URLs that are loaded or restored, or keyword typed in the search bar.
-						
-					</div>
+          <p>In the everyday life of a browser, it can be activated for different occasions: waken up from idle mode after a weekend, restarted after installation of a new add-on, opened again after the crash, etc.. Meanwhile, people have different expecations when they activate a browser. Do you know:</p>
+          <ul>
+            <li>How long the browser is activated through the week?</li>
+            <li>When and how often does the browser start and restart?</li> 
+            <li>How often that a browser start with session restored? How many tabs are stored? Does session restore succeed?</li>
+            <li>Whether most users activate their browsers on morning or in the evening?</li>
+          </ul>
+	<p><span class="bold">Main Data Type:</span></p>
+	<p>To understand how user starts with the Firefox browser, we will record and timestamp when Firefox is activated and stopped. We will not record the URLs that are loaded or restored, or keyword typed in the search bar.</p>
+      </div>
 					
-					 <div class="question_callout">
-					
-						<p><span class="bolder">Question 2: What does the browser help its user during the week?  </span>  
-						<p>Besides browsing, we have observed that people use browsers for many things: bookmark their favorite website, manage online activites through add-ons, organize browsing history, etc. Do you know:
-							<li>How many browser windows and tabs are opened in different time during the week?</li>
-							<li>How many addons are installed? How many are used in the week?</li>
-							<li>How many bookmarks the browser collects? How many of them are used in the week?  How many folders do people have for bookmarks, how deep are they?</li>
-							<li>How many times search engines are used? How many of them are used through the search box? </li>
-							<li>How bursty or smooth the experience is? As a user, what's you best wish for it? </li>
-					
-						
-						
-						<p><span class="bold">Main Data Type:</span>  
-						<p>To understand user interactions with current Firefox, we will record and timestamp interactions that .  We will not record any add-on name, URL or name from the bookmarks, URLs that are loaded in the tab or keyword typed in the search bar; we will record only the fact of  whether the above browser functions are used.
-						
-					</div>
-					
-				</div>
-				
-					
-			</div>
-			
-			<div id="footer"><img class="mozLogo" src="../images/mozilla-logo.png">Copyright &copy; 2005-2009 Mozilla. All rights reserved. &nbsp; &nbsp; <a href="http://labs.mozilla.com/">Mozilla Labs</a> &nbsp; &nbsp; <a href="http://www.mozilla.com/en-US/privacy-policy.html">Privacy Policy</a> &nbsp; &nbsp; <a href="http://www.mozilla.com/en-US/about/legal.html">Legal Notices</a></div>
-		
-		</div>
-
+      <div class="question_callout">
+	<p><span class="bolder">Question 2: What does the browser help its user during the week?</span></p>
+	<p>Besides browsing, we have observed that people use browsers for many things: bookmark their favorite website, manage online activites through add-ons, organize browsing history, etc. Do you know:</p>
+        <ul>
+          <li>How many browser windows and tabs are opened in different time during the week?</li>
+          <li>How many addons are installed? How many are used in the week?</li>
+          <li>How many bookmarks the browser collects? How many of them are used in the week?  How many folders do people have for bookmarks, how deep are they?</li>
+          <li>How many times search engines are used? How many of them are used through the search box? </li>
+          <li>How bursty or smooth the experience is? As a user, what's you best wish for it? </li>
+        </ul>					
+        <p><span class="bold">Main Data Type:</span></p>
+	<p>To understand user interactions with current Firefox, we will record and timestamp interactions that . We will not record any add-on name, URL or name from the bookmarks, URLs that are loaded in the tab or keyword typed in the search bar; we will record only the fact of whether the above browser functions are used.</p>
+       </div>
+     </div>
+   </div>
+   <div id="footer">
+     <img class="mozLogo" src="../images/mozilla-logo.png">Copyright &copy; 2005-2009 Mozilla. All rights reserved. &nbsp; &nbsp;
+     <a href="http://labs.mozilla.com/">Mozilla Labs</a> &nbsp; &nbsp;
+     <a href="http://www.mozilla.com/en-US/privacy-policy.html">Privacy Policy</a> &nbsp; &nbsp;
+     <a href="http://www.mozilla.com/en-US/about/legal.html">Legal Notices</a>
+   </div>
+  </div>
 </body>
 </html>
 

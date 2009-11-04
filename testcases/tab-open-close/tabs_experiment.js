@@ -66,8 +66,9 @@ exports.experimentInfo = {
   testName: "Tab Open/Close Study",
   testId: MY_EXPERIMENT_ID,
   testInfoUrl: "",  // TODO
+  testResultsUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html",
   optInRequired: false,
-  basicPanel: true,
+  recursAutomatically: false,
   versionNumber: 2 // for minor changes in format within the same experiment
 };
 
@@ -141,7 +142,7 @@ exports.Observer.prototype = {
     ObserverHelper.onObserverInstalled(this);
   },
 
-  _listen: function TPS__listener(container, eventName, method, catchCap) {
+  _listen: function TEO__listen(container, eventName, method, catchCap) {
     // Keep a record of this so that we can automatically unregister during
     // uninstall:
     let self = this;

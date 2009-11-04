@@ -92,6 +92,7 @@ var ObserverHelper = {
     var ioService = Cc["@mozilla.org/network/io-service;1"]
                       .getService(Ci.nsIIOService);
     // TODO this next line can sometimes throw a data:no exception.
+    // It doesn't seem to cause any serious problems.
     let host = ioService.newURI(url, null, null).host;
 
     if (this._tempHostHash[host] == undefined) {
@@ -157,6 +158,7 @@ exports.Observer.prototype = {
   },
 
   install: function TabsExperimentObserver_install() {
+    let self = this;
     let browser = this._window.getBrowser();
     let container = browser.tabContainer;
     console.info("Installing tabsExperimentObserver on a window!");

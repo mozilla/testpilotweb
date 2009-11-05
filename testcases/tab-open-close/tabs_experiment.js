@@ -62,13 +62,14 @@ var TABS_EXPERIMENT_COLUMNS =  [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: "",
+  duration: 7, // Days
   testName: "Tab Open/Close Study",
   testId: MY_EXPERIMENT_ID,
-  testInfoUrl: "",  // TODO
+  testInfoUrl: "",
   testResultsUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html",
   optInRequired: false,
   recursAutomatically: false,
+  recurrenceInterval: 0,
   versionNumber: 2 // for minor changes in format within the same experiment
 };
 

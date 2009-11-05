@@ -1,2 +1,4 @@
 {"experiments": [{"name": "Tab Open/Close Study",
-                  "filename": "tab-open-close/tabs_experiment.js"}]}
+                  "filename": "tab-open-close/tabs_experiment.js"},
+                 {"name": "Survey For New Test Pilots",
+                  "filename": "new_pilot_survey.js"]}

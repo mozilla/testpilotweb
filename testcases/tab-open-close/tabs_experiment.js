@@ -1,6 +1,5 @@
 // A Securable Module to be loaded with Cuddlefish.
 // This is the remote code for the Tabs Experiment, to be hosted from the server.
-// (Think about where to put the remote experiments in the Hg repo!!)
 
 const MY_EXPERIMENT_ID = 1;
 
@@ -65,7 +64,7 @@ exports.experimentInfo = {
   duration: 7, // Days
   testName: "Tab Open/Close Study",
   testId: MY_EXPERIMENT_ID,
-  testInfoUrl: "",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
   testResultsUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html",
   optInRequired: false,
   recursAutomatically: false,
@@ -367,7 +366,7 @@ exports.webContent = {
     <p><b>This study aims to understand what users typically do next after opening or closing a tab.</b> You don\'t have to do anything except use the Web normally.</p> \
     <p>When you interact with tabs, Test Pilot will record what you do (open/close/switch etc) and when you do it (timestamp). We will then analyze this data to detect patterns that will help us build a better browser. More information is available on <a href="https://testpilot.mozillalabs.com/testcases/tab-open-close.html">the study\'s website.</a></p> \
     <p>So, buckle up and get ready for your first flight! </p> \
-    <h4>This study is currently running.  It will end <span id="test-end-time"></span>. If you don\'t want to participate, please <a href="chrome://testpilot/content/status-quit.html">click here to quit</a>.</h4> \
+    <h4>This study is currently running.  It will end <span id="test-end-time"></span>. If you don\'t want to participate, please <a href="chrome://testpilot/content/status-quit.html?eid=1">click here to quit</a>.</h4> \
     <h3>The fine print:</h3> \
       <ul> \
 	<li>The websites (URLs) that you visit will never be recorded.</li> \
@@ -389,7 +388,7 @@ exports.webContent = {
     <p>&nbsp;</p> \
     <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png"> <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a></span></div> \
     <p>&nbsp;</p> \
-    <p>We will analyze the data submitted by all Test Pilots in order to to detect patterns that will help us build a better browser.  When the analysis is done, we will let you know where you can see the results.</p>      <p><a onclick="showRawData(1);">Click here</a> to see a display of all the collected data in its raw form, exactly as it will be sent. If there is anything there that you are not comfortable with sending to us, you can <a href="chrome://testpilot/content/status-quit.html">click here to delete the data without sending it</a>.</p> \
+    <p>We will analyze the data submitted by all Test Pilots in order to to detect patterns that will help us build a better browser.  When the analysis is done, we will let you know where you can see the results.</p>      <p><a onclick="showRawData(1);">Click here</a> to see a display of all the collected data in its raw form, exactly as it will be sent. If there is anything there that you are not comfortable with sending to us, you can <a href="chrome://testpilot/content/status-quit.html?eid=1">click here to delete the data without sending it</a>.</p> \
     <h3>The fine print:</h3> \
     <ul> \
       <li>The websites (URLs) that you visit have not been recorded.</li> \

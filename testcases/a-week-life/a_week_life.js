@@ -63,6 +63,9 @@ var BookmarkObserver = {
       this.store = store;
       this.alreadyInstalled = true;
     }
+    /* TODO how to get the number of bookmarks, number of bookmark folders,
+     * and depth of bookmark folders?  Is that all through Places?
+     */
   },
 
   uninstall: function() {
@@ -100,6 +103,40 @@ var BookmarkObserver = {
   }
 };
 
+var IdlenessObserver = {
+  alreadyInstalled: false,
+  store: null,
+  idleService: null,
+
+  install: function(store) {
+    // See: https://developer.mozilla.org/en/nsIIdleService
+    if (!this.alreadyInstalled) {
+      this.idleService = Cc["@mozilla.org/widget/idleservice;1"]
+       .getService(Ci.nsIIdleService);
+      this.idleService.addIdleObserver(this, 600); // ten minutes
+      this.alreadyInstalled = true;
+    }
+  },
+
+  uninstall: function() {
+    if (this.alreadyInstalled) {
+      this.idleService.removeIdleObserver(this, 600);
+      this.alreadyInstalled = false;
+    }
+  },
+
+  observe: function(subject, topic, data) {
+    // Subject is nsIIdleService. Topic is 'idle' or 'back'.  Data is elapsed
+    // time in seconds.
+    if (topic == 'idle') {
+      console.info("User has gone idle for " + data + " seconds.");
+    }
+    if (topic == 'back') {
+      console.info("User is back!  They were idle for " + data + " seconds.");
+    }
+  }
+};
+
 
 exports.Observer = function WeekLifeObserver(window, store) {
   this._init(window, store);
@@ -108,29 +145,17 @@ exports.Observer.prototype = {
   _init: function(window, store) {
     this._window = window;
     this._dataStore = store;
+
     BookmarkObserver.install(store);
+    IdlenessObserver.install(store);
 
     this._inPrivateBrowsingMode = false; // TODO SHOULD BE IN CORE
-    this.install();
   },
-
-
-  install: function() {
-
-    // Registering observers goes here!  We observe stuff like crazy!!
-
-    // If I'm using this object itself as the Observer, must implement
-    // all the interfaces and support QueryInterface, right?  So I need to be
-    // a nsINavBookmarkObserver?
     /*
      topic              data
      private-browsing 	enter
      private-browsing 	exit
 
-     idle 	The length of time the user has been idle, in seconds. 	Sent when the user becomes idle.
-     idle-daily 	The length of time the user has been idle, in seconds. 	Sent once a day while the user is idle. Requires Gecko 1.9.2
-     back 	The length of time the user has been idle, in seconds.
-     See: https://developer.mozilla.org/en/nsIIdleService
 
      em-action-requested 	item-installed 	A new extension has been installed.
      em-action-requested 	item-upgraded 	A different version of an existing extension has been installed.
@@ -143,27 +168,11 @@ exports.Observer.prototype = {
      Note: The data value for this notification is either 'shutdown' or 'restart'.
 
      How to catch startup/session-restore without needing to modify extension?
-
      */
-
-    /*var idleService = Cc["@mozilla.org/widget/idleservice;1"]
-       .getService(Ci.nsIIdleService);
-    var idleObserver = {
-      observe: function(subject, topic, data) {
-        alert("topic: " + topic + "\ndata: " + data);
-      }
-    };
-    idleService.addIdleObserver(idleObserver, 60); // one minute
-    // ...
-    // Don't forget to remove the observer using removeIdleObserver!
-    idleService.removeIdleObserver(idleObserver, 60);
-     */
-
-
-  },
 
   uninstall: function() {
     BookmarkObserver.uninstall();
+    IdlenessObserver.uninstall();
   }
 };
 

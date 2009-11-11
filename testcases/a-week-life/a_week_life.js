@@ -46,20 +46,36 @@ exports.dataStoreInfo = {
             {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time"}]
 };
 
-exports.Observer = function WeekLifeObserver(window, store) {
-  this._init(window, store);
-};
-exports.Observer.prototype = {
-  _init: function(window, store) {
-    this._window = window;
-    this._dataStore = store;
+var BookmarkObserver = {
+  alreadyInstalled: false,
+  store: null,
+  bmsvc: null,
 
-    this._inPrivateBrowsingMode = false; // TODO SHOULD BE IN CORE
-    this.install();
-    // TODO this is going to install per window, which is not what we want.
+  install: function(store) {
+     /* See
+     https://developer.mozilla.org/en/nsINavBookmarkObserver and
+     https://developer.mozilla.org/en/nsINavBookmarksService
+      */
+    if (!this.alreadyInstalled) {
+      this.bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+        .getService(Ci.nsINavBookmarksService);
+      this.bmsvc.addObserver(this, false);
+      this.store = store;
+      this.alreadyInstalled = true;
+    }
+  },
+
+  uninstall: function() {
+    if (this.alreadyInstalled) {
+      this.bmsvc.removeObserver(this);
+      this.alreadyInstalled = false;
+    }
   },
 
   onItemAdded: function(itemId, parentId, index, type) {
+    // TODO first time I ran this I got a TON of "bookmark added" at the end
+    // of startup.  I think it was adding every bookmark the profile had or
+    // something?  This didn't happen next time we started, though.
     console.info("Bookmark added!");
   },
 
@@ -69,6 +85,8 @@ exports.Observer.prototype = {
 
   onItemChanged: function(bookmarkId, property, isAnnotation,
                           newValue, lastModified, type) {
+    // TODO this gets called with almost every add, remove, or visit.
+    // Too much.
     console.info("Bookmark modified!");
   },
 
@@ -79,9 +97,26 @@ exports.Observer.prototype = {
   onItemMoved: function(itemId, oldParentId, oldIndex, newParentId,
                         newIndex, type) {
     console.info("Bookmark moved!");
+  }
+};
+
+
+exports.Observer = function WeekLifeObserver(window, store) {
+  this._init(window, store);
+};
+exports.Observer.prototype = {
+  _init: function(window, store) {
+    this._window = window;
+    this._dataStore = store;
+    BookmarkObserver.install(store);
+
+    this._inPrivateBrowsingMode = false; // TODO SHOULD BE IN CORE
+    this.install();
   },
 
+
   install: function() {
+
     // Registering observers goes here!  We observe stuff like crazy!!
 
     // If I'm using this object itself as the Observer, must implement
@@ -109,12 +144,6 @@ exports.Observer.prototype = {
 
      How to catch startup/session-restore without needing to modify extension?
 
-     Bookmark stuff:  See
-     https://developer.mozilla.org/en/nsINavBookmarkObserver and
-     https://developer.mozilla.org/en/nsINavBookmarksService
-
-     note observer has onItemAdded, onItemRemoved, onItemChanged, onItemVisited,
-     onItemMoved.
      */
 
     /*var idleService = Cc["@mozilla.org/widget/idleservice;1"]
@@ -130,17 +159,11 @@ exports.Observer.prototype = {
     idleService.removeIdleObserver(idleObserver, 60);
      */
 
-    var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-      .getService(Ci.nsINavBookmarksService);
-    bmsvc.addObserver(this, false);
 
   },
 
   uninstall: function() {
-    var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-      .getService(Ci.nsINavBookmarksService);
-    bmsvc.removeObserver(this, false);
-
+    BookmarkObserver.uninstall();
   }
 };
 

@@ -62,10 +62,15 @@ var BookmarkObserver = {
       this.bmsvc.addObserver(this, false);
       this.store = store;
       this.alreadyInstalled = true;
+      this.runGlobalBookmarkQuery();
     }
+  },
+
+  runGlobalBookmarkQuery: function() {
     /* TODO how to get the number of bookmarks, number of bookmark folders,
      * and depth of bookmark folders?  Is that all through Places?
      */
+
   },
 
   uninstall: function() {
@@ -137,6 +142,42 @@ var IdlenessObserver = {
   }
 };
 
+var ExtensionObserver = {
+  alreadyInstalled: false,
+  store: null,
+  obsService: null,
+
+  install: function(store) {
+    if (!this.alreadyInstalled) {
+      this.obsService = Cc["@mozilla.org/observer-service;1"]
+                           .getService(Ci.nsIObserverService);
+      this.obsService.addObserver(this, "em-action-requested", false);
+      this.alreadyInstalled = true;
+    }
+  },
+
+  uninstall: function() {
+    if (this.alreadyInstalled) {
+      this.obsService.removeObserver(this, "em-action-requested");
+      this.alreadyInstalled = false;
+    }
+  },
+
+  observe: function(subject, topic, data) {
+    if (data == "item-installed") {
+      console.info("An extension was installed!");
+    } else if (data == "item-upgraded") {
+      console.info("An extension was upgraded!");
+    } else if (data == "item-uninstalled") {
+      console.info("An extension was uninstalled!");
+    } else if (data == "item-enabled") {
+      console.info("An extension was enabled!");
+    } else if (data == "item-disabled") {
+      console.info("An extension was disabled!");
+    }
+  }
+};
+
 
 exports.Observer = function WeekLifeObserver(window, store) {
   this._init(window, store);
@@ -148,21 +189,13 @@ exports.Observer.prototype = {
 
     BookmarkObserver.install(store);
     IdlenessObserver.install(store);
-
+    ExtensionObserver.install(store);
     this._inPrivateBrowsingMode = false; // TODO SHOULD BE IN CORE
   },
     /*
      topic              data
      private-browsing 	enter
      private-browsing 	exit
-
-
-     em-action-requested 	item-installed 	A new extension has been installed.
-     em-action-requested 	item-upgraded 	A different version of an existing extension has been installed.
-     em-action-requested 	item-uninstalled 	An addon has been marked to be uninstalled.
-     em-action-requested 	item-enabled 	An addon has been enabled.
-     em-action-requested 	item-disabled 	An addon has been disabled.
-     em-action-requested 	item-cancel-action 	A previous action has been cancelled.
 
      quit-application 	The application is about to quit. This can be in response to a normal shutdown, or a restart.
      Note: The data value for this notification is either 'shutdown' or 'restart'.
@@ -173,6 +206,7 @@ exports.Observer.prototype = {
   uninstall: function() {
     BookmarkObserver.uninstall();
     IdlenessObserver.uninstall();
+    ExtensionObserver.uninstall();
   }
 };
 

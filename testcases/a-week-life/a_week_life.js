@@ -213,6 +213,8 @@ var DownloadsObserver = {
 };
 
 
+var global_observerInstalled = false;
+
 exports.Observer = function WeekLifeObserver(window, store) {
   this._init(window, store);
 };
@@ -221,28 +223,53 @@ exports.Observer.prototype = {
     this._window = window;
     this._dataStore = store;
 
-    this._startAllObservers();
-    this._inPrivateBrowsingMode = false; // TODO SHOULD BE IN CORE
+    if (!global_observerInstalled) {
+      this.obsService = Cc["@mozilla.org/observer-service;1"]
+                           .getService(Ci.nsIObserverService);
+      global_observerInstalled = true;
+      this._startAllObservers();
+    }
   },
-    /*
-     topic              data
-     private-browsing 	enter
-     private-browsing 	exit
 
-     quit-application 	The application is about to quit. This can be in response to a normal shutdown, or a restart.
-     Note: The data value for this notification is either 'shutdown' or 'restart'.
-
-     How to catch startup/session-restore without needing to modify extension?
-     */
+  observer: function(subject, topic, data) {
+    if (subject == "private-browsing") {
+      if (topic == "enter") {
+        console.info("Private browsing turned on.");
+        // TODO stop all observers when private browsing goes on
+      } else if (topic == "exit"){
+        console.info("Private browsing turned off.");
+        // TODO restart all observers when private browsing goes back off!
+      }
+    } else if (subject == "quit-application") {
+      if (topic == "shutdown") {
+        console.info("Firefox commanded to shut down!");
+      } else if (topic == "restart") {
+        console.info("Firefox commanded to start up!");
+      }
+    }
+  },
 
   uninstall: function() {
-    this._stopAllObservers();
+    if (global_observerInstalled) {
+      global_observerInstalled = false;
+      this._stopAllObservers();
+    }
   },
 
   _startAllObservers: function() {
+    this.obsService.addObserver(this, "private-browsing", false);
+    this.obsService.addObserver(this, "quit-application", false);
+
+    BookmarkObserver.install(store);
+    IdlenessObserver.install(store);
+    ExtensionObserver.install(store);
+    DownloadsObserver.install(store);
   },
 
   _stopAllObservers: function() {
+    this.obsService.removeObserver(this, "private-browsing");
+    this.obsService.removeObserver(this, "quit-application");
+
     BookmarkObserver.uninstall();
     IdlenessObserver.uninstall();
     ExtensionObserver.uninstall();

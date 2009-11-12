@@ -223,6 +223,7 @@ exports.Observer.prototype = {
     this._window = window;
     this._dataStore = store;
 
+    console.info("Called A Week Life Observer._init.");
     if (!global_observerInstalled) {
       this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
@@ -257,6 +258,7 @@ exports.Observer.prototype = {
   },
 
   _startAllObservers: function() {
+    console.info("A Week Life Observer - installing all observers.");
     this.obsService.addObserver(this, "private-browsing", false);
     this.obsService.addObserver(this, "quit-application", false);
 
@@ -267,6 +269,7 @@ exports.Observer.prototype = {
   },
 
   _stopAllObservers: function() {
+    console.info("A Week Life Observer - removing all observers.");
     this.obsService.removeObserver(this, "private-browsing");
     this.obsService.removeObserver(this, "quit-application");
 

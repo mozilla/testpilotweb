@@ -231,7 +231,7 @@ exports.Observer.prototype = {
     }
   },
 
-  observer: function(subject, topic, data) {
+  observe: function(subject, topic, data) {
     if (subject == "private-browsing") {
       if (topic == "enter") {
         console.info("Private browsing turned on.");

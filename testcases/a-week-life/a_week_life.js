@@ -57,6 +57,7 @@ var BookmarkObserver = {
      https://developer.mozilla.org/en/nsINavBookmarksService
       */
     if (!this.alreadyInstalled) {
+      console.info("Adding bookmark observer.");
       this.bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
         .getService(Ci.nsINavBookmarksService);
       this.bmsvc.addObserver(this, false);
@@ -116,6 +117,7 @@ var IdlenessObserver = {
   install: function(store) {
     // See: https://developer.mozilla.org/en/nsIIdleService
     if (!this.alreadyInstalled) {
+      console.info("Adding idleness observer.");
       this.idleService = Cc["@mozilla.org/widget/idleservice;1"]
        .getService(Ci.nsIIdleService);
       this.store = store;
@@ -150,6 +152,7 @@ var ExtensionObserver = {
 
   install: function(store) {
     if (!this.alreadyInstalled) {
+      console.info("Adding extension observer.");
       this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
       this.obsService.addObserver(this, "em-action-requested", false);
@@ -183,6 +186,7 @@ var ExtensionObserver = {
 var DownloadsObserver = {
   install: function(store) {
     if (!this.alreadyInstalled) {
+      console.info("Adding downloads observer.");
       this.downloadManager = Cc["@mozilla.org/download-manager;1"]
                    .getService(Ci.nsIDownloadManager);
       this.downloadManager.addListener(this);

@@ -118,6 +118,7 @@ var IdlenessObserver = {
     if (!this.alreadyInstalled) {
       this.idleService = Cc["@mozilla.org/widget/idleservice;1"]
        .getService(Ci.nsIIdleService);
+      this.store = store;
       this.idleService.addIdleObserver(this, 600); // ten minutes
       this.alreadyInstalled = true;
     }
@@ -152,6 +153,7 @@ var ExtensionObserver = {
       this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
       this.obsService.addObserver(this, "em-action-requested", false);
+      this.store = store;
       this.alreadyInstalled = true;
     }
   },
@@ -178,6 +180,38 @@ var ExtensionObserver = {
   }
 };
 
+var DownloadsObserver = {
+  install: function(store) {
+    if (!this.alreadyInstalled) {
+      this.downloadManager = Cc["@mozilla.org/download-manager;1"]
+                   .getService(Ci.nsIDownloadManager);
+      this.downloadManager.addListener(this);
+      this.store = store;
+      this.alreadyInstalled = true;
+    }
+  },
+
+  uninstall: function() {
+    if (this.alreadyInstalled) {
+      this.downloadManager.addListener(this);
+      this.alreadyInstalled = false;
+    }
+  },
+
+  onSecurityChange : function(prog, req, state, dl) {
+    console.info("Security changed for a download.");
+  },
+  onProgressChange : function(prog, req, prog, progMax, tProg, tProgMax, dl) {
+    console.info("Progress changed for a download.");
+  },
+  onStateChange : function(prog, req, flags, status, dl) {
+    console.info("State changed for a download.");
+  },
+  onDownloadStateChange : function(state, dl) {
+    console.info("Download State changed for a download.");
+  }
+};
+
 
 exports.Observer = function WeekLifeObserver(window, store) {
   this._init(window, store);
@@ -187,9 +221,7 @@ exports.Observer.prototype = {
     this._window = window;
     this._dataStore = store;
 
-    BookmarkObserver.install(store);
-    IdlenessObserver.install(store);
-    ExtensionObserver.install(store);
+    this._startAllObservers();
     this._inPrivateBrowsingMode = false; // TODO SHOULD BE IN CORE
   },
     /*
@@ -204,9 +236,17 @@ exports.Observer.prototype = {
      */
 
   uninstall: function() {
+    this._stopAllObservers();
+  },
+
+  _startAllObservers: function() {
+  },
+
+  _stopAllObservers: function() {
     BookmarkObserver.uninstall();
     IdlenessObserver.uninstall();
     ExtensionObserver.uninstall();
+    DownloadsObserver.uninstall();
   }
 };
 

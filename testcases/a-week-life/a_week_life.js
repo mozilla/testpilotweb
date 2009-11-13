@@ -253,6 +253,7 @@ exports.Observer.prototype = {
 
   observe: function(subject, topic, data) {
     // TODO I don't seem to get private browsing on/off notifications.
+    console.info("Observation observed: topic = " + topic);
     if (subject == "private-browsing") {
       if (topic == "enter") {
         console.info("Private browsing turned on.");

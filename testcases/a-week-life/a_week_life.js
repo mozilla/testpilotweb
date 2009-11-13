@@ -172,6 +172,8 @@ var ExtensionObserver = {
   },
 
   observe: function(subject, topic, data) {
+    // TODO I seem to get two disable notifications, no enable notification.. weird.
+    // I also get doubled-up uninstall notification.
     if (data == "item-installed") {
       console.info("An extension was installed!");
     } else if (data == "item-upgraded") {
@@ -225,7 +227,7 @@ var DownloadsObserver = {
 };
 
 
-var global_observerInstalled = false;
+var global_observerInstalled = null;
 
 exports.Observer = function WeekLifeObserver(window, store) {
   this._init(window, store);
@@ -237,21 +239,29 @@ exports.Observer.prototype = {
 
     console.info("Called A Week Life Observer._init.");
     if (!global_observerInstalled) {
+      // Only install the listeners once, no matter how many copies are
+      // instantiated.
       this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
-      global_observerInstalled = true;
+      global_observerInstalled = this;
+      console.info("A Week Life Observer global startup - installing all observers.");
+      this.obsService.addObserver(this, "private-browsing", false);
+      this.obsService.addObserver(this, "quit-application", false);
       this._startAllObservers();
     }
   },
 
   observe: function(subject, topic, data) {
+    // TODO I don't seem to get private browsing on/off notifications.
     if (subject == "private-browsing") {
       if (topic == "enter") {
         console.info("Private browsing turned on.");
-        // TODO stop all observers when private browsing goes on
+        // Stop all observers when private browsing goes on
+        this._stopAllObservers();
       } else if (topic == "exit"){
         console.info("Private browsing turned off.");
-        // TODO restart all observers when private browsing goes back off!
+        // Start all observers again when private browsing goes back off!
+        this._startAllObservers();
       }
     } else if (subject == "quit-application") {
       if (topic == "shutdown") {
@@ -263,34 +273,43 @@ exports.Observer.prototype = {
   },
 
   uninstall: function() {
-    if (global_observerInstalled) {
-      global_observerInstalled = false;
+    // Nothing!  Uninstall listeners only when module is unloded,
+    // see myDestructor.
+  },
+
+  globalUninstall: function() {
+    if (this == global_observerInstalled) {
+      console.info("A Week Life Observer global shutdown - removing all observers.");
       this._stopAllObservers();
+      this.obsService.removeObserver(this, "private-browsing");
+      this.obsService.removeObserver(this, "quit-application");
+      global_observerInstalled = null;
     }
   },
 
   _startAllObservers: function() {
-    console.info("A Week Life Observer - installing all observers.");
-    this.obsService.addObserver(this, "private-browsing", false);
-    this.obsService.addObserver(this, "quit-application", false);
-
-    BookmarkObserver.install(store);
-    IdlenessObserver.install(store);
-    ExtensionObserver.install(store);
-    DownloadsObserver.install(store);
+    console.info("Startingg subobservers.");
+    BookmarkObserver.install(this._dataStore);
+    IdlenessObserver.install(this._dataStore);
+    ExtensionObserver.install(this._dataStore);
+    DownloadsObserver.install(this._dataStore);
   },
 
   _stopAllObservers: function() {
-    console.info("A Week Life Observer - removing all observers.");
-    this.obsService.removeObserver(this, "private-browsing");
-    this.obsService.removeObserver(this, "quit-application");
-
+    console.info("Stopping subobservers.");
     BookmarkObserver.uninstall();
     IdlenessObserver.uninstall();
     ExtensionObserver.uninstall();
     DownloadsObserver.uninstall();
   }
 };
+
+require("unload").when(
+  function myDestructor() {
+    if (global_observerInstalled) {
+      global_observerInstalled.globalUninstall();
+    }
+  });
 
 exports.webContent = {
   inProgressHtml: "<h2>A Week in the Life of a Browser</h2><p>In progress.</p>",

@@ -69,10 +69,57 @@ var BookmarkObserver = {
   },
 
   runGlobalBookmarkQuery: function() {
-    /* TODO how to get the number of bookmarks, number of bookmark folders,
-     * and depth of bookmark folders?  Is that all through Places?
-     */
+    // Run once on startup to count bookmarks, folders, and depth of
+    // folders.
+    let historyService = Cc["@mozilla.org/browser/nav-history-service;1"]
+                               .getService(Ci.nsINavHistoryService);
+    let bookmarksService = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+                                 .getService(Ci.nsINavBookmarksService);
 
+    let totalBookmarks = 0;
+    let totalFolders = 0;
+    let greatestDepth = 0;
+    let rootFolders = [ bookmarksService.toolbarFolder,
+                        bookmarksService.bookmarksMenuFolder,
+                        bookmarksService.tagsFolder,
+                        bookmarksService.unfiledBookmarksFolder];
+
+    let digIntoFolder = function(folderID, depth) {
+      console.info("These are the children of " + folderID );
+      let options = historyService.getNewQueryOptions();
+      let query = historyService.getNewQuery();
+      query.setFolders([folderID], 1);
+      let result = historyService.executeQuery(query, options);
+      let rootNode = result.root;
+      rootNode.containerOpen = true;
+      // iterate over the immediate children of this folder and dump to console
+      for (let i = 0; i < rootNode.childCount; i ++) {
+        let node = rootNode.getChild(i);
+        console.info("Child: " + node.title );
+        if (node.type == node.RESULT_TYPE_FOLDER) {
+          console.info("This is a folder, so I am recursing into it.");
+          totalFolders ++;
+          digIntoFolder(node.itemId, depth + 1);
+        } else {
+          console.info("This is a non-folder bookmark.");
+          totalBookmarks ++;
+        }
+      }
+      // close a container after using it!
+      rootNode.containerOpen = false;
+      if (depth > greatestDepth) {
+        greatestDepth = depth;
+      }
+    };
+
+    let rootFolder;
+    for each (rootFolder in rootFolders) {
+      digIntoFolder(rootFolder, 0);
+    }
+
+    console.info("Results: There are " + totalBookmarks + " bookmarks.");
+    console.info("In " + totalFolders + " folders.");
+    console.info("Greatest folder depth is " + greatestDepth);
   },
 
   uninstall: function() {
@@ -254,20 +301,20 @@ exports.Observer.prototype = {
   observe: function(subject, topic, data) {
     // TODO I don't seem to get private browsing on/off notifications.
     console.info("Observation observed: topic = " + topic);
-    if (subject == "private-browsing") {
-      if (topic == "enter") {
+    if (topic == "private-browsing") {
+      if (data == "enter") {
         console.info("Private browsing turned on.");
         // Stop all observers when private browsing goes on
         this._stopAllObservers();
-      } else if (topic == "exit"){
+      } else if (data == "exit"){
         console.info("Private browsing turned off.");
         // Start all observers again when private browsing goes back off!
         this._startAllObservers();
       }
-    } else if (subject == "quit-application") {
-      if (topic == "shutdown") {
+    } else if (topic == "quit-application") {
+      if (data == "shutdown") {
         console.info("Firefox commanded to shut down!");
-      } else if (topic == "restart") {
+      } else if (data == "restart") {
         console.info("Firefox commanded to start up!");
       }
     }

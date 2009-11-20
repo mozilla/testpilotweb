@@ -274,68 +274,63 @@ var DownloadsObserver = {
 };
 
 
-var global_observerInstalled = null;
-
-exports.Observer = function WeekLifeObserver(window, store) {
-  this._init(window, store);
-};
-exports.Observer.prototype = {
-  _init: function(window, store) {
-    this._window = window;
-    this._dataStore = store;
-
-    console.info("Called A Week Life Observer._init.");
-    if (!global_observerInstalled) {
-      // Only install the listeners once, no matter how many copies are
-      // instantiated.
-      this.obsService = Cc["@mozilla.org/observer-service;1"]
-                           .getService(Ci.nsIObserverService);
-      global_observerInstalled = this;
-      console.info("A Week Life Observer global startup - installing all observers.");
-      this.obsService.addObserver(this, "private-browsing", false);
-      this.obsService.addObserver(this, "quit-application", false);
-      this._startAllObservers();
-    }
+exports.handlers = {
+  _dataStore: null,
+  obsService: null,
+  // for handlers API:
+  onNewWindow: function(window) {
+    // Don't care
   },
 
+  onWindowClosed: function(window) {
+    // Don't care
+  },
+
+  onAppStartup: function() {
+    console.info("Week in the life study got app startup message.");
+  },
+
+  onAppShutdown: function() {
+    // Nothing to do
+  },
+
+  onExperimentStartup: function(store) {
+    this._dataStore = store;
+    console.info("Week in the life: Startingg subobservers.");
+    this._startAllObservers();
+    this.obsService = Cc["@mozilla.org/observer-service;1"]
+                           .getService(Ci.nsIObserverService);
+    //this.obsService.addObserver(this, "private-browsing", false);
+    this.obsService.addObserver(this, "quit-application", false);
+
+      /*
   observe: function(subject, topic, data) {
-    console.info("Observation observed: topic = " + topic);
     if (topic == "private-browsing") {
       if (data == "enter") {
-        console.info("Private browsing turned on.");
-        // Stop all observers when private browsing goes on
-        this._stopAllObservers();
       } else if (data == "exit"){
-        console.info("Private browsing turned off.");
-        // Start all observers again when private browsing goes back off!
-        this._startAllObservers();
-      }
-    } else if (topic == "quit-application") {
-      if (data == "shutdown") {
-        console.info("Firefox commanded to shut down!");
-      } else if (data == "restart") {
-        console.info("Firefox commanded to start up!");
       }
     }
+  }*/
+
   },
 
-  uninstall: function() {
-    // Nothing!  Uninstall listeners only when module is unloded,
-    // see myDestructor.
+  onExperimentShutdown: function() {
+    console.info("Week in the life: Shutting down subobservers.");
+    this._stopAllObservers();
+
+    /*this.obsService.removeObserver(this, "private-browsing");
+      this.obsService.removeObserver(this, "quit-application");*/
   },
 
-  globalUninstall: function() {
-    if (this == global_observerInstalled) {
-      console.info("A Week Life Observer global shutdown - removing all observers.");
-      this._stopAllObservers();
-      this.obsService.removeObserver(this, "private-browsing");
-      this.obsService.removeObserver(this, "quit-application");
-      global_observerInstalled = null;
-    }
+  onEnterPrivateBrowsing: function() {
+    this._stopAllObservers();
+  },
+
+  onExitPrivateBrowsing: function() {
+    this._startAllObservers();
   },
 
   _startAllObservers: function() {
-    console.info("Startingg subobservers.");
     BookmarkObserver.install(this._dataStore);
     IdlenessObserver.install(this._dataStore);
     ExtensionObserver.install(this._dataStore);
@@ -343,19 +338,26 @@ exports.Observer.prototype = {
   },
 
   _stopAllObservers: function() {
-    console.info("Stopping subobservers.");
     BookmarkObserver.uninstall();
     IdlenessObserver.uninstall();
     ExtensionObserver.uninstall();
     DownloadsObserver.uninstall();
+  },
+
+  observe: function(subject, topic, data) {
+    if (topic == "quit-application") {
+      if (data == "shutdown") {
+        console.info("Week in the Life study got shutdown message.");
+      } else if (data == "restart") {
+        console.info("Week in the Life study got startup message.");
+      }
+    }
   }
 };
 
 require("unload").when(
   function myDestructor() {
-    if (global_observerInstalled) {
-      global_observerInstalled.globalUninstall();
-    }
+    exports.handlers.onExperimentShutdown();
   });
 
 exports.webContent = {

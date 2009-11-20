@@ -78,8 +78,7 @@ exports.dataStoreInfo = {
   columns: TABS_EXPERIMENT_COLUMNS
 };
 
-
-var ObserverHelper = {
+exports.handlers = {
   /* Utility singleton that helps dealing with multiple instances of
    * TabsExperimentObserver.  Not exported. */
   _nextWindowId: 1,
@@ -88,6 +87,7 @@ var ObserverHelper = {
    * may need to have an experiment_data_store for it. */
   _tempHostHash: {},
   _installedObservers: [],
+  _dataStore: null,
   getTabGroupIdFromUrl: function(url) {
     var ioService = Cc["@mozilla.org/network/io-service;1"]
                       .getService(Ci.nsIIOService);
@@ -117,7 +117,46 @@ var ObserverHelper = {
     for (let i = 0; i < this._installedObservers.length; i++) {
       this._installedObservers[i].uninstall();
     }
+  },
+
+  // for handlers API:
+  onNewWindow: function(window) {
+    // Create an observer for each window.
+    this._installedObservers.push( new TabWindowObserver(window, this._dataStore));
+  },
+
+  onWindowClosed: function(window) {
+    for (let i=0; i < this._installedObservers.length; i++) {
+      if (this._installedObservers[i]._window == window) {
+        this._installedObservers[i].uninstall();
+      }
+    }
+  },
+
+  onAppStartup: function() {
+    // Nothing to do
+  },
+
+  onAppShutdown: function() {
+    // Nothing to do
+  },
+
+  onExperimentStartup: function(store) {
+    this._dataStore = store;
+  },
+
+  onExperimentShutdown: function() {
+    this.cleanup();
+  },
+
+  onEnterPrivateBrowsing: function() {
+     // Nothing to do
+  },
+
+  onExitPrivateBrowsing: function() {
+     // Nothing to do
   }
+
 };
 
 /* Ensure that when this module is unloaded, all observers get uninstalled
@@ -128,11 +167,11 @@ require("unload").when(
   });
 
 
-// The tabs experiment observer!
-exports.Observer = function TabsExperimentObserver(window, store) {
+// The per-window observer class:
+function TabWindowObserver(window, store) {
   this._init(window, store);
 };
-exports.Observer.prototype = {
+TabWindowObserver.prototype = {
   _init: function TabsExperimentObserver__init(window, store) {
     this._lastEventWasClick = null;
     this._window = window;

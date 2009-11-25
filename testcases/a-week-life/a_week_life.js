@@ -36,6 +36,11 @@ const WeekEventCodes = {
   PRIVATE_OFF: 18
 };
 
+// subcodes for BOOKMARK_MODIFY:
+const BMK_MOD_CHANGED = 0;
+const BMK_MOD_REMOVED = 1;
+const BMK_MOD_MOVED = 2;
+
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_results.sqlite",
   tableName: "week_in_the_life",
@@ -120,6 +125,8 @@ var BookmarkObserver = {
     console.info("Results: There are " + totalBookmarks + " bookmarks.");
     console.info("In " + totalFolders + " folders.");
     console.info("Greatest folder depth is " + greatestDepth);
+    this.store.rec(WeekEventCodes.BOOKMARK_STATUS,
+                   [totalBookmarks, totalFolders, greatestDepth]);
   },
 
   uninstall: function() {
@@ -133,10 +140,12 @@ var BookmarkObserver = {
     // TODO first time I ran this I got a TON of "bookmark added" at the end
     // of startup.  I think it was adding every bookmark the profile had or
     // something?  This didn't happen next time we started, though.
+    this.store.rec(WeekEventCodes.BOOKMARK_CREATE, []);
     console.info("Bookmark added!");
   },
 
   onItemRemoved: function(itemId, parentId, index, type) {
+    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_REMOVED]);
     console.info("Bookmark removed!");
   },
 
@@ -144,15 +153,18 @@ var BookmarkObserver = {
                           newValue, lastModified, type) {
     // TODO this gets called with almost every add, remove, or visit.
     // Too much.
+    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_CHANGED]);
     console.info("Bookmark modified!");
   },
 
   onItemVisited: function(bookmarkId, visitId, time) {
+    this.store.rec(WeekEventCodes.BOOKMARK_CHOOSE, []);
     console.info("Bookmark visited!");
   },
 
   onItemMoved: function(itemId, oldParentId, oldIndex, newParentId,
                         newIndex, type) {
+    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_MOVED]);
     console.info("Bookmark moved!");
   }
 };
@@ -187,9 +199,11 @@ var IdlenessObserver = {
     // time in seconds.
     if (topic == 'idle') {
       console.info("User has gone idle for " + data + " seconds.");
+      this.store.rec(WeekEventCodes.BROWSER_INACTIVE, [data]);
     }
     if (topic == 'back') {
       console.info("User is back!  They were idle for " + data + " seconds.");
+      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [data]);
     }
   }
 };
@@ -222,14 +236,18 @@ var ExtensionObserver = {
     // TODO I seem to get two disable notifications, no enable notification.. weird.
     // I also get doubled-up uninstall notification.
     if (data == "item-installed") {
+      this.store.rec(WeekEventCodes.ADDON_INSTALL, []);
       console.info("An extension was installed!");
     } else if (data == "item-upgraded") {
       console.info("An extension was upgraded!");
     } else if (data == "item-uninstalled") {
+      this.store.rec(WeekEventCodes.ADDON_UNINSTALL, []);
       console.info("An extension was uninstalled!");
     } else if (data == "item-enabled") {
+      // TODO record something here?
       console.info("An extension was enabled!");
     } else if (data == "item-disabled") {
+      // TODO record something here?
       console.info("An extension was disabled!");
     }
   }
@@ -260,15 +278,20 @@ var DownloadsObserver = {
   },
 
   onSecurityChange : function(prog, req, state, dl) {
+    // TODO anything useful we can do with this?
     console.info("Security changed for a download.");
   },
-  onProgressChange : function(prog, req, prog, progMax, tProg, tProgMax, dl) {
+  onProgressChange : function(prog, req, prog2, progMax, tProg, tProgMax, dl) {
+    // TODO anything useful we can do with this?
     console.info("Progress changed for a download.");
   },
   onStateChange : function(prog, req, flags, status, dl) {
+    // TODO anything useful we can do with this?
     console.info("State changed for a download.");
   },
   onDownloadStateChange : function(state, dl) {
+    // TODO we want some kind of record here for repeat downloads
+    this.store.rec(WeekEventCodes.DOWNLOAD, []);
     console.info("Download State changed for a download.");
   }
 };
@@ -287,6 +310,8 @@ exports.handlers = {
   },
 
   onAppStartup: function() {
+    // TODO right here we need to get number of restored tabs/windows.
+    this._dataStore.rec(WeekEventCodes.BROWSER_START, []);
     console.info("Week in the life study got app startup message.");
   },
 
@@ -295,6 +320,13 @@ exports.handlers = {
   },
 
   onExperimentStartup: function(store) {
+    store.rec = function(eventCode, data) {
+      store.storeEvent({ event_code: eventCode,
+                         data1: data[0] || 0,
+                         data2: data[1] || 0,
+                         data3: data[2] || 0,
+                         timestamp: Date.now()});
+    };
     this._dataStore = store;
     console.info("Week in the life: Startingg subobservers.");
     this._startAllObservers();
@@ -323,10 +355,12 @@ exports.handlers = {
   },
 
   onEnterPrivateBrowsing: function() {
+    this.store.rec(WeekEventCodes.PRIVATE_ON, []);
     this._stopAllObservers();
   },
 
   onExitPrivateBrowsing: function() {
+    this.store.rec(WeekEventCodes.PRIVATE_OFF, []);
     this._startAllObservers();
   },
 
@@ -347,8 +381,10 @@ exports.handlers = {
   observe: function(subject, topic, data) {
     if (topic == "quit-application") {
       if (data == "shutdown") {
+        this._dataStore.rec(WeekEventCodes.BROWSER_SHUTDOWN, []);
         console.info("Week in the Life study got shutdown message.");
       } else if (data == "restart") {
+        this._dataStore.rec(WeekEventCodes.BROWSER_RESTART, []);
         console.info("Week in the Life study got startup message.");
       }
     }
@@ -361,9 +397,18 @@ require("unload").when(
   });
 
 exports.webContent = {
-  inProgressHtml: "<h2>A Week in the Life of a Browser</h2><p>In progress.</p>",
-  completedHtml: "<h2>A Week in the Life of a Browser</h2><p>Completed.</p>",
-  upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>In progress.</p>",
+  inProgressHtml: "<h2>A Week in the Life of a Browser</h2><p>In progress.  "
+                 +"<a onclick='showRawData(2);'>the complete raw data set</a>.</p>",
+  completedHtml: "<h2>A Week in the Life of a Browser</h2><p>Completed. "
+                 + "<a onclick='showRawData(2);'>the complete raw data set</a>.</p>",
+  upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
   onPageLoad: function(experiment, document, graphUtils) {
+    let rawData = experiment.dataStoreAsJSON;
+    // so what's in this raw data json?  We may have to go through row by
+    // row.  Myeah.  Really the event-log based data store isn't the best
+    // way to do this one... but whatever, we've got it and it works OK.
+    // So like...
+    for each ( let row in rawData ) {
+    }
   }
 };

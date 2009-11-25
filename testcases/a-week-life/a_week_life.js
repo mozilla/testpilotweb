@@ -325,6 +325,7 @@ exports.handlers = {
 
   onAppStartup: function() {
     // TODO right here we need to get number of restored tabs/windows.
+    // TODO how can we tell if something has gone wrong with session restore?
     this._dataStore.rec(WeekEventCodes.BROWSER_START, []);
     console.info("Week in the life study got app startup message.");
   },
@@ -346,35 +347,28 @@ exports.handlers = {
     this._startAllObservers();
     this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
-    //this.obsService.addObserver(this, "private-browsing", false);
     this.obsService.addObserver(this, "quit-application", false);
-
-      /*
-  observe: function(subject, topic, data) {
-    if (topic == "private-browsing") {
-      if (data == "enter") {
-      } else if (data == "exit"){
-      }
-    }
-  }*/
-
   },
 
   onExperimentShutdown: function() {
+    // TODO how many times does this get called for a single shutdown
+    // event?  Cuz I saw two times - maybe it's one for the explicit
+    // onExperimentShutdown call in setup.js and another one for the unload
+    // handler?
     console.info("Week in the life: Shutting down subobservers.");
     this._stopAllObservers();
-
-    /*this.obsService.removeObserver(this, "private-browsing");
-      this.obsService.removeObserver(this, "quit-application");*/
+    this.obsService.removeObserver(this, "quit-application", false);
   },
 
   onEnterPrivateBrowsing: function() {
-    this.store.rec(WeekEventCodes.PRIVATE_ON, []);
+    console.info("Week in the Life: Got private browsing on message.");
+    this._dataStore.rec(WeekEventCodes.PRIVATE_ON, []);
     this._stopAllObservers();
   },
 
   onExitPrivateBrowsing: function() {
-    this.store.rec(WeekEventCodes.PRIVATE_OFF, []);
+    console.info("Week in the Life: Got private browsing off message.");
+    this._dataStore.rec(WeekEventCodes.PRIVATE_OFF, []);
     this._startAllObservers();
   },
 

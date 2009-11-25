@@ -36,6 +36,15 @@ const WeekEventCodes = {
   PRIVATE_OFF: 18
 };
 
+var eventCodeToEventName = ["", "Firefox Startup", "Firefox Shutdown",
+                            "Firefox Restart", "Resume Active Use",
+                            "Begin Idle", "Search", "Search Settings Changed",
+                            "Bookmark Count", "New Bookmark", "Bookmark Opened",
+                            "Bookmark Modified", "Download",
+                            "Download Settings Changed", "Add-ons Count",
+                            "Add-on Installed", "Add-on Uninstalled",
+                            "Private Mode On", "Private Mode Off"];
+
 // subcodes for BOOKMARK_MODIFY:
 const BMK_MOD_CHANGED = 0;
 const BMK_MOD_REMOVED = 1;
@@ -44,11 +53,13 @@ const BMK_MOD_MOVED = 2;
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_results.sqlite",
   tableName: "week_in_the_life",
-  columns: [{property: "event_code", type: TYPE_INT_32, displayName: "Event"},
+  columns: [{property: "event_code", type: TYPE_INT_32, displayName: "Event",
+             displayValue: eventCodeToEventName},
             {property: "data1", type: TYPE_INT_32, displayName: "Data 1"},
             {property: "data2", type: TYPE_INT_32, displayName: "Data 2"},
             {property: "data3", type: TYPE_INT_32, displayName: "Data 2"},
-            {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time"}]
+            {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
+             displayValue: function(value) {return new Date(value).toLocaleString();}}]
 };
 
 var BookmarkObserver = {

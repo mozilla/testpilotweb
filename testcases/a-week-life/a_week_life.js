@@ -397,18 +397,73 @@ require("unload").when(
   });
 
 exports.webContent = {
-  inProgressHtml: "<h2>A Week in the Life of a Browser</h2><p>In progress.  "
-                 +"<a onclick='showRawData(2);'>the complete raw data set</a>.</p>",
-  completedHtml: "<h2>A Week in the Life of a Browser</h2><p>Completed. "
-                 + "<a onclick='showRawData(2);'>the complete raw data set</a>.</p>",
+  inProgressHtml:
+    '<h2>A Week in the Life of a Browser</h2><p>In progress. \
+     <a onclick="showRawData(2);">the complete raw data set</a>.\
+     </p><h4>This study is currently running.  It will end \
+     <span id="test-end-time"></span>. If you don\'t want to \
+     participate, please \
+    <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</h4>\
+    <p>You have <span id="num-bkmks-span"></span> bookmarks in \
+    <span id="num-folders-span"></span> folders, to a max folder depth of \
+    <span id="max-depth-span"></span>.</p>   \
+    <canvas id="browser-use-time-canvas" width="450" height="220"></canvas> \
+  ',
+  completedHtml: '<h2>A Week in the Life of a Browser</h2><p>Completed. \
+                 <a onclick="showRawData(2);">the complete raw data set</a>.\
+                 </p>',
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
   onPageLoad: function(experiment, document, graphUtils) {
     let rawData = experiment.dataStoreAsJSON;
-    // so what's in this raw data json?  We may have to go through row by
-    // row.  Myeah.  Really the event-log based data store isn't the best
-    // way to do this one... but whatever, we've got it and it works OK.
-    // So like...
+    let bkmks, folders, depth;
+    let browserUseTimeData = [];
+    let firstTimestamp = 0;
+
     for each ( let row in rawData ) {
+      if (firstTimestamp == 0 )
+        firstTimestamp = row.timestamp;
+      switch(row.event_code) {
+      case WeekEventCodes.BROWSER_START:
+        browserUseTimeData.push( [row.timestamp - firstTimestamp, 2]);
+        // calculate this as a crash if there was no shutdown first!
+      break;
+      case WeekEventCodes.BROWSER_SHUTDOWN:
+        browserUseTimeData.push( [row.timestamp - firstTimestamp, 0]);
+      break;
+      case WeekEventCodes.BROWSER_ACTIVATE:
+        browserUseTimeData.push( [row.timestamp - firstTimestamp, 2]);
+      break;
+      case WeekEventCodes.BROWSER_INACTIVE:
+        browserUseTimeData.push( [row.timestamp - firstTimestamp, 1]);
+      break;
+      case WeekEventCodes.BOOKMARK_STATUS:
+        bkmks = row.data1;
+        folders = row.data2;
+        depth = row.data3;
+      break;
+      }
     }
+    let lastTimestamp = (new Date()).getTime();
+    document.getElementById("num-bkmks-span").innerHTML = bkmks;
+    document.getElementById("num-folders-span").innerHTML = folders;
+    document.getElementById("max-depth-span").innerHTML = depth;
+
+    let red = "rgb(200,0,0)";
+    let boundingRect = { originX: 40,
+                         originY: 210,
+                         width: 400,
+                         height: 200 };
+    let axes = {xScale: boundingRect.width / lastTimestamp,
+                yScale: boundingRect.height / 2,
+                xMin: firstTimestamp,
+                xMax: lastTimestamp,
+                yMin: 0,
+                yMax: 2 };
+    console.log("xScale is " + boundingRect.width / lastTimestamp );
+    console.log("yScale is " + boundingRect.height / 2 );
+
+    let canvas = document.getElementById("browser-use-time-canvas");
+    graphUtils.drawTimeSeriesGraph(canvas, browserUseTimeData,
+                                   boundingRect, axes, red);
   }
 };

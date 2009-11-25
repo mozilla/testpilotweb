@@ -467,10 +467,11 @@ exports.webContent = {
     let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
     console.log("xScale is " + xScale );
 
-    //debug:
+    //Draw colored bar - orange for using the browser, yellow for running
+    // but not being used, white for no use.
     for (let rowNum = 0; rowNum < browserUseTimeData.length; rowNum++) {
       let row = browserUseTimeData[rowNum];
-      console.info("Data point: " + row[0] + ", " + row[1]);
+      console.info("Data point: " + (new Date(row[0])).toString() + ", " + row[1]);
       switch( row[1]) {
       case 0:
         continue;
@@ -486,6 +487,30 @@ exports.webContent = {
         let nextX = xScale * (browserUseTimeData[rowNum + 1][0] - firstTimestamp);
         ctx.fillRect(x, 100, nextX - x, 50);
       }
+    }
+    // Add scale with dates on it
+    let firstDay = new Date(firstTimestamp);
+    console.info("Beginning date is " + firstDay.toString());
+    console.info("Ending date is " + (new Date(lastTimestamp)).toString());
+    firstDay.setDate( firstDay.getDate() + 1 );
+    firstDay.setHours(0);
+    firstDay.setMinutes(0);
+    firstDay.setSeconds(0);
+    firstDay.setMilliseconds(0);
+    ctx.mozTextStyle = "12pt sans serif";
+    ctx.fillStyle = "black";
+    let dayMarker = firstDay;
+    while (dayMarker.getTime() < lastTimestamp) {
+      let x = xScale * (dayMarker.getTime() - firstTimestamp);
+      ctx.beginPath();
+      ctx.moveTo(x, 50);
+      ctx.lineTo(x, 200);
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(x + 5, 55);
+      ctx.mozDrawText(dayMarker.toDateString());
+      ctx.restore();
+      dayMarker.setDate( dayMarker.getDate() + 1 );
     }
   }
 };

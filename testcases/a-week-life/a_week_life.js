@@ -140,6 +140,9 @@ var BookmarkObserver = {
     // TODO first time I ran this I got a TON of "bookmark added" at the end
     // of startup.  I think it was adding every bookmark the profile had or
     // something?  This didn't happen next time we started, though.
+
+    // OH, I know what this is - it's the live bookmark RSS feed of BBC news.
+    // We should have some way of skipping those.
     this.store.rec(WeekEventCodes.BOOKMARK_CREATE, []);
     console.info("Bookmark added!");
   },
@@ -424,17 +427,18 @@ exports.webContent = {
         firstTimestamp = row.timestamp;
       switch(row.event_code) {
       case WeekEventCodes.BROWSER_START:
-        browserUseTimeData.push( [row.timestamp - firstTimestamp, 2]);
-        // calculate this as a crash if there was no shutdown first!
+        browserUseTimeData.push( [row.timestamp, 2]);
+        // TODO treat this as a crash if there was no shutdown first!
+        // what is the logic for that, though?
       break;
       case WeekEventCodes.BROWSER_SHUTDOWN:
-        browserUseTimeData.push( [row.timestamp - firstTimestamp, 0]);
+        browserUseTimeData.push( [row.timestamp, 0]);
       break;
       case WeekEventCodes.BROWSER_ACTIVATE:
-        browserUseTimeData.push( [row.timestamp - firstTimestamp, 2]);
+        browserUseTimeData.push( [row.timestamp, 2]);
       break;
       case WeekEventCodes.BROWSER_INACTIVE:
-        browserUseTimeData.push( [row.timestamp - firstTimestamp, 1]);
+        browserUseTimeData.push( [row.timestamp, 1]);
       break;
       case WeekEventCodes.BOOKMARK_STATUS:
         bkmks = row.data1;
@@ -444,26 +448,44 @@ exports.webContent = {
       }
     }
     let lastTimestamp = (new Date()).getTime();
+    browserUseTimeData.push( [lastTimestamp, 2] );
+
     document.getElementById("num-bkmks-span").innerHTML = bkmks;
     document.getElementById("num-folders-span").innerHTML = folders;
     document.getElementById("max-depth-span").innerHTML = depth;
 
-    let red = "rgb(200,0,0)";
+    let orange = "rgb(200,100,0)";
+    let yellow = "rgb(200,200,0)";
+
+    let canvas = document.getElementById("browser-use-time-canvas");
+    let ctx = canvas.getContext("2d");
+
     let boundingRect = { originX: 40,
                          originY: 210,
                          width: 400,
                          height: 200 };
-    let axes = {xScale: boundingRect.width / lastTimestamp,
-                yScale: boundingRect.height / 2,
-                xMin: firstTimestamp,
-                xMax: lastTimestamp,
-                yMin: 0,
-                yMax: 2 };
-    console.log("xScale is " + boundingRect.width / lastTimestamp );
-    console.log("yScale is " + boundingRect.height / 2 );
+    let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
+    console.log("xScale is " + xScale );
 
-    let canvas = document.getElementById("browser-use-time-canvas");
-    graphUtils.drawTimeSeriesGraph(canvas, browserUseTimeData,
-                                   boundingRect, axes, red);
+    //debug:
+    for (let rowNum = 0; rowNum < browserUseTimeData.length; rowNum++) {
+      let row = browserUseTimeData[rowNum];
+      console.info("Data point: " + row[0] + ", " + row[1]);
+      switch( row[1]) {
+      case 0:
+        continue;
+      case 1:
+        ctx.fillStyle = yellow;
+        break;
+      case 2:
+        ctx.fillStyle = orange;
+        break;
+      }
+      let x = xScale * ( row[0] - firstTimestamp );
+      if (rowNum + 1 < browserUseTimeData.length) {
+        let nextX = xScale * (browserUseTimeData[rowNum + 1][0] - firstTimestamp);
+        ctx.fillRect(x, 100, nextX - x, 50);
+      }
+    }
   }
 };

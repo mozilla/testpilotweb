@@ -78,9 +78,7 @@ exports.dataStoreInfo = {
   columns: TABS_EXPERIMENT_COLUMNS
 };
 
-exports.handlers = {
-  /* Utility singleton that helps dealing with multiple instances of
-   * TabsExperimentObserver.  Not exported. */
+let ObserverHelper = {
   _nextWindowId: 1,
   _nextTabGroupId: 0,
   /* TODO make hash persistent across sessions and windows...
@@ -158,6 +156,8 @@ exports.handlers = {
   }
 
 };
+
+exports.handlers = ObserverHelper;
 
 /* Ensure that when this module is unloaded, all observers get uninstalled
  * too. */

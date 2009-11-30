@@ -5,7 +5,7 @@ const FREE_ENTRY = 3;
 const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
-  surveId: "week_life_survey",
+  surveyId: "week_life_survey",
   surveyName: "A week in the life of a Browser",
   uploadWithExperiment: 2,
   surveyQuestions:  [

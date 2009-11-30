@@ -357,6 +357,9 @@ exports.handlers = {
     // handler?
     console.info("Week in the life: Shutting down subobservers.");
     this._stopAllObservers();
+    // TODO getting an error on the following line, wherein this.obsService
+    // is none, when this is called from the unload handler.  Is this because
+    // of the multiple calls problem?
     this.obsService.removeObserver(this, "quit-application", false);
   },
 

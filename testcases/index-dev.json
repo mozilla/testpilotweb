@@ -2,5 +2,8 @@
                   "filename": "tab-open-close/tabs_experiment.js"},
                  {"name": "Survey For New Test Pilots",
                   "filename": "new_pilot_survey.js"},
-                 {"name": "A Week in the Life of a Browser",
-                  "filename": "a-week-life/a_week_life.js"}]}
+                 {"name": "A Week in the Life of a Browser (Experiment)",
+                  "filename": "a-week-life/a_week_life.js"},
+                 {"name": "A Week in the Life of a Browser (Survey)",
+                  "filename": "week-life-survey.js"}]
+}

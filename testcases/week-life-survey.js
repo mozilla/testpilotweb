@@ -1,8 +1,8 @@
-
-
-var survey_title = "User survey - A week in the life of a Browser";
-
-var survey_questions = [
+exports.surveyInfo = {
+  surveId: "week_life_survey",
+  surveyName: "A week in the life of a Browser",
+  uploadWithExperiment: 2,
+  surveyQuestions:  [
    { question: "How long have you used Firefox?",
      type: MULTIPLE_CHOICE,
      choices: ["less than a year", "1-2 years", "2-4 years",
@@ -47,4 +47,5 @@ var survey_questions = [
              "36-45",
              "46-55",
              "older than 55"]}
-];
+  ]
+};

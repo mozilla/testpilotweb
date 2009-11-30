@@ -1,3 +1,9 @@
+const MULTIPLE_CHOICE = 0;
+const CHECK_BOXES_WITH_FREE_ENTRY = 1;
+const SCALE = 2;
+const FREE_ENTRY = 3;
+const CHECK_BOXES = 4;
+
 exports.surveyInfo = {
   surveId: "week_life_survey",
   surveyName: "A week in the life of a Browser",

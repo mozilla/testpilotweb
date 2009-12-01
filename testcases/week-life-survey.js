@@ -5,8 +5,8 @@ const FREE_ENTRY = 3;
 const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
-  surveyId: "week_life_survey",
-  surveyName: "A week in the life of a Browser",
+  surveyId: "basic_panel_survey",
+  surveyName: "Pilot Background Survey",
   uploadWithExperiment: 2,
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
@@ -19,7 +19,7 @@ exports.surveyInfo = {
               "Yes, I use other browsers besides Firefox."]},
    { question: "If you use other browsers besides Firefox, what are they?",
      type: CHECK_BOXES_WITH_FREE_ENTRY,
-     choices: ["IE 8", "Chrome", "Safari", "IE7"],
+     choices: ["IE 8", "Chrome", "Safari", "IE 7"],
      free_entry: "Other" },
   { question: "If you use multiple browser at the same time, what are reasons to do so?",
     type: CHECK_BOXES_WITH_FREE_ENTRY,

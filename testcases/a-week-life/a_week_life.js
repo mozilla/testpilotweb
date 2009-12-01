@@ -80,7 +80,6 @@ var BookmarkObserver = {
       this.bmsvc.addObserver(this, false);
       this.store = store;
       this.alreadyInstalled = true;
-      this.runGlobalBookmarkQuery();
     }
   },
 
@@ -343,24 +342,23 @@ exports.handlers = {
                          timestamp: Date.now()});
     };
     this._dataStore = store;
-    console.info("Week in the life: Startingg subobservers.");
+    console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();
+    BookmarkObserver.runGlobalBookmarkQuery();
     this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
     this.obsService.addObserver(this, "quit-application", false);
   },
 
   onExperimentShutdown: function() {
-    // TODO how many times does this get called for a single shutdown
-    // event?  Cuz I saw two times - maybe it's one for the explicit
-    // onExperimentShutdown call in setup.js and another one for the unload
-    // handler?
     console.info("Week in the life: Shutting down subobservers.");
     this._stopAllObservers();
-    // TODO getting an error on the following line, wherein this.obsService
-    // is none, when this is called from the unload handler.  Is this because
-    // of the multiple calls problem?
-    this.obsService.removeObserver(this, "quit-application", false);
+    // This check is to make sure nothing weird will happen if
+    // onExperimentShutdown gets called more than once:
+    if (this.obsService) {
+      this.obsService.removeObserver(this, "quit-application", false);
+      this.obsService = null;
+    }
   },
 
   onEnterPrivateBrowsing: function() {
@@ -505,9 +503,10 @@ exports.webContent = {
     firstDay.setMinutes(0);
     firstDay.setSeconds(0);
     firstDay.setMilliseconds(0);
-    ctx.mozTextStyle = "12pt sans serif";
+    ctx.mozTextStyle = "10pt sans serif";
     ctx.fillStyle = "black";
     let dayMarker = firstDay;
+    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     while (dayMarker.getTime() < lastTimestamp) {
       let x = xScale * (dayMarker.getTime() - firstTimestamp);
       ctx.beginPath();
@@ -516,7 +515,7 @@ exports.webContent = {
       ctx.stroke();
       ctx.save();
       ctx.translate(x + 5, 55);
-      ctx.mozDrawText(dayMarker.toDateString());
+      ctx.mozDrawText(days[dayMarker.getDay()] + dayMarker.getDate());
       ctx.restore();
       dayMarker.setDate( dayMarker.getDate() + 1 );
     }

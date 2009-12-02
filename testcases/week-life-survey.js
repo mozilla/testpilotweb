@@ -21,7 +21,7 @@ exports.surveyInfo = {
      type: CHECK_BOXES_WITH_FREE_ENTRY,
      choices: ["IE 8", "Chrome", "Safari", "IE 7"],
      free_entry: "Other" },
-  { question: "If you use multiple browser at the same time, what are reasons to do so?",
+  { question: "If you use multiple browsers at the same time, what are your reasons for doing so?",
     type: CHECK_BOXES_WITH_FREE_ENTRY,
     choices: [ "My job requires me working with several browsers.",
                "I like different functions from different browsers.",

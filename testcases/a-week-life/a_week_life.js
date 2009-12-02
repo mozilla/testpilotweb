@@ -407,7 +407,7 @@ require("unload").when(
 
 exports.webContent = {
   inProgressHtml:
-    '<h2>A Week in the Life of a Browser</h2><p>In progress. \
+    '<h2>A Week in the Life of a Browser</h2><p>In progress. Here is \
      <a onclick="showRawData(2);">the complete raw data set</a>.\
      </p><h4>This study is currently running.  It will end \
      <span id="test-end-time"></span>. If you don\'t want to \
@@ -418,9 +418,16 @@ exports.webContent = {
     <span id="max-depth-span"></span>.</p>   \
     <canvas id="browser-use-time-canvas" width="450" height="220"></canvas> \
   ',
-  completedHtml: '<h2>A Week in the Life of a Browser</h2><p>Completed. \
-                 <a onclick="showRawData(2);">the complete raw data set</a>.\
-                 </p>',
+  completedHtml:
+    '<h2>A Week in the Life of a Browser</h2><p>Completed! Here is \
+     <a onclick="showRawData(2);">the complete raw data set</a>.</p>\
+     <p>This test will automatically start again in 60 days.  If you would \
+     prefer to have Test Pilot submit your data automatically next time, \
+     instead of asking you, you can check the box below:<br/>\
+     <input type="checkbox" id="always-submit-checkbox">\
+     Automatically submit data for this test from now on<br/>\
+     <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png"> <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a></span></div>\
+     ',
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
   onPageLoad: function(experiment, document, graphUtils) {
     let rawData = experiment.dataStoreAsJSON;
@@ -515,7 +522,7 @@ exports.webContent = {
       ctx.stroke();
       ctx.save();
       ctx.translate(x + 5, 55);
-      ctx.mozDrawText(days[dayMarker.getDay()] + dayMarker.getDate());
+      ctx.mozDrawText(days[dayMarker.getDay()] + " " + dayMarker.getDate());
       ctx.restore();
       dayMarker.setDate( dayMarker.getDate() + 1 );
     }

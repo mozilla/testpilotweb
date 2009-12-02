@@ -426,6 +426,8 @@ exports.webContent = {
      instead of asking you, you can check the box below:<br/>\
      <input type="checkbox" id="always-submit-checkbox">\
      Automatically submit data for this test from now on<br/>\
+     If you don\'t want to upload your data, please \
+     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</h4>\
      <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png"> <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a></span></div>\
      ',
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",

@@ -88,16 +88,13 @@ var BookmarkObserver = {
     // folders.
     let historyService = Cc["@mozilla.org/browser/nav-history-service;1"]
                                .getService(Ci.nsINavHistoryService);
-    let bookmarksService = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-                                 .getService(Ci.nsINavBookmarksService);
-
     let totalBookmarks = 0;
     let totalFolders = 0;
     let greatestDepth = 0;
-    let rootFolders = [ bookmarksService.toolbarFolder,
-                        bookmarksService.bookmarksMenuFolder,
-                        bookmarksService.tagsFolder,
-                        bookmarksService.unfiledBookmarksFolder];
+    let rootFolders = [ this.bmsvc.toolbarFolder,
+                        this.bmsvc.bookmarksMenuFolder,
+                        this.bmsvc.tagsFolder,
+                        this.bmsvc.unfiledBookmarksFolder];
 
     let digIntoFolder = function(folderID, depth) {
       console.info("These are the children of " + folderID );
@@ -110,13 +107,10 @@ var BookmarkObserver = {
       // iterate over the immediate children of this folder and dump to console
       for (let i = 0; i < rootNode.childCount; i ++) {
         let node = rootNode.getChild(i);
-        console.info("Child: " + node.title );
         if (node.type == node.RESULT_TYPE_FOLDER) {
-          console.info("This is a folder, so I am recursing into it.");
           totalFolders ++;
           digIntoFolder(node.itemId, depth + 1);
         } else {
-          console.info("This is a non-folder bookmark.");
           totalBookmarks ++;
         }
       }
@@ -147,14 +141,16 @@ var BookmarkObserver = {
   },
 
   onItemAdded: function(itemId, parentId, index, type) {
-    // TODO first time I ran this I got a TON of "bookmark added" at the end
-    // of startup.  I think it was adding every bookmark the profile had or
-    // something?  This didn't happen next time we started, though.
+    var livemarkService = Cc["@mozilla.org/browser/livemark-service;2"]
+                            .getService(Ci.nsILivemarkService);
 
-    // OH, I know what this is - it's the live bookmark RSS feed of BBC news.
-    // We should have some way of skipping those.
-    this.store.rec(WeekEventCodes.BOOKMARK_CREATE, []);
-    console.info("Bookmark added!");
+    let folderId = this.bmsvc.getFolderIdForItem(itemId);
+    if (livemarkService.isLivemark(folderId)) {
+      console.info("This is a child of a livemark.  IGNORE ME!");
+    } else {
+      console.info("This looks like a real bookmark add.");
+      this.store.rec(WeekEventCodes.BOOKMARK_CREATE, []);
+    }
   },
 
   onItemRemoved: function(itemId, parentId, index, type) {

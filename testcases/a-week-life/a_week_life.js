@@ -15,6 +15,9 @@ exports.experimentInfo = {
   versionNumber: 1
 };
 
+// TODO purposefully throw exception if Test Pilot version is not at least
+// 0.4.
+
 const WeekEventCodes = {
   BROWSER_START: 1,
   BROWSER_SHUTDOWN: 2,
@@ -77,6 +80,8 @@ var BookmarkObserver = {
       console.info("Adding bookmark observer.");
       this.bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
         .getService(Ci.nsINavBookmarksService);
+      this.lmsvc = Cc["@mozilla.org/browser/livemark-service;2"]
+        .getService(Ci.nsILivemarkService);
       this.bmsvc.addObserver(this, false);
       this.store = store;
       this.alreadyInstalled = true;
@@ -104,7 +109,8 @@ var BookmarkObserver = {
       let result = historyService.executeQuery(query, options);
       let rootNode = result.root;
       rootNode.containerOpen = true;
-      // iterate over the immediate children of this folder and dump to console
+      // iterate over the immediate children of this folder, recursing
+      // into any subfolders
       for (let i = 0; i < rootNode.childCount; i ++) {
         let node = rootNode.getChild(i);
         if (node.type == node.RESULT_TYPE_FOLDER) {
@@ -141,32 +147,36 @@ var BookmarkObserver = {
   },
 
   onItemAdded: function(itemId, parentId, index, type) {
-    var livemarkService = Cc["@mozilla.org/browser/livemark-service;2"]
-                            .getService(Ci.nsILivemarkService);
-
     let folderId = this.bmsvc.getFolderIdForItem(itemId);
-    if (livemarkService.isLivemark(folderId)) {
-      console.info("This is a child of a livemark.  IGNORE ME!");
-    } else {
-      console.info("This looks like a real bookmark add.");
+    if (!this.lmsvc.isLivemark(folderId)) {
+      // Ignore livemarks -these are constantly added automatically
+      // and we don't really care about them.
+      console.info("Bookmark added.");
       this.store.rec(WeekEventCodes.BOOKMARK_CREATE, []);
     }
   },
 
   onItemRemoved: function(itemId, parentId, index, type) {
-    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_REMOVED]);
-    console.info("Bookmark removed!");
+    let folderId = this.bmsvc.getFolderIdForItem(itemId);
+    if (!this.lmsvc.isLivemark(folderId)) {
+      this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_REMOVED]);
+      console.info("Bookmark removed!");
+    }
   },
 
   onItemChanged: function(bookmarkId, property, isAnnotation,
                           newValue, lastModified, type) {
-    // TODO this gets called with almost every add, remove, or visit.
-    // Too much.
-    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_CHANGED]);
-    console.info("Bookmark modified!");
+    // This gets called with almost every add, remove, or visit; it's too
+    // much info, so we're not going to track it for now.
+    /*let folderId = this.bmsvc.getFolderIdForItem(bookmarkId);
+    if (!this.lmsvc.isLivemark(folderId)) {
+      this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_CHANGED]);
+      console.info("Bookmark modified!");
+    }*/
   },
 
   onItemVisited: function(bookmarkId, visitId, time) {
+    // This works.
     this.store.rec(WeekEventCodes.BOOKMARK_CHOOSE, []);
     console.info("Bookmark visited!");
   },
@@ -259,6 +269,25 @@ var ExtensionObserver = {
       // TODO record something here?
       console.info("An extension was disabled!");
     }
+  },
+
+  runGlobalAddonsQuery: function () {
+    // TODO record number of active and inactive extensions.
+    let extManager = Cc["@mozilla.org/extensions/manager;1"]
+                       .getService(Ci.nsIExtensionManager);
+    let nsIUpdateItem = Ci.nsIUpdateItem;
+    let numberActive;
+    let numberInactive;
+    let items = extManager.getItemList(nsIUpdateItem.TYPE_EXTENSION,{});
+    // Note we can also pass in TYPE_THEME, TYPE_LOCALE, or TYPE_ADDON here
+    // besides TYPE_EXTENSION.
+    for (var i = 0; i < items.length; ++i) {
+      // TODO how to detect that addon is disabled???
+    }
+    numberActive = items.length;
+    numberInactive = 0;
+    console.info("Recording extensions: " + numberActive);
+    this.store.rec(WeekEventCodes.ADDON_STATUS, [numberActive, numberInactive]);
   }
 };
 
@@ -271,9 +300,13 @@ var DownloadsObserver = {
     console.info("Is bookmark observer already installed? " + this.alreadyInstalled);
     if (!this.alreadyInstalled) {
       console.info("Adding downloads observer.");
-      this.downloadManager = Cc["@mozilla.org/download-manager;1"]
+      this.obsService = Cc["@mozilla.org/observer-service;1"]
+                           .getService(Ci.nsIObserverService);
+      this.obsService.addObserver(this, "dl-done", false);
+
+      /*this.downloadManager = Cc["@mozilla.org/download-manager;1"]
                    .getService(Ci.nsIDownloadManager);
-      this.downloadManager.addListener(this);
+      this.downloadManager.addListener(this);*/
       this.store = store;
       this.alreadyInstalled = true;
     }
@@ -281,28 +314,28 @@ var DownloadsObserver = {
 
   uninstall: function() {
     if (this.alreadyInstalled) {
-      this.downloadManager.addListener(this);
+      //this.downloadManager.removeListener(this);
+      this.obsService.removeObserver(this, "dl-done", false);
       this.alreadyInstalled = false;
     }
   },
 
-  onSecurityChange : function(prog, req, state, dl) {
-    // TODO anything useful we can do with this?
-    console.info("Security changed for a download.");
+  observe: function (subject, topic, state) {
+    if (topic == "dl-done") {
+      console.info("A download completed.");
+      this.store.rec(WeekEventCodes.DOWNLOAD, []);
+    }
+  }
+
+  // This is the API for the downloadManager.addListener listener...
+  /*onSecurityChange : function(prog, req, state, dl) {
   },
   onProgressChange : function(prog, req, prog2, progMax, tProg, tProgMax, dl) {
-    // TODO anything useful we can do with this?
-    console.info("Progress changed for a download.");
   },
   onStateChange : function(prog, req, flags, status, dl) {
-    // TODO anything useful we can do with this?
-    console.info("State changed for a download.");
   },
   onDownloadStateChange : function(state, dl) {
-    // TODO we want some kind of record here for repeat downloads
-    this.store.rec(WeekEventCodes.DOWNLOAD, []);
-    console.info("Download State changed for a download.");
-  }
+  }*/
 };
 
 
@@ -320,6 +353,7 @@ exports.handlers = {
 
   onAppStartup: function() {
     // TODO right here we need to get number of restored tabs/windows.
+    // ... which I can do by iterating through
     // TODO how can we tell if something has gone wrong with session restore?
     this._dataStore.rec(WeekEventCodes.BROWSER_START, []);
     console.info("Week in the life study got app startup message.");
@@ -341,6 +375,7 @@ exports.handlers = {
     console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();
     BookmarkObserver.runGlobalBookmarkQuery();
+    ExtensionObserver.runGlobalAddonsQuery();
     this.obsService = Cc["@mozilla.org/observer-service;1"]
                            .getService(Ci.nsIObserverService);
     this.obsService.addObserver(this, "quit-application", false);
@@ -409,11 +444,22 @@ exports.webContent = {
      <span id="test-end-time"></span>. If you don\'t want to \
      participate, please \
     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</h4>\
-    <p>You have <span id="num-bkmks-span"></span> bookmarks in \
+    <canvas id="browser-use-time-canvas" width="500" height="300"></canvas> \
+    <div class="dataBox">\
+    <h4>Facts About Your Browser Use This Week</h4>\
+    <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
+     hours actively using Firefox this week. Firefox was running but \
+    idle for a total of <span id="idle-time-span"></span> hours.</p>\
+    <p><b>Bookmarks:</b> At the beginning of the week you had <span id="first-num-bkmks-span"></span>\
+    bookmarks. Now you have <span id="num-bkmks-span"></span> bookmarks in \
     <span id="num-folders-span"></span> folders, to a max folder depth of \
-    <span id="max-depth-span"></span>.</p>   \
-    <canvas id="browser-use-time-canvas" width="450" height="220"></canvas> \
-  ',
+    <span id="max-depth-span"></span>.</p>\
+    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> files\
+    during this week.</p>\
+    <p><b>Extensions:</b> At the beginning of the week you had \
+    <span id="first-num-extensions"></span> Firefox extensions installed.  Now \
+    you have <span id="num-extensions"></span> extensions installed.</p>\
+    </div>',
   completedHtml:
     '<h2>A Week in the Life of a Browser</h2><p>Completed! Here is \
      <a onclick="showRawData(2);">the complete raw data set</a>.</p>\
@@ -431,7 +477,15 @@ exports.webContent = {
     let rawData = experiment.dataStoreAsJSON;
     let bkmks, folders, depth;
     let browserUseTimeData = [];
+    let bookmarksData = [];
+    let addonsData = [];
     let firstTimestamp = 0;
+    let maxBkmks = 0;
+    let totalUseTime = 0;
+    let idleTime = 0;
+    let numDownloads = 0;
+    let numAddons = 0;
+    let rowNum;
 
     for each ( let row in rawData ) {
       if (firstTimestamp == 0 )
@@ -455,50 +509,96 @@ exports.webContent = {
         bkmks = row.data1;
         folders = row.data2;
         depth = row.data3;
+        bookmarksData.push( [row.timestamp, bkmks] );
       break;
+      case WeekEventCodes.BOOKMARK_CREATE:
+        bkmks += 1;
+        bookmarksData.push( [row.timestamp, bkmks] );
+      break;
+        // TODO bookmark remove!
+      case WeekEventCodes.DOWNLOAD:
+        numDownloads += 1;
+      break;
+      case WeekEventCodes.ADDON_STATUS:
+        numAddons = row.data1;
+        addonsData.push( [row.timestamp, numAddons] );
+        break;
+      case WeekEventCodes.ADDON_INSTALL:
+        numAddons += 1;
+        addonsData.push( [row.timestamp, numAddons] );
+        break;
+        // TODO add-on uninstall!
+      }
+      if (bkmks > maxBkmks) {
+        maxBkmks = bkmks;
       }
     }
     let lastTimestamp = (new Date()).getTime();
     browserUseTimeData.push( [lastTimestamp, 2] );
-
-    document.getElementById("num-bkmks-span").innerHTML = bkmks;
-    document.getElementById("num-folders-span").innerHTML = folders;
-    document.getElementById("max-depth-span").innerHTML = depth;
-
-    let orange = "rgb(200,100,0)";
-    let yellow = "rgb(200,200,0)";
 
     let canvas = document.getElementById("browser-use-time-canvas");
     let ctx = canvas.getContext("2d");
 
     let boundingRect = { originX: 40,
                          originY: 210,
-                         width: 400,
-                         height: 200 };
+                         width: 500,
+                         height: 300 };
     let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
     console.log("xScale is " + xScale );
 
     //Draw colored bar - orange for using the browser, yellow for running
     // but not being used, white for no use.
-    for (let rowNum = 0; rowNum < browserUseTimeData.length; rowNum++) {
+    for (rowNum = 0; rowNum < browserUseTimeData.length - 1; rowNum++) {
       let row = browserUseTimeData[rowNum];
-      console.info("Data point: " + (new Date(row[0])).toString() + ", " + row[1]);
+      let nextRow = browserUseTimeData[rowNum + 1];
+      let timeLength = nextRow[0] - row[0];
+      let x = xScale * ( row[0] - firstTimestamp );
+      let width = xScale * timeLength;
       switch( row[1]) {
       case 0:
         continue;
       case 1:
-        ctx.fillStyle = yellow;
+        idleTime += timeLength;
+        ctx.fillStyle = "yellow";
         break;
       case 2:
-        ctx.fillStyle = orange;
+        totalUseTime += timeLength;
+        ctx.fillStyle = "orange";
         break;
       }
-      let x = xScale * ( row[0] - firstTimestamp );
-      if (rowNum + 1 < browserUseTimeData.length) {
-        let nextX = xScale * (browserUseTimeData[rowNum + 1][0] - firstTimestamp);
-        ctx.fillRect(x, 100, nextX - x, 50);
+      ctx.fillRect(x, 200, width, 50);
+    }
+
+    // Draw line to show bookmarks over time:
+    let bkmkYScale = boundingRect.height / (maxBkmks * 2);
+    ctx.strokeStyle = "blue";
+    ctx.beginPath();
+    for (rowNum = 0; rowNum < bookmarksData.length; rowNum++) {
+      let row = bookmarksData[rowNum];
+      if (rowNum == 0) {
+        ctx.moveTo(xScale * (row[0] - firstTimestamp),
+                   (boundingRect.height/2) - bkmkYScale * row[1] + 10);
+      } else {
+        ctx.lineTo(xScale * (row[0] - firstTimestamp),
+                   (boundingRect.height/2) - bkmkYScale * row[1] + 10);
       }
     }
+    ctx.stroke();
+    // Label starting and finishing bookmarks:
+    ctx.mozTextStyle = "10pt sans serif";
+    ctx.fillStyle = "grey";
+    ctx.save();
+    ctx.translate(5, (boundingRect.height/2) -
+                  bkmkYScale * bookmarksData[0][1] + 25);
+    ctx.mozDrawText(bookmarksData[0][1] + " bookmarks");
+    ctx.restore();
+    ctx.save();
+    let lastNumBkmks = bookmarksData[bookmarksData.length -1][1];
+    ctx.translate(boundingRect.width - 80,
+                  (boundingRect.height/2) - bkmkYScale * lastNumBkmks + 25);
+    ctx.mozDrawText(lastNumBkmks + " bookmarks");
+    ctx.restore();
+
     // Add scale with dates on it
     let firstDay = new Date(firstTimestamp);
     console.info("Beginning date is " + firstDay.toString());
@@ -508,21 +608,35 @@ exports.webContent = {
     firstDay.setMinutes(0);
     firstDay.setSeconds(0);
     firstDay.setMilliseconds(0);
-    ctx.mozTextStyle = "10pt sans serif";
-    ctx.fillStyle = "black";
+    ctx.fillStyle = "grey";
+    ctx.strokeStyle = "grey";
     let dayMarker = firstDay;
     let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     while (dayMarker.getTime() < lastTimestamp) {
       let x = xScale * (dayMarker.getTime() - firstTimestamp);
       ctx.beginPath();
-      ctx.moveTo(x, 50);
-      ctx.lineTo(x, 200);
+      ctx.moveTo(x, 5);
+      ctx.lineTo(x, boundingRect.height - 5);
       ctx.stroke();
       ctx.save();
-      ctx.translate(x + 5, 55);
+      ctx.translate(x + 5, 295);
       ctx.mozDrawText(days[dayMarker.getDay()] + " " + dayMarker.getDate());
       ctx.restore();
       dayMarker.setDate( dayMarker.getDate() + 1 );
     }
+
+    // Fill in missing values from html paragraphs:
+    let getHours = function(x) {
+      return Math.round( x / 36000 ) / 100;
+    };
+    document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
+    document.getElementById("num-bkmks-span").innerHTML = bkmks;
+    document.getElementById("num-folders-span").innerHTML = folders;
+    document.getElementById("max-depth-span").innerHTML = depth;
+    document.getElementById("num-downloads").innerHTML = numDownloads;
+    document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
+    document.getElementById("num-extensions").innerHTML = numAddons;
+    document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
+    document.getElementById("idle-time-span").innerHTML = getHours(idleTime);
   }
 };

@@ -15,9 +15,6 @@ exports.experimentInfo = {
   versionNumber: 1
 };
 
-// TODO purposefully throw exception if Test Pilot version is not at least
-// 0.4.
-
 const WeekEventCodes = {
   BROWSER_START: 1,
   BROWSER_SHUTDOWN: 2,
@@ -100,7 +97,8 @@ var BookmarkObserver = {
                         this.bmsvc.bookmarksMenuFolder,
                         this.bmsvc.tagsFolder,
                         this.bmsvc.unfiledBookmarksFolder];
-
+    let lmsvc = this.lmsvc;
+    let bmsvc = this.bmsvc;
     let digIntoFolder = function(folderID, depth) {
       console.info("These are the children of " + folderID );
       let options = historyService.getNewQueryOptions();
@@ -109,15 +107,21 @@ var BookmarkObserver = {
       let result = historyService.executeQuery(query, options);
       let rootNode = result.root;
       rootNode.containerOpen = true;
-      // iterate over the immediate children of this folder, recursing
-      // into any subfolders
-      for (let i = 0; i < rootNode.childCount; i ++) {
-        let node = rootNode.getChild(i);
-        if (node.type == node.RESULT_TYPE_FOLDER) {
-          totalFolders ++;
-          digIntoFolder(node.itemId, depth + 1);
-        } else {
-          totalBookmarks ++;
+      if (rootNode.childCount > 0) {
+        // don't count livemarks
+        let folderId = bmsvc.getFolderIdForItem( rootNode.getChild(0).itemId );
+        if (!lmsvc.isLivemark(folderId)) {
+          // iterate over the immediate children of this folder, recursing
+          // into any subfolders
+          for (let i = 0; i < rootNode.childCount; i ++) {
+            let node = rootNode.getChild(i);
+            if (node.type == node.RESULT_TYPE_FOLDER) {
+              totalFolders ++;
+              digIntoFolder(node.itemId, depth + 1);
+            } else {
+              totalBookmarks ++;
+            }
+          }
         }
       }
       // close a container after using it!
@@ -192,6 +196,9 @@ var IdlenessObserver = {
   alreadyInstalled: false,
   store: null,
   idleService: null,
+  lastSelfPing: 0,
+  selfPingTimer: null,
+  selfPingInterval: 300000, // Five minutes
 
   install: function(store) {
     // See: https://developer.mozilla.org/en/nsIIdleService
@@ -203,6 +210,13 @@ var IdlenessObserver = {
       this.store = store;
       this.idleService.addIdleObserver(this, 600); // ten minutes
       this.alreadyInstalled = true;
+      // Periodically ping myself to make sure Firefox is still running...
+      // if time since last ping is ever too long, it probably means the computer
+      // shut down or something
+      this.lastSelfPing = Date.now();
+      this.selfPingTimer = Components.classes["@mozilla.org/timer;1"]
+                           .createInstance(Components.interfaces.nsITimer);
+      this.pingSelf();
     }
   },
 
@@ -210,7 +224,28 @@ var IdlenessObserver = {
     if (this.alreadyInstalled) {
       this.idleService.removeIdleObserver(this, 600);
       this.alreadyInstalled = false;
+      if (this.selfPingTimer) {
+        this.selfPingTimer.cancel();
+      }
     }
+  },
+
+  pingSelf: function() {
+    // If we miss one or more expected pings, then
+    let self = this;
+    this.selfPingTimer.initWithCallback(function() {
+      let now = Date.now();
+      let diff = now - self.lastSelfPing;
+      if (diff > self.selfPingInterval * 1.1) {
+        // TODO we may occasionally see another event recorded between
+        // 'estimatedStop' and 'now', in which case it will be in the file
+        // before either of them... account for this in processing.
+        let estimatedStop = self.lastSelfPing + self.selfPingInterval;
+        self.store.rec(WeekEventCodes.BROWSER_INACTIVE, [estimatedStop, 1]);
+        self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [now, 1]);
+      }
+      self.lastSelfPing = now;
+    }, this.selfPingInterval, 1);
   },
 
   observe: function(subject, topic, data) {
@@ -218,11 +253,18 @@ var IdlenessObserver = {
     // time in seconds.
     if (topic == 'idle') {
       console.info("User has gone idle for " + data + " seconds.");
-      this.store.rec(WeekEventCodes.BROWSER_INACTIVE, [data]);
+      let idleTime = Date.now() - data * 1000;
+      this.store.rec(WeekEventCodes.BROWSER_INACTIVE, [idleTime, 2]);
+      if (this.selfPingTimer) {
+        this.selfPingTimer.cancel();
+      }
     }
     if (topic == 'back') {
       console.info("User is back!  They were idle for " + data + " seconds.");
-      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [data]);
+      let resumeTime = Date.now();
+      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [resumeTime, 2]);
+      this.lastSelfPing = resumeTime;
+      this.pingSelf();
     }
   }
 };
@@ -436,15 +478,14 @@ require("unload").when(
     exports.handlers.onExperimentShutdown();
   });
 
-exports.webContent = {
-  inProgressHtml:
-    '<h2>A Week in the Life of a Browser</h2><p>In progress. Here is \
-     <a onclick="showRawData(2);">the complete raw data set</a>.\
-     </p><h4>This study is currently running.  It will end \
-     <span id="test-end-time"></span>. If you don\'t want to \
-     participate, please \
-    <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</h4>\
-    <canvas id="browser-use-time-canvas" width="500" height="300"></canvas> \
+const FINE_PRINT = '<p><b>The Fine Print:</b> All test data you submit will be anonymized and will not be \
+personally identifiable.  We do not collect any URLs that you visit, search terms \
+that you enter, or sites that you bookmark.  The uploaded test data is annotated \
+with your locale settings, Firefox version, Test Pilot version, operating system \
+version, and any survey answers you have provided.';
+
+const DATA_DISPLAY_HTML =
+   '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
     <div class="dataBox">\
     <h4>Facts About Your Browser Use This Week</h4>\
     <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
@@ -459,19 +500,43 @@ exports.webContent = {
     <p><b>Extensions:</b> At the beginning of the week you had \
     <span id="first-num-extensions"></span> Firefox extensions installed.  Now \
     you have <span id="num-extensions"></span> extensions installed.</p>\
-    </div>',
+    </div>';
+
+exports.webContent = {
+  inProgressHtml:
+    '<h2>A Week in the Life of a Browser</h2>\
+     <p>Thank you for joining the Test Pilot program!  You are currently in \
+     a study designed to help us understand "A Week in the Life of a Browser"!\
+     By participating in this study, you will contribute to the\
+     design of a group of key features of Firefox, including bookmarks,\
+     search, and downloads. You will help us understand what features are used \
+     often and how trends in their use are changing over time.</p>\
+     <p>There is no need to do anything differently; just browse normally, and Test \
+     Pilot will record certain key events.  Don\'t worry: we never record any \
+     URLs that are loaded or restored, or any words typed in the search bar.\
+     You can <a onclick="showRawData(2);">click here to see</a> exactly what data \
+     has been collected, or check out the graphs below for a summary.</p>\
+     <p>The study will end <span id="test-end-time"></span>. If you don\'t want to \
+     participate, please <a href="chrome://testpilot/content/status-quit.html?eid=2">\
+     click here to quit</a>.</p>\
+     <p>Otherwise, buckle up and get ready for the flight!</p>'
+    + DATA_DISPLAY_HTML + FINE_PRINT,
   completedHtml:
-    '<h2>A Week in the Life of a Browser</h2><p>Completed! Here is \
-     <a onclick="showRawData(2);">the complete raw data set</a>.</p>\
-     <p>This test will automatically start again in 60 days.  If you would \
-     prefer to have Test Pilot submit your data automatically next time, \
+    '<h2>A Week in the Life of a Browser</h2><p>Greetings!  The &quot;a week in the \
+     life of a browser&quot; study has just completed!  The last step is to submit \
+     the data. \
+     You can <a onclick="showRawData(2);">click here to see</a> the complete raw \
+     data set, just as it will be uploaded to Mozilla.</p>\
+     <p>This test will automatically recur every 60 days for up to one year.\
+     If you would  prefer to have Test Pilot submit your data automatically next time, \
      instead of asking you, you can check the box below:<br/>\
      <input type="checkbox" id="always-submit-checkbox">\
      Automatically submit data for this test from now on<br/>\
-     If you don\'t want to upload your data, please \
-     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</h4>\
-     <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png"> <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a></span></div>\
-     ',
+     <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
+     <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
+     </span></div><p>If you don\'t want to upload your data, please \
+     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>\
+     ' + DATA_DISPLAY_HTML + FINE_PRINT,
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
   onPageLoad: function(experiment, document, graphUtils) {
     let rawData = experiment.dataStoreAsJSON;
@@ -503,7 +568,9 @@ exports.webContent = {
         browserUseTimeData.push( [row.timestamp, 2]);
       break;
       case WeekEventCodes.BROWSER_INACTIVE:
-        browserUseTimeData.push( [row.timestamp, 1]);
+        // note - inactivation events have a more accurate timestamp in their
+        // 1st data field - use that instead of row.timestamp.
+        browserUseTimeData.push( [row.data1, 1]);
       break;
       case WeekEventCodes.BOOKMARK_STATUS:
         bkmks = row.data1;
@@ -535,6 +602,7 @@ exports.webContent = {
     }
     let lastTimestamp = (new Date()).getTime();
     browserUseTimeData.push( [lastTimestamp, 2] );
+    bookmarksData.push([lastTimestamp, bkmks]);
 
     let canvas = document.getElementById("browser-use-time-canvas");
     let ctx = canvas.getContext("2d");
@@ -566,8 +634,24 @@ exports.webContent = {
         ctx.fillStyle = "orange";
         break;
       }
-      ctx.fillRect(x, 200, width, 50);
+      ctx.fillRect(x, 180, width, 50);
     }
+    // Add legend to explain colored bar:
+    ctx.strokeStyle ="black";
+    ctx.fillStyle = "orange";
+    ctx.fillRect(5, 235, 15, 15);
+    ctx.strokeRect(5, 235, 15, 15);
+    ctx.save();
+    ctx.translate(25, 250);
+    ctx.mozDrawText("= Firefox actively running");
+    ctx.restore();
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(5, 255, 15, 15);
+    ctx.strokeRect(5, 255, 15, 15);
+    ctx.save();
+    ctx.translate(25, 270);
+    ctx.mozDrawText("= Firefox running but idle");
+    ctx.restore();
 
     // Draw line to show bookmarks over time:
     let bkmkYScale = boundingRect.height / (maxBkmks * 2);

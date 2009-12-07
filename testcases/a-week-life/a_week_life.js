@@ -214,6 +214,7 @@ var IdlenessObserver = {
       // if time since last ping is ever too long, it probably means the computer
       // shut down or something
       this.lastSelfPing = Date.now();
+      console.info("lastSelfPing + interval is " + (this.lastSelfPing + this.selfPingInterval));
       this.selfPingTimer = Components.classes["@mozilla.org/timer;1"]
                            .createInstance(Components.interfaces.nsITimer);
       this.pingSelf();
@@ -241,8 +242,11 @@ var IdlenessObserver = {
         // 'estimatedStop' and 'now', in which case it will be in the file
         // before either of them... account for this in processing.
         let estimatedStop = self.lastSelfPing + self.selfPingInterval;
-        self.store.rec(WeekEventCodes.BROWSER_INACTIVE, [estimatedStop, 1]);
-        self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [now, 1]);
+        // backdate my own timestamp:
+        self.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
+                                data1: 1, data2: 0, data3: 0,
+                                timestamp: estimatedStop});
+        self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [1]);
       }
       self.lastSelfPing = now;
     }, this.selfPingInterval, 1);
@@ -254,6 +258,9 @@ var IdlenessObserver = {
     if (topic == 'idle') {
       console.info("User has gone idle for " + data + " seconds.");
       let idleTime = Date.now() - data * 1000;
+      self.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
+                              data1: 2, data2: 0, data3: 0,
+                              timestamp: idleTime});
       this.store.rec(WeekEventCodes.BROWSER_INACTIVE, [idleTime, 2]);
       if (this.selfPingTimer) {
         this.selfPingTimer.cancel();
@@ -261,9 +268,8 @@ var IdlenessObserver = {
     }
     if (topic == 'back') {
       console.info("User is back!  They were idle for " + data + " seconds.");
-      let resumeTime = Date.now();
-      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [resumeTime, 2]);
-      this.lastSelfPing = resumeTime;
+      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [2]);
+      this.lastSelfPing = Date.now();
       this.pingSelf();
     }
   }
@@ -568,9 +574,7 @@ exports.webContent = {
         browserUseTimeData.push( [row.timestamp, 2]);
       break;
       case WeekEventCodes.BROWSER_INACTIVE:
-        // note - inactivation events have a more accurate timestamp in their
-        // 1st data field - use that instead of row.timestamp.
-        browserUseTimeData.push( [row.data1, 1]);
+        browserUseTimeData.push( [row.timestamp, 1]);
       break;
       case WeekEventCodes.BOOKMARK_STATUS:
         bkmks = row.data1;
@@ -620,6 +624,8 @@ exports.webContent = {
       let row = browserUseTimeData[rowNum];
       let nextRow = browserUseTimeData[rowNum + 1];
       let timeLength = nextRow[0] - row[0];
+      console.info("This row's timestamp is " + row[0]);
+      console.info("calculated timeLength as " + timeLength);
       let x = xScale * ( row[0] - firstTimestamp );
       let width = xScale * timeLength;
       switch( row[1]) {
@@ -641,13 +647,14 @@ exports.webContent = {
     ctx.fillStyle = "orange";
     ctx.fillRect(5, 235, 15, 15);
     ctx.strokeRect(5, 235, 15, 15);
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(5, 255, 15, 15);
+    ctx.strokeRect(5, 255, 15, 15);
+    ctx.fillStyle = "grey";
     ctx.save();
     ctx.translate(25, 250);
     ctx.mozDrawText("= Firefox actively running");
     ctx.restore();
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(5, 255, 15, 15);
-    ctx.strokeRect(5, 255, 15, 15);
     ctx.save();
     ctx.translate(25, 270);
     ctx.mozDrawText("= Firefox running but idle");

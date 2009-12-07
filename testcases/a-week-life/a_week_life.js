@@ -72,7 +72,6 @@ var BookmarkObserver = {
      https://developer.mozilla.org/en/nsINavBookmarkObserver and
      https://developer.mozilla.org/en/nsINavBookmarksService
       */
-    console.info("Is bookmark observer already installed? " + this.alreadyInstalled);
     if (!this.alreadyInstalled) {
       console.info("Adding bookmark observer.");
       this.bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
@@ -100,7 +99,6 @@ var BookmarkObserver = {
     let lmsvc = this.lmsvc;
     let bmsvc = this.bmsvc;
     let digIntoFolder = function(folderID, depth) {
-      console.info("These are the children of " + folderID );
       let options = historyService.getNewQueryOptions();
       let query = historyService.getNewQuery();
       query.setFolders([folderID], 1);
@@ -202,7 +200,6 @@ var IdlenessObserver = {
 
   install: function(store) {
     // See: https://developer.mozilla.org/en/nsIIdleService
-    console.info("Is idleness observer already installed? " + this.alreadyInstalled);
     if (!this.alreadyInstalled) {
       console.info("Adding idleness observer.");
       this.idleService = Cc["@mozilla.org/widget/idleservice;1"]
@@ -214,7 +211,6 @@ var IdlenessObserver = {
       // if time since last ping is ever too long, it probably means the computer
       // shut down or something
       this.lastSelfPing = Date.now();
-      console.info("lastSelfPing + interval is " + (this.lastSelfPing + this.selfPingInterval));
       this.selfPingTimer = Components.classes["@mozilla.org/timer;1"]
                            .createInstance(Components.interfaces.nsITimer);
       this.pingSelf();
@@ -281,7 +277,6 @@ var ExtensionObserver = {
   obsService: null,
 
   install: function(store) {
-    console.info("Is extension observer already installed? " + this.alreadyInstalled);
     if (!this.alreadyInstalled) {
       console.info("Adding extension observer.");
       this.obsService = Cc["@mozilla.org/observer-service;1"]
@@ -345,7 +340,6 @@ var DownloadsObserver = {
   downloadManager: null,
 
   install: function(store) {
-    console.info("Is bookmark observer already installed? " + this.alreadyInstalled);
     if (!this.alreadyInstalled) {
       console.info("Adding downloads observer.");
       this.obsService = Cc["@mozilla.org/observer-service;1"]
@@ -624,8 +618,6 @@ exports.webContent = {
       let row = browserUseTimeData[rowNum];
       let nextRow = browserUseTimeData[rowNum + 1];
       let timeLength = nextRow[0] - row[0];
-      console.info("This row's timestamp is " + row[0]);
-      console.info("calculated timeLength as " + timeLength);
       let x = xScale * ( row[0] - firstTimestamp );
       let width = xScale * timeLength;
       switch( row[1]) {

@@ -92,7 +92,6 @@ exports.webContent = {
     let sumAngle = 0;
     for (i = 0; i < rawData.length; i++) {
       let angle = 2*Math.PI * rawData[i].frequency / total;
-      dump("Angle is " + angle + "\n");
       ctx.fillStyle = colors[i % (colors.length)];
 
       ctx.beginPath();

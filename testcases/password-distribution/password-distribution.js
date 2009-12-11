@@ -62,12 +62,12 @@ exports.webContent = {
     <a href="chrome://testpilot/content/status-quit.html?eid=3">click \
     here to quit</a>.</p>\
     <p><a onclick="showRawData(3);">Click here for the raw data set</a>.</p>\
-    <canvas id="passwd-pie-canvas" width="500" height="350"></canvas>\
+    <canvas id="passwd-pie-canvas" width="500" height="300"></canvas>\
                   ',
   completedHtml: "",
   upcomingHtml: "",
   onPageLoad: function(experiment, document, graphUtils) {
-    let origin  = { x: 250, y: 175 };
+    let origin  = { x: 110, y: 125 };
     let radius = 100;
     let rawData = experiment.dataStoreAsJSON;
     if (rawData.length == 0) {
@@ -86,9 +86,12 @@ exports.webContent = {
 
     let colors = ["red", "blue", "green", "yellow", "black", "orange",
                   "purple", "white", "pink", "grey"];
+    let ordinal = ["Your Most Common Password",
+                   "Second Most Common",
+                   "Third Most Common"];
     // TODO algorithmically generate colors so we have an infinite number
     // with high contrast!
-
+    ctx.mozTextStyle = "12pt sans serif";
     let sumAngle = 0;
     for (i = 0; i < rawData.length; i++) {
       let angle = 2*Math.PI * rawData[i].frequency / total;
@@ -104,6 +107,26 @@ exports.webContent = {
       ctx.stroke();
 
       sumAngle += angle;
+
+      if (i < 3) {
+        ctx.mozTextStyle = "10pt sans serif";
+        ctx.fillStyle = colors[i];
+        ctx.fillRect( 220, 10 + 30 * i, 20, 20);
+        ctx.strokeRect( 220, 10 + 30 * i, 20, 20);
+        ctx.fillStyle = "black";
+        ctx.save();
+        ctx.translate( 245, 25 + 30 * i );
+        let sites = rawData[i].frequency;
+        let percent = Math.round( 100 * sites /total);
+        if (sites == 1) {
+          sites = sites + " site";
+        } else {
+          sites = sites + " sites";
+        }
+        let line1 = ordinal[i] + ": " + sites + " (" + percent + "%)";
+        ctx.mozDrawText( line1 );
+        ctx.restore();
+      }
     }
   }
 };

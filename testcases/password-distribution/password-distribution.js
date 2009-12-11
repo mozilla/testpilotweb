@@ -30,8 +30,9 @@ exports.handlers = {
   onAppStartup: function() {},
   onAppShutdown: function() {},
   onExperimentStartup: function(store) {
+    store.wipeAllData();
     // Code by Mike Connor:
-    var logins = Cc["@mozilla.org/loginmanager;1"]
+    var logins = Cc["@mozilla.org/login-manager;1"]
                    .getService(Ci.nsILoginManager).getAllLogins({});
     var counts = {}, output = [];
     for (var i = 0;i < logins.length;i++) {
@@ -91,13 +92,14 @@ exports.webContent = {
     let sumAngle = 0;
     for (i = 0; i < rawData.length; i++) {
       let angle = 2*Math.PI * rawData[i].frequency / total;
+      dump("Angle is " + angle + "\n");
       ctx.fillStyle = colors[i % (colors.length)];
 
       ctx.beginPath();
       ctx.moveTo( origin.x, origin.y);
       ctx.lineTo( origin.x + radius * Math.cos( sumAngle ),
-                  origin.y - radius * Math.sin( sumAngle ) );
-      ctx.arc( origin.x, origin.y, radius, 0, angle, false);
+                  origin.y + radius * Math.sin( sumAngle ) );
+      ctx.arc( origin.x, origin.y, radius, sumAngle, sumAngle + angle, false);
       ctx.lineTo( origin.x, origin.y );
       ctx.fill();
       ctx.stroke();

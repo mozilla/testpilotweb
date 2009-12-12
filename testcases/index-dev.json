@@ -5,5 +5,8 @@
                  {"name": "Pilot Background Survey",
                   "filename": "pilot-background-survey.js"},
                  {"name": "Password Distribution Study",
-                  "filename": "password-distribution/password-distribution.js"}
+                  "filename": "password-distribution/password-distribution.js"},
+                 {"name": "Password Management Survey",
+                  "filename": "password-distribution/password-survey.js"}
+
 ]}

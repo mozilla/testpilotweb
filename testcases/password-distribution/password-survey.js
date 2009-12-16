@@ -6,7 +6,7 @@ const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
   surveyId: "account_password_survey",
-  surveyName: "Managing Accounts and Passwords - Survey",
+  surveyName: "Accounts and Passwords Survey",
   uploadWithExperiment: 3,
   surveyQuestions: [
     {question: "Do you share your computer with others?",

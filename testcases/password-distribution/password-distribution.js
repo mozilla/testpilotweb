@@ -81,7 +81,7 @@ exports.webContent = {
     For this study, you will contribute to the <a href="http://mozillalabs.com/weave/">Weave project</a>\
     from <a href="http://mozillalabs.com">Mozilla Labs</a>.\
     In order to understand how people use the Firefox to manage accounts \
-    and passwords online, we will simplly count how many unique passwords you \
+    and passwords online, we will simply count how many unique passwords you \
     use and the number of times you reuse each password. Don\'t worry: no actual \
     passwords will be collected.</p>\
     This study will be short and it is also associated with a survey. Please \

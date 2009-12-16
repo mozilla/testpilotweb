@@ -4,9 +4,9 @@ const TYPE_DOUBLE = 1;
 exports.experimentInfo = {
   startDate: null,
   duration: 1,
-  testName: "Password Frequency Study",
+  testName: "Accounts and Passwords Study",
   testId: 3,
-  testInfoUrl: "",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/account-password.html",
   testResultsUrl: "",
   optInRequired: false,
   recursAutomatically: false,
@@ -55,26 +55,81 @@ exports.handlers = {
   onExitPrivateBrowsing: function() {}
 };
 
+const FINE_PRINT = '<p><strong>The fine print:</strong></p>\
+    <ul>\
+    <li>At the end of the test, you will be able to choose whether to submit\
+    your test data or not.</li>\
+    <li>All test data you submit will be anonymized and will not be personally \
+    identifiable.</li>\
+    <li>If you don\'t want to participate, please \
+    <a href="chrome://testpilot/content/status-quit.html?eid=3">click \
+    here to quit the study</a>.</li></ul>';
+
+const PIE_CHART = '<p><a onclick="showRawData(3);">\
+    Click here to see the raw data set</a>,\
+    exactly as it will be transmitted to Mozilla.</p>\
+    <canvas id="passwd-pie-canvas" width="500" height="300"></canvas>';
+
 exports.webContent = {
   inProgressHtml: '\
-    <h3>Thank you for participating in the Password Distribution study!</h3>\
-    <p>If you don\'t want to participate, please \
-    <a href="chrome://testpilot/content/status-quit.html?eid=3">click \
-    here to quit</a>.</p>\
-    <p><a onclick="showRawData(3);">Click here for the raw data set</a>.</p>\
-    <canvas id="passwd-pie-canvas" width="500" height="300"></canvas>\
-                  ',
-  completedHtml:
-    '<h3>Thank you for completing the Password Distribution study!</h3>\
-     <p id="next-step-here"></p>\
-     <p>If you don\'t want to participate, please \
-     <a href="chrome://testpilot/content/status-quit.html?eid=3">click \
-     here to quit</a>.</p>\
-     <p><a onclick="showRawData(3);">Click here for the raw data set</a>.</p>\
-     <canvas id="passwd-pie-canvas" width="500" height="300"></canvas>\
-     <p>\
-     ',
+    <h3>Thank you for participating in the \
+    <a href="https://testpilot.mozillalabs.com/testcases/account-password.html">\
+    Accounts and Passwords</a> study!</h3>\
+    <p>Good day, Test  Pilot!</p>\
+    <p>You are currently in a study helping design better ways for you to \
+    manage online accounts and passwords.</p>\
+    For this study, you will contribute to the <a href="http://mozillalabs.com/weave/">Weave project</a>\
+    from <a href="http://mozillalabs.com">Mozilla Labs</a>.\
+    In order to understand how people use the Firefox to manage accounts \
+    and passwords online, we will simplly count how many unique passwords you \
+    use and the number of times you reuse each password. Don\'t worry: no actual \
+    passwords will be collected.</p>\
+    This study will be short and it is also associated with a survey. Please \
+    <a href="chrome://testpilot/content/take-survey.html?eid=account_password_survey">\
+    check out the survey</a> before you submit the data!</p>'
+    + FINE_PRINT + PIE_CHART,
+
+  completedHtml: '\
+     <h3>Thank you for completing the \
+     <a href="https://testpilot.mozillalabs.com/testcases/account-password.html">\
+     Accounts and Passwords</a> study!</h3>\
+     <p id="next-step-here"></p><br/>'
+    + FINE_PRINT + PIE_CHART,
+
   upcomingHtml: "",
+
+  _unifiedUpload: function(experiment, document, answers) {
+    /* glom together survey results with data collected from study.
+     * This is a hack because the needed feature is missing from the
+     * extension core. */
+    let uploadStatus = document.getElementById("upload-status");
+    uploadStatus.innerHTML = "Now uploading data...";
+
+    let experimentData = experiment._prependMetadataToCSV();
+    let hack = {
+      _prependMetadataToCSV: function() {
+        return experimentData + "\npassword_survey_answers\n" + answers;
+      }
+    };
+    hack.__proto__ = experiment;
+
+    hack.upload(function(success) {
+      if (success) {
+        uploadStatus.innerHTML = "<h2>Thank you for submitting your data!</h2>"
+          + "<p>This study is no longer collecting data, and the data that "
+          + "was collected has been deleted from your computer.  You can now "
+          + "close this tab or navigate away from this page.</p>"
+          + "<p>The results of the study will be available soon.  When they "
+          + "are ready for viewing, Test Pilot will let you know.";
+      } else {
+        uploadStatus.innerHTML = "<p>Oops!  There was an error connecting to "
+          + "the Mozilla servers.  Maybe your network connection is down?</p>"
+          + "<p>Test Pilot will retry automatically, so it's OK to close this"
+          + " page now.</p>";
+      }
+    });
+  },
+
   onPageLoad: function(experiment, document, graphUtils) {
     this._drawPieChart(experiment, document, graphUtils);
     let nextStep = document.getElementById("next-step-here");
@@ -89,13 +144,20 @@ exports.webContent = {
       let prefs = Cc["@mozilla.org/preferences-service;1"]
                     .getService(Ci.nsIPrefService);
       prefs = prefs.getBranch("extensions.testpilot.");
+
       if (prefs.prefHasUserValue(prefName)) {
         nextStep.innerHTML = '<div class="home_callout_continue">\
   <img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
   <span id="upload-status"><a id="submit-link">Submit your data \
           &raquo;</a></span></div>';
-
-        // override upload
+        let self = this;
+        let answers = prefs.getCharPref(prefName);
+        let uploadLink = document.getElementById("submit-link");
+        uploadLink.addEventListener("click", function() {
+                                      self._unifiedUpload(experiment,
+                                                          document,
+                                                          answers);
+                                    }, false);
       } else {
         nextStep.innerHTML = 'Please take a moment to fill out \
           <a href="chrome://testpilot/content/take-survey.html?eid=account_password_survey">\

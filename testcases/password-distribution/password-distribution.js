@@ -64,9 +64,47 @@ exports.webContent = {
     <p><a onclick="showRawData(3);">Click here for the raw data set</a>.</p>\
     <canvas id="passwd-pie-canvas" width="500" height="300"></canvas>\
                   ',
-  completedHtml: "",
+  completedHtml:
+    '<h3>Thank you for completing the Password Distribution study!</h3>\
+     <p id="next-step-here"></p>\
+     <p>If you don\'t want to participate, please \
+     <a href="chrome://testpilot/content/status-quit.html?eid=3">click \
+     here to quit</a>.</p>\
+     <p><a onclick="showRawData(3);">Click here for the raw data set</a>.</p>\
+     <canvas id="passwd-pie-canvas" width="500" height="300"></canvas>\
+     <p>\
+     ',
   upcomingHtml: "",
   onPageLoad: function(experiment, document, graphUtils) {
+    this._drawPieChart(experiment, document, graphUtils);
+    let nextStep = document.getElementById("next-step-here");
+    if (nextStep) {
+      // A hack to get study results and survey submitted together.  First,
+      // check the db contents to see whether survey is complete or not.  If
+      // it is, put the submit button.  If it is not, put the link to the
+      // survey.
+
+      // The survey results are stored in:
+      let prefName = "surveyAnswers.account_password_survey";
+      let prefs = Cc["@mozilla.org/preferences-service;1"]
+                    .getService(Ci.nsIPrefService);
+      prefs = prefs.getBranch("extensions.testpilot.");
+      if (prefs.prefHasUserValue(prefName)) {
+        nextStep.innerHTML = '<div class="home_callout_continue">\
+  <img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
+  <span id="upload-status"><a id="submit-link">Submit your data \
+          &raquo;</a></span></div>';
+
+        // override upload
+      } else {
+        nextStep.innerHTML = 'Please take a moment to fill out \
+          <a href="chrome://testpilot/content/take-survey.html?eid=account_password_survey">\
+          this survey</a> about how you manage your passwords.';
+      }
+    }
+  },
+
+  _drawPieChart: function(experiment, document, graphUtils) {
     let origin  = { x: 110, y: 125 };
     let radius = 100;
     let rawData = experiment.dataStoreAsJSON;

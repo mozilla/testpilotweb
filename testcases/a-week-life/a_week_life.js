@@ -12,7 +12,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
-  versionNumber: 1
+  versionNumber: 2
 };
 
 const WeekEventCodes = {
@@ -254,7 +254,7 @@ var IdlenessObserver = {
     if (topic == 'idle') {
       console.info("User has gone idle for " + data + " seconds.");
       let idleTime = Date.now() - data * 1000;
-      self.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
+      this.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
                               data1: 2, data2: 0, data3: 0,
                               timestamp: idleTime});
       this.store.rec(WeekEventCodes.BROWSER_INACTIVE, [idleTime, 2]);

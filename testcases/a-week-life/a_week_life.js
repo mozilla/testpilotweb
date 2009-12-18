@@ -12,7 +12,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
-  versionNumber: 2
+  versionNumber: 3
 };
 
 const WeekEventCodes = {
@@ -191,6 +191,13 @@ var BookmarkObserver = {
 };
 
 var IdlenessObserver = {
+  /* Uses nsIIdleService, see
+   * https://developer.mozilla.org/en/nsIIdleService
+   * However, that has two flaws: First, it is OS-wide, not Firefox-specific.
+   * Second, it won't trigger if you close your laptop lid before the
+   * allotted time is up.  To catch this second case, we use an additional
+   * method: self-pinging on a timer.
+   */
   alreadyInstalled: false,
   store: null,
   idleService: null,
@@ -199,13 +206,13 @@ var IdlenessObserver = {
   selfPingInterval: 300000, // Five minutes
 
   install: function(store) {
-    // See: https://developer.mozilla.org/en/nsIIdleService
     if (!this.alreadyInstalled) {
       console.info("Adding idleness observer.");
       this.idleService = Cc["@mozilla.org/widget/idleservice;1"]
        .getService(Ci.nsIIdleService);
       this.store = store;
-      this.idleService.addIdleObserver(this, 600); // ten minutes
+      // addIdleObserver takes seconds, not ms.  600s = 10 minutes.
+      this.idleService.addIdleObserver(this, 600);
       this.alreadyInstalled = true;
       // Periodically ping myself to make sure Firefox is still running...
       // if time since last ping is ever too long, it probably means the computer
@@ -228,7 +235,7 @@ var IdlenessObserver = {
   },
 
   pingSelf: function() {
-    // If we miss one or more expected pings, then
+    // If we miss one or more expected pings, then record idle event.
     let self = this;
     this.selfPingTimer.initWithCallback(function() {
       let now = Date.now();
@@ -250,20 +257,19 @@ var IdlenessObserver = {
 
   observe: function(subject, topic, data) {
     // Subject is nsIIdleService. Topic is 'idle' or 'back'.  Data is elapsed
-    // time in seconds.
+    // time in *milliseconds* (not seconds like addIdleObserver).
     if (topic == 'idle') {
-      console.info("User has gone idle for " + data + " seconds.");
-      let idleTime = Date.now() - data * 1000;
+      console.info("User has gone idle for " + data + " milliseconds.");
+      let idleTime = Date.now() - parseInt(data);
       this.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
                               data1: 2, data2: 0, data3: 0,
                               timestamp: idleTime});
-      this.store.rec(WeekEventCodes.BROWSER_INACTIVE, [idleTime, 2]);
       if (this.selfPingTimer) {
         this.selfPingTimer.cancel();
       }
     }
     if (topic == 'back') {
-      console.info("User is back!  They were idle for " + data + " seconds.");
+      console.info("User is back!  Was idle for " + data + " milliseconds.");
       this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [2]);
       this.lastSelfPing = Date.now();
       this.pingSelf();

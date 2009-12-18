@@ -219,9 +219,9 @@ exports.webContent = {
         let sites = rawData[i].frequency;
         let percent = Math.round( 100 * sites /total);
         if (sites == 1) {
-          sites = sites + " site";
+          sites = sites + " page";
         } else {
-          sites = sites + " sites";
+          sites = sites + " pages";
         }
         let line1 = ordinal[i] + ": " + sites + " (" + percent + "%)";
         ctx.mozDrawText( line1 );

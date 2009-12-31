@@ -36,12 +36,52 @@
 			
 			<h2> Test Data </h2>
 			<p>Anyone is welcome to download and use the aggregated data files below.</p>
+
+			<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">N (Number of users)</span></td><td><span class="headers">Description</span></td></tr>
+<tr><td><a href="week-life-stats-10.csv">week-life-stats-10.csv</a></td><td>67k</td><td>686 users</td><td>10 percent sample</td></tr>
+<tr><td><a href="week-life-stats-30.csv">week-life-stats-30.csv</a></td><td>199k</td><td>2058 users</td><td>30 percent sample</td></tr>
+<tr><td><a href="week-life-stats-50.csv">week-life-stats-50.csv</a></td><td>331k</td><td>3430 users</td><td>50 percent sample</td></tr>
+<tr><td><a href="week-life-stats-70.csv">week-life-stats-70.csv</a></td><td>465k</td><td>4802 users</td><td>70 percent sample</td></tr>
+</table>
+                  
 			
 			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
 			
 			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
 			
 			<h3>How to read the data</h3>
+                 <p>Data is in CSV format.  The first line of the file is the header and gives the names of all the columns.   After that, each line contains a summary of the data for a single user.  Here are the column names and the explanation of each one:</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+  <tr><td>how_long_used_firefox</td><td>Response to the survey question: How long have you used Firefox?  (See below for response codes)</td></tr>
+  <tr><td>skill_level</td><td>Response to the survey question: How would you describe your computer/web skill level?  The answer is on a scale from 1 (least skilled) to 10 (most skilled).  A value of -1 means the user declined to answer.</td></tr>
+  <tr><td>time_on_web</td><td>Response to the survey question: How much time do you spend on the Web per day?  (See below for response codes)</td></tr>
+  <tr><td>age</td><td>Response to the survey question: How old are you?  (See below for response codes)</td></tr>
+  <tr><td>sex</td><td>Response to the survey question: Your gender?  (See below for response codes)</td></tr>
+  <tr><td>fx_version</td><td>String describing the version of Firefox user was running, e.g. "3.5.5"</td></tr>
+  <tr><td>os</td><td>String describing the operating system the user was running, e.g. "WINNT Windows NT 5.1"</td></tr>
+  <tr><td>locale</td><td>String describing the Firefox language/locale setting, e.g. "en-US"</td></tr>
+  <tr><td>num_extensions</td><td>Number of add-ons the user has installed</td></tr>
+  <tr><td>num_downloads</td><td>Number of files that the user downloaded during the week of the study.  (The same file downloaded multiple times will be counted each time.)</td></tr>
+  <tr><td>bookmarks</td><td>Number of bookmarks that the user had at the end of the week of the study.  Note that livemark folders / RSS feeds do not contribute to this total.  However, due to a bug, separators and smart folders do get added to this total, meaning that it is slightly higher (6-7 higher in most cases) than the true count.</td></tr>
+  <tr><td>folders</td><td>Number of bookmark <i>folders</i> that the user's bookmarks are organized into, at the end of the week of the study</td></tr>
+  <tr><td>depth</td><td>Maximum depth of bookmark folder <i>hierarchy</i> that the user's bookmarks are organized into, at the end of the week.  E.g. if the value is 2, it means the user has at least one folder inside another folder.</td></tr>
+  <tr><td>num_sessions</td><td>Number of separate Firefox sessions the user ran during the week.  Increases by one each time the user starts up Firefox.</td></tr>
+  <tr><td>avg_session_length</td><td>A number of milliseconds giving the average length of those Firefox sessions, e.g. milliseconds between startup and shutdown events.  (Note that if no shutdown event was logged, the next startup event will be used as the ending time of the session; this may not be accurate especially in case where Firefox may have crashed.)</td></tr>
+  <tr><td>total_session_length</td><td>Total number of milliseconds of all sessions put together: equal to num_sessions multiplied by avg_session_length.</td></tr>
+</table>
+
+<p>The survey questions are mutiple-choice, so the value in those columns will be an index into the choices.  To interpret those indices, use this table:</p>
+
+<table>
+<tr><td>Survey Question</td><td>-1</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+<tr><td>how_long_used_firefox</td><td>(Decline to answer)<td>Less than a year</td><td>1-2 years</td><td>2-4 years</td><td>4 years or more</td><td>Don't remember</td></tr>
+<tr><td>time_on_web</td><td>(Decline to answer)</td><td>Less than 1 hour</td><td>1 to 4 hours</td><td>4 to 8 hours</td><td>8 to 12 hours</td><td>More than 12 hours</td></tr>
+<tr><td>sex</td><td>(Decline to answer)</td><td>Male</td><td>Female</td></tr>
+<tr><td>age</td><td>(Decline to answer)</td><td>Under 18</td><td>18 to 25</td><td>26 to 35</td><td>36 to 45</td><td>46 to 55</td><td>Over 55</td></tr>
+</table>
 			
 			<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
 			

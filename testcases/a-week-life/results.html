@@ -3,31 +3,81 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
-	<title>Test Pilot: Tab Open/Close Study: Results</title>
+	<title>Test Pilot: A Week in the Life of a Browser: Analysis</title>
 </head>
 <body>
 
 <div id="container">
 
 	<div id="content-standalone">
-	          <p><a href="../../index.html">Home</a> &gt; <a href="../index.html">Test Cases</a> &gt; <a href="../a-week-life.html">A Week in the Life of a Browser</a> &gt; Results</p>
+	          <p><a href="../../index.html">Home</a> &gt; <a href="../index.html">Test Cases</a> &gt; <a href="../a-week-life.html">A Week in the Life of a Browser</a> &gt; Analysis</p>
 
 		<div id="intro">
 		
-			<h1>A Week in the Life Study: Results</h1>
+			<h1>A Week in the Life of a Browser: Analysis</h1>
 			
-			<p>These are some results from the <a href="https://testpilot.mozillalabs.com/testcases/a-week-life.html">A Week in the Life of a Browser</a> Test Pilot study.  The graphs on this page are based on the data submissions we received from approximately N users of Firefox during the period between Date and Date.</p>
+			<p>These are some results from the <a href="https://testpilot.mozillalabs.com/testcases/a-week-life.html">A Week in the Life of a Browser</a>.  The graphs on this page are based on the data submissions we received from Test Pilots of Firefox 3.5 and above versions, since December 13rd,2009.</p>
+		  <p> These analysis are generated based on early raw data, and they may not be super definitive or representative for all Firefox users. We are looking for help to firm it up! Please join the <a href="http://groups.google.com/group/mozilla-labs-testpilot"> Test Pilot discussion group </a>if you have any suggestions or questions. </p>
+		  
 			<p>Graph images are thumbnails: click any one to see it full-size.</p>
 			<p>Contents:</p>
-                        <ol>
+		        <b>Bookmark and bookmark folders  </b>
+		          <p><i>Sample size:approximately 5,000 submissions  </i></p>
+		          <p><i>Time: December 13 - 21, 2009   </i></p>
+			<ol><li><a href="#bookmark">Bookmarks</a></li>
+			  <li><a href="#folder">Bookmark folders</a></li>
+			  <li><a href="#depth">Bookmark folder depth</a></li>
                         </ol>
 
-			<p>If you would like to do your own analaysis of the data from this study, you can <a href="aggregated-data.html">download samples of it here</a>.
+			<b>Browsing session length </b>
+		          <p><i>Sample size:approximately 6,000 submissions  </i></p>
+		          <p><i>Time: December 13 - 22, 2009   </i></p>
+			<ol>Coming soon!
+                        </ol>
+
+			<p>If you would like to do your own analaysis of the data from this tab study, you can <a href="aggregated-data.html">download samples of it here</a>.
 		</div>
 
 
-		<div id="data"> 
-                </div>
+		<div id="data">
+
+		  <h2> Bookmark and Bookmark folders </h2>
+		  <p> The following graph illustrates the distribution and amounts of bookmarks and bookmark folders people use in Firefox, and the data sample is about 85% of <a href="http://bit.ly/5XB50O"> total 4913 submissions </a> of <a href="https://testpilot.mozillalabs.com/testcases/a-week-life.html">the study</a>.  </p>
+
+
+               <image> 85% </image>
+
+		  <p>The x-axis: The amount of bookmarks people use.</p>
+                  <p>The y-axis:The amount of bookmark folders people use </p>
+                  <p>The unit: Count of submissions. e.g: Each blue hexagon represents 20 submissions and each red hexagon represents 140 submissions.  </p>
+		  
+<h3><a name="bookmark">Question: How many bookmarks do people use?</a></h3>
+<p class="callout"><a href="graphs/min-max-avg-tabs-open.png"><img src="graphs/min-max-avg-tabs-open-thumb.png"/></a></p>
+<p>The x-axis:.</p>
+<p>The y-axis: </p>
+		  
+		  <p> </p>
+
+
+<h3><a name="folder">Question: How many folders do people use to manage their bookmarks?</a></h3>
+<p class="callout"><a href="graphs/tab-lifespans.png"><img src="graphs/tab-lifespans-thumb.png"/></a></p>
+<p>The x-axis: The amount of bookmarks folders.</p>
+<p>The y-axis: Count of submissions, e.g. the second column means over 350 submissions indicate that there are 2 bookmark folders are existed. </p>
+
+		  <p> Note: When people start to use Firefox, the browser has already created a folder "Mozilla Firefox" for the user. </p>
+<p>In this case, if people do not delete this folder, the amount of folders created by users themselves will be N-1.  E.g.  the second column means over  350 submissions indicate that there are 2 bookmark folders are existed, and 1 is created by user themselves or through other applications, if users do not delete the "Mozilla Firefox" folder.</p>
+
+
+<h3> <a name="depth"> Question: How deep are those folders that people use to manage their bookmarks? </a></h3>
+<p class="callout"><a href="graphs/close-switch-stats.png"><img src="graphs/close-switch-stats-thumb.png"/></a></p>
+<p>The x-axis: The amount of bookmark folder level.
+<p>The y-axis:Count of submissions, e.g. the first column means over 1500 submissions indicate that there are only 1 level of folders and no sub folders within them. </p>
+
+                 <p>Note: When people start to use  Firefox, the browser has already created a folder "Mozilla Firefox" for  the user. </p>
+<p>In this case, more than 50% people have at least one subfolders to manage bookmarks, and some people have 6 layers of folders in its hierarchy. </p>
+
+		</div>
+	
 	</div>
 
 </div>

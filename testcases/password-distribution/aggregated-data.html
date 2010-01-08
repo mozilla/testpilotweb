@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: Accounts and Passwords Study: Aggregated Data Samples</title>
+</head>
+<body>
+
+<div id="container">
+
+	<div id="content-standalone">
+          <p><a href="../../index.html">Home</a> &gt; <a href="../index.html">Test Cases</a> &gt; <a href="../account-password.html">Accounts and Passwords Study</a> &gt; Aggregated Data Samples</p>	
+		<div id="intro">
+		
+			<h1>Accounts and Passwords Study: Aggregated Data Samples</h1>
+			
+			<h2>Test Description </h2>
+			
+			<ul>
+			<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/account-password.html">Accounts and Passwords Study</a>.</li>
+			<li>Test duration: 1 day</li>
+			<li>Test type: Global</li>
+			<li>Firefox versions covered: 3.5 and above</li>
+			<li>Data submission: 7823 users, between Dec 15 and Jan 7, 2009</li>
+			</ul>
+		</div>
+		
+		<div id="data"> 
+		
+			<h2> Test Results </h2>
+			
+			<p>There's a lot more we can do with this data. If you have questions about it, ideas for how to analyze it, or derived metrics that you would be interested in seeing, please join the <a href="http://groups.google.com/group/mozilla-labs-testpilot"> Test Pilot Discussion Group </a>.  If you generate any statistics or charts from the data, we would of course look forward to seeing those posted in the discussion group as well.</p>
+			
+			<h2> Test Data </h2>
+			<p>Anyone is welcome to download and use the aggregated data files below.</p>
+
+      			<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">N (Number of users)</span></td><td><span class="headers">Description</span></td></tr>
+</table>
+
+			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+			
+			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+			
+			<h3>How to read the data</h3>
+                 <p>Data is in CSV format.  The first line of the file is the header and gives the names of all the columns.   After that, each line contains a summary of the data for a single user.  Here are the column names and the explanation of each one:</p>
+
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+
+<tr><td>happiness</td><td>Answer to survey question "How do you feel about your current options for managing accounts and passwords?". 1 is the most frustrated, 5 is the happiest.</td></tr>
+<tr><td>open_id</td><td>Answer to the survey question "Do you use OpenID?" (See below for response codes)</td></tr>
+<tr><td>other_tools</td><td>Answer to survey question "Do you use other tools to help manage your password?" (See below for response codes).</td></tr>
+<tr><td>multi_accounts_same_website</td><td>Answer to the question "Do you ever usemultiple accounts for the same wesite?" (See below for response codes)</td></tr>
+<tr><td>share_computer</td><td>Answer to the question "Do you share your computer with others?" (See below for response codes)</td></tr>
+<tr><td>fx_version</td><td>Firefox version string</td></tr>
+<tr><td>os</td><td>Operating system and version string</td></tr>
+<tr><td>locale</td><td>Locale string, e.g. "en-US"</td></tr>
+<tr><td>num_extensions</td><td>Number of extensions installed (not neccessarily active)</td></tr>
+<tr><td>total_sites</td><td>Number of different sites for which user has stored a password in the password manager</td></tr>
+<tr><td>total_passwords</td><td>Number of different passwords that the user has stored in the password manager</td></tr>
+<tr><td>most_used</td><td>For whichever password the user has re-used on the most sites:  How many sites is that password used on?</td></tr>
+<tr><td>histogram</td><td>semicolon-separated list of numbers, where each number is a number of sites that have the same password.  Sorted from highest to lowest. The highest number in histogram is equal to most_used, and the number of items in histogram is equal to total_passwords.</td></tr>
+</table>
+
+<p>The survey questions are mutiple-choice, so the value in those columns will be a numerical answer code.  To interpret those codes, use the table below. The questions are on the left side and the answer codes are on the top.  (Some questions allow multiple responses.  If multiple responses were given, the answer codes will be delimited with semicolons.)</p>
+
+<table class="callout">
+<tr><td></td><td>-1</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+<tr><td>open_id</td><td>(Decline to answer)<td>Yes, and I like it</td><td>Yes, but I don't like it</td><td>No, but I want one</td><td>No, I don't know what OpenID is</td><td>Other (freeform text entry was allowed)</td></tr>
+<tr><td>other_tools</td><td>(Decline to answer)</td><td>No, I memorize them all</td><td>Yes, I write them down</td><td>Yes, I use Firefox password manager</td><td>Other (freeform text entry was allowed)</td></tr>
+<tr><td>multi_accounts_same_website</td><td>(Decline to answer)</td><td>Yes, often</td><td>Sometimes</td><td>Never</td><td>N/a</td></tr>
+<tr><td>share_computer</td><td>(Decline to answer)</td><td>Yes, and we have different accounts</td><td>Yes, we use the same account</td><td>No</td></tr>
+</table>
+			
+			<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
+			
+		</div>
+	
+	</div>
+
+</div>
+
+</body></html>

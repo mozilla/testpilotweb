@@ -7,6 +7,7 @@
                  {"name": "Password Distribution Study",
                   "filename": "password-distribution/password-distribution.js"},
                  {"name": "Password Management Survey",
-                  "filename": "password-distribution/password-survey.js"}
-
+                  "filename": "password-distribution/password-survey.js"},
+                 {"name": "Menu Item Usage Study",
+                  "filename": "menu-item-usage/menu-item-usage.js"}
 ]}

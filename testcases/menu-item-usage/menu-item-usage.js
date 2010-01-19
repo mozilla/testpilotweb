@@ -29,17 +29,35 @@ exports.handlers = {
   onNewWindow: function(window) {
     // OK, for each window we need to stick an event listener on the main
     // menu thingy...
-    let mainCommandSet = window.getElementById("mainCommandSet");
-    // or...?
-    let mainMenuBar = window.getElementById("main-menubar");
 
-    mainMenuBar.addEventListener("command", function() {
+    let mainCommandSet = window.document.getElementById("mainCommandSet");
+
+    let mainMenuBar = window.document.getElementById("main-menubar");
+
+
+    /* TODO OK this basically works but weirdly, some menu items are
+     * detected by one and some are detected by the other... nearly
+     * everything seems to be the set, except for Preferences (in the Firefox
+     * menu on Mac) which is captured by the bar?  interesting.
+     *
+     * Also, commands invoked by keyboard shortcuts: some seem to get
+     * captured by this method, others do not.  (It captures View Source
+     * but not Select All or Copy...)
+     */
+    mainMenuBar.addEventListener("command", function(evt) {
                                    console.info("You used a menu item! (bar)");
-                                 }, false);
-    mainCommandSet.addEventListener("command", function() {
+                                   // evt is a XULCommandEvent... how to
+                                   // extract comand ID?
+                                 }, true);
+    mainCommandSet.addEventListener("command", function(evt) {
                                    console.info("You used a menu item! (set)");
-                                 }, false);
-    // TODO should we use true for useCapture?
+                                 }, true);
+
+    /* TODO we will want to detect when somebody clicks on menu bar and
+     * then hunts around for a while before they find the command they
+     * want... this means also registering onMouseDown handlers to the
+     * menu bar?
+     */
   },
   onWindowClosed: function(window) {
     // TODO remove those event listeners or something

@@ -3,7 +3,7 @@ const TYPE_DOUBLE = 1;
 
 exports.experimentInfo = {
   startDate: null,
-  duration: 1,
+  duration: 0.00347222,  // 5 mins
   testName: "Accounts and Passwords Study",
   testId: 3,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/account-password.html",

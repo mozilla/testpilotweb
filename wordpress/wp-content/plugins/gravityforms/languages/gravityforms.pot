@@ -1,0 +1,2714 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: gravityforms.php:3975
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-09-17 09:57-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gravityforms.php:324
+msgid "There is a new version of Gravity Forms available."
+msgstr ""
+
+#: gravityforms.php:324
+#, php-format
+msgid "View version %s Details"
+msgstr ""
+
+#: gravityforms.php:325
+msgid ""
+"By <a href=\"http://www.gravityforms.com\">registering your copy</a>, you "
+"will get access to automatic upgrades and support."
+msgstr ""
+
+#: gravityforms.php:352
+msgid ""
+"Oops!! Something went wrong.<br/>Please try again or <a href='http://www."
+"gravityforms.com'>contact us</a>."
+msgstr ""
+
+#: gravityforms.php:491
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#: gravityforms.php:493 gravityforms.php:496
+#, php-format
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: gravityforms.php:522
+msgid "View All Entries"
+msgstr ""
+
+#: gravityforms.php:524
+msgid "View Unread Entries"
+msgstr ""
+
+#: gravityforms.php:549
+msgid "Add Gravity Form"
+msgstr ""
+
+#: gravityforms.php:559
+msgid "Please select a form"
+msgstr ""
+
+#: gravityforms.php:578
+msgid "Insert A Form"
+msgstr ""
+
+#: gravityforms.php:580
+msgid "Select a form below to add it to your post or page."
+msgstr ""
+
+#: gravityforms.php:585 gravityforms.php:2653
+msgid "Select a Form"
+msgstr ""
+
+#: gravityforms.php:595
+msgid "Can't find your form? Make sure it is active."
+msgstr ""
+
+#: gravityforms.php:598
+msgid "display form title"
+msgstr ""
+
+#: gravityforms.php:599
+msgid "display form description"
+msgstr ""
+
+#: gravityforms.php:603 gravityforms.php:2057 select_columns.php:110
+msgid "Cancel"
+msgstr ""
+
+#: gravityforms.php:637 gravityforms.php:640 gravityforms.php:2956
+msgid "Edit Forms"
+msgstr ""
+
+#: gravityforms.php:637
+msgid "Forms"
+msgstr ""
+
+#: gravityforms.php:642
+msgid "New Form"
+msgstr ""
+
+#: gravityforms.php:644 gravityforms.php:2618 gravityforms.php:2991
+#: gravityforms.php:3003 gravityforms.php:3033
+msgid "Entries"
+msgstr ""
+
+#: gravityforms.php:646
+msgid "Settings"
+msgstr ""
+
+#: gravityforms.php:648
+msgid "Export"
+msgstr ""
+
+#: gravityforms.php:650
+msgid "Help"
+msgstr ""
+
+#: gravityforms.php:686 gravityforms.php:3159 select_columns.php:64
+msgid "Entry Date"
+msgstr ""
+
+#: gravityforms.php:687 gravityforms.php:2028 gravityforms.php:3160
+#: select_columns.php:65
+msgid "User IP"
+msgstr ""
+
+#: gravityforms.php:688 gravityforms.php:3161 select_columns.php:66
+msgid "Source Url"
+msgstr ""
+
+#: gravityforms.php:697
+msgid ""
+"Could not create export folder. Make sure your /wp-content/uploads folder is "
+"writable"
+msgstr ""
+
+#: gravityforms.php:819 gravityforms.php:1089 gravityforms.php:1167
+#: gravityforms.php:1597 gravityforms.php:2011 gravityforms.php:2617
+#: gravityforms.php:2955 gravityforms.php:3719
+msgid "Gravity Forms"
+msgstr ""
+
+#: gravityforms.php:820
+msgid "Gravity Forms Settings"
+msgstr ""
+
+#: gravityforms.php:824
+msgid "Support License Key"
+msgstr ""
+
+#: gravityforms.php:831
+msgid "The license key is used for access to automatic upgrades and support."
+msgstr ""
+
+#: gravityforms.php:835 tooltips.php:50
+msgid "Output CSS"
+msgstr ""
+
+#: gravityforms.php:837
+msgid "Yes"
+msgstr ""
+
+#: gravityforms.php:838
+msgid "No"
+msgstr ""
+
+#: gravityforms.php:839
+msgid ""
+"Set this to No if you would like to disable the plugin from outputting the "
+"form CSS."
+msgstr ""
+
+#: gravityforms.php:846
+msgid "reCAPTCHA Settings"
+msgstr ""
+
+#: gravityforms.php:848
+msgid ""
+"Gravity Forms integrates with reCAPTCHA, a free CAPTCHA service that helps "
+"to digitize books while protecting your forms from spam bots. "
+msgstr ""
+
+#: gravityforms.php:848
+msgid "Read more about reCAPTCHA"
+msgstr ""
+
+#: gravityforms.php:854
+msgid "reCAPTCHA Public Key"
+msgstr ""
+
+#: gravityforms.php:857 gravityforms.php:864
+msgid "Required only if you decide to use the reCAPTCHA field."
+msgstr ""
+
+#: gravityforms.php:861
+msgid "reCAPTCHA Private Key"
+msgstr ""
+
+#: gravityforms.php:872
+msgid "Installation Status"
+msgstr ""
+
+#: gravityforms.php:876
+msgid "PHP Version"
+msgstr ""
+
+#: gravityforms.php:890
+msgid "Gravity Forms requires PHP 5 or above."
+msgstr ""
+
+#: gravityforms.php:897
+msgid "MySQL Version"
+msgstr ""
+
+#: gravityforms.php:911
+msgid "Gravity Forms requires MySQL 5 or above."
+msgstr ""
+
+#: gravityforms.php:918
+msgid "WordPress Version"
+msgstr ""
+
+#: gravityforms.php:932
+msgid "Gravity Forms requires WordPress 2.8 or above."
+msgstr ""
+
+#: gravityforms.php:939
+msgid "Gravity Forms Version"
+msgstr ""
+
+#: gravityforms.php:964
+msgid "Save Settings"
+msgstr ""
+
+#: gravityforms.php:973 gravityforms.php:976
+msgid "Uninstall Gravity Forms"
+msgstr ""
+
+#: gravityforms.php:974
+msgid "Warning! This operation deletes ALL Gravity Forms data."
+msgstr ""
+
+#: gravityforms.php:976
+msgid ""
+"Warning! ALL Gravity Forms data will be deleted, including entries. This "
+"cannot be undone. \\'OK\\' to delete, \\'Cancel\\' to stop"
+msgstr ""
+
+#: gravityforms.php:988
+msgid "Settings Updated"
+msgstr ""
+
+#: gravityforms.php:1014
+msgid "Ajax error while selecting a form"
+msgstr ""
+
+#: gravityforms.php:1027
+msgid "Deselect All"
+msgstr ""
+
+#: gravityforms.php:1027
+msgid "Select All"
+msgstr ""
+
+#: gravityforms.php:1067
+msgid "Ajax error while exporting."
+msgstr ""
+
+#: gravityforms.php:1090
+msgid "Export Form Entries"
+msgstr ""
+
+#: gravityforms.php:1096
+msgid "Select A Form"
+msgstr ""
+
+#: gravityforms.php:1100
+msgid "Select a form"
+msgstr ""
+
+#: gravityforms.php:1114
+msgid "Select Fields"
+msgstr ""
+
+#: gravityforms.php:1121
+msgid "Select Date Range"
+msgstr ""
+
+#: gravityforms.php:1126
+msgid "Start"
+msgstr ""
+
+#: gravityforms.php:1131
+msgid "End"
+msgstr ""
+
+#: gravityforms.php:1134
+msgid ""
+"Date Range is optional, if no date range is selected all entries will be "
+"exported."
+msgstr ""
+
+#: gravityforms.php:1142
+msgid "Download Export File"
+msgstr ""
+
+#: gravityforms.php:1144
+msgid "Exporting entries. Please wait..."
+msgstr ""
+
+#: gravityforms.php:1168
+msgid "Gravity Forms Help"
+msgstr ""
+
+#: gravityforms.php:1171
+msgid "Embedding a form"
+msgstr ""
+
+#: gravityforms.php:1172
+msgid "There are two ways to embed a form to a post or page."
+msgstr ""
+
+#: gravityforms.php:1175
+msgid "Shortcode:"
+msgstr ""
+
+#: gravityforms.php:1177
+msgid "Add the following shortcode to your page or post"
+msgstr ""
+
+#: gravityforms.php:1181
+msgid "id"
+msgstr ""
+
+#: gravityforms.php:1181 gravityforms.php:1191
+msgid "(Required) The id of the form to be embedded"
+msgstr ""
+
+#: gravityforms.php:1182
+msgid "title"
+msgstr ""
+
+#: gravityforms.php:1182 gravityforms.php:1192
+msgid ""
+"(Optional) Whether or not do display the form title. Defaults to 'false'"
+msgstr ""
+
+#: gravityforms.php:1183
+msgid "description"
+msgstr ""
+
+#: gravityforms.php:1183 gravityforms.php:1193
+msgid ""
+"(Optional) Whether or not do display the form description. Defaults to "
+"'false'"
+msgstr ""
+
+#: gravityforms.php:1189
+msgid "Add the following function call to your template"
+msgstr ""
+
+#: gravityforms.php:1191
+msgid "Parameter 1 (id)"
+msgstr ""
+
+#: gravityforms.php:1192
+msgid "Parameter 2 (title)"
+msgstr ""
+
+#: gravityforms.php:1193
+msgid "Parameter 3(description)"
+msgstr ""
+
+#: gravityforms.php:1200
+msgid "Action Hooks and Filters"
+msgstr ""
+
+#: gravityforms.php:1201
+msgid ""
+"The following hooks and filters allow developers to integrate Gravity Forms "
+"with other plugins."
+msgstr ""
+
+#: gravityforms.php:1206
+msgid ""
+"This action hook runs during form submission after validation has taken "
+"place and before entry data has been saved"
+msgstr ""
+
+#: gravityforms.php:1208 gravityforms.php:1243 gravityforms.php:1270
+#: gravityforms.php:1287
+msgid "Sample"
+msgstr ""
+
+#: gravityforms.php:1241
+msgid "This action hook runs after entry data has been saved"
+msgstr ""
+
+#: gravityforms.php:1268
+msgid "Filters the form submit buton"
+msgstr ""
+
+#: gravityforms.php:1285
+msgid "Same as gform_submit_button, but it only applies to the specified form"
+msgstr ""
+
+#: gravityforms.php:1394
+msgid "Oops! We could not locate your form."
+msgstr ""
+
+#: gravityforms.php:1464
+msgid "There was a problem with your submission."
+msgstr ""
+
+#: gravityforms.php:1464
+msgid "Errors have been highlighted below "
+msgstr ""
+
+#: gravityforms.php:1482
+msgid "Submit"
+msgstr ""
+
+#: gravityforms.php:1494
+msgid "Edit this form"
+msgstr ""
+
+#: gravityforms.php:1598 gravityforms.php:3037
+msgid "Notifications"
+msgstr ""
+
+#: gravityforms.php:1601
+msgid "Notification to Administrator"
+msgstr ""
+
+#: gravityforms.php:1605
+msgid ""
+"Enter a message below to receive a notification email when users submit this "
+"form."
+msgstr ""
+
+#: gravityforms.php:1609
+msgid "Send To Email"
+msgstr ""
+
+#: gravityforms.php:1616 gravityforms.php:1723
+msgid "From Email"
+msgstr ""
+
+#: gravityforms.php:1623
+msgid "OR"
+msgstr ""
+
+#: gravityforms.php:1625
+msgid "Select an email field"
+msgstr ""
+
+#: gravityforms.php:1641 gravityforms.php:1716
+msgid "BCC"
+msgstr ""
+
+#: gravityforms.php:1653 gravityforms.php:1742
+msgid "Subject"
+msgstr ""
+
+#: gravityforms.php:1663 gravityforms.php:1752
+msgid "Message"
+msgstr ""
+
+#: gravityforms.php:1677
+msgid "Notification to User"
+msgstr ""
+
+#: gravityforms.php:1695
+msgid ""
+"Enter a message below to send users an automatic response when they submit "
+"this form."
+msgstr ""
+
+#: gravityforms.php:1700
+msgid "Send To Field"
+msgstr ""
+
+#: gravityforms.php:1730
+msgid "Reply To (optional)"
+msgstr ""
+
+#: gravityforms.php:1770
+msgid "Save"
+msgstr ""
+
+#: gravityforms.php:1782
+msgid "Notification Updated."
+msgstr ""
+
+#: gravityforms.php:1825
+msgid "Insert form field"
+msgstr ""
+
+#: gravityforms.php:1830 js.php:882
+msgid "All Submitted Fields"
+msgstr ""
+
+#: gravityforms.php:1834 gravityforms.php:1835 gravityforms.php:3986
+#: gravityforms.php:4275 js.php:351 js.php:882
+msgid "Date"
+msgstr ""
+
+#: gravityforms.php:1836 gravityforms.php:2030
+msgid "Embed Url"
+msgstr ""
+
+#: gravityforms.php:1837 js.php:882 tooltips.php:11
+msgid "Form Title"
+msgstr ""
+
+#: gravityforms.php:1838 js.php:882
+msgid "User IP Address"
+msgstr ""
+
+#: gravityforms.php:1880
+msgid "Required form fields"
+msgstr ""
+
+#: gravityforms.php:1889
+msgid "Optional form fields"
+msgstr ""
+
+#: gravityforms.php:1923
+msgid "OOps! We couldn't find your lead. Please try again"
+msgstr ""
+
+#: gravityforms.php:1965
+msgid "Entry has been deleted."
+msgstr ""
+
+#: gravityforms.php:1965
+msgid "Back to entries list"
+msgstr ""
+
+#: gravityforms.php:1981
+msgid ""
+"'Would you like to delete this file? \\'Cancel\\' to stop. \\'OK\\' to "
+"delete'"
+msgstr ""
+
+#: gravityforms.php:1991 js.php:219
+msgid "Ajax error while deleting field."
+msgstr ""
+
+#: gravityforms.php:2012
+msgid "Entry #"
+msgstr ""
+
+#: gravityforms.php:2013
+msgid "&laquo; back to entries list"
+msgstr ""
+
+#: gravityforms.php:2018
+msgid "Info"
+msgstr ""
+
+#: gravityforms.php:2024
+msgid "Entry Id"
+msgstr ""
+
+#: gravityforms.php:2025
+msgid "Submitted on"
+msgstr ""
+
+#: gravityforms.php:2036
+msgid "Edit Post"
+msgstr ""
+
+#: gravityforms.php:2036
+msgid "Click to edit post"
+msgstr ""
+
+#: gravityforms.php:2046
+msgid ""
+"You are about to delete this entry. \\'Cancel\\' to stop, \\'OK\\' to delete."
+msgstr ""
+
+#: gravityforms.php:2046 gravityforms.php:2193 gravityforms.php:2642
+#: gravityforms.php:2807 gravityforms.php:2851 gravityforms.php:2973
+#: gravityforms.php:3042 gravityforms.php:3072 gravityforms.php:3213
+msgid "Delete"
+msgstr ""
+
+#: gravityforms.php:2052
+msgid "Edit Entry"
+msgstr ""
+
+#: gravityforms.php:2052
+msgid "Update Entry"
+msgstr ""
+
+#: gravityforms.php:2074 gravityforms.php:2257
+msgid "Add Note"
+msgstr ""
+
+#: gravityforms.php:2107
+msgid "Notes"
+msgstr ""
+
+#: gravityforms.php:2129
+msgid "Entry Updated."
+msgstr ""
+
+#: gravityforms.php:2139
+msgid "Details"
+msgstr ""
+
+#: gravityforms.php:2190
+msgid " Bulk action"
+msgstr ""
+
+#: gravityforms.php:2192 gravityforms.php:2641
+msgid " Bulk action "
+msgstr ""
+
+#: gravityforms.php:2196 gravityforms.php:2649 gravityforms.php:2858
+#: gravityforms.php:2976 gravityforms.php:3075
+msgid "Apply"
+msgstr ""
+
+#: gravityforms.php:2243
+msgid "added on"
+msgstr ""
+
+#: gravityforms.php:2275 print-entry_list.php:32
+msgid "Entry # "
+msgstr ""
+
+#: gravityforms.php:2398 gravityforms.php:2408 gravityforms.php:2760
+#: gravityforms.php:2769
+msgid "Click to view"
+msgstr ""
+
+#: gravityforms.php:2512
+msgid "&laquo;"
+msgstr ""
+
+#: gravityforms.php:2513
+msgid "&raquo;"
+msgstr ""
+
+#: gravityforms.php:2581
+msgid "Ajax error while setting lead property"
+msgstr ""
+
+#: gravityforms.php:2628 gravityforms.php:2963
+msgid "All"
+msgstr ""
+
+#: gravityforms.php:2629
+msgid "Unread"
+msgstr ""
+
+#: gravityforms.php:2630
+msgid "Starred"
+msgstr ""
+
+#: gravityforms.php:2633
+msgid "Search Posts:"
+msgstr ""
+
+#: gravityforms.php:2634
+msgid "Search"
+msgstr ""
+
+#: gravityforms.php:2639 gravityforms.php:2848 gravityforms.php:2970
+#: gravityforms.php:2972 gravityforms.php:3069 gravityforms.php:3071
+msgid "Bulk action"
+msgstr ""
+
+#: gravityforms.php:2643 gravityforms.php:2852
+msgid "Mark as Read"
+msgstr ""
+
+#: gravityforms.php:2644 gravityforms.php:2853
+msgid "Mark as Unread"
+msgstr ""
+
+#: gravityforms.php:2645 gravityforms.php:2854
+msgid "Add Star"
+msgstr ""
+
+#: gravityforms.php:2646 gravityforms.php:2855
+msgid "Remove Star"
+msgstr ""
+
+#: gravityforms.php:2673 gravityforms.php:2868
+#, php-format
+msgid "Displaying %d - %d of %d"
+msgstr ""
+
+#: gravityforms.php:2698
+msgid "Select Columns"
+msgstr ""
+
+#: gravityforms.php:2798
+msgid "View this entry"
+msgstr ""
+
+#: gravityforms.php:2798
+msgid "View"
+msgstr ""
+
+#: gravityforms.php:2802
+msgid "Mark read"
+msgstr ""
+
+#: gravityforms.php:2802
+msgid "Mark this entry as unread"
+msgstr ""
+
+#: gravityforms.php:2802
+msgid "Mark unread"
+msgstr ""
+
+#: gravityforms.php:2807
+msgid "Delete this entry"
+msgstr ""
+
+#: gravityforms.php:2807
+msgid ""
+"'You are about to delete this entry. \\'Cancel\\' to stop, \\'OK\\' to "
+"delete.'"
+msgstr ""
+
+#: gravityforms.php:2835
+msgid "This form does not have any entries yet."
+msgstr ""
+
+#: gravityforms.php:2850
+msgid "Bulk action "
+msgstr ""
+
+#: gravityforms.php:2923 gravityforms.php:2965 gravityforms.php:3019
+msgid "Inactive"
+msgstr ""
+
+#: gravityforms.php:2927 gravityforms.php:2964 gravityforms.php:3019
+msgid "Active"
+msgstr ""
+
+#: gravityforms.php:2941
+msgid "Ajax error while update form"
+msgstr ""
+
+#: gravityforms.php:2976 gravityforms.php:3042 gravityforms.php:3075
+msgid ""
+"WARNING: You are about to delete this form and ALL entries associated with "
+"it. "
+msgstr ""
+
+#: gravityforms.php:2976 gravityforms.php:3042 gravityforms.php:3075
+msgid "\\'Cancel\\' to stop, \\'OK\\' to delete."
+msgstr ""
+
+#: gravityforms.php:2988 gravityforms.php:3000
+msgid "Id"
+msgstr ""
+
+#: gravityforms.php:2989 gravityforms.php:3001 gravityforms.php:3338
+#: gravityforms.php:3747 gravityforms.php:3995 gravityforms.php:4052
+#: gravityforms.php:4295
+msgid "Title"
+msgstr ""
+
+#: gravityforms.php:2990 gravityforms.php:3002
+msgid "Views"
+msgstr ""
+
+#: gravityforms.php:2992 gravityforms.php:3004
+msgid "Conversion"
+msgstr ""
+
+#: gravityforms.php:3022 gravityforms.php:3025 gravityforms.php:3216
+#: gravityforms.php:3730 js.php:443
+msgid "Edit"
+msgstr ""
+
+#: gravityforms.php:3029 gravityforms.php:3896 gravityforms.php:3908
+msgid "Preview this form"
+msgstr ""
+
+#: gravityforms.php:3029
+msgid "Preview"
+msgstr ""
+
+#: gravityforms.php:3033
+msgid "View entries generated by this form"
+msgstr ""
+
+#: gravityforms.php:3037
+msgid "Edit notifications sent by this form"
+msgstr ""
+
+#: gravityforms.php:3213
+msgid "click to delete this field"
+msgstr ""
+
+#: gravityforms.php:3216
+msgid "click to edit this field"
+msgstr ""
+
+#: gravityforms.php:3287 js.php:853
+msgid "Phone format:"
+msgstr ""
+
+#: gravityforms.php:3336 js.php:363
+msgid "File"
+msgstr ""
+
+#: gravityforms.php:3339 gravityforms.php:4057
+msgid "Caption"
+msgstr ""
+
+#: gravityforms.php:3340 gravityforms.php:3754 gravityforms.php:4062
+#: gravityforms.php:4117
+msgid "Description"
+msgstr ""
+
+#: gravityforms.php:3364 js.php:307
+msgid "Prefix"
+msgstr ""
+
+#: gravityforms.php:3364 gravityforms.php:3370 js.php:307 js.php:313
+msgid "First"
+msgstr ""
+
+#: gravityforms.php:3364 gravityforms.php:3370 js.php:307 js.php:313
+msgid "Last"
+msgstr ""
+
+#: gravityforms.php:3364 js.php:307
+msgid "Suffix"
+msgstr ""
+
+#: gravityforms.php:3385 js.php:333
+msgid "Street Address"
+msgstr ""
+
+#: gravityforms.php:3386 js.php:333
+msgid "Address Line 2"
+msgstr ""
+
+#: gravityforms.php:3387 js.php:333
+msgid "City"
+msgstr ""
+
+#: gravityforms.php:3388 js.php:334
+msgid "State / Province"
+msgstr ""
+
+#: gravityforms.php:3389 js.php:334
+msgid "Zip / Postal Code"
+msgstr ""
+
+#: gravityforms.php:3390 js.php:334
+msgid "Country"
+msgstr ""
+
+#: gravityforms.php:3413
+msgid "HH"
+msgstr ""
+
+#: gravityforms.php:3413
+msgid "MM"
+msgstr ""
+
+#: gravityforms.php:3413
+msgid "AM"
+msgstr ""
+
+#: gravityforms.php:3413
+msgid "PM"
+msgstr ""
+
+#: gravityforms.php:3420
+msgid "Download file"
+msgstr ""
+
+#: gravityforms.php:3420
+msgid "Delete file"
+msgstr ""
+
+#: gravityforms.php:3435
+msgid "To use the reCaptcha field you must first do the following:"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Afghanistan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Albania"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Algeria"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Andorra"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Angola"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Antigua and Barbuda"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Argentina"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Armenia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Australia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Austria"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Azerbaijan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bahamas"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bahrain"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bangladesh"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Barbados"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Belarus"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Belgium"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Belize"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Benin"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bermuda"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bhutan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bolivia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bosnia and Herzegovina"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Botswana"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Brazil"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Brunei"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Bulgaria"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Burkina Faso"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Burundi"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Cambodia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Cameroon"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Canada"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Cape Verde"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Central African Republic"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Chad"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Chile"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "China"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Colombia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Comoros"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Congo"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Costa Rica"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "C&ocirc;te d'Ivoire"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Croatia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Cuba"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Cyprus"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Czech Republic"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Denmark"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Djibouti"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Dominica"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Dominican Republic"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "East Timor"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Ecuador"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Egypt"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "El Salvador"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Equatorial Guinea"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Eritrea"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Estonia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Ethiopia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Fiji"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Finland"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "France"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Gabon"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Gambia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Georgia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Germany"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Ghana"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Greece"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Grenada"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Guatemala"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Guinea"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Guinea-Bissau"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Guyana"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Haiti"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Honduras"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Hong Kong"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Hungary"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Iceland"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "India"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Indonesia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Iran"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Iraq"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Ireland"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Israel"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Italy"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Jamaica"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Japan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Jordan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Kazakhstan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Kenya"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Kiribati"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "North Korea"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "South Korea"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Kuwait"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Kyrgyzstan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Laos"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Latvia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Lebanon"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Lesotho"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Liberia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Libya"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Liechtenstein"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Lithuania"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Luxembourg"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Macedonia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Madagascar"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Malawi"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Malaysia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Maldives"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Mali"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Malta"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Marshall Islands"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Mauritania"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Mauritius"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Mexico"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Micronesia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Moldova"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Monaco"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Mongolia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Montenegro"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Morocco"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Mozambique"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Myanmar"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Namibia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Nauru"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Nepal"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Netherlands"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "New Zealand"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Nicaragua"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Niger"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Nigeria"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Norway"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Oman"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Pakistan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Palau"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Palestine"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Panama"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Papua New Guinea"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Paraguay"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Peru"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Philippines"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Poland"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Portugal"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Puerto Rico"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Qatar"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Romania"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Russia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Rwanda"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Saint Kitts and Nevis"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Saint Lucia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Saint Vincent and the Grenadines"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Samoa"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "San Marino"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Sao Tome and Principe"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Saudi Arabia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Senegal"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Serbia and Montenegro"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Seychelles"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Sierra Leone"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Singapore"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Slovakia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Slovenia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Solomon Islands"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Somalia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "South Africa"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Spain"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Sri Lanka"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Sudan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Suriname"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Swaziland"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Sweden"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Switzerland"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Syria"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Taiwan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Tajikistan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Tanzania"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Thailand"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Togo"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Tonga"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Trinidad and Tobago"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Tunisia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Turkey"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Turkmenistan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Tuvalu"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Uganda"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Ukraine"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "United Arab Emirates"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "United Kingdom"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "United States"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Uruguay"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Uzbekistan"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Vanuatu"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Vatican City"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Venezuela"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Vietnam"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Yemen"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Zambia"
+msgstr ""
+
+#: gravityforms.php:3560
+msgid "Zimbabwe"
+msgstr ""
+
+#: gravityforms.php:3717
+msgid "Form Settings"
+msgstr ""
+
+#: gravityforms.php:3720
+msgid "Form Editor"
+msgstr ""
+
+#: gravityforms.php:3729
+msgid "Delete this Form"
+msgstr ""
+
+#: gravityforms.php:3729
+msgid ""
+"Would you like to delete this form and ALL entries associated with it? "
+"\\'Cancel\\' to stop. \\'OK\\' to delete"
+msgstr ""
+
+#: gravityforms.php:3729
+msgid "Delete Form"
+msgstr ""
+
+#: gravityforms.php:3730
+msgid "Edit Form's properties"
+msgstr ""
+
+#: gravityforms.php:3739 gravityforms.php:3913
+msgid "Properties"
+msgstr ""
+
+#: gravityforms.php:3740 gravityforms.php:3914
+msgid "Advanced"
+msgstr ""
+
+#: gravityforms.php:3741
+msgid "Confirmation"
+msgstr ""
+
+#: gravityforms.php:3761
+msgid "Label Placement"
+msgstr ""
+
+#: gravityforms.php:3765
+msgid "Top aligned"
+msgstr ""
+
+#: gravityforms.php:3766
+msgid "Left aligned"
+msgstr ""
+
+#: gravityforms.php:3767
+msgid "Right aligned"
+msgstr ""
+
+#: gravityforms.php:3775
+msgid "Form Button"
+msgstr ""
+
+#: gravityforms.php:3779
+msgid "Default"
+msgstr ""
+
+#: gravityforms.php:3785 gravityforms.php:3999 gravityforms.php:4300
+msgid "Image"
+msgstr ""
+
+#: gravityforms.php:3791
+msgid "Text:"
+msgstr ""
+
+#: gravityforms.php:3798
+msgid "Url:"
+msgstr ""
+
+#: gravityforms.php:3806 gravityforms.php:4214 tooltips.php:38
+msgid "CSS Class Name"
+msgstr ""
+
+#: gravityforms.php:3816
+msgid "Confirmation Message"
+msgstr ""
+
+#: gravityforms.php:3820
+msgid "Text"
+msgstr ""
+
+#: gravityforms.php:3826
+msgid "Page"
+msgstr ""
+
+#: gravityforms.php:3832
+msgid "Redirect"
+msgstr ""
+
+#: gravityforms.php:3854
+msgid "Pass Field Data Via Query String"
+msgstr ""
+
+#: gravityforms.php:3861
+msgid "Sample: phone={Phone:1}&email{Email:2}"
+msgstr ""
+
+#: gravityforms.php:3885
+msgid "Update Form"
+msgstr ""
+
+#: gravityforms.php:3885
+msgid "Save Form"
+msgstr ""
+
+#: gravityforms.php:3891
+msgid "Saving form. Please wait..."
+msgstr ""
+
+#: gravityforms.php:3894
+msgid "You have successfully saved your form!"
+msgstr ""
+
+#: gravityforms.php:3895
+msgid "What do you want to do next?"
+msgstr ""
+
+#: gravityforms.php:3896
+msgid "Preview this Form"
+msgstr ""
+
+#: gravityforms.php:3897 gravityforms.php:3906
+msgid "Setup email notifications for this form"
+msgstr ""
+
+#: gravityforms.php:3897
+msgid "Setup Email Notifications for this Form"
+msgstr ""
+
+#: gravityforms.php:3898
+msgid "Learn how to add this form to a post or page"
+msgstr ""
+
+#: gravityforms.php:3898
+msgid "Add this Form to a Post or Page"
+msgstr ""
+
+#: gravityforms.php:3899 gravityforms.php:3905
+msgid "Continue editing this form"
+msgstr ""
+
+#: gravityforms.php:3899
+msgid "Continue Editing this Form"
+msgstr ""
+
+#: gravityforms.php:3900
+msgid "I am done. Take me back to form list"
+msgstr ""
+
+#: gravityforms.php:3900
+msgid "Return to Form List"
+msgstr ""
+
+#: gravityforms.php:3904
+msgid "Form updated successfully."
+msgstr ""
+
+#: gravityforms.php:3905
+msgid "Continue Editing"
+msgstr ""
+
+#: gravityforms.php:3906
+msgid "Setup Email Notifications"
+msgstr ""
+
+#: gravityforms.php:3907
+msgid "View this form's entries"
+msgstr ""
+
+#: gravityforms.php:3907
+msgid "View Entries"
+msgstr ""
+
+#: gravityforms.php:3908
+msgid "Preview Form"
+msgstr ""
+
+#: gravityforms.php:3920 tooltips.php:21
+msgid "Field Label"
+msgstr ""
+
+#: gravityforms.php:3927
+msgid "Theme"
+msgstr ""
+
+#: gravityforms.php:3931
+msgid "Red"
+msgstr ""
+
+#: gravityforms.php:3932
+msgid "White"
+msgstr ""
+
+#: gravityforms.php:3933
+msgid "Black Glass"
+msgstr ""
+
+#: gravityforms.php:3934
+msgid "Clean"
+msgstr ""
+
+#: gravityforms.php:3939 tooltips.php:23
+msgid "Custom Field Name"
+msgstr ""
+
+#: gravityforms.php:3945
+msgid "Existing"
+msgstr ""
+
+#: gravityforms.php:3951
+msgid "New"
+msgstr ""
+
+#: gravityforms.php:3957
+msgid "Select an existing custom field"
+msgstr ""
+
+#: gravityforms.php:3971
+msgid "Field Type"
+msgstr ""
+
+#: gravityforms.php:3976
+msgid "Single line text"
+msgstr ""
+
+#: gravityforms.php:3977 gravityforms.php:4256
+msgid "Paragraph Text"
+msgstr ""
+
+#: gravityforms.php:3978 gravityforms.php:4257
+msgid "Drop Down"
+msgstr ""
+
+#: gravityforms.php:3979 gravityforms.php:4258 js.php:342
+msgid "Number"
+msgstr ""
+
+#: gravityforms.php:3980 gravityforms.php:4259
+msgid "Checkboxes"
+msgstr ""
+
+#: gravityforms.php:3981 gravityforms.php:4260
+msgid "Multiple Choice"
+msgstr ""
+
+#: gravityforms.php:3982 gravityforms.php:4261
+msgid "Section Break"
+msgstr ""
+
+#: gravityforms.php:3984 gravityforms.php:4268 tooltips.php:44
+msgid "Advanced Fields"
+msgstr ""
+
+#: gravityforms.php:3985 gravityforms.php:4274 js.php:302
+msgid "Name"
+msgstr ""
+
+#: gravityforms.php:3987 gravityforms.php:4276 js.php:355
+msgid "Time"
+msgstr ""
+
+#: gravityforms.php:3988 gravityforms.php:4277 js.php:346
+msgid "Phone"
+msgstr ""
+
+#: gravityforms.php:3989 gravityforms.php:4278 js.php:332
+msgid "Address"
+msgstr ""
+
+#: gravityforms.php:3990 gravityforms.php:4279 js.php:359
+msgid "Website"
+msgstr ""
+
+#: gravityforms.php:3991 gravityforms.php:4280 js.php:338
+msgid "Email"
+msgstr ""
+
+#: gravityforms.php:3992 gravityforms.php:4281
+msgid "File Upload"
+msgstr ""
+
+#: gravityforms.php:3994 gravityforms.php:4289 tooltips.php:45
+msgid "Post Fields"
+msgstr ""
+
+#: gravityforms.php:3996 gravityforms.php:4296
+msgid "Body"
+msgstr ""
+
+#: gravityforms.php:3997 gravityforms.php:4297
+msgid "Excerpt"
+msgstr ""
+
+#: gravityforms.php:3998 gravityforms.php:4020 gravityforms.php:4299
+msgid "Category"
+msgstr ""
+
+#: gravityforms.php:4000 gravityforms.php:4298
+msgid "Tags"
+msgstr ""
+
+#: gravityforms.php:4001 gravityforms.php:4301
+msgid "Custom Field"
+msgstr ""
+
+#: gravityforms.php:4007
+msgid "Post Author"
+msgstr ""
+
+#: gravityforms.php:4013 js.php:388 tooltips.php:41
+msgid "Post Category"
+msgstr ""
+
+#: gravityforms.php:4026
+msgid "All Categories"
+msgstr ""
+
+#: gravityforms.php:4032
+msgid "Select Categories"
+msgstr ""
+
+#: gravityforms.php:4068
+msgid "Name Format"
+msgstr ""
+
+#: gravityforms.php:4072
+msgid "Normal"
+msgstr ""
+
+#: gravityforms.php:4073
+msgid "Extended"
+msgstr ""
+
+#: gravityforms.php:4074
+msgid "Simple"
+msgstr ""
+
+#: gravityforms.php:4080
+msgid "Date Format"
+msgstr ""
+
+#: gravityforms.php:4091
+msgid "Allowed file extensions"
+msgstr ""
+
+#: gravityforms.php:4095
+msgid "Separated with commas (i.e. jpg, gif, png, pdf)"
+msgstr ""
+
+#: gravityforms.php:4101
+msgid "Phone Format"
+msgstr ""
+
+#: gravityforms.php:4106
+msgid "International"
+msgstr ""
+
+#: gravityforms.php:4111
+msgid "Choices"
+msgstr ""
+
+#: gravityforms.php:4123
+msgid "Rules"
+msgstr ""
+
+#: gravityforms.php:4126
+msgid "Required"
+msgstr ""
+
+#: gravityforms.php:4132 tooltips.php:31
+msgid "No Duplicates"
+msgstr ""
+
+#: gravityforms.php:4139
+msgid "Range"
+msgstr ""
+
+#: gravityforms.php:4145
+msgid "Min"
+msgstr ""
+
+#: gravityforms.php:4152
+msgid "Max"
+msgstr ""
+
+#: gravityforms.php:4166 tooltips.php:33
+msgid "Admin Label"
+msgstr ""
+
+#: gravityforms.php:4173 tooltips.php:34
+msgid "Field Size"
+msgstr ""
+
+#: gravityforms.php:4177
+msgid "Small"
+msgstr ""
+
+#: gravityforms.php:4178
+msgid "Medium"
+msgstr ""
+
+#: gravityforms.php:4179
+msgid "Large"
+msgstr ""
+
+#: gravityforms.php:4184 tooltips.php:35
+msgid "Default Value"
+msgstr ""
+
+#: gravityforms.php:4191 tooltips.php:36
+msgid "Validation Message"
+msgstr ""
+
+#: gravityforms.php:4198
+msgid "Language"
+msgstr ""
+
+#: gravityforms.php:4202
+msgid "English"
+msgstr ""
+
+#: gravityforms.php:4203
+msgid "Dutch"
+msgstr ""
+
+#: gravityforms.php:4204
+msgid "French"
+msgstr ""
+
+#: gravityforms.php:4205
+msgid "German"
+msgstr ""
+
+#: gravityforms.php:4206
+msgid "Portuguese"
+msgstr ""
+
+#: gravityforms.php:4207
+msgid "Russian"
+msgstr ""
+
+#: gravityforms.php:4208
+msgid "Spanish"
+msgstr ""
+
+#: gravityforms.php:4209
+msgid "Turkish"
+msgstr ""
+
+#: gravityforms.php:4220 tooltips.php:39
+msgid "Visibility"
+msgstr ""
+
+#: gravityforms.php:4224
+msgid "Everyone"
+msgstr ""
+
+#: gravityforms.php:4229
+msgid "Admin Only"
+msgstr ""
+
+#: gravityforms.php:4242
+msgid "Add Fields"
+msgstr ""
+
+#: gravityforms.php:4250 tooltips.php:43
+msgid "Standard Fields"
+msgstr ""
+
+#: gravityforms.php:4255
+msgid "Single Line Text"
+msgstr ""
+
+#: gravityforms.php:4362 gravityforms.php:4468
+msgid "This field is required. Please enter a value."
+msgstr ""
+
+#: gravityforms.php:4368
+msgid ""
+"This field requires an unique entry and the values you entered have been "
+"already been used"
+msgstr ""
+
+#: gravityforms.php:4380
+msgid "This field is required. Please enter the first and last name."
+msgstr ""
+
+#: gravityforms.php:4397
+msgid "This field is required. Please enter a complete address."
+msgstr ""
+
+#: gravityforms.php:4407
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: gravityforms.php:4458
+msgid "Please enter a valid time."
+msgstr ""
+
+#: gravityforms.php:4475
+msgid "Please enter a valid Website URL (i.e. http://www.gravityforms.com)."
+msgstr ""
+
+#: gravityforms.php:4490
+msgid "The reCAPTCHA wasn't entered correctly. Go back and try it again."
+msgstr ""
+
+#: gravityforms.php:4503
+#, php-format
+msgid "The uploaded file type is not allowed. Must be one of the following: %s"
+msgstr ""
+
+#: download.php:9
+msgid "You don't have permission to download a file"
+msgstr ""
+
+#: js.php:111
+msgid ""
+"The form title you have entered is already taken. Please enter an unique "
+"form title"
+msgstr ""
+
+#: js.php:161
+msgid "Ajax error while setting post template"
+msgstr ""
+
+#: js.php:209
+msgid ""
+"Warning! Deleting this field will also delete all entry data associated with "
+"it. \\'Cancel\\' to stop. \\'OK\\' to delete"
+msgstr ""
+
+#: js.php:320 js.php:321 js.php:325 js.php:329
+msgid "First Choice"
+msgstr ""
+
+#: js.php:320 js.php:321 js.php:325 js.php:329
+msgid "Second Choice"
+msgstr ""
+
+#: js.php:320 js.php:321 js.php:325 js.php:329
+msgid "Third Choice"
+msgstr ""
+
+#: js.php:367
+msgid "Post Title"
+msgstr ""
+
+#: js.php:371
+msgid "Post Body"
+msgstr ""
+
+#: js.php:375
+msgid "Post Excerpt"
+msgstr ""
+
+#: js.php:380
+msgid "Post Tags"
+msgstr ""
+
+#: js.php:385
+msgid "Post Custom Field"
+msgstr ""
+
+#: js.php:394
+msgid "Post Image"
+msgstr ""
+
+#: js.php:419
+msgid "Only one reCAPTCHA field can be added to the form."
+msgstr ""
+
+#: js.php:436 js.php:508
+msgid "Ajax error while adding field"
+msgstr ""
+
+#: js.php:448
+msgid "Close"
+msgstr ""
+
+#: js.php:882
+msgid "Select a field"
+msgstr ""
+
+#: preview.php:9 print-entry_list.php:9
+msgid "You don't have adequate permission to preview forms."
+msgstr ""
+
+#: preview.php:24 print-entry_list.php:37
+msgid "close window"
+msgstr ""
+
+#: select_columns.php:6
+msgid "Oops! We could not locate your form. Please try again."
+msgstr ""
+
+#: select_columns.php:71
+msgid "Active Columns"
+msgstr ""
+
+#: select_columns.php:84
+msgid "Inactive Columns"
+msgstr ""
+
+#: select_columns.php:109
+msgid "OK"
+msgstr ""
+
+#: tooltips.php:4
+msgid ""
+"Enter the email address you would like the administrator notification email "
+"sent to."
+msgstr ""
+
+#: tooltips.php:5
+msgid ""
+"Enter the email address you would like the administrator notification email "
+"sent from, or select the email from available email form fields."
+msgstr ""
+
+#: tooltips.php:6
+msgid ""
+"Enter a comma separated list of email addresses you would like to receive a "
+"BCC of the administrator notification email."
+msgstr ""
+
+#: tooltips.php:7
+msgid ""
+"Select the email form field that the user notification email should be sent "
+"to."
+msgstr ""
+
+#: tooltips.php:8
+msgid ""
+"Enter a comma separated list of email addresses you would like to receive a "
+"BCC of the user notification email."
+msgstr ""
+
+#: tooltips.php:9
+msgid ""
+"Enter the email address you would like the user notification email sent from."
+msgstr ""
+
+#: tooltips.php:10
+msgid ""
+"Enter the email address you would like to be used as the reply to address "
+"for the user notification email."
+msgstr ""
+
+#: tooltips.php:11
+msgid "Enter the title of your form."
+msgstr ""
+
+#: tooltips.php:12
+msgid "Form Description"
+msgstr ""
+
+#: tooltips.php:12
+msgid ""
+"Enter a description for your form. This may be used for user instructions."
+msgstr ""
+
+#: tooltips.php:13
+msgid "Form Label Placement"
+msgstr ""
+
+#: tooltips.php:13
+msgid ""
+"Select the label placement.  Labels can be top aligned above a field, left "
+"aligned to the left of a field, or right aligned to the left of a field."
+msgstr ""
+
+#: tooltips.php:14
+msgid "Form Button Text"
+msgstr ""
+
+#: tooltips.php:14
+msgid "Enter the text you would like to appear on the form submit button."
+msgstr ""
+
+#: tooltips.php:15
+msgid "Form Button Image"
+msgstr ""
+
+#: tooltips.php:15
+msgid ""
+"Enter the path to an image you would like to use as the form submit button."
+msgstr ""
+
+#: tooltips.php:16
+msgid "Form CSS Class Name"
+msgstr ""
+
+#: tooltips.php:16
+msgid ""
+"Enter the CSS class name you would like to use in order to override the "
+"default styles for this form."
+msgstr ""
+
+#: tooltips.php:17
+msgid "Confirmation Message Text"
+msgstr ""
+
+#: tooltips.php:17
+msgid ""
+"Enter the text you would like the user to see on the confirmation page of "
+"this form."
+msgstr ""
+
+#: tooltips.php:18
+msgid "Redirect Form to Page"
+msgstr ""
+
+#: tooltips.php:18
+msgid ""
+"Select the page you would like the user to be redirected to after they have "
+"submitted the form."
+msgstr ""
+
+#: tooltips.php:19
+msgid "Redirect Form to URL"
+msgstr ""
+
+#: tooltips.php:19
+msgid ""
+"Enter the URL of the webpage you would like the user to be redirected to "
+"after they have submitted the form."
+msgstr ""
+
+#: tooltips.php:20
+msgid "Pass Data Via Query String"
+msgstr ""
+
+#: tooltips.php:20
+msgid ""
+"To pass field data to the confirmation page, build a Query String using the "
+"'Insert form field' drop down. <a href='http://en.wikipedia.org/wiki/"
+"Query_string' target='_blank'>..more info on querystrings &raquo;</a>"
+msgstr ""
+
+#: tooltips.php:21
+msgid ""
+"Enter the label of the form field.  This is the field title the user will "
+"see when filling out the form."
+msgstr ""
+
+#: tooltips.php:22
+msgid "Recaptcha Theme"
+msgstr ""
+
+#: tooltips.php:22
+msgid ""
+"Select the visual theme for the reCAPTCHA field the available options to "
+"better match your site design."
+msgstr ""
+
+#: tooltips.php:23
+msgid ""
+"Select the custom field name from available existing custom fields, or enter "
+"a new custom field name."
+msgstr ""
+
+#: tooltips.php:24
+msgid "Field type"
+msgstr ""
+
+#: tooltips.php:24
+msgid "Select the type of field from the available form fields."
+msgstr ""
+
+#: tooltips.php:25
+msgid "Field Name Format"
+msgstr ""
+
+#: tooltips.php:25
+msgid ""
+"Select the format you would like to use for the Name field.  There are 3 "
+"options, Normal which includes First and Last Name, Extended which adds "
+"Prefix and Suffix, or Simple which is a single input field."
+msgstr ""
+
+#: tooltips.php:26
+msgid "Field Date Format"
+msgstr ""
+
+#: tooltips.php:26
+msgid ""
+"Select the format you would like to use for the date input.  Available "
+"options are MM/DD/YYYY and DD/MM/YYYY."
+msgstr ""
+
+#: tooltips.php:27
+msgid "Allowed File Extensions"
+msgstr ""
+
+#: tooltips.php:27
+msgid ""
+"Enter that allowed file extensions for file uploads.  This will limit what "
+"type of files a user may upload."
+msgstr ""
+
+#: tooltips.php:28
+msgid "Phone Number Format"
+msgstr ""
+
+#: tooltips.php:28
+msgid ""
+"Select the format you would like to use for the phone input.  Available "
+"options are domestic US/CANADA style phone number and international long "
+"format phone number."
+msgstr ""
+
+#: tooltips.php:29
+msgid "Field Description"
+msgstr ""
+
+#: tooltips.php:29
+msgid ""
+"Enter the description for the form field.  This will be displayed to the "
+"user and provide some direction on how the field should be filled out or "
+"selected."
+msgstr ""
+
+#: tooltips.php:30
+msgid "Required Field"
+msgstr ""
+
+#: tooltips.php:30
+msgid ""
+"Select this option to make the form field required.  A required field will "
+"prevent the form from being submitted if it is not filled out or selected."
+msgstr ""
+
+#: tooltips.php:31
+msgid ""
+"Select this option to limit user input to unique values only.  This will "
+"require that a value entered in a field does not currently exist in the "
+"entry database for that field."
+msgstr ""
+
+#: tooltips.php:32
+msgid "Number Range"
+msgstr ""
+
+#: tooltips.php:32
+msgid ""
+"Enter the minimum and maximum values for this form field.  This will require "
+"that the value entered by the user must fall within this range."
+msgstr ""
+
+#: tooltips.php:33
+msgid ""
+"Enter the admin label of the form field.  Entering a value in this field "
+"will override the Field Label when displayed in the Gravity Forms "
+"administration tool."
+msgstr ""
+
+#: tooltips.php:34
+msgid ""
+"Select a form field size from the available options.  This will set the "
+"width of the field."
+msgstr ""
+
+#: tooltips.php:35
+msgid "If you would like to pre-populate the value of a field, enter it here."
+msgstr ""
+
+#: tooltips.php:36
+msgid ""
+"If you would like to override the default error validation for a field, "
+"enter it here.  This message will be displayed if there is an error with "
+"this field when the user submits the form."
+msgstr ""
+
+#: tooltips.php:37
+msgid "reCaptcha Language"
+msgstr ""
+
+#: tooltips.php:37
+msgid ""
+"Select the language you would like to use for the reCAPTCHA display from the "
+"available options."
+msgstr ""
+
+#: tooltips.php:38
+msgid ""
+"Enter the CSS class name you would like to use in order to override the "
+"default styles for this field."
+msgstr ""
+
+#: tooltips.php:39
+msgid ""
+"Select the visibility for this field. Field visibility set to Everyone will "
+"be visible by the user submitting the form. Form field visibility set to "
+"Admin Only will only be visible within the Gravity Forms administration tool."
+"<br /><br />Setting a field to Admin Only is useful for creating fields that "
+"can be used to set a status or priority level on submitted entries."
+msgstr ""
+
+#: tooltips.php:40
+msgid "Field Choices"
+msgstr ""
+
+#: tooltips.php:40
+msgid ""
+"Add Choices to this field. You can mark each choice as checked by default by "
+"using the radio/checkbox fields on the left."
+msgstr ""
+
+#: tooltips.php:41
+msgid ""
+"Select which categories are displayed. You can choose to display all of them "
+"or select individual ones."
+msgstr ""
+
+#: tooltips.php:42
+msgid "Image Meta"
+msgstr ""
+
+#: tooltips.php:42
+msgid ""
+"Select one or more image metadata field to be displayed along with the image "
+"upload field. They enable users to enter additional information about the "
+"uploaded image."
+msgstr ""
+
+#: tooltips.php:43
+msgid ""
+"Standard Fields provide basic form functionality. Use them to create a wide "
+"variety of flexible fields."
+msgstr ""
+
+#: tooltips.php:44
+msgid ""
+"Advanced Fields are for specific uses.  They enable advanced formatting of "
+"regularly used fields such as Name, Email, Address, etc."
+msgstr ""
+
+#: tooltips.php:45
+msgid ""
+"Post Fields allow you to add fields to your form that create Post Drafts in "
+"WordPress from the submitted data."
+msgstr ""
+
+#: tooltips.php:46
+msgid "Export Selected Form"
+msgstr ""
+
+#: tooltips.php:46
+msgid ""
+"Select the form you would like to export entry data from. You may only "
+"export data from one form at a time."
+msgstr ""
+
+#: tooltips.php:47
+msgid "Export Selected Fields"
+msgstr ""
+
+#: tooltips.php:47
+msgid ""
+"Select the fields from the select form you would like to export data from."
+msgstr ""
+
+#: tooltips.php:48
+msgid "Export Date Range"
+msgstr ""
+
+#: tooltips.php:48
+msgid ""
+"Select a date range. Setting a range will only export entries submitted "
+"during that date range. If no range is set, all entries will be exported."
+msgstr ""
+
+#: tooltips.php:49
+msgid "Settings License Key"
+msgstr ""
+
+#: tooltips.php:49
+msgid ""
+"Your Gravity Forms support license key is used to verify your support "
+"package, enable automatic updates and receive support."
+msgstr ""
+
+#: tooltips.php:50
+msgid ""
+"Select yes or no to enable or disable CSS output.  Setting this to no will "
+"disable the standard Gravity Forms CSS from being included in your theme."
+msgstr ""
+
+#: tooltips.php:51
+msgid "reCaptcha Public Key"
+msgstr ""
+
+#: tooltips.php:51
+msgid ""
+"Enter your reCAPTCHA Public Key, if you do not have a key you can register "
+"for one at the provided link.  reCAPTCHA is a free service."
+msgstr ""
+
+#: tooltips.php:52
+msgid "reCaptcha Private Key"
+msgstr ""
+
+#: tooltips.php:52
+msgid ""
+"Enter your reCAPTCHA Private Key, if you do not have a key you can register "
+"for one at the provided link.  reCAPTCHA is a free service."
+msgstr ""
+
+#: tooltips.php:53
+msgid "Entries Conversion"
+msgstr ""
+
+#: tooltips.php:53
+msgid ""
+"Conversion is the percentage of form views that generated an entry. If a "
+"form was viewed twice, and one entry was generated, the conversion will be "
+"50%."
+msgstr ""
+
+#: print-entry_list.php:15
+msgid "Form Id and Lead Id are required parameters."
+msgstr ""

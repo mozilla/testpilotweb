@@ -1,0 +1,14 @@
+/*
+Theme Name: Test Pilot Test Cases
+Description: Test Pilot Test Cases wordpress theme
+Version: 1.0
+Author: Mozilla | Neil Lee
+Author URI: http://www.mozilla.com/
+*/
+
+
+/* import stylesheets and hide from ie/mac \*/
+/* @import url("style/css/reset.css"); */
+@import url("style/css/master.css");
+@import url("style/css/ie.css");
+/* end import/hide */

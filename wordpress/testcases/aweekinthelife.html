@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>Mozilla Labs Test Pilot</title>
+  <link rel="stylesheet" type="text/css" media="all" href="/css/screen.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="/css/subpage.css" />
+  <link href="http://testpilot/wordpress/wp-content/themes/testpilot/style.css" rel="stylesheet" type="text/css" media="screen">
+  
+
+</head>
+<body>
+
+  <div id="container">
+    <div id="logo"><a href="http://labs.mozilla.com">
+       <img src="../../images/logo.png" border="0"></a>
+    </div>
+	<div class="button">
+	<span class="menuItem"><a href="../index.html">Home</a></span>
+	<span class="menuItem"><a href="../principles.html">Guiding Principles</a></span>
+
+	<span class="menuItem"><a href="../privacy.html">Privacy Policy</a></span>
+	<span class="menuOn"><a href="index.html">Test Cases</a></span>
+   </div>
+    <div id="content">
+   
+   <div id="testcases-content">
+   
+	<h1>A Week in the Life of a Browser</h1>
+	<h2>Introduction</h2>
+        <p>How much time do you spend in your Web browser every day? More time than you spend in your car? </p>
+        <p>How do you use your browser in the morning, the afternoon, the evening, the weekend?  Will you still be using it the same way a year from now?</p>
+	<p>Is your browser robust enough to work for you smoothly all the time?</p>
+        <p>For this study, we would like to explore what Firefox does to facilitate your use of the Web over the course a year. We will periodically collect data on the browser's basic performance for one week, running the same study again every second month.  The main goal is to explore the larger trends of how average browser use changes over time, which may help us design a better browser that works adaptively.</p>
+        <p>This study is inspired by several test proposals that we received in the past few months, e.g. <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Overall_performance">Overall Performance </a>, <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Memory_usage">Memory Usage</a>, and <a href="https://wiki.mozilla.org/Labs/Test_Pilot/Test_Proposals/Window_Metrics">Window Metrics</a>.</p>
+				  
+        <div class="indent">
+	<span class="bold">Test Champion:<a href="http://twitter.com/jinghuaz">Jinghua Zhang </a>, Usability Catalyst in Mozilla Labs<br/>
+	Test Duration: Periodical study*, run 1 week every 60 days <br/></span>
+	*For the periodical study, users can choose to opt in or out of the study at any time. Each study phase is independent and equally important to us. Whether you choose to participate for the whole year, or only for a single week, the data that you share is extremely valuable.
+	</div>
+					
+	<p>This test is not localized to any other languages yet. If you have any questions about this test or are interested in helping us improve test metrics, please join us in the <a href="http://groups.google.com/group/mozilla-labs-testpilot">Test Pilot discussion group</a>.</p>
+					
+	<p class="spacer_sm"/>
+	<h2>Study Detail</h2>
+        <div class="question_callout">
+          <p><span class="bolder">Question 1: How does a browser get started?</span></p>
+						
+          <p>In the everyday life of a browser, it can be activated for many different reasons: woken up from idle mode after a weekend, restarted after installation of a new add-on, opened again after a crash, etc.. Meanwhile, people have different expecations when they activate a browser. We'd like to find out:</p>
+          <ul>
+            <li>How long does the browser stay active in an average week?</li>
+            <li>When and how often does the browser start and restart?</li> 
+            <li>How often does the browser start with a session restore (i.e., start with the same tabs open that it had when last closed)? How many tabs are resstored this way?  How often does session restore run into errors?</li>
+            <li>At what times of the day do most users activate their browsers?</li>
+          </ul>
+	<p><span class="bold">Main Data Type:</span></p>
+	<p>To understand how a user starts and stops the Firefox browser, we will record and timestamp when Firefox is started, restarted, or quit. We will not record any URLs that are loaded or restored, or any words typed in the search bar.</p>
+      </div>
+					
+      <div class="question_callout">
+	<p><span class="bolder">Question 2: What does the browser do to help its user during an average week week?</span></p>
+	<p>Besides browsing, people use browsers for many things: bookmarking their favorite websites, managing online activites through add-ons, organizing browsing history, etc. We'd like to find out:</p>
+        <ul>
+          <li>How many browser windows and tabs are open at different times during the week?</li>
+          <li>How many addons are installed? How many are actively used during the week?</li>
+          <li>How many bookmarks does the browser collect? How many of them are used in the week?  How many folders do people have for bookmarks, and how deeply are those folders nested?</li>
+          <li>How often is the Firefox search box used to do a search?</li>
+          <li>How happy are users with their Firefox experience?</li>
+        </ul>					
+        <p><span class="bold">Main Data Type:</span></p>
+	<p>To understand user interactions with current Firefox, we will record numbers of bookmarks, bookmark folders, windows, tabs, and downloads, as well as timestamps of active browser use and search events.  We will also record, though we will not publish, the names of add-ons that you have installed.  We will <strong>not</strong> record any URL or name from your bookmarks, downloads, tabs, URL bar, or search bar; we will record only the fact of whether the above browser functions are used.</p>
+	
+	       </div>
+	 
+	<div id="submitted-cases">
+	<h2>User Submitted Test Cases</h2>
+	
+	<div class="entry">
+	<h3><a href="#">Lorem ipsum dolor sit amet</a></h3>
+	<ul>
+	<li>Submitted by: <strong>Neil Lee</strong> on November 15, 2009</li>
+	<li>Original URL: <strong><a href="#">http://www.testcase.com/example</a></strong></li>
+	<li><a href="#">4 Comments</a></li>
+	</ul>
+	
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p><a href="#"><strong>Lorem ipsum dolor sit amet</strong> continues &raquo;</a></p>
+
+	</div>
+	
+	<div class="entry">
+	<h3><a href="#">Lorem ipsum dolor sit amet</a></h3>
+	<ul>
+	<li>Submitted by: <strong>Neil Lee</strong> on November 15, 2009</li>
+	<li>Original URL: <strong><a href="#">http://www.testcase.com/example</a></strong></li>
+	<li><a href="#">4 Comments</a></li>
+	</ul>
+	
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p><a href="#"><strong>Lorem ipsum dolor sit amet</strong> continues &raquo;</a></p>
+
+	</div>
+	
+	
+	<div class="entry">
+	<h3><a href="#">Lorem ipsum dolor sit amet</a></h3>
+	<ul>
+	<li>Submitted by: <strong>Neil Lee</strong> on November 15, 2009</li>
+	<li>Original URL: <strong><a href="#">http://www.testcase.com/example</a></strong></li>
+	<li><a href="#">4 Comments</a></li>
+	</ul>
+	
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p><a href="#"><strong>Lorem ipsum dolor sit amet</strong> continues &raquo;</a></p>
+	
+	</div>
+
+	</div>	<!-- END User contributed content -->
+	   
+   </div> <!-- END testcases-content -->
+   
+   <div id="sidebar">
+   
+   <div id="contrbute">
+   <h3>Contribute your data</h3>
+   <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.</p>
+   <select>
+   <option>Choose a Test Case</option>
+   <option>---------------------</option>
+   <option>A Day in the Life of a Browser</option>
+   <option>Test Case #2</option> 
+   <option>Test Case #3</option>   
+   </select>
+   <p><a href="/wordpress/submit">Contribute now &raquo;</a></p>
+   </div>
+   
+   </div> <!-- END sidebar -->
+   
+   </div>
+   
+   
+   <div id="footer">
+     <img class="mozLogo" src="../images/mozilla-logo.png">Copyright &copy; 2005-2009 Mozilla. All rights reserved. &nbsp; &nbsp;
+     <a href="http://labs.mozilla.com/">Mozilla Labs</a> &nbsp; &nbsp;
+
+     <a href="http://www.mozilla.com/en-US/privacy-policy.html">Privacy Policy</a> &nbsp; &nbsp;
+     <a href="http://www.mozilla.com/en-US/about/legal.html">Legal Notices</a>
+   </div>
+  </div>
+</body>
+</html>

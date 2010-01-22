@@ -13,7 +13,7 @@ get_header(); ?>
 
 	<?php 
 
-		$categories = get_categories('child_of=4');
+		$categories = get_categories('child_of=3');
         
         echo '<h2>Current Test Cases</h2>';
 		foreach($categories as $category) {
@@ -23,7 +23,7 @@ get_header(); ?>
 
         }
         
-		$categories = get_categories('child_of=5');
+		$categories = get_categories('child_of=4');
         
         echo '<h3>Archived Test Cases</h3>';
 		foreach($categories as $category) {

@@ -40,46 +40,83 @@ exports.dataStoreInfo = {
 };
 
 exports.handlers = {
+  _dataStore: null,
+  _registeredListeners: [],
+  _listen: function(window, container, eventName, method, catchCap) {
+    // Keep a record of this so that we can automatically unregister during
+    // uninstall:
+    let self = this;
+    let handler = function(event) {
+      method.call(self, event);
+    };
+    container.addEventListener(eventName, handler, catchCap);
+
+    this._registeredListeners.push(
+      {window: window, container: container, eventName: eventName,
+       handler: handler, catchCap: catchCap});
+  },
+
+  onCmdMainSet: function(evt) {
+    let tag = evt.sourceEvent.target;
+    if (tag.tagName == "menuitem") {
+      console.info("You picked a menu item with the mouse.");
+      console.info("Command ID: " + tag.command);
+    } else if (tag.tagName == "key") {
+      console.info("You picked a menu item with the keyboard.");
+      console.info("Command ID: " + tag.command);
+    }
+    // Other properties of interest:  tag.label, evt.sourceEvent.type,
+    // evt.sourceEvent.keyCode
+  },
+
+  onCmdMenuBar: function(evt) {
+    console.info("You used a menu item! (bar)");
+    console.info("Source event is " + evt.sourceEvent);
+  },
+
+  /* Commands detected in the set:
+   *
+   *
+   * Commands detected in the bar:
+   *   "Firefox:About Mozilla Firefox", "Firefox:Preferences" (Mac)
+   *
+   * Commands not detected:
+   *    Rest of the Firefox menu (Mac)
+   *    Select All if by keyboard shortcut
+   *    Copy if by keyboard shortcut
+   */
+
+  onMenuBarMouseDown: function(evt) {
+    // Adding a mouseDown event listener to the mainMenuBar does not work
+    // (on Mac) -- is this because the menu bar is outside the XUL window
+    // and is owned by the OS?  Let's try it on Windows and see if it works...
+    console.info("You mousedowned on menu bar!");
+  },
+
   onNewWindow: function(window) {
-    // OK, for each window we need to stick an event listener on the main
-    // menu thingy...
+    // Register listeners.
 
     let mainCommandSet = window.document.getElementById("mainCommandSet");
-
     let mainMenuBar = window.document.getElementById("main-menubar");
-
-
-    /* TODO OK this basically works but weirdly, some menu items are
-     * detected by one and some are detected by the other... nearly
-     * everything seems to be the set, except for Preferences (in the Firefox
-     * menu on Mac) which is captured by the bar?  interesting.
-     *
-     * Also, commands invoked by keyboard shortcuts: some seem to get
-     * captured by this method, others do not.  (It captures View Source
-     * but not Select All or Copy...)
-     */
-    mainMenuBar.addEventListener("command", function(evt) {
-                                   console.info("You used a menu item! (bar)");
-                                   // evt is a XULCommandEvent... how to
-                                   // extract comand ID?
-                                 }, true);
-    mainCommandSet.addEventListener("command", function(evt) {
-                                   console.info("You used a menu item! (set)");
-                                 }, true);
-
-    /* TODO we will want to detect when somebody clicks on menu bar and
-     * then hunts around for a while before they find the command they
-     * want... this means also registering onMouseDown handlers to the
-     * menu bar?
-     */
+    this._listen(window, mainMenuBar, "mousedown", this.onMenuBarMouseDown, true);
+    this._listen(window, mainMenuBar, "command", this.onCmdMenuBar, true);
+    this._listen(window, mainCommandSet, "command", this.onCmdMainSet, true);
   },
+
   onWindowClosed: function(window) {
-    // TODO remove those event listeners or something
+    // Unregister all registered listeners for this window.
+
+    for (let i = 0; i < this._registeredListeners.length; i++) {
+      let rl = this._registeredListeners[i];
+      if (rl.window == window) {
+        rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
+      }
+    }
   },
   onAppStartup: function() {},
   onAppShutdown: function() {},
   onExperimentStartup: function(store) {
-    // TODO save reference to store
+    this._dataStore = store;
   },
   onExperimentShutdown: function() {},
   onEnterPrivateBrowsing: function() {},

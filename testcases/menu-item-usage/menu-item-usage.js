@@ -20,23 +20,13 @@ const UI_METHOD_SHORTCUT = 1; // using shortcut key to activate directly
 const UI_METHOD_ALT_NAV = 2; // navigation using alt key and choosing an item
 
 const MENU_INTERACTION_ABORTED = -1;
+const MENU_UNKNOWN_ITEM = -3;
 
 const UNDETECTABLE = -1; // Means there's a keyboard shortcut we can't detect
+const INDISTINCT = -2; // Means the item is detected but has no ID
 
-var COLUMNS = [
-  {property: "ui_method", type: TYPE_INT_32, displayName: "UI Method",
-   displayValue: ["Mouse", "Keyboard shortcut", "Alt key navigation"]},
-  {property: "start_menu_id", type: TYPE_INT_32,
-   displayName: "Starting Menu"},
-  {property: "explore_ms", type: TYPE_INT_32, displayName: "Milliseconds to find"},
-  {property: "explore_num", type: TYPE_INT_32, displayName: "Number of menus explored"},
-  {property: "menu_id", type: TYPE_INT_32, displayName: "Menu Chosen"},
-  {property: "item_id", type: TYPE_INT_32, displayName: "Item Chosen"},
-  {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time of Menu Choice",
-   displayValue: function(value) {return new Date(value).toLocaleString();}}];
-
-var CMD_ID_STRINGS = [
-     // File menu:
+var CMD_ID_STRINGS_BY_MENU = [
+  {menuName: "File", menuId: 0, menuItems: [
   {name: "New Window", mouse: "cmd_newNavigator", key: "key_newNavigator"},
   {name: "New Tab", mouse: "cmd_newNavigatorTab", key: "key_newNavigatorTab"},
   {name: "Open Location", mouse: "Browser:OpenLocation", key: "focusURLBar"},
@@ -50,10 +40,12 @@ var CMD_ID_STRINGS = [
   {name: "Print", mouse: "cmd_print", key: "printKb"},
   {name: "Import", mouse: "menu_import", key: null},
   {name: "Work Offline", mouse: "goOfflineMenuitem", key: null},
-  {name: "Exit", mouse: "cmd_quitApplication", key: "key_quitApplication"},
+  {name: "Exit", mouse: "cmd_quitApplication", key: "key_quitApplication"}
   // On Mac this is in the Firefox menu and called Quit Firefox
+   ]},
 
   // Edit menu:
+  {menuName: "Edit", menuId: 1, menuItems: [
   {name: "Undo", mouse: "cmd_undo", key: UNDETECTABLE},
   {name: "Redo", mouse: "cmd_redo", key: UNDETECTABLE},
   {name: "Cut", mouse: "cmd_cut", key: UNDETECTABLE},
@@ -63,12 +55,14 @@ var CMD_ID_STRINGS = [
   {name: "Select All", mouse: "cmd_selectAll", key: UNDETECTABLE},
   {name: "Find", mouse: "cmd_find", key: "key_find"},
   {name: "Find Again", mouse: "cmd_findAgain", key: "key_findAgain"},
-  {name: "Special Characters", mouse: UNDETECTABLE, key: UNDETECTABLE}, //Mac only
+  {name: "Special Characters", mouse: UNDETECTABLE, key: UNDETECTABLE} //Mac only
+   ]},
 
   //View menu:
-  {name: "Toolbars/Menu Bar", mouse: UNDETECTABLE, key: UNDETECTABLE},
-  {name: "Toolbars/Navigation Toolbar", mouse: UNDETECTABLE, key: UNDETECTABLE},
-  {name: "Toolbars/Bookmarks Toolbar", mouse: UNDETECTABLE, key: UNDETECTABLE},
+  {menuName: "View", menuId: 2, menuItems: [
+  {name: "Toolbars/Menu Bar", mouse: INDISTINCT, key: null},
+  {name: "Toolbars/Navigation Toolbar", mouse: INDISTINCT, key: null},
+  {name: "Toolbars/Bookmarks Toolbar", mouse: INDISTINCT, key: null},
   {name: "Toolbars/Customize", mouse: "cmd_CustomizeToolbars", key: null},
   {name: "Status Bar", mouse: "cmd_toggleTaskbar", key: null},
   {name: "Sidebar/Bookmarks", mouse: "menu_bookmarksSidebar", key: UNDETECTABLE},
@@ -87,9 +81,11 @@ var CMD_ID_STRINGS = [
   {name: "Character Encoding/Western", mouse: "charset.ISO-8859-1", key: null},
   {name: "Character Encoding/UTF-16", mouse: "UTF-16", key: null},
   {name: "View Source", mouse: "View:PageSource", key: "key_viewSource"},
-  {name: "Full Screen", mouse: "fullScreenItem", key: "key_fullScreen"},
+  {name: "Full Screen", mouse: "fullScreenItem", key: "key_fullScreen"}
+   ]},
 
   //History menu:
+  {menuName: "History", menuId: 3,  menuItems: [
   {name: "Back", mouse: "Browser:BackOrBackDuplicate", key: "goBackKb"},
   {name: "Forward", mouse: "Browser:ForwardOrForwardDuplicate", key:"goForwardKb"},
   {name: "Home", mouse: "historyMenuHome", key: "goHome"},
@@ -98,16 +94,20 @@ var CMD_ID_STRINGS = [
   {name: "Recently Closed Tab", mouse: INDISTINCT, key: null},
   {name: "Restore All Tabs", mouse: "menu_restoreAllTabs", key: null},
   {name: "Recently Closed Window", mouse: INDISTINCT, key: null},
-  {name: "Restore All Windows", mouse: "menu_restoreAllWindows", key: null},
+  {name: "Restore All Windows", mouse: "menu_restoreAllWindows", key: null}
+   ]},
 
   //Bookmarks menu:
+  {menuName: "Bookmarks", menuId: 4,  menuItems: [
   {name: "Bookmark This Page", mouse: "Browser:AddBookmarkAs", key: "addBookmarkAsKb"},
   {name: "Subscribe to This Page", mouse: "subscribeToPageMenuitem", key: null},
   {name: "Bookmark All Tabs", mouse: "Browser:BookmarkAllTabs", key: "bookmarkAllTabsKb"},
   {name: "Organize Bookmarks", mouse: UNDETECTABLE, key: UNDETECTABLE},
-  {name: "(User Bookmark Item)", mouse: INDISTINCT, key: null},
+  {name: "(User Bookmark Item)", mouse: INDISTINCT, key: null}
+   ]},
 
   //Tools menu:
+  {menuName: "Tools", menuId: 5, menuItems: [
   {name: "Web Search", mouse: "Tools:Search", key: "key_search"},
   {name: "Downloads", mouse: "Tools:Downloads", key: "key_openDownloads"},
   {name: "Add-Ons", mouse: "Tools:Addons", key: null},
@@ -115,17 +115,21 @@ var CMD_ID_STRINGS = [
   {name: "Error Console", mouse: "javascriptConsole", key: UNDETECTABLE},
   {name: "Page Info", mouse: "View:PageInfo", key: "key_viewInfo"}, // No key on Windows
   {name: "Private Browsing", mouse: "Tools:PrivateBrowsing", key: "key_privatebrowsing"},
-  {name: "Clear Recent History", mouse: "Tools:Sanitize", key: null},
-  {name: "Options", mouse: "menu_preferences", key: null },
+  {name: "Clear Recent History", mouse: "Tools:Sanitize", key: "key_sanitize"},
+  {name: "Options", mouse: "menu_preferences", key: null }
   // On Mac this is in the Firefox menu and called Preferences, and it has
   // a key (cmd-,) but we are notified as if it were a mouse event.
+   ]},
 
   //Windows menu (Mac Only):
+  {menuName: "Windows", menuId: 6, menuItems: [
   {name: "Minimize", mouse: UNDETECTABLE, key: UNDETECTABLE},
   {name: "Zoom", mouse: UNDETECTABLE, key: null},
-  {name: "(User Window)", mouse: "window-*", key: null},
+  {name: "(User Window)", mouse: "window-*", key: null}
+   ]},
 
   //Help menu:
+  {menuName: "Help", menuId: 7, menuItems: [
   {name: "Firefox Help", mouse: "menu_openHelp", key: UNDETECTABLE},
   {name: "For Internet Explorer Users", mouse: INDISTINCT, key: null}, // Windows only
   {name: "Troubleshooting Information", mouse: "troubleShooting", key: null},
@@ -135,8 +139,37 @@ var CMD_ID_STRINGS = [
   {name: "Check for Updates", mouse: "checkForUpdates", key: null},
   {name: "About Mozilla Firefox", mouse: "aboutName", key: null}
   // On Mac this is in the Firefox menu.
-
+   ]}
 ];
+
+var CMD_ID_STRINGS = [];
+
+var makelist = function() {
+  for each (let menu in CMD_ID_STRINGS_BY_MENU) {
+    for each (let item in menu.menuItems) {
+      item.menuName = menu.menuName;
+      item.menuId = menu.menuId;
+    }
+    CMD_ID_STRINGS = CMD_ID_STRINGS.concat(menu.menuItems);
+  }
+};
+
+makelist();
+
+
+var COLUMNS = [
+  {property: "ui_method", type: TYPE_INT_32, displayName: "UI Method",
+   displayValue: ["Mouse", "Keyboard shortcut", "Alt key navigation"]},
+  {property: "start_menu_id", type: TYPE_INT_32,
+   displayName: "Starting Menu"},
+  {property: "explore_ms", type: TYPE_INT_32, displayName: "Milliseconds to find"},
+  {property: "explore_num", type: TYPE_INT_32, displayName: "Menus explored"},
+  {property: "menu_id", type: TYPE_INT_32, displayName: "Menu Chosen",
+   displayValue: function(val) {return CMD_ID_STRINGS_BY_MENU[val].menuName;}},
+  {property: "item_id", type: TYPE_INT_32, displayName: "Item Chosen",
+   displayValue: function(val) {return CMD_ID_STRINGS[val].name;}},
+  {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time of Menu Choice",
+   displayValue: function(val) {return new Date(val).toLocaleString();}}];
 
 
 exports.dataStoreInfo = {
@@ -167,28 +200,42 @@ exports.handlers = {
        handler: handler, catchCap: catchCap});
   },
 
+  storeMenuChoice: function( isKeyboard, idString ) {
+    /* TODO: allow for alt-key navigation
+     * TODO: record start_menu_id, explore_ms, and explore_num.
+     */
+    let itemId = MENU_UNKNOWN_ITEM;
+    let menuId = MENU_UNKNOWN_ITEM;
+    for (let itemNum in CMD_ID_STRINGS) {
+      let item = CMD_ID_STRINGS[itemNum];
+      if ((isKeyboard && idString == item.key) ||
+        (!isKeyboard && idString == item.mouse)) {
+        itemId = itemNum;
+        menuId = item.menuId;
+        break;
+      }
+    }
+    // If we got to here and found no match... this should not happen but
+    // we'll record MENU_UNKNOWN_ITEM into menu_id and item_id.
+    this._dataStore.storeEvent({
+      ui_method: isKeyboard?UI_METHOD_SHORTCUT:UI_METHOD_MOUSE,
+      start_menu_id: 0,
+      explore_ms: 0,
+      explore_num: 0,
+      menu_id: menuId,
+      item_id: itemId,
+      timestamp: Date.now()
+    });
+  },
+
   onCmdMainSet: function(evt) {
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
-      console.info("You picked a menu item with the mouse.");
-      console.info("Command ID: " + tag.command);
-      this._tempStorage.push( "CmdSet - Mouse - " + tag.command);
+      this.storeMenuChoice(false, tag.command);
     } else if (tag.tagName == "key") {
-      console.info("You picked a menu item with the keyboard.");
-      if (tag.command) {
-        console.info("Command: " + tag.command);
-        this._tempStorage.push( "CmdSet - Key - " + tag.command);
-      } else {
-        console.info("ID: " + tag.id);
-        this._tempStorage.push( "CmdSet - Key - " + tag.id);
-      }
-      // TODO tag.command is undefined!!!
-      // console.info("Command ID: " + tag.command);
-      // Dump out the guts of the object:
-      /*for (let x in tag) {
-        console.info("Tag[" + x + "] = " + tag[x]);
-      }*/
+      this.storeMenuChoice(true, tag.command?tag.command:tag.id );
     }
+
     // Other properties of interest:  tag.label, evt.sourceEvent.type,
     // evt.sourceEvent.keyCode
   },
@@ -200,19 +247,18 @@ exports.handlers = {
     // evt.sourceEvent is null, and all other fields seem to be the
     // same no matter whether it's keyboard or mouse... how can we
     // distinguish???
-  },
 
-  /* Commands detected in the set:
-   *
-   *
-   * Commands detected in the bar:
-   *   "Firefox:About Mozilla Firefox", "Firefox:Preferences" (Mac)
-   *
-   * Commands not detected:
-   *    Rest of the Firefox menu (Mac)
-   *    Select All if by keyboard shortcut
-   *    Copy if by keyboard shortcut
-   */
+    // Answer... this almost never catches the event for keyboard
+    // shortcuts (only for apple-, ->preferences on mac).  If we
+    // catch the event through the MenuBar it usually means there's no
+    // keyboard equivalent OR the keyboard equivalent cannot be caught.
+
+    if (evt.target.id) {
+      this.storeMenuChoice( false, evt.target.id );
+    } else {
+      // TODO:  Debug INDISTINCT items here.
+    }
+  },
 
   onPopupHidden: function(evt) {
     this._popupCounter--;
@@ -282,19 +328,48 @@ exports.handlers = {
 };
 
 exports.webContent = {
-  inProgressHtml: '<p>You are running menu item usage study.</p><div id="displaydiv"></div>',
+  inProgressHtml: '<p>The menu item usage study is collecting data.</p>'
+  + '<p><a onclick="showRawData(4);">Raw Data</a></p>'
+  + '<h3>Your Most Often Used Menu Items Are:</h3>'
+  + '<div id="displaydiv"></div>',
 
   completedHtml: 'Thanks for completing menu item usage study.',
 
   upcomingHtml: "",
 
   onPageLoad: function(experiment, document, graphUtils) {
+    let rawData = experiment.dataStoreAsJSON;
+    let stats = [];
+    for (let row in rawData) {
+      let id = rawData[row].item_id;
+      let match = false;
+      for (let item in stats) {
+        if (stats[item].id == id) {
+          match = true;
+          stats[item].quantity ++;
+          break;
+        }
+      }
+      if (!match) {
+        stats.push( {id: id, quantity: 1} );
+      }
+    }
+    // Sort by quantity, descending:
+    stats.sort(function(a, b) { return b.quantity - a.quantity;});
+
+    // look at ui_method, explore_ms, explore_num, start_menu_id, timestamp
+
     let div = document.getElementById("displaydiv");
     let str = "";
-    let tmpStorage = exports.handlers._tempStorage;
+    for (let item in stats) {
+      //console.info("Stats[" + item + "] = " + stats[item]);
+      let id = stats[item].id;
+      str += CMD_ID_STRINGS[id].menuName + " &gt; " + CMD_ID_STRINGS[id].name + ": " + stats[item].quantity + "<br/>";
+    }
+    /*let tmpStorage = exports.handlers._tempStorage;
     for (let x in tmpStorage) {
       str += tmpStorage[x] + "<br/>";
-    }
+    }*/
     div.innerHTML = str;
   }
 };

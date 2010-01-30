@@ -23,7 +23,6 @@ const MENU_ABORT = -1;
 const MENU_UNKNOWN_ITEM = -3;
 
 const UNDETECTABLE = -1; // Means there's a keyboard shortcut we can't detect
-const INDISTINCT = -2; // Means the item is detected but has no ID
 
 var CMD_ID_STRINGS_BY_MENU = [
   {menuName: "File", menuId: 0, menuItems: [
@@ -60,9 +59,7 @@ var CMD_ID_STRINGS_BY_MENU = [
 
   //View menu:
   {menuName: "View", menuId: 2, menuItems: [
-  {name: "Toolbars/Menu Bar", mouse: INDISTINCT, key: null},
-  {name: "Toolbars/Navigation Toolbar", mouse: INDISTINCT, key: null},
-  {name: "Toolbars/Bookmarks Toolbar", mouse: INDISTINCT, key: null},
+  {name: "Toolbars", mouse: "viewToolbarsMenu", key: null},
   {name: "Toolbars/Customize", mouse: "cmd_CustomizeToolbars", key: null},
   {name: "Status Bar", mouse: "cmd_toggleTaskbar", key: null},
   {name: "Sidebar/Bookmarks", mouse: "menu_bookmarksSidebar", key: UNDETECTABLE},
@@ -90,10 +87,10 @@ var CMD_ID_STRINGS_BY_MENU = [
   {name: "Forward", mouse: "Browser:ForwardOrForwardDuplicate", key:"goForwardKb"},
   {name: "Home", mouse: "historyMenuHome", key: "goHome"},
   {name: "Show All History", mouse: UNDETECTABLE, key: UNDETECTABLE},
-  {name: "(User History Item)", mouse: INDISTINCT, key: null},
-  {name: "Recently Closed Tab", mouse: INDISTINCT, key: null},
+  {name: "(User History Item)", mouse: "goPopup", key: null},
+  {name: "Recently Closed Tab", mouse: "historyUndoPopup", key: null},
   {name: "Restore All Tabs", mouse: "menu_restoreAllTabs", key: null},
-  {name: "Recently Closed Window", mouse: INDISTINCT, key: null},
+  {name: "Recently Closed Window", mouse: "historyUndoWindowPopup", key: null},
   {name: "Restore All Windows", mouse: "menu_restoreAllWindows", key: null}
    ]},
 
@@ -103,7 +100,7 @@ var CMD_ID_STRINGS_BY_MENU = [
   {name: "Subscribe to This Page", mouse: "subscribeToPageMenuitem", key: null},
   {name: "Bookmark All Tabs", mouse: "Browser:BookmarkAllTabs", key: "bookmarkAllTabsKb"},
   {name: "Organize Bookmarks", mouse: UNDETECTABLE, key: UNDETECTABLE},
-  {name: "(User Bookmark Item)", mouse: INDISTINCT, key: null}
+  {name: "(User Bookmark Item)", mouse: "bookmarksMenuPopup", key: null}
    ]},
 
   //Tools menu:
@@ -131,7 +128,7 @@ var CMD_ID_STRINGS_BY_MENU = [
   //Help menu:
   {menuName: "Help", menuId: 7, menuItems: [
   {name: "Firefox Help", mouse: "menu_openHelp", key: UNDETECTABLE},
-  {name: "For Internet Explorer Users", mouse: INDISTINCT, key: null}, // Windows only
+  {name: "For Internet Explorer Users", mouse: "menu_HelpPopup", key: null}, // Windows only
   {name: "Troubleshooting Information", mouse: "troubleShooting", key: null},
   {name: "Release Notes", mouse: "releaseNotes", key: null},
   {name: "Report Broken Web Site", mouse: "menu_HelpPopup_reportertoolmenu", key: null},
@@ -310,7 +307,17 @@ exports.handlers = {
     if (evt.target.id) {
       this.storeMenuChoice( false, evt.target.id );
     } else {
-      // TODO:  Debug INDISTINCT items here.
+      // If the item doesn't have an ID, keep going up through its parents
+      // until you find one that does.
+      let node = evt.target;
+      while (! node.id) {
+        node = node.parentNode;
+        if (!node) {
+          this.storeMenuChoice( false, "Unknown Item" );
+          return;
+        }
+      }
+      this.storeMenuChoice( false, node.id );
     }
   },
 

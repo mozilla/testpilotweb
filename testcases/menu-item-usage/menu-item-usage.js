@@ -19,7 +19,7 @@ const UI_METHOD_MOUSE = 0; // clicking through menus with mouse
 const UI_METHOD_SHORTCUT = 1; // using shortcut key to activate directly
 const UI_METHOD_ALT_NAV = 2; // navigation using alt key and choosing an item
 
-const MENU_INTERACTION_ABORTED = -1;
+const MENU_ABORT = -1;
 const MENU_UNKNOWN_ITEM = -3;
 
 const UNDETECTABLE = -1; // Means there's a keyboard shortcut we can't detect
@@ -153,9 +153,32 @@ var makelist = function() {
     CMD_ID_STRINGS = CMD_ID_STRINGS.concat(menu.menuItems);
   }
 };
-
 makelist();
 
+function interpretMenuName(id) {
+  if (id == MENU_ABORT) {
+    return "Aborted";
+  } else if (id == MENU_UNKNOWN_ITEM) {
+    return "Unknown";
+  } else {
+    if (!CMD_ID_STRINGS_BY_MENU[id]) {
+      console.info("Unknown menu id: " + id);
+      return "Unknown";
+    } else {
+      return CMD_ID_STRINGS_BY_MENU[id].menuName;
+    }
+  }
+}
+
+function interpretItemName(id) {
+  if (id == MENU_ABORT) {
+    return "Aborted";
+  } else if (id == MENU_UNKNOWN_ITEM) {
+    return "Unknown";
+  } else {
+    return CMD_ID_STRINGS[id].name;
+  }
+}
 
 var COLUMNS = [
   {property: "ui_method", type: TYPE_INT_32, displayName: "UI Method",
@@ -165,9 +188,9 @@ var COLUMNS = [
   {property: "explore_ms", type: TYPE_INT_32, displayName: "Milliseconds to find"},
   {property: "explore_num", type: TYPE_INT_32, displayName: "Menus explored"},
   {property: "menu_id", type: TYPE_INT_32, displayName: "Menu Chosen",
-   displayValue: function(val) {return CMD_ID_STRINGS_BY_MENU[val].menuName;}},
+   displayValue: interpretMenuName},
   {property: "item_id", type: TYPE_INT_32, displayName: "Item Chosen",
-   displayValue: function(val) {return CMD_ID_STRINGS[val].name;}},
+   displayValue: interpretItemName},
   {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time of Menu Choice",
    displayValue: function(val) {return new Date(val).toLocaleString();}}];
 
@@ -185,6 +208,7 @@ exports.handlers = {
   _huntingState: false,
   _startMenuHuntingTime: 0,
   _huntingNumMenus: 0,
+  _finishHuntingTimer: null,
   _tempStorage: [],
   _listen: function(window, container, eventName, method, catchCap) {
     // Keep a record of this so that we can automatically unregister during
@@ -202,7 +226,7 @@ exports.handlers = {
 
   storeMenuChoice: function( isKeyboard, idString ) {
     /* TODO: allow for alt-key navigation
-     * TODO: record start_menu_id, explore_ms, and explore_num.
+     * TODO: Match on ids with * wildcards in them!!
      */
     let itemId = MENU_UNKNOWN_ITEM;
     let menuId = MENU_UNKNOWN_ITEM;
@@ -215,17 +239,40 @@ exports.handlers = {
         break;
       }
     }
+
+    // Use hunting state to calculate start_menu_id, explore_ms,
+    // and explore_num!
+    let exploreMs = 0;
+    let exploreNum = 0;
+    let startMenuId = 0;
+    if (this._huntingState) {
+      exploreMs = Date.now() - this._startMenuHuntingTime;
+      exploreNum = this._huntingNumMenus;
+      // TODO start_menu_id
+    }
+
     // If we got to here and found no match... this should not happen but
     // we'll record MENU_UNKNOWN_ITEM into menu_id and item_id.
     this._dataStore.storeEvent({
       ui_method: isKeyboard?UI_METHOD_SHORTCUT:UI_METHOD_MOUSE,
-      start_menu_id: 0,
-      explore_ms: 0,
-      explore_num: 0,
+      start_menu_id: startMenuId,
+      explore_ms: exploreMs,
+      explore_num: exploreNum,
       menu_id: menuId,
       item_id: itemId,
       timestamp: Date.now()
     });
+
+    // TODO If there is a _finishHuntingTimer, cancel it.
+    // Restore hunting state to default:
+    console.info("Oh, you picked something.  You must be done hunting.");
+    if (this._finishHuntingTimer) {
+      this._finishHuntingTimer.cancel();
+      this._finishHuntingTimer = null;
+    }
+    this._huntingState = false;
+    this._startMenuHuntingTime = 0;
+    this._huntingNumMenus = 0;
   },
 
   onCmdMainSet: function(evt) {
@@ -238,6 +285,13 @@ exports.handlers = {
 
     // Other properties of interest:  tag.label, evt.sourceEvent.type,
     // evt.sourceEvent.keyCode
+  },
+
+  cancelHuntingTimer: function() {
+    if (this._finishHuntingTimer) {
+      this._finishHuntingTimer.cancel();
+      this._finishHuntingTimer = null;
+    }
   },
 
   onCmdMenuBar: function(evt) {
@@ -260,41 +314,71 @@ exports.handlers = {
     }
   },
 
-  onPopupHidden: function(evt) {
-    this._popupCounter--;
-    console.info("Popups: " + this._popupCounter);
-    if (this._popupCounter == 0) {
-      // start a timer for a couple seconds before we declare that this was an
-      // abort?  What, like 1 second?  And if another popup is shown or a
-      // command is picked, then we cancel the timer, but if the timer runs
-      // out then we count it as an abort.
-      let endTime = Date.now();
-      this._huntingState = false;
-      console.info("You stopped hunting through menus.");
-      console.info("You hunted through " + this._huntingNumMenus + " menus.");
-      let huntingTime = endTime - this._startMenuHuntingTime;
-      console.info("For " + huntingTime + " ms.");
-    }
-  },
-
-  onHuntTimeout: function(evt) {
-  },
+  /* TODO flaws with the show/hide popup notifications:
+   * For the task bar menu, we get the onPopupShown
+   * notification but we do not get the onPopupHidden notification!  We need
+   * to either capture both, or preferrably, none.
+   * For the main menu bar, we seem to occasionally miss an onPopupShown,
+   * which leads to the opposite problem - popupCounter drops to 0 when it
+   * really shouldn't, which leads to extra ABORTs being recorded.
+   */
 
   onPopupShown: function(evt) {
     this._popupCounter++;
     console.info("Popups: " + this._popupCounter);
     if (!this._huntingState) {
       this._huntingState = true;
+      // TODO identify the menu where you started hunting...
       this._startMenuHuntingTime = Date.now();
       this._huntingNumMenus = 1;
     } else {
       this._huntingNumMenus++;
+      // If there is a _finishHuntingTimer, cancel it.
+      console.info("Oh, you're still hunting.  Canceling hunting timer.");
+      this.cancelHuntingTimer();
     }
+  },
+
+  onPopupHidden: function(evt) {
+    this._popupCounter--;
+    console.info("Popups: " + this._popupCounter);
+    let self = this;
+    if (this._popupCounter == 0) {
+      /* User may be done hunting, or this may just be temporary.
+       * Start the _finishHuntingTimer here.  For 1 second.
+       * If another popup is shown or a
+       * command is picked, then we cancel the timer, but if the timer runs
+       * out then we count it as an abort. */
+      console.info("Starting a new finishHuntingTimer...");
+      this.cancelHuntingTimer();
+      this._finishHuntingTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+      this._finishHuntingTimer.initWithCallback(
+        {notify: function(timer) { self.onHuntTimeout();}},
+        1000, Ci.nsITimer.TYPE_ONE_SHOT);
+    }
+  },
+
+  onHuntTimeout: function() {
+    console.info("Hunting timer finished!  Recording abort.");
+    let endTime = Date.now();
+    let huntingTime = endTime - this._startMenuHuntingTime;
+    let huntingNum = this._huntingNumMenus;
+    this.cancelHuntingTimer();
+    this._huntingState = false;
+
+    this._dataStore.storeEvent({
+      ui_method: UI_METHOD_MOUSE,
+      start_menu_id: 0, // TODO
+      explore_ms: huntingTime,
+      explore_num: huntingNum,
+      menu_id: MENU_ABORT,
+      item_id: MENU_ABORT,
+      timestamp: Date.now()
+    });
   },
 
   onNewWindow: function(window) {
     // Register listeners.
-
     let mainCommandSet = window.document.getElementById("mainCommandSet");
     let mainMenuBar = window.document.getElementById("main-menubar");
     this._listen(window, mainMenuBar, "command", this.onCmdMenuBar, true);
@@ -331,7 +415,9 @@ exports.webContent = {
   inProgressHtml: '<p>The menu item usage study is collecting data.</p>'
   + '<p><a onclick="showRawData(4);">Raw Data</a></p>'
   + '<h3>Your Most Often Used Menu Items Are:</h3>'
-  + '<div id="displaydiv"></div>',
+  + '<div id="most-used-table"></div>'
+  + '<h3>The Menu Items You Spent The Longest Time Hunting For Are:</h3>'
+  + '<div id="longest-hunt-table"></div>',
 
   completedHtml: 'Thanks for completing menu item usage study.',
 
@@ -340,18 +426,27 @@ exports.webContent = {
   onPageLoad: function(experiment, document, graphUtils) {
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
+    let item;
+
     for (let row in rawData) {
       let id = rawData[row].item_id;
+      let menuId = rawData[row].menu_id;
+      let exploreMs = rawData[row].explore_ms;
+      if (id == MENU_ABORT) {
+        continue;
+      }
       let match = false;
-      for (let item in stats) {
+      for (item in stats) {
         if (stats[item].id == id) {
           match = true;
           stats[item].quantity ++;
+          stats[item].exploreMs += exploreMs;
           break;
         }
       }
       if (!match) {
-        stats.push( {id: id, quantity: 1} );
+        stats.push( {id: id, menuId: menuId,
+                     quantity: 1, exploreMs: exploreMs} );
       }
     }
     // Sort by quantity, descending:
@@ -359,18 +454,33 @@ exports.webContent = {
 
     // look at ui_method, explore_ms, explore_num, start_menu_id, timestamp
 
-    let div = document.getElementById("displaydiv");
+    let div = document.getElementById("most-used-table");
     let str = "";
-    for (let item in stats) {
-      //console.info("Stats[" + item + "] = " + stats[item]);
+    for (item in stats) {
       let id = stats[item].id;
-      str += CMD_ID_STRINGS[id].menuName + " &gt; " + CMD_ID_STRINGS[id].name + ": " + stats[item].quantity + "<br/>";
+      let menuId = stats[item].menuId;
+      str += interpretMenuName(menuId) + " &gt; " + interpretItemName(id) + ": " + stats[item].quantity + "<br/>";
     }
+    div.innerHTML = str;
+
+    // Now re-sort by longest average hunt time, descending:
+    stats.sort(function(a, b) { return (b.exploreMs / b.quantity) -
+                                (a.exploreMs / a.quantity);});
+    div = document.getElementById("longest-hunt-table");
+    str = "";
+    for (item in stats) {
+      let id = stats[item].id;
+      let menuId = stats[item].menuId;
+      let avgSearchTime = (stats[item].exploreMs / stats[item].quantity);
+      str += interpretMenuName(menuId) + " &gt; " + interpretItemName(id)
+        + ": " + avgSearchTime + "ms<br/>";
+    }
+    div.innerHTML = str;
+
     /*let tmpStorage = exports.handlers._tempStorage;
     for (let x in tmpStorage) {
       str += tmpStorage[x] + "<br/>";
     }*/
-    div.innerHTML = str;
   }
 };
 

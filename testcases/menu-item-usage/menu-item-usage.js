@@ -233,12 +233,11 @@ exports.handlers = {
     function matches(pattern, string) {
       // Pattern may be either a string or a regexp;
       // do straight comparison for one, matching for the other
-      if (pattern == UNDETECTABLE) {
+      if (pattern == UNDETECTABLE || pattern == null) {
         return false;
       } else if (typeof(pattern) == "string") {
         return (pattern == string);
       } else if (pattern.test) { //regexp
-        console.info("Pattern is " + pattern);
         return pattern.test(string);
       } else {
         return false;
@@ -266,6 +265,8 @@ exports.handlers = {
       exploreMs = Date.now() - this._startMenuHuntingTime;
       exploreNum = this._huntingNumMenus;
       // TODO start_menu_id
+      // TODO always record 0 here if it was a keyboard shortcut,
+      // even if hunting state is on (shouldn't ever happen)
     }
 
     // If we got to here and found no match... this should not happen but
@@ -395,12 +396,18 @@ exports.handlers = {
     });
   },
 
+  onCopyKey: function() {
+    console.info("Copy key!!");
+  },
+
   onNewWindow: function(window) {
     // Register listeners.
     let mainCommandSet = window.document.getElementById("mainCommandSet");
     let mainMenuBar = window.document.getElementById("main-menubar");
     this._listen(window, mainMenuBar, "command", this.onCmdMenuBar, true);
     this._listen(window, mainCommandSet, "command", this.onCmdMainSet, true);
+
+    // TODO figure out how to get copy key event
 
     let popups = mainMenuBar.getElementsByTagName("menupopup");
     for (let i = 0; i < popups.length; i++) {
@@ -430,6 +437,7 @@ exports.handlers = {
 };
 
 exports.webContent = {
+  // TODO put better HTML here:
   inProgressHtml: '<p>The menu item usage study is collecting data.</p>'
   + '<p><a onclick="showRawData(4);">Raw Data</a></p>'
   + '<h3>Your Most Often Used Menu Items Are:</h3>'
@@ -446,6 +454,7 @@ exports.webContent = {
     // into a single object
 
     // TODO: If there's no data, say "no data"!!
+    // TODO: Make this a table with "keyboard" and "menu" columns...
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
     let item;

@@ -1,4 +1,8 @@
 <?php
+update_option('siteurl','http://testpilot-stage.mozillalabs.com/wordpress');
+update_option('home','http://testpilot-stage.mozillalabs.com/wordpress');
+
+
 /**
  * @package WordPress
  * @subpackage TestPilot

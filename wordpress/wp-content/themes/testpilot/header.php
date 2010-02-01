@@ -27,9 +27,13 @@
     </div>
 	<div class="button">
 		<span class="menuItem"><a href="/index.html">Home</a></span>
+<?php if (is_home()) { ?>
+   		<span class="menuOn"><a href="/wordpress/">Test Cases</a></span>
+<?php } else { ?> 
+		<span class="menuItem"><a href="/wordpress/">Test Cases</a></span>
+<?php } ?>
 		<span class="menuItem"><a href="/principles.html">Guiding Principles</a></span>
-	
+        <span class="menuItem"><a href="/faq.html">FAQ</a></span>
 		<span class="menuItem"><a href="/privacy.html">Privacy Policy</a></span>
-		<span class="menuOn"><a href="/wordpress/">Test Cases</a></span>
       </div>
     <div id="content">

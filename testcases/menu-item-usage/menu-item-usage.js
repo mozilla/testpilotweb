@@ -321,15 +321,6 @@ exports.handlers = {
     }
   },
 
-  /* TODO flaws with the show/hide popup notifications:
-   * For the task bar menu, we get the onPopupShown
-   * notification but we do not get the onPopupHidden notification!  We need
-   * to either capture both, or preferrably, none.
-   * For the main menu bar, we seem to occasionally miss an onPopupShown,
-   * which leads to the opposite problem - popupCounter drops to 0 when it
-   * really shouldn't, which leads to extra ABORTs being recorded.
-   */
-
   onPopupShown: function(evt) {
     this._popupCounter++;
     console.info("Popups: " + this._popupCounter);
@@ -431,6 +422,8 @@ exports.webContent = {
   upcomingHtml: "",
 
   onPageLoad: function(experiment, document, graphUtils) {
+    // Process raw data: Combine all events on the same menu item
+    // into a single object
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
     let item;
@@ -439,6 +432,9 @@ exports.webContent = {
       let id = rawData[row].item_id;
       let menuId = rawData[row].menu_id;
       let exploreMs = rawData[row].explore_ms;
+      let isMouse = (rawData[row].ui_method == UI_METHOD_MOUSE);
+      let mouseBump = isMouse?1:0;
+      let keyBump = isMouse?0:1;
       if (id == MENU_ABORT) {
         continue;
       }
@@ -447,13 +443,15 @@ exports.webContent = {
         if (stats[item].id == id) {
           match = true;
           stats[item].quantity ++;
+          stats[item].mouseQuantity += mouseBump;
+          stats[item].keyQuantity += keyBump;
           stats[item].exploreMs += exploreMs;
           break;
         }
       }
       if (!match) {
-        stats.push( {id: id, menuId: menuId,
-                     quantity: 1, exploreMs: exploreMs} );
+        stats.push( {id: id, menuId: menuId, mouseQuantity: mouseBump,
+                     keyQuantity: keyBump, quantity: 1, exploreMs: exploreMs} );
       }
     }
     // Sort by quantity, descending:
@@ -483,11 +481,6 @@ exports.webContent = {
         + ": " + avgSearchTime + "ms<br/>";
     }
     div.innerHTML = str;
-
-    /*let tmpStorage = exports.handlers._tempStorage;
-    for (let x in tmpStorage) {
-      str += tmpStorage[x] + "<br/>";
-    }*/
   }
 };
 

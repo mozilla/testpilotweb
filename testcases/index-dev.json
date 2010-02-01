@@ -1,13 +1,3 @@
-{"experiments": [{"name": "Tab Open/Close Study",
-                  "filename": "tab-open-close/tabs_experiment.js"},
-                 {"name": "A Week in the Life of a Browser",
-                  "filename": "a-week-life/a_week_life.js"},
-                 {"name": "Pilot Background Survey",
-                  "filename": "pilot-background-survey.js"},
-                 {"name": "Password Distribution Study",
-                  "filename": "password-distribution/password-distribution.js"},
-                 {"name": "Password Management Survey",
-                  "filename": "password-distribution/password-survey.js"},
-                 {"name": "Menu Item Usage Study",
+{"experiments": [{"name": "Menu Item Usage Study",
                   "filename": "menu-item-usage/menu-item-usage.js"}
 ]}

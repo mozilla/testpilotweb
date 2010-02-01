@@ -407,7 +407,8 @@ exports.handlers = {
     this._listen(window, mainMenuBar, "command", this.onCmdMenuBar, true);
     this._listen(window, mainCommandSet, "command", this.onCmdMainSet, true);
 
-    // TODO figure out how to get copy key event
+    // TODO figure out how to get copy key event -- putting a listener
+    // for 'command' onto the 'key id="key_copy"' element doesn't work.
 
     let popups = mainMenuBar.getElementsByTagName("menupopup");
     for (let i = 0; i < popups.length; i++) {
@@ -441,9 +442,11 @@ exports.webContent = {
   inProgressHtml: '<p>The menu item usage study is collecting data.</p>'
   + '<p><a onclick="showRawData(4);">Raw Data</a></p>'
   + '<h3>Your Most Often Used Menu Items Are:</h3>'
-  + '<div id="most-used-table"></div>'
+  + '<p><table id="most-used-table"><tr><th>Menu</th><th>Item</th>'
+  + '<th>Selected with mouse</th><th>Used keyboard shortcut</th></tr></table></p>'
   + '<h3>The Menu Items You Spent The Longest Time Hunting For Are:</h3>'
-  + '<div id="longest-hunt-table"></div>',
+  + '<p><table id="longest-hunt-table"><tr><th>Menu</th><th>Item</th>'
+  + '<th>Average Time to Find</th></tr></table></p>',
 
   completedHtml: 'Thanks for completing menu item usage study.',
 
@@ -454,7 +457,6 @@ exports.webContent = {
     // into a single object
 
     // TODO: If there's no data, say "no data"!!
-    // TODO: Make this a table with "keyboard" and "menu" columns...
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
     let item;
@@ -490,28 +492,57 @@ exports.webContent = {
 
     // look at ui_method, explore_ms, explore_num, start_menu_id, timestamp
 
-    let div = document.getElementById("most-used-table");
-    let str = "";
+    let table = document.getElementById("most-used-table");
+    let rows = 0;
     for (item in stats) {
-      let id = stats[item].id;
-      let menuId = stats[item].menuId;
-      str += interpretMenuName(menuId) + " &gt; " + interpretItemName(id) + ": " + stats[item].quantity + "<br/>";
+      rows ++; // max out at ten rows
+      if (rows >= 10) {
+        break;
+      }
+      let newRow = document.createElement("tr");
+      table.appendChild(newRow);
+      let newCell = document.createElement("td");
+      newCell.innerHTML = interpretMenuName( stats[item].menuId);
+      newRow.appendChild( newCell);
+      newCell = document.createElement("td");
+      newCell.innerHTML = interpretItemName( stats[item].id);
+      newRow.appendChild( newCell);
+      newCell = document.createElement("td");
+      newCell.innerHTML = stats[item].mouseQuantity + " times";
+      newRow.appendChild( newCell);
+      newCell = document.createElement("td");
+      newCell.innerHTML = stats[item].keyQuantity + " times";
+      newRow.appendChild( newCell);
     }
-    div.innerHTML = str;
+
 
     // Now re-sort by longest average hunt time, descending:
     stats.sort(function(a, b) { return (b.exploreMs / b.quantity) -
                                 (a.exploreMs / a.quantity);});
-    div = document.getElementById("longest-hunt-table");
-    str = "";
+    table = document.getElementById("longest-hunt-table");
+    rows = 0;
     for (item in stats) {
-      let id = stats[item].id;
-      let menuId = stats[item].menuId;
+      rows ++; // max out at ten rows
+      if (rows >= 10) {
+        break;
+      }
+
+      if (stats[item].exploreMs == 0) {
+        continue;
+      }
+      let newRow = document.createElement("tr");
+      table.appendChild(newRow);
+      let newCell = document.createElement("td");
+      newCell.innerHTML = interpretMenuName( stats[item].menuId);
+      newRow.appendChild( newCell);
+      newCell = document.createElement("td");
+      newCell.innerHTML = interpretItemName( stats[item].id);
+      newRow.appendChild( newCell);
       let avgSearchTime = (stats[item].exploreMs / stats[item].quantity);
-      str += interpretMenuName(menuId) + " &gt; " + interpretItemName(id)
-        + ": " + avgSearchTime + "ms<br/>";
+      newCell = document.createElement("td");
+      newCell.innerHTML = (avgSearchTime / 1000) + " seconds";
+      newRow.appendChild( newCell);
     }
-    div.innerHTML = str;
   }
 };
 

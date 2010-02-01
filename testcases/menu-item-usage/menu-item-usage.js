@@ -3,7 +3,7 @@ const TYPE_DOUBLE = 1;
 
 exports.experimentInfo = {
   startDate: null,
-  duration: 7,
+  duration: 5,
   testName: "Menu Item Usage Study",
   testId: 4,
   testInfoUrl: "",

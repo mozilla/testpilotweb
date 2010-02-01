@@ -1,1 +1,2 @@
 RewriteEngine On
+php_flag magic_quotes_sybase Off

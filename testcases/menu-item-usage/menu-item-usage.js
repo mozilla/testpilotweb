@@ -72,8 +72,8 @@ var CMD_ID_STRINGS_BY_MENU = [
   {name: "Zoom Text Only", mouse: "cmd_fullZoomToggle", key: null},
   {name: "Page Style/No Style", mouse: "menu_pageStyleNoStyle", key: null},
   {name: "Page Style/Basic Page Style", mouse: "menu_pageStylePersistentOnly", key: null},
-  {name: "Character Encoding/Autodetect/*", mouse: "chardet.*", key: null},
-  {name: "Character Encoding/More Encodings/*", mouse: "charset.*", key: null},
+  {name: "Character Encoding/Autodetect/*", mouse: /chardet\.*/, key: null},
+  {name: "Character Encoding/More Encodings/*", mouse: /charset\*/, key: null},
   {name: "Character Encoding/Customize List", mouse: UNDETECTABLE, key: UNDETECTABLE},
   {name: "Character Encoding/Western", mouse: "charset.ISO-8859-1", key: null},
   {name: "Character Encoding/UTF-16", mouse: "UTF-16", key: null},
@@ -122,7 +122,7 @@ var CMD_ID_STRINGS_BY_MENU = [
   {menuName: "Windows", menuId: 6, menuItems: [
   {name: "Minimize", mouse: UNDETECTABLE, key: UNDETECTABLE},
   {name: "Zoom", mouse: UNDETECTABLE, key: null},
-  {name: "(User Window)", mouse: "window-*", key: null}
+  {name: "(User Window)", mouse: /window-*/, key: null}
    ]},
 
   //Help menu:
@@ -149,6 +149,7 @@ var makelist = function() {
     }
     CMD_ID_STRINGS = CMD_ID_STRINGS.concat(menu.menuItems);
   }
+  console.info("CMD_ID_STRINGS has " + CMD_ID_STRINGS.length + " items.");
 };
 makelist();
 
@@ -173,7 +174,12 @@ function interpretItemName(id) {
   } else if (id == MENU_UNKNOWN_ITEM) {
     return "Unknown";
   } else {
-    return CMD_ID_STRINGS[id].name;
+    if (!CMD_ID_STRINGS[id]) {
+      console.info("Unknown item id: " + id);
+      return "Unknown";
+    } else {
+      return CMD_ID_STRINGS[id].name;
+    }
   }
 }
 
@@ -222,15 +228,29 @@ exports.handlers = {
   },
 
   storeMenuChoice: function( isKeyboard, idString ) {
-    /* TODO: allow for alt-key navigation
-     * TODO: Match on ids with * wildcards in them!!
-     */
+    /* TODO: allow for alt-key navigation */
+
+    function matches(pattern, string) {
+      // Pattern may be either a string or a regexp;
+      // do straight comparison for one, matching for the other
+      if (pattern == UNDETECTABLE) {
+        return false;
+      } else if (typeof(pattern) == "string") {
+        return (pattern == string);
+      } else if (pattern.test) { //regexp
+        console.info("Pattern is " + pattern);
+        return pattern.test(string);
+      } else {
+        return false;
+      }
+    }
+
     let itemId = MENU_UNKNOWN_ITEM;
     let menuId = MENU_UNKNOWN_ITEM;
     for (let itemNum in CMD_ID_STRINGS) {
       let item = CMD_ID_STRINGS[itemNum];
-      if ((isKeyboard && idString == item.key) ||
-        (!isKeyboard && idString == item.mouse)) {
+      if ((isKeyboard && matches(item.key, idString)) ||
+        (!isKeyboard && matches(item.mouse, idString))) {
         itemId = itemNum;
         menuId = item.menuId;
         break;
@@ -424,6 +444,8 @@ exports.webContent = {
   onPageLoad: function(experiment, document, graphUtils) {
     // Process raw data: Combine all events on the same menu item
     // into a single object
+
+    // TODO: If there's no data, say "no data"!!
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
     let item;

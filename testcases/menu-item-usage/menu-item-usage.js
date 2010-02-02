@@ -213,6 +213,7 @@ exports.handlers = {
   _huntingNumMenus: 0,
   _finishHuntingTimer: null,
   _tempStorage: [],
+  _inPrivateBrowsing: false,
   _listen: function(window, container, eventName, method, catchCap) {
     // Keep a record of this so that we can automatically unregister during
     // uninstall:
@@ -228,6 +229,10 @@ exports.handlers = {
   },
 
   storeMenuChoice: function( isKeyboard, idString ) {
+    if (this._inPrivateBrowsing) {
+      // Don't record anything the user does in private browsing mode
+      return;
+    }
     /* TODO: allow for alt-key navigation */
 
     function matches(pattern, string) {
@@ -479,8 +484,13 @@ exports.handlers = {
     this._dataStore = store;
   },
   onExperimentShutdown: function() {},
-  onEnterPrivateBrowsing: function() {},
-  onExitPrivateBrowsing: function() {}
+
+  onEnterPrivateBrowsing: function() {
+    this._inPrivateBrowsing = true;
+  },
+  onExitPrivateBrowsing: function() {
+    this._inPrivateBrowsing = false;
+  }
 };
 
 exports.webContent = {
@@ -499,6 +509,7 @@ exports.webContent = {
 <p>You can also look at the <a onclick="showRawData(4);">Raw Data</a> to see exactly what will be transmitted to Mozilla at the end of the study.</p>\
 <p>If you do not want to continue participating in this study, plese <a href="chrome://testpilot/content/status-quit.html?eid=4">click here to quit</a>.</p>\
   ',
+  // TODO add note about limitation of collecting certain keyboard shortcuts.
 
   completedHtml: 'Thanks for completing menu item usage study.',
 

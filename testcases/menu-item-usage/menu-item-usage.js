@@ -25,7 +25,7 @@ const MENU_UNKNOWN_ITEM = -3;
 const UNDETECTABLE = -1; // Means there's a keyboard shortcut we can't detect
 
 var CMD_ID_STRINGS_BY_MENU = [
-  {menuName: "File", menuId: 0, menuItems: [
+  {menuName: "File", menuId: 0, popupId: "menu_FilePopup", menuItems: [
   {name: "New Window", mouse: "cmd_newNavigator", key: "key_newNavigator"},
   {name: "New Tab", mouse: "cmd_newNavigatorTab", key: "key_newNavigatorTab"},
   {name: "Open Location", mouse: "Browser:OpenLocation", key: "focusURLBar"},
@@ -44,7 +44,7 @@ var CMD_ID_STRINGS_BY_MENU = [
    ]},
 
   // Edit menu:
-  {menuName: "Edit", menuId: 1, menuItems: [
+  {menuName: "Edit", menuId: 1, popupId: "menu_EditPopup", menuItems: [
   {name: "Undo", mouse: "cmd_undo", key: UNDETECTABLE},
   {name: "Redo", mouse: "cmd_redo", key: UNDETECTABLE},
   {name: "Cut", mouse: "cmd_cut", key: UNDETECTABLE},
@@ -58,7 +58,7 @@ var CMD_ID_STRINGS_BY_MENU = [
    ]},
 
   //View menu:
-  {menuName: "View", menuId: 2, menuItems: [
+  {menuName: "View", menuId: 2, popupId: "menu_viewPopup", menuItems: [
   {name: "Toolbars", mouse: "viewToolbarsMenu", key: null},
   {name: "Toolbars/Customize", mouse: "cmd_CustomizeToolbars", key: null},
   {name: "Status Bar", mouse: "cmd_toggleTaskbar", key: null},
@@ -82,7 +82,7 @@ var CMD_ID_STRINGS_BY_MENU = [
    ]},
 
   //History menu:
-  {menuName: "History", menuId: 3,  menuItems: [
+  {menuName: "History", menuId: 3, popupId: "goPopup", menuItems: [
   {name: "Back", mouse: "Browser:BackOrBackDuplicate", key: "goBackKb"},
   {name: "Forward", mouse: "Browser:ForwardOrForwardDuplicate", key:"goForwardKb"},
   {name: "Home", mouse: "historyMenuHome", key: "goHome"},
@@ -95,7 +95,7 @@ var CMD_ID_STRINGS_BY_MENU = [
    ]},
 
   //Bookmarks menu:
-  {menuName: "Bookmarks", menuId: 4,  menuItems: [
+  {menuName: "Bookmarks", menuId: 4, popupId: "bookmarksMenuPopup", menuItems: [
   {name: "Bookmark This Page", mouse: "Browser:AddBookmarkAs", key: "addBookmarkAsKb"},
   {name: "Subscribe to This Page", mouse: "subscribeToPageMenuitem", key: null},
   {name: "Bookmark All Tabs", mouse: "Browser:BookmarkAllTabs", key: "bookmarkAllTabsKb"},
@@ -104,11 +104,10 @@ var CMD_ID_STRINGS_BY_MENU = [
    ]},
 
   //Tools menu:
-  {menuName: "Tools", menuId: 5, menuItems: [
+  {menuName: "Tools", menuId: 5, popupId: "menu_ToolsPopup", menuItems: [
   {name: "Web Search", mouse: "Tools:Search", key: "key_search"},
   {name: "Downloads", mouse: "Tools:Downloads", key: "key_openDownloads"},
   {name: "Add-Ons", mouse: "Tools:Addons", key: null},
-  // TODO: how to handle menus added here by individual add-ons?
   {name: "Error Console", mouse: "javascriptConsole", key: UNDETECTABLE},
   {name: "Page Info", mouse: "View:PageInfo", key: "key_viewInfo"}, // No key on Windows
   {name: "Private Browsing", mouse: "Tools:PrivateBrowsing", key: "key_privatebrowsing"},
@@ -119,14 +118,14 @@ var CMD_ID_STRINGS_BY_MENU = [
    ]},
 
   //Windows menu (Mac Only):
-  {menuName: "Windows", menuId: 6, menuItems: [
+  {menuName: "Windows", menuId: 6, popupId: "windowPopup", menuItems: [
   {name: "Minimize", mouse: UNDETECTABLE, key: UNDETECTABLE},
   {name: "Zoom", mouse: UNDETECTABLE, key: null},
   {name: "(User Window)", mouse: /window-*/, key: null}
    ]},
 
   //Help menu:
-  {menuName: "Help", menuId: 7, menuItems: [
+  {menuName: "Help", menuId: 7, popupId: "menu_HelpPopup", menuItems: [
   {name: "Firefox Help", mouse: "menu_openHelp", key: UNDETECTABLE},
   {name: "For Internet Explorer Users", mouse: "menu_HelpPopup", key: null}, // Windows only
   {name: "Troubleshooting Information", mouse: "troubleShooting", key: null},
@@ -187,7 +186,7 @@ var COLUMNS = [
   {property: "ui_method", type: TYPE_INT_32, displayName: "UI Method",
    displayValue: ["Mouse", "Keyboard shortcut", "Alt key navigation"]},
   {property: "start_menu_id", type: TYPE_INT_32,
-   displayName: "Starting Menu"},
+   displayName: "Starting Menu", displayValue: interpretMenuName},
   {property: "explore_ms", type: TYPE_INT_32, displayName: "Milliseconds to find"},
   {property: "explore_num", type: TYPE_INT_32, displayName: "Menus explored"},
   {property: "menu_id", type: TYPE_INT_32, displayName: "Menu Chosen",
@@ -210,6 +209,7 @@ exports.handlers = {
   _popupCounter: 0,
   _huntingState: false,
   _startMenuHuntingTime: 0,
+  _startHuntingMenuId: MENU_UNKNOWN_ITEM,
   _huntingNumMenus: 0,
   _finishHuntingTimer: null,
   _tempStorage: [],
@@ -261,12 +261,10 @@ exports.handlers = {
     let exploreMs = 0;
     let exploreNum = 0;
     let startMenuId = 0;
-    if (this._huntingState) {
+    if (this._huntingState && !isKeyboard) {
       exploreMs = Date.now() - this._startMenuHuntingTime;
       exploreNum = this._huntingNumMenus;
-      // TODO start_menu_id
-      // TODO always record 0 here if it was a keyboard shortcut,
-      // even if hunting state is on (shouldn't ever happen)
+      startMenuId = this._startHuntingMenuId;
     }
 
     // If we got to here and found no match... this should not happen but
@@ -281,15 +279,13 @@ exports.handlers = {
       timestamp: Date.now()
     });
 
-    // TODO If there is a _finishHuntingTimer, cancel it.
+    // If there is a _finishHuntingTimer, cancel it.
     // Restore hunting state to default:
     console.info("Oh, you picked something.  You must be done hunting.");
-    if (this._finishHuntingTimer) {
-      this._finishHuntingTimer.cancel();
-      this._finishHuntingTimer = null;
-    }
+    this.cancelHuntingTimer();
     this._huntingState = false;
     this._startMenuHuntingTime = 0;
+    this._startHuntingMenuId = MENU_UNKNOWN_ITEM;
     this._huntingNumMenus = 0;
   },
 
@@ -342,15 +338,27 @@ exports.handlers = {
     }
   },
 
+  identifyMenuByPopup: function(popupId) {
+    for (let item in CMD_ID_STRINGS_BY_MENU) {
+      if (CMD_ID_STRINGS_BY_MENU[item] == popupId) {
+        return CMD_ID_STRINGS_BY_MENU[item].menuId;
+      }
+    }
+    return MENU_UNKNOWN_ITEM;
+  },
+
   onPopupShown: function(evt) {
     this._popupCounter++;
     console.info("Popups: " + this._popupCounter);
     if (!this._huntingState) {
+      // First popup opens
       this._huntingState = true;
-      // TODO identify the menu where you started hunting...
+      // Remember the time and the menu where you started hunting...
+      this._startHuntingMenuId = this.identifyMenuByPopup(evt.target.id);
       this._startMenuHuntingTime = Date.now();
       this._huntingNumMenus = 1;
     } else {
+      // Second or later popup opens...
       this._huntingNumMenus++;
       // If there is a _finishHuntingTimer, cancel it.
       console.info("Oh, you're still hunting.  Canceling hunting timer.");
@@ -362,7 +370,7 @@ exports.handlers = {
     this._popupCounter--;
     console.info("Popups: " + this._popupCounter);
     let self = this;
-    if (this._popupCounter == 0) {
+    if (this._huntingState == true && this._popupCounter == 0) {
       /* User may be done hunting, or this may just be temporary.
        * Start the _finishHuntingTimer here.  For 1 second.
        * If another popup is shown or a
@@ -382,18 +390,18 @@ exports.handlers = {
     let endTime = Date.now();
     let huntingTime = endTime - this._startMenuHuntingTime;
     let huntingNum = this._huntingNumMenus;
-    this.cancelHuntingTimer();
-    this._huntingState = false;
-
     this._dataStore.storeEvent({
       ui_method: UI_METHOD_MOUSE,
-      start_menu_id: 0, // TODO
+      start_menu_id: this._startHuntingMenuId,
       explore_ms: huntingTime,
       explore_num: huntingNum,
       menu_id: MENU_ABORT,
       item_id: MENU_ABORT,
       timestamp: Date.now()
     });
+    this.cancelHuntingTimer();
+    this._huntingState = false;
+    this._startMenuHuntingTime = MENU_UNKNOWN_ITEM;
   },
 
   onCopyKey: function() {
@@ -442,10 +450,10 @@ exports.webContent = {
   inProgressHtml: '<p>The menu item usage study is collecting data.</p>'
   + '<p><a onclick="showRawData(4);">Raw Data</a></p>'
   + '<h3>Your Most Often Used Menu Items Are:</h3>'
-  + '<p><table id="most-used-table"><tr><th>Menu</th><th>Item</th>'
+  + '<p><table class="callout" id="most-used-table"><tr><th>Menu</th><th>Item</th>'
   + '<th>Selected with mouse</th><th>Used keyboard shortcut</th></tr></table></p>'
   + '<h3>The Menu Items You Spent The Longest Time Hunting For Are:</h3>'
-  + '<p><table id="longest-hunt-table"><tr><th>Menu</th><th>Item</th>'
+  + '<p><table class="callout" id="longest-hunt-table"><tr><th>Menu</th><th>Item</th>'
   + '<th>Average Time to Find</th></tr></table></p>',
 
   completedHtml: 'Thanks for completing menu item usage study.',

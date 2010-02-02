@@ -340,7 +340,7 @@ exports.handlers = {
 
   identifyMenuByPopup: function(popupId) {
     for (let item in CMD_ID_STRINGS_BY_MENU) {
-      if (CMD_ID_STRINGS_BY_MENU[item] == popupId) {
+      if (CMD_ID_STRINGS_BY_MENU[item].popupId == popupId) {
         return CMD_ID_STRINGS_BY_MENU[item].menuId;
       }
     }
@@ -348,7 +348,16 @@ exports.handlers = {
   },
 
   onPopupShown: function(evt) {
+    if (!identifyMenuByPopup(evt.target.id)) {
+      return;
+    }
     this._popupCounter++;
+    // TODO: We NEVER get popupshown notifications on Mac on the
+    // Firefox, File, Edit, or View menus.  We SOMETIMES get History, Bookmarks,
+    // Tools, Windows, and Help.
+
+    // On Windows we pretty consistently get all of the popupshown notifications
+    // but there seem to be logic problems.
     console.info("Popups: " + this._popupCounter);
     if (!this._huntingState) {
       // First popup opens
@@ -367,6 +376,10 @@ exports.handlers = {
   },
 
   onPopupHidden: function(evt) {
+    if (!identifyMenuByPopup(evt.target.id)) {
+      return;
+    }
+    console.info("Popup " + evt.target.id + " hidden.");
     this._popupCounter--;
     console.info("Popups: " + this._popupCounter);
     let self = this;
@@ -418,11 +431,36 @@ exports.handlers = {
     // TODO figure out how to get copy key event -- putting a listener
     // for 'command' onto the 'key id="key_copy"' element doesn't work.
 
-    let popups = mainMenuBar.getElementsByTagName("menupopup");
-    for (let i = 0; i < popups.length; i++) {
-      this._listen(window, popups[i], "popuphidden", this.onPopupHidden, true);
-      this._listen(window, popups[i], "popupshown", this.onPopupShown, true);
+    //let popups = mainMenuBar.getElementsByTagName("menupopup");
+    for (let item in CMD_ID_STRINGS_BY_MENU) {
+      let popupId = CMD_ID_STRINGS_BY_MENU[item].popupId;
+      let popup = window.document.getElementById(popupId);
+      if (popup) {
+        console.info("Registering listener on popup id = " + popupId);
+        this._listen(window, popup, "popuphidden", this.onPopupHidden, true);
+        this._listen(window, popup, "popupshown", this.onPopupShown, true);
+      }
+      // TODO include Mac's Firefox menu, if we can figure out what its
+      // popup id is.
     }
+
+      // TODO try popuphiding and popupshowing instead?  See https://developer.mozilla.org/en/XUL/menupopup
+      // Or use popup.state, which can be "closed", "open", "showing", or
+      // "hiding". (the last 2 are transition states).
+
+      // TODO do not attach it to taskbar menus, context menus, or other
+      // weird things like that.
+      // What if we just do the top-level menupopups by id?
+
+      // TODO WE STILL GET onpopuphidden NOTIFICATIONS WHEN THE TASKBAR
+    // MENU CLOSES (on Windows).  WTF????  Which menu are we registering that is
+    // catching this event and why is it only catching the closes?
+    // TODO I think it's cuz taskbar menu is also a submenu of Tools.
+    // OK, we can cause the same problem with submenus of other top-level
+    // menus too.
+    // We really only care about top-level menus here!!!!  Ignore event if
+    // the menupopup being hidden/shown is not the one we registered the
+    // listener on!!!
   },
 
   onWindowClosed: function(window) {
@@ -553,5 +591,3 @@ exports.webContent = {
     }
   }
 };
-
-//http://www.rgraph.net/

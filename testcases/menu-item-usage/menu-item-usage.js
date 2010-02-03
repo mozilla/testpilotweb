@@ -509,9 +509,19 @@ exports.webContent = {
 <p>You can also look at the <a onclick="showRawData(4);">Raw Data</a> to see exactly what will be transmitted to Mozilla at the end of the study.</p>\
 <p>If you do not want to continue participating in this study, plese <a href="chrome://testpilot/content/status-quit.html?eid=4">click here to quit</a>.</p>\
   ',
-  // TODO add note about limitation of collecting certain keyboard shortcuts.
 
-  completedHtml: 'Thanks for completing menu item usage study.',
+  completedHtml: '<h2>The Menu Item Usage study has finished collecting data!</h2>\
+<h3>The last step is to submit the data.</h3>\
+<div class="home_callout_continue"><img class="homeIcon"\ src="chrome://testpilot/skin/images/home_computer.png"> <span\ id="upload-status"><a onclick="uploadData();">Submit your data\ &raquo;</a></span></div>\
+<p>The data you submit will be analyzed as part of the Menu Item Usage study.\ We hope it will lead to better designs for the Firefox menu bars in the future.\
+<a href="https://testpilot.mozillalabs.com/testcases/menu-item-usage.html">\
+Read more about the Menu Item Usage study here</a>. We will notify you when the\
+study results are ready to review.</p>\
+<p>All test data you submit will be anonymized and will not be personally\ identifiable. This study has not recorded the names or URLs of any bookarks,\ history items, tabs, or windows that you selected.</p>\
+<p>You can also look at the <a onclick="showRawData(4);">Raw Data</a> to see\ exactly what will be transmitted to Mozilla if you click "Submit".</p>\
+<p>If you do not want to submit your data, for any reason, please \
+<a href="chrome://testpilot/content/status-quit.html?eid=4">click here to quit\ the study</a>.</p>\
+    <p>Thank you very much for your participation!</p>',
 
   upcomingHtml: "",
 
@@ -520,6 +530,7 @@ exports.webContent = {
     // into a single object
 
     // TODO: If there's no data, say "no data"!!
+    // TODO: If there's no matching table ID, skip it!!
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
     let item;

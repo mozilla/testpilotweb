@@ -493,22 +493,31 @@ exports.handlers = {
   }
 };
 
-exports.webContent = {
-  inProgressHtml: '\
-<h2>The Menu Item Usage study is currently collecting data.</h2>\
-<h3>It will finish <span id="test-end-time"></span>.  Thank you for your participation!</h3>\
-<p>This study will help us understand how menu items are used in Firefox:  Which items are used most, and which items do users have the most trouble finding?  <a href="https://testpilot.mozillalabs.com/testcases/menu-item-usage.html">Read more about the Menu Item Usage study</a>.</p>\
-<h3>Your Most Often Used Menu Items Are:</h3>\
+const DISPLAY_TABLES = '<h3>Your Most Often Used Menu Items Are:</h3>\
 <p><table class="callout" id="most-used-table"><tr><th>Menu</th><th>Item</th>\
 <th>Selected with mouse</th><th>Used keyboard shortcut</th></tr></table></p>\
 <h3>The Menu Items You Spent The Longest Time Hunting For Are:</h3>\
 <p><table class="callout" id="longest-hunt-table"><tr><th>Menu</th><th>Item</th>\
-<th>Average Time to Find</th></tr></table></p>\
-<h3>The Fine Print</h3>\
+<th>Average Time to Find</th></tr></table></p>';
+
+const APOLOGY = '<p><i>Note:</i> There are some keyboard shortcuts that the study\
+ doesn\'t detect due to a\
+ <a href="http://groups.google.com/group/mozilla-labs-testpilot/browse_thread/thread/da46fd87fba1dbd3">\
+ known bug</a>.  If you use a keyboard shortcut and don\'t see it reflected\
+ in the stats, don\'t be alarmed.  We\'re working on a fix for this.  If you\
+ have any questions about the study, you can bring them to \
+ <a href="http://groups.google.com/group/mozilla-labs-testpilot">the discussion group</a>.</p>';
+
+exports.webContent = {
+  inProgressHtml: '\
+<h2>The Menu Item Usage study is currently collecting data.</h2>\
+<h3>It will finish <span id="test-end-time"></span>.  Thank you for your participation!</h3>\
+<p>This study will help us understand how menu items are used in Firefox:  Which items are used most, and which items do users have the most trouble finding?  <a href="https://testpilot.mozillalabs.com/testcases/menu-item-usage.html">Read more about the Menu Item Usage study</a>.</p>'
++ DISPLAY_TABLES + '<h3>The Fine Print</h3>\
 <p>The study will end in 5 days. At  the end of it, you will be offered a choice to submit your data or not.  All test data you submit will be anonymized and will not be personally identifiable. This study does not record the names or URLs of any bookarks, history items, tabs, or windows that you select.</p>\
 <p>You can also look at the <a onclick="showRawData(4);">Raw Data</a> to see exactly what will be transmitted to Mozilla at the end of the study.</p>\
 <p>If you do not want to continue participating in this study, plese <a href="chrome://testpilot/content/status-quit.html?eid=4">click here to quit</a>.</p>\
-  ',
+  ' + APOLOGY,
 
   completedHtml: '<h2>The Menu Item Usage study has finished collecting data!</h2>\
 <h3>The last step is to submit the data.</h3>\
@@ -521,7 +530,7 @@ study results are ready to review.</p>\
 <p>You can also look at the <a onclick="showRawData(4);">Raw Data</a> to see\ exactly what will be transmitted to Mozilla if you click "Submit".</p>\
 <p>If you do not want to submit your data, for any reason, please \
 <a href="chrome://testpilot/content/status-quit.html?eid=4">click here to quit\ the study</a>.</p>\
-    <p>Thank you very much for your participation!</p>',
+<p>Thank you very much for your participation!</p>' + DISPLAY_TABLES + APOLOGY,
 
   upcomingHtml: "",
 

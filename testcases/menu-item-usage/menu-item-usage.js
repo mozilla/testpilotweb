@@ -212,7 +212,6 @@ exports.handlers = {
   _startHuntingMenuId: MENU_UNKNOWN_ITEM,
   _huntingNumMenus: 0,
   _finishHuntingTimer: null,
-  _tempStorage: [],
   _inPrivateBrowsing: false,
   _listen: function(window, container, eventName, method, catchCap) {
     // Keep a record of this so that we can automatically unregister during
@@ -251,6 +250,7 @@ exports.handlers = {
 
     let itemId = MENU_UNKNOWN_ITEM;
     let menuId = MENU_UNKNOWN_ITEM;
+    // If we find no match (should never happen), then we record MENU_UNKNOWN_ITEM.
     for (let itemNum in CMD_ID_STRINGS) {
       let item = CMD_ID_STRINGS[itemNum];
       if ((isKeyboard && matches(item.key, idString)) ||
@@ -272,8 +272,6 @@ exports.handlers = {
       startMenuId = this._startHuntingMenuId;
     }
 
-    // If we got to here and found no match... this should not happen but
-    // we'll record MENU_UNKNOWN_ITEM into menu_id and item_id.
     this._dataStore.storeEvent({
       ui_method: isKeyboard?UI_METHOD_SHORTCUT:UI_METHOD_MOUSE,
       start_menu_id: startMenuId,
@@ -286,7 +284,6 @@ exports.handlers = {
 
     // If there is a _finishHuntingTimer, cancel it.
     // Restore hunting state to default:
-    console.info("Oh, you picked something.  You must be done hunting.");
     this.cancelHuntingTimer();
     this._huntingState = false;
     this._startMenuHuntingTime = 0;
@@ -314,18 +311,6 @@ exports.handlers = {
   },
 
   onCmdMenuBar: function(evt) {
-    console.info("You used a menu item! (bar)");
-    this._tempStorage.push( "MenuBar - Unknown - " + evt.target.id);
-    // TODO: evt.target (or originalTarget etc) is always <menuitem>
-    // evt.sourceEvent is null, and all other fields seem to be the
-    // same no matter whether it's keyboard or mouse... how can we
-    // distinguish???
-
-    // Answer... this almost never catches the event for keyboard
-    // shortcuts (only for apple-, ->preferences on mac).  If we
-    // catch the event through the MenuBar it usually means there's no
-    // keyboard equivalent OR the keyboard equivalent cannot be caught.
-
     if (evt.target.id) {
       this.storeMenuChoice( false, evt.target.id );
     } else {
@@ -353,16 +338,13 @@ exports.handlers = {
   },
 
   onPopupShown: function(evt) {
-    if (!identifyMenuByPopup(evt.target.id)) {
+    if (this.identifyMenuByPopup(evt.target.id) == MENU_UNKNOWN_ITEM) {
+      console.info("Skipping popup id = " + evt.target.id);
       return;
     }
+    console.info("Tracking popup id = " + evt.target.id);
     this._popupCounter++;
-    // TODO: We NEVER get popupshown notifications on Mac on the
-    // Firefox, File, Edit, or View menus.  We SOMETIMES get History, Bookmarks,
-    // Tools, Windows, and Help.
 
-    // On Windows we pretty consistently get all of the popupshown notifications
-    // but there seem to be logic problems.
     console.info("Popups: " + this._popupCounter);
     if (!this._huntingState) {
       // First popup opens
@@ -381,7 +363,7 @@ exports.handlers = {
   },
 
   onPopupHidden: function(evt) {
-    if (!identifyMenuByPopup(evt.target.id)) {
+    if (this.identifyMenuByPopup(evt.target.id) == MENU_UNKNOWN_ITEM) {
       return;
     }
     console.info("Popup " + evt.target.id + " hidden.");
@@ -422,10 +404,6 @@ exports.handlers = {
     this._startMenuHuntingTime = MENU_UNKNOWN_ITEM;
   },
 
-  onCopyKey: function() {
-    console.info("Copy key!!");
-  },
-
   onNewWindow: function(window) {
     // Register listeners.
     let mainCommandSet = window.document.getElementById("mainCommandSet");
@@ -433,11 +411,11 @@ exports.handlers = {
     this._listen(window, mainMenuBar, "command", this.onCmdMenuBar, true);
     this._listen(window, mainCommandSet, "command", this.onCmdMainSet, true);
 
-    // TODO figure out how to get copy key event -- putting a listener
-    // for 'command' onto the 'key id="key_copy"' element doesn't work.
-
-    //let popups = mainMenuBar.getElementsByTagName("menupopup");
     for (let item in CMD_ID_STRINGS_BY_MENU) {
+      // Currently trying: just attach it to toplevel menupopups, not
+      // taskbar menus, context menus, or other
+      // weird things like that.
+
       let popupId = CMD_ID_STRINGS_BY_MENU[item].popupId;
       let popup = window.document.getElementById(popupId);
       if (popup) {
@@ -448,24 +426,6 @@ exports.handlers = {
       // TODO include Mac's Firefox menu, if we can figure out what its
       // popup id is.
     }
-
-      // TODO try popuphiding and popupshowing instead?  See https://developer.mozilla.org/en/XUL/menupopup
-      // Or use popup.state, which can be "closed", "open", "showing", or
-      // "hiding". (the last 2 are transition states).
-
-      // TODO do not attach it to taskbar menus, context menus, or other
-      // weird things like that.
-      // What if we just do the top-level menupopups by id?
-
-      // TODO WE STILL GET onpopuphidden NOTIFICATIONS WHEN THE TASKBAR
-    // MENU CLOSES (on Windows).  WTF????  Which menu are we registering that is
-    // catching this event and why is it only catching the closes?
-    // TODO I think it's cuz taskbar menu is also a submenu of Tools.
-    // OK, we can cause the same problem with submenus of other top-level
-    // menus too.
-    // We really only care about top-level menus here!!!!  Ignore event if
-    // the menupopup being hidden/shown is not the one we registered the
-    // listener on!!!
   },
 
   onWindowClosed: function(window) {
@@ -539,7 +499,6 @@ Read more about the Menu Item Usage study here</a>. We will notify you when the\
     // into a single object
 
     // TODO: If there's no data, say "no data"!!
-    // TODO: If there's no matching table ID, skip it!!
     let rawData = experiment.dataStoreAsJSON;
     let stats = [];
     let item;

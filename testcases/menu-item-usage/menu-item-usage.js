@@ -148,7 +148,6 @@ var makelist = function() {
     }
     CMD_ID_STRINGS = CMD_ID_STRINGS.concat(menu.menuItems);
   }
-  console.info("CMD_ID_STRINGS has " + CMD_ID_STRINGS.length + " items.");
 };
 makelist();
 
@@ -159,7 +158,6 @@ function interpretMenuName(id) {
     return "Unknown";
   } else {
     if (!CMD_ID_STRINGS_BY_MENU[id]) {
-      console.info("Unknown menu id: " + id);
       return "Unknown";
     } else {
       return CMD_ID_STRINGS_BY_MENU[id].menuName;
@@ -174,7 +172,6 @@ function interpretItemName(id) {
     return "Unknown";
   } else {
     if (!CMD_ID_STRINGS[id]) {
-      console.info("Unknown item id: " + id);
       return "Unknown";
     } else {
       return CMD_ID_STRINGS[id].name;
@@ -339,13 +336,10 @@ exports.handlers = {
 
   onPopupShown: function(evt) {
     if (this.identifyMenuByPopup(evt.target.id) == MENU_UNKNOWN_ITEM) {
-      console.info("Skipping popup id = " + evt.target.id);
       return;
     }
-    console.info("Tracking popup id = " + evt.target.id);
     this._popupCounter++;
 
-    console.info("Popups: " + this._popupCounter);
     if (!this._huntingState) {
       // First popup opens
       this._huntingState = true;
@@ -357,7 +351,6 @@ exports.handlers = {
       // Second or later popup opens...
       this._huntingNumMenus++;
       // If there is a _finishHuntingTimer, cancel it.
-      console.info("Oh, you're still hunting.  Canceling hunting timer.");
       this.cancelHuntingTimer();
     }
   },
@@ -366,9 +359,7 @@ exports.handlers = {
     if (this.identifyMenuByPopup(evt.target.id) == MENU_UNKNOWN_ITEM) {
       return;
     }
-    console.info("Popup " + evt.target.id + " hidden.");
     this._popupCounter--;
-    console.info("Popups: " + this._popupCounter);
     let self = this;
     if (this._huntingState == true && this._popupCounter == 0) {
       /* User may be done hunting, or this may just be temporary.
@@ -376,7 +367,6 @@ exports.handlers = {
        * If another popup is shown or a
        * command is picked, then we cancel the timer, but if the timer runs
        * out then we count it as an abort. */
-      console.info("Starting a new finishHuntingTimer...");
       this.cancelHuntingTimer();
       this._finishHuntingTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
       this._finishHuntingTimer.initWithCallback(
@@ -386,7 +376,6 @@ exports.handlers = {
   },
 
   onHuntTimeout: function() {
-    console.info("Hunting timer finished!  Recording abort.");
     let endTime = Date.now();
     let huntingTime = endTime - this._startMenuHuntingTime;
     let huntingNum = this._huntingNumMenus;
@@ -419,7 +408,6 @@ exports.handlers = {
       let popupId = CMD_ID_STRINGS_BY_MENU[item].popupId;
       let popup = window.document.getElementById(popupId);
       if (popup) {
-        console.info("Registering listener on popup id = " + popupId);
         this._listen(window, popup, "popuphidden", this.onPopupHidden, true);
         this._listen(window, popup, "popupshown", this.onPopupShown, true);
       }

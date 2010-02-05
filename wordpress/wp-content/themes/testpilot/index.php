@@ -23,6 +23,20 @@ get_header(); ?>
 
         }
         
+        $categories = get_categories('child_of=8');
+        
+        if ($categories != "") {
+        
+        echo '<h2>Scheduled Test Cases</h2>';
+            foreach($categories as $category) {
+            			  
+            		 echo '<dl class="archived"><dt><a href="' . get_category_link( $category->term_id ) . '" title="' . sprintf( __( "View all posts in %s" ), $category->name ) . '" ' . '>' . $category->name.'</a></dt>';
+            		    echo '<dd>'. $category->description . ' <span class="view"><a href="' . get_category_link( $category->term_id ) . '">View this test case &raquo;</a></span></dd></dl>';				
+            }
+        } else {
+            echo '<p>No upcoming test cases currently scheduled</p>';
+        }
+        
 		$categories = get_categories('child_of=4');
         
         echo '<h3>Archived Test Cases</h3>';

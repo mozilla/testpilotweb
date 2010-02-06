@@ -16,6 +16,7 @@ exports.experimentInfo = {
 };
 
 const WeekEventCodes = {
+  STUDY_STATUS: 0,
   BROWSER_START: 1,
   BROWSER_SHUTDOWN: 2,
   BROWSER_RESTART: 3,
@@ -420,6 +421,11 @@ exports.handlers = {
                          timestamp: Date.now()});
     };
     this._dataStore = store;
+    // Record the version of this study at startup: this lets us see
+    // what data was recorded before and after an update, which lets us
+    // know whether any given data included a given bug-fix or not.
+    store.rec(STUDY_STATUS, [exports.experimentInfo.versionNumber]);
+
     console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();
     BookmarkObserver.runGlobalBookmarkQuery();

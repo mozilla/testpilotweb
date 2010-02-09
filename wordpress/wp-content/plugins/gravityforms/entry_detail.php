@@ -73,18 +73,16 @@ class GFEntryDetail{
             break;
         }
 
-
         $mode = empty($_POST["screen_mode"]) ? "view" : $_POST["screen_mode"];
 
         ?>
         <link rel="stylesheet" href="<?php echo GFCommon::get_base_url()?>/css/admin.css" />
         <script type="text/javascript">
 
-
             function DeleteFile(leadId, fieldId){
                 if(confirm(<?php _e("'Would you like to delete this file? \'Cancel\' to stop. \'OK\' to delete'", "gravityforms"); ?>)){
 
-                    var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+                    var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>");
                     mysack.execute = 1;
                     mysack.method = 'POST';
                     mysack.setVar( "action", "rg_delete_file" );
@@ -281,6 +279,7 @@ class GFEntryDetail{
     }
 
     public static function lead_detail_edit($form, $lead){
+        $form = apply_filters("gform_admin_pre_render_" . $form["id"], apply_filters("gform_pre_render", $form));
         ?>
         <div id="namediv" class="stuffbox">
             <h3>

@@ -15,6 +15,7 @@ jQuery(document).ready(
                 element.datepicker({ yearRange: '-100:+10', showOn: showOn, buttonImage: image, buttonImageOnly: true, dateFormat: format });
             }
         );
+        //jQuery('.datepicker').datepicker('option', jQuery.extend({showMonthAfterYear: true}, jQuery.datepicker.regional['fr']));
     }
 );
 

@@ -1,6 +1,6 @@
 /*
 ------------------------------------
-admin.css v1.3.5
+admin.css v1.3.9
 Gravity Forms Administration Form Styles
 http://www.gravityforms.com
 
@@ -89,7 +89,7 @@ textarea.large{height:250px}
 .gform_footer{padding:10px 0 10px 10px; margin:6px 0 0 0; border-top:1px dotted #ccc!important}
 .gform_wrapper .gform_footer+.right_label, .gform_wrapper .gform_footer+.left_label { padding:16px 0 10px 31%;}
 a.close_icon{position:absolute; left:100%; margin-left:-27px; top:9px; width:16px; height:16px; background-image:url(../images/close.png); background-repeat:no-repeat; text-indent:-9000px}
-a.tooltip, a.tooltip_left{width:16px; height:16px; background-image:url(../images/icon-question.png); background-repeat:no-repeat; display:inline-block; text-indent:-9000px; text-decoration:none}
+
 .gfield{position:relative}
 .field_hover .field_edit_icon, .field_hover .field_delete_icon, .field_hover .form_edit_icon, .field_hover .form_delete_icon, .field_selected .field_edit_icon, .field_selected .field_delete_icon, .field_selected .form_edit_icon, .field_selected .form_delete_icon{display:block!important}
 .field_edit_icon, .form_edit_icon{display:none; float:right; font-size:10px; text-decoration:none; margin-right:6px; height:16px; line-height:16px; padding:0 0 0 18px}
@@ -118,14 +118,11 @@ div.new-form-option a{font-size:16px; padding:8px; text-decoration:none; text-al
 div.new-form-option a:hover{color:#2B2B2B; border:1px solid #666}
 .installation_item_cell{width:40px}
 .installation_item_message{padding-left:15px; color:red}
-.qtip{min-width:100px}
-.qtip-content{line-height:130%; margin:8px}
-.qtip-content h6{font-weight:bold; font-size:14px; color:#21759B; margin:0 0 2px 0; padding:0}
+
 #floatMenu{position:absolute; width:280px; top:60px}
 div.add-buttons-title{background-color:#636363; background-image:url(../images/expand_title.png); background-repeat:no-repeat; background-position:right 0; height:24px; overflow:hidden; cursor:pointer; font-size:13px; border-width:1px; border-style:solid; border-color:#636363; margin:0!important; padding:5px 12px 0 12px; white-space:nowrap; -moz-border-radius-topleft:4px; -moz-border-radius-topright:4px; -webkit-border-top-right-radius:4px; -webkit-border-top-left-radius:4px; -khtml-border-top-right-radius:4px; -khtml-border-top-left-radius:4px; border-top-right-radius:4px; border-top-left-radius:4px}
 .button-title-link{color:#FFF; text-shadow:none; font-weight:bold; cursor:text!important}
 .add-buttons{border-width:0 1px 1px; border-style:none solid solid; -moz-border-radius-bottomleft:4px; -moz-border-radius-bottomright:4px; -webkit-border-bottom-right-radius:4px; -webkit-border-bottom-left-radius:4px; -khtml-border-bottom-right-radius:4px; -khtml-border-bottom-left-radius:4px; border-bottom-right-radius:4px; border-bottom-left-radius:4px; background-color:#F1F1F1; border-color:#DDD; padding:12px}
-li#add-standard-buttons a.tooltip_left, li#add-advanced-buttons a.tooltip_left, li#add-post-buttons a.tooltip_left{background-image:url(../images/icon-question2.png)}
 ul.menu li{margin-bottom:10px}
 ol.field_type{display:block; visibility:visible!important; overflow:hidden; margin:0px; padding:0px}
 div.push-alert-gold{padding:10px 6px; margin:30px 0 10px 0; text-align:center; line-height:150%; display:block!important; visibility:visible!important; min-width:800px; font-size:1.1em; background-color:#FFFBCC; border-top:1px solid #E6DB55; border-bottom:1px solid #E6DB55}
@@ -204,3 +201,18 @@ input.headercb {*margin-top:-3px;}
 .gfield_error{ background-color:#FFDFDF!important;  margin-top:4px!important;  margin-bottom:6px;  padding:6px 6px 4px 6px!important; border:1px dotted #C89797}
 .grouting_rule_error input {border:1px solid #f00}
 .gfield_sub_setting{margin-top:20px;};
+
+
+/* after update form panel  -------------------------------------------------------------------------- */
+#after_update_dialog {}
+.updated_base {background-color:#FFFFE0;border-color:#E6DB55;}
+.updated_base { border-width:1px; border-style:solid; padding:0 .6em; margin:10px 15px 10px 0; -moz-border-radius:3px; -khtml-border-radius:3px; -webkit-border-radius:3px; border-radius:3px; }
+.updated_base p { margin:.5em 0; line-height:1; padding:2px; }
+.wrap .updated_base { margin:10px 15px 10px 0; }
+table.form-table td .updated_base { font-size:13px; }
+
+.error_base {background-color:#FFEBE8; border-color:#CC0000;}
+.error_base { border-width:1px; border-style:solid; padding:0 .6em; margin:10px 15px 10px 0; -moz-border-radius:3px; -khtml-border-radius:3px; -webkit-border-radius:3px; border-radius:3px; }
+.error_base p { margin:.5em 0; line-height:1; padding:2px; }
+.wrap .error_base { margin:10px 15px 10px 0; }
+table.form-table td .error_base { font-size:13px; }

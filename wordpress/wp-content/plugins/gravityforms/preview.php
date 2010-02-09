@@ -19,12 +19,17 @@ if(!GFCommon::current_user_can_any(array("gravityforms_edit_forms", "gravityform
         <link rel='stylesheet' href='<?php echo GFCommon::get_base_url() ?>/css/reset.css' type='text/css' />
         <link rel='stylesheet' href='<?php echo GFCommon::get_base_url() ?>/css/preview.css' type='text/css' />
         <link rel='stylesheet' href='<?php echo GFCommon::get_base_url() ?>/css/forms.css' type='text/css' />
+        <?php
+            require_once(GFCommon::get_base_path() . "/form_display.php");
+            $form = RGFormsModel::get_form_meta($_GET["id"]);
+            GFFormDisplay::enqueue_form_scripts($form);
+            wp_print_scripts();
+        ?>
     </head>
     <body>
     <div id="preview_hdr"><span class="actionlinks"><a href="javascript:window.close()" class="close_window"><?php _e("close window", "gravityforms") ?></a></span><?php _e("Form Preview", "gravityforms") ?></div>
         <?php
         echo RGForms::get_form($_GET["id"], true, true, true);
-        wp_print_scripts();
         ?>
     </body>
 </html>

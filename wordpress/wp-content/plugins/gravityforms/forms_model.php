@@ -9,6 +9,7 @@ class RGFormsModel{
     public static function get_form_table_name(){
         global $wpdb;
         return $wpdb->prefix . "rg_form";
+
     }
 
     public static function get_meta_table_name(){
@@ -52,15 +53,39 @@ class RGFormsModel{
         $view_table_name = self::get_form_view_table_name();
 
         $active_clause = $is_active !== null ? $wpdb->prepare("WHERE is_active=%d", $is_active) : "";
-        $sql = "SELECT f.id, f.title, f.date_created, f.is_active, l.lead_count, v.view_count
+        $sql = "SELECT f.id, f.title, f.date_created, f.is_active, 0 as lead_count, 0 view_count
                 FROM $form_table_name f
-                LEFT OUTER JOIN
-                    (SELECT form_id, count(id) as lead_count FROM $lead_table_name l GROUP BY form_id) l ON f.id = l.form_id
-                LEFT OUTER JOIN
-                    (SELECT form_id, sum(count) as view_count FROM $view_table_name GROUP BY form_id) v ON f.id = v.form_id
                 $active_clause";
 
-        return $wpdb->get_results($sql);
+        //Getting all forms
+        $forms = $wpdb->get_results($sql);
+
+        //Getting entry count per form
+        $sql = "SELECT form_id, count(id) as lead_count FROM $lead_table_name l GROUP BY form_id";
+        $entry_count = $wpdb->get_results($sql);
+
+        //Getting view count per form
+        $sql = "SELECT form_id, sum(count) as view_count FROM $view_table_name GROUP BY form_id";
+        $view_count = $wpdb->get_results($sql);
+
+        //Adding entry counts and to form array
+        foreach($forms as &$form){
+            foreach($view_count as $count){
+                if($count->form_id == $form->id){
+                    $form->view_count = $count->view_count;
+                    break;
+                }
+            }
+
+            foreach($entry_count as $count){
+                if($count->form_id == $form->id){
+                    $form->lead_count = $count->lead_count;
+                    break;
+                }
+            }
+        }
+
+        return $forms;
     }
 
     public static function get_form_counts($form_id){
@@ -240,6 +265,8 @@ class RGFormsModel{
         if(!GFCommon::current_user_can_any("gravityforms_delete_forms"))
             die(__("You don't have adequate permission to delete forms.", "gravityforms"));
 
+        do_action("gform_before_delete_form", $form_id);
+
         $lead_table = self::get_lead_table_name();
         $lead_notes_table = self::get_lead_notes_table_name();
         $lead_detail_table = self::get_lead_details_table_name();
@@ -286,6 +313,8 @@ class RGFormsModel{
         //Delete form
         $sql = $wpdb->prepare("DELETE FROM $form_table WHERE id=%d", $form_id);
         $wpdb->query($sql);
+
+        do_action("gform_after_delete_form", $form_id);
     }
 
     public static function duplicate_form($form_id){
@@ -346,7 +375,7 @@ class RGFormsModel{
             $wpdb->query( $wpdb->prepare("UPDATE $meta_table_name SET display_meta=%s WHERE form_id=%d", $form_meta, $form_id) );
         else
             $wpdb->query( $wpdb->prepare("INSERT INTO $meta_table_name(form_id, display_meta) VALUES(%d, %s)", $form_id, $form_meta ) );
-    }
+        }
 
     public static function delete_file($lead_id, $field_id){
         global $wpdb;
@@ -374,6 +403,8 @@ class RGFormsModel{
 
         if($form_id == 0)
             return;
+
+        do_action("gform_before_delete_field", $form_id, $field_id);
 
         $lead_table = self::get_lead_table_name();
         $lead_detail_table = self::get_lead_details_table_name();
@@ -456,6 +487,8 @@ class RGFormsModel{
                                     SELECT DISTINCT(lead_id) FROM $lead_detail_table WHERE form_id=%d
                                 )", $form_id, $form_id);
         $wpdb->query($sql);
+
+        do_action("gform_after_delete_field", $form_id, $field_id);
     }
 
     public static function delete_lead($lead_id){
@@ -731,6 +764,7 @@ class RGFormsModel{
         $images = array();
 
         foreach($form["fields"] as $field){
+
             $value = $_POST["input_" . $field["id"]];
 
             //reading default value
@@ -855,8 +889,11 @@ class RGFormsModel{
             break;
 
             case "fileupload" :
-
                 $value = self::upload_file($form_id, $_FILES[$input_name]);
+            break;
+
+            case "number" :
+                $value = GFCommon::clean_number($value);
             break;
 
             default:
@@ -1324,16 +1361,16 @@ public static function get_leads($form_id, $sort_field_number=0, $sort_direction
                 FROM
                 (
                     SELECT distinct l.id
-                FROM $lead_table_name l
-                INNER JOIN $lead_detail_table_name d ON d.lead_id = l.id
-                WHERE l.form_id=$form_id
-                $search_filter
-                $star_filter
-                $read_filter
-                $start_date_filter
-                $end_date_filter
-                ORDER BY $sort_field $sort_direction
-                LIMIT $offset,$page_size
+                    FROM $lead_table_name l
+                    INNER JOIN $lead_detail_table_name d ON d.lead_id = l.id
+                    WHERE l.form_id=$form_id
+                    $search_filter
+                    $star_filter
+                    $read_filter
+                    $start_date_filter
+                    $end_date_filter
+                    ORDER BY $sort_field $sort_direction
+                    LIMIT $offset,$page_size
                 ) page
             ) filtered ON filtered.id = l.id
             ORDER BY filtered.sort";

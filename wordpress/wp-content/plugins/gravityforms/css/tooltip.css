@@ -1,0 +1,5 @@
+a.tooltip, a.tooltip_left{width:16px; height:16px; background-image:url(../images/icon-question.png); background-repeat:no-repeat; display:inline-block; text-indent:-9000px; text-decoration:none}
+li#add-standard-buttons a.tooltip_left, li#add-advanced-buttons a.tooltip_left, li#add-post-buttons a.tooltip_left{background-image:url(../images/icon-question2.png)}
+.qtip{min-width:100px}
+.qtip-content{line-height:130%; margin:8px}
+.qtip-content h6{font-weight:bold; font-size:14px; color:#21759B; margin:0 0 2px 0; padding:0}

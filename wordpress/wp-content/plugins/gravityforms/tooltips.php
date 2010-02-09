@@ -1,6 +1,18 @@
 <?php
+
+//Prints required tooltip scripts
+add_action("admin_print_scripts", 'print_tooltip_scripts');
+function print_tooltip_scripts(){
+    wp_register_script('qtip-lib' , GFCommon::get_base_url() ."/js/jquery.qtip-1.0.0-rc2.min.js");
+    wp_enqueue_script('qtip-init' , GFCommon::get_base_url() ."/js/qtip_init.js", array('qtip-lib'));
+    wp_enqueue_style("gf_tooltip", GFCommon::get_base_url() ."/css/tooltip.css");
+
+    wp_print_scripts();
+    wp_print_styles();
+}
+
 function gform_tooltip($name, $css_class="tooltip"){
-    $strings = array(
+    $gf_tooltips = array(
         "notification_send_to_email" => "<h6>" . __("Send To Email Address", "gravityforms") . "</h6>" . __("Enter the email address you would like the administrator notification email sent to.", "gravityforms"),
         "notification_send_to_routing" => "<h6>" . __("Routing", "gravityforms") . "</h6>" . __("Allows notification to be sent do different email addresses depending on values selected in the form.", "gravityforms"),
         "notification_from_email" => "<h6>" . __("From Email Address", "gravityforms") . "</h6>" . __("Enter the email address you would like the administrator notification email sent from, or select the email from available email form fields.", "gravityforms"),
@@ -70,8 +82,11 @@ function gform_tooltip($name, $css_class="tooltip"){
         "settings_recaptcha_private" => "<h6>" . __("reCaptcha Private Key", "gravityforms") . "</h6>" . __("Enter your reCAPTCHA Private Key, if you do not have a key you can register for one at the provided link.  reCAPTCHA is a free service.", "gravityforms"),
         "entries_conversion" => "<h6>" . __("Entries Conversion", "gravityforms") . "</h6>" . __("Conversion is the percentage of form views that generated an entry. If a form was viewed twice, and one entry was generated, the conversion will be 50%.", "gravityforms")
     );
+
+    $gf_tooltips = apply_filters("gform_tooltips", $gf_tooltips);
+
     ?>
-    <a href="javascript:void(0);" class="<?php echo esc_attr($css_class)?>" tooltip="<?php echo esc_attr($strings[$name]) ?>">(?)</a>
+    <a href="javascript:void(0);" class="<?php echo esc_attr($css_class)?>" tooltip="<?php echo esc_attr($gf_tooltips[$name]) ?>">(?)</a>
     <?php
 }
 ?>

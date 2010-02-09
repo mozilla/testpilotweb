@@ -1,4 +1,37 @@
 ------------------------------------------------------------------------------------------------------------------
+Version 1.3.9
+    - Re-worked conditional logic to solve 404 problems with GoDaddy
+    - Fixed performance issue on form list that caused forms not be displayed when there were 300+ forms
+    - Enhanced number validation to accept thousand separators
+    - Updated POT file
+    - Added "Add New" button on Edit Forms page next to "Edit Forms" header (see Edit Posts for example)
+    - Added the following countries to the country predefined list and country drop downs: "American Samoa", "Guam", "Northern Mariana Islands", "Palau", "Virgin Islands, British", "Virgin Islands, U.S."
+    - Added "District of Columbia" to predefined states and address drop down
+    - Fixed Numeric Field validation bug
+    - Checked jQuery 1.4 compatibility
+    - Prevent corrupt form meta to be saved and display error message
+    - Set collation on tables to match WP tables
+    - Fixed escaping issue when using a double quote for notification email subject
+    - Added country code mapping
+    - Added validation message filter
+
+        add_filter("gform_validation_message", "change_message", 10, 2);
+        function change_message($message, $form){
+            return "failed " . $form["title"];
+        }
+
+    - Refactor get_selection_fields to GFCommon in support of the Integration plugin
+    - Changed settings to support multiple pages (for addons)
+
+------------------------------------------------------------------------------------------------------------------
+Version 1.3.8.2
+    - Correct time zone for {date_dmy} and (date_mdy} variables
+
+------------------------------------------------------------------------------------------------------------------
+Version 1.3.8.1
+    - Changed paths to take SSL into account
+
+------------------------------------------------------------------------------------------------------------------
 Version 1.3.8
     - Fixed issue with phone formatting where leading zeros where getting cut off
     - Fixed issue with form front end (throwing errors) when the wp_query posts collection wasn't loaded
@@ -35,7 +68,6 @@ Version 1.3.5
 ------------------------------------------------------------------------------------------------------------------
 Version 1.3.4
     - Fixed issue with escaping when magic quotes are turned off
-
 ------------------------------------------------------------------------------------------------------------------
 Version 1.3.3
     - Fixed issue with file upload creating a broken link when filename contains a single quote
@@ -43,7 +75,7 @@ Version 1.3.3
 ------------------------------------------------------------------------------------------------------------------
 Version 1.3.2
     - Fixed javascript error on conditional logic when select field choice had single quotes
-    - Fixed issue with escaping when magic quotes are turned off
+    - Fixed issue with escaping when magic quotes where turned off
 
 ------------------------------------------------------------------------------------------------------------------
 Version 1.3.1

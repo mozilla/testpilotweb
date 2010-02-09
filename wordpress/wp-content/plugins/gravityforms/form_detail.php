@@ -1,5 +1,7 @@
 <?php
 
+
+
 class GFFormDetail{
 
     public static function forms_page($form_id){
@@ -385,8 +387,7 @@ class GFFormDetail{
                             <div class="new-form-option"><a title="<?php _e("I am done. Take me back to form list", "gravityforms"); ?>" href="?page=gf_edit_forms"><?php _e("Return to Form List", "gravityforms"); ?></a></div>
 
                         </div>
-                        <h2></h2>
-                        <div class="updated fade" id="after_update_dialog" style="padding:10px; display:none;">
+                        <div class="updated_base" id="after_update_dialog" style="padding:10px 10px 16px 10px; display:none;">
                             <strong><?php _e("Form updated successfully.", "gravityforms"); ?></strong><br />
                             <a title="<?php _e("Continue editing this form", "gravityforms"); ?>" id="continue_form_link" href="javascript:void(0);" onclick="jQuery('#after_update_dialog').slideUp();"><?php _e("Continue Editing", "gravityforms"); ?></a> |
                             <a title="<?php _e("Setup email notifications for this form", "gravityforms"); ?>" href="?page=gf_edit_forms&view=notification&id=<?php echo absint($form["id"]) ?>"><?php _e("Setup Email Notifications", "gravityforms"); ?></a> |
@@ -397,6 +398,12 @@ class GFFormDetail{
 
                             <a title="<?php _e("Preview this form", "gravityforms"); ?>" href="<?php echo GFCommon::get_base_url() ?>/preview.php?id=<?php echo absint($form["id"]) ?>" target="_blank"><?php _e("Preview Form", "gravityforms"); ?></a>
                         </div>
+                        <div class="error_base" id="after_update_error_dialog" style="padding:10px 10px 16px 10px; display:none;">
+                            There was an error while saving your form, most likely caused by a plugin conflict.
+                            Please <a href="http://www.gravityhelp.com">contact us</a> and we will be happy to help you get this corrected.
+                        </div>
+
+
                     </div>
                     <div id="field_settings" style="display: none;">
                         <ul>
@@ -1145,6 +1152,9 @@ class GFFormDetail{
         $form_json = stripslashes($form_json);
 
         $form_meta = GFCommon::json_decode($form_json, true);
+        if(!$form_meta)
+            die("EndUpdateForm(0);");
+
         $form_table_name =  $wpdb->prefix . "rg_form";
         $meta_table_name =  $wpdb->prefix . "rg_form_meta";
 

@@ -140,6 +140,7 @@ img.ui-datepicker-trigger {position:relative; top:3px; left:4px}
 /* tame those pesky hidden fields --------------------------------------------------------------------*/
 
 .gform_wrapper input[type="hidden"], .gform_wrapper input.gform_hidden {display:none}
+.ginput_full br, .ginput_left br, .ginput_right br {display:none;}
 
 /* fix captcha alignment for IE8 --------------------------------------------------------------------*/
 .gform_wrapper .left_label #recaptcha_area, #recaptcha_table, .gform_wrapper .right_label #recaptcha_area, #recaptcha_table {margin-left:32%;}

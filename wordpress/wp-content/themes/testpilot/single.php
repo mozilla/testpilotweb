@@ -13,6 +13,18 @@ get_header();
 
 		<div <?php post_class() ?> id="post-<?php the_ID(); ?>">
 			<h2><?php the_title(); ?></h2>
+
+            <?php
+            $key = 'post-name';
+            $themeta = get_post_meta($post->ID, $key, TRUE);
+            if($themeta != '') { ?>
+    				<dl class="custom">
+    				    <dt>Contributed by:</dt>
+    				    <dd><?php echo get_post_meta($post->ID, 'post-name', true); ?></dd>
+    				    <dt>Original URL:</dt>
+    				    <dd><a href="<?php echo get_post_meta($post->ID, 'posturl', true); ?>"><?php echo get_post_meta($post->ID, 'posturl', true); ?></a></dd>
+    				</dl>
+            <?php } ?>
 			
 			<?php the_content('<p>Read the rest of this entry &raquo;</p>'); ?>
 			<?php echo do_shortcode("[gallery]"); ?>

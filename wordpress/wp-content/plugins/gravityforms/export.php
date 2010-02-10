@@ -13,7 +13,7 @@ class GFExport{
                     if(!formId)
                         return;
 
-                    var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+                    var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
                     mysack.execute = 1;
                     mysack.method = 'POST';
                     mysack.setVar( "action", "rg_select_export_form" );
@@ -62,7 +62,7 @@ class GFExport{
                     var startDate = jQuery("#export_date_start").val();
                     var endDate = jQuery("#export_date_end").val();
 
-                    var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+                    var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
                     mysack.execute = 1;
                     mysack.method = 'POST';
                     mysack.setVar( "action", "rg_start_export" );

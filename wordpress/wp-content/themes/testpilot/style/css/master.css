@@ -105,6 +105,10 @@ a img {
 	font-size: 1.3em;
 }
 
+#testcases-content .custom dd {
+    margin: 0 0 6px 0;
+}
+
 
 
 /* footer

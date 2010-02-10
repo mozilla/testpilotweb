@@ -347,7 +347,7 @@ function SaveForm(){
 
     SortFields();
 
-    var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+    var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
     mysack.execute = 1;
     mysack.method = 'POST';
     mysack.setVar( "action", "rg_save_form" );
@@ -382,10 +382,15 @@ function EndInsertForm(formId){
 }
 
 function EndUpdateForm(formId){
-     jQuery("#please_wait_container").hide();
+    jQuery("#please_wait_container").hide();
+    jQuery("#after_update_dialog").hide();
+    jQuery("#after_update_error_dialog").hide();
+    if(formId)
+        jQuery("#after_update_dialog").slideDown();
+    else
+        jQuery("#after_update_error_dialog").slideDown();
 
-     jQuery("#after_update_dialog").slideDown();
-     setTimeout(function(){jQuery('#after_update_dialog').slideUp();}, 50000);
+    setTimeout(function(){jQuery('#after_update_dialog').slideUp();}, 50000);
 }
 
 function SortFields(){
@@ -405,7 +410,7 @@ function DeleteField(fieldId){
 
     if(form.id == 0 || confirm('<?php _e("Warning! Deleting this field will also delete all entry data associated with it. \'Cancel\' to stop. \'OK\' to delete", "gravityforms"); ?>')){
 
-        var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+        var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
         mysack.execute = 1;
         mysack.method = 'POST';
         mysack.setVar( "action", "rg_delete_field" );
@@ -720,7 +725,7 @@ function AddCaptchaField(){
 function StartAddField(type){
     var field = CreateField(form.nextFieldId++, type);
 
-    var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+    var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
     mysack.execute = 1;
     mysack.method = 'POST';
     mysack.setVar( "action", "rg_add_field" );
@@ -791,7 +796,7 @@ function StartChangeInputType(type, field){
     field["inputType"] = type;
     SetDefaultValues(field);
 
-    var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+    var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
     mysack.execute = 1;
     mysack.method = 'POST';
     mysack.setVar( "action", "rg_change_input_type" );

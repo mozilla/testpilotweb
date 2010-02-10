@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms
 Plugin URI: http://www.gravityforms.com
 Description: Easily create web forms and manage form entries within the WordPress admin.
-Version: 1.3.8
+Version: 1.3.9
 Author: rocketgenius
 Author URI: http://www.rocketgenius.com
 
@@ -25,13 +25,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+
 if(!defined("RG_CURRENT_PAGE"))
-define("RG_CURRENT_PAGE", basename($_SERVER['PHP_SELF']));
+    define("RG_CURRENT_PAGE", basename($_SERVER['PHP_SELF']));
 
 if(!defined("IS_ADMIN"))
-define("IS_ADMIN",  is_admin());
+    define("IS_ADMIN",  is_admin());
+
 define("RG_CURRENT_VIEW", $_GET["view"]);
 define("GF_SUPPORTED_WP_VERSION", version_compare(get_bloginfo("version"), '2.8.0', '>='));
+
 if(!defined("GRAVITY_MANAGER_URL"))
     define("GRAVITY_MANAGER_URL", "http://www.gravityhelp.com/wp-content/plugins/gravitymanager");
 
@@ -164,6 +167,11 @@ class RGForms{
 
             require_once(ABSPATH . '/wp-admin/includes/upgrade.php');
 
+            if ( ! empty($wpdb->charset) )
+                $charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
+            if ( ! empty($wpdb->collate) )
+                $charset_collate .= " COLLATE $wpdb->collate";
+
             //------ FORM -----------------------------------------------
             $form_table_name = RGFormsModel::get_form_table_name();
             $sql = "CREATE TABLE " . $form_table_name . " (
@@ -172,7 +180,7 @@ class RGForms{
                   date_created datetime not null,
                   is_active tinyint(1) not null default 1,
                   PRIMARY KEY  (id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
             dbDelta($sql);
 
             //------ META -----------------------------------------------
@@ -182,7 +190,7 @@ class RGForms{
                   display_meta longtext,
                   entries_grid_meta longtext,
                   KEY form_id (form_id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
             dbDelta($sql);
 
             //------ FORM VIEW -----------------------------------------------
@@ -195,7 +203,7 @@ class RGForms{
                   count mediumint(8) unsigned not null default 1,
                   PRIMARY KEY  (id),
                   KEY form_id (form_id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
             dbDelta($sql);
 
             //------ LEAD -----------------------------------------------
@@ -212,7 +220,7 @@ class RGForms{
                   user_agent varchar(250) not null default '',
                   PRIMARY KEY  (id),
                   KEY form_id (form_id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
            dbDelta($sql);
 
            //------ LEAD NOTES ------------------------------------------
@@ -227,7 +235,7 @@ class RGForms{
                   PRIMARY KEY  (id),
                   KEY lead_id (lead_id),
                   KEY lead_user_key (lead_id,user_id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
            dbDelta($sql);
 
             //------ LEAD DETAIL -----------------------------------------
@@ -241,7 +249,7 @@ class RGForms{
                   PRIMARY KEY  (id),
                   KEY form_id (form_id),
                   KEY lead_id (lead_id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
             dbDelta($sql);
 
             //------ LEAD DETAIL LONG -----------------------------------
@@ -250,12 +258,11 @@ class RGForms{
                   lead_detail_id bigint(20) unsigned not null,
                   value longtext,
                   KEY lead_detail_key (lead_detail_id)
-                )CHARSET=utf8;";
+                ) $charset_collate;";
             dbDelta($sql);
 
             //fix checkbox value. needed for version 1.0 and below but won't hurt for higher versions
             self::fix_checkbox_value();
-
         }
         update_option("rg_form_version", $version);
     }
@@ -304,8 +311,7 @@ class RGForms{
 
     //Prints common admin scripts
     public static function print_scripts(){
-        wp_register_script('qtip-lib' , GFCommon::get_base_url() ."/js/jquery.qtip-1.0.0-rc2.min.js");
-        wp_enqueue_script('qtip-init' , GFCommon::get_base_url() ."/js/qtip_init.js", array('sack', 'qtip-lib'));
+        wp_enqueue_script("sack");
         wp_print_scripts();
     }
 
@@ -325,7 +331,10 @@ class RGForms{
         if(empty($min_cap))
             $min_cap = "gform_full_access";
 
-        $parent_menu = self::get_parent_menu();
+        $addon_menus = array();
+        $addon_menus = apply_filters("gform_addon_navigation", $addon_menus);
+
+        $parent_menu = self::get_parent_menu($addon_menus);
 
         // Add a top-level left nav
         add_object_page(__('Forms', "gravityforms"), __("Forms", "gravityforms"), $has_full_access ? "gform_full_access" : $min_cap, $parent_menu["name"] , $parent_menu["callback"], GFCommon::get_base_url() . '/images/gravity-admin-icon.png');
@@ -337,6 +346,11 @@ class RGForms{
 
         add_submenu_page($parent_menu["name"], __("Entries", "gravityforms"), __("Entries", "gravityforms"), $has_full_access ? "gform_full_access" : "gravityforms_view_entries", "gf_entries", array("RGForms", "all_leads_page"));
 
+        if(is_array($addon_menus)){
+            foreach($addon_menus as $addon_menu)
+                add_submenu_page($parent_menu["name"], $addon_menu["label"], $addon_menu["label"], $has_full_access ? "gform_full_access" : $addon_menu["permission"], $addon_menu["name"], $addon_menu["callback"]);
+        }
+
         add_submenu_page($parent_menu["name"], __("Settings", "gravityforms"), __("Settings", "gravityforms"), $has_full_access ? "gform_full_access" : "gravityforms_view_settings", "gf_settings", array("RGForms", "settings_page"));
 
         add_submenu_page($parent_menu["name"], __("Export", "gravityforms"), __("Export", "gravityforms"), $has_full_access ? "gform_full_access" : "gravityforms_export_entries", "gf_export", array("RGForms", "export_page"));
@@ -346,7 +360,7 @@ class RGForms{
     }
 
     //Returns the parent menu item. It needs to be the same as the first sub-menu (otherwise WP will duplicate the main menu as a sub-menu)
-    private static function get_parent_menu(){
+    public static function get_parent_menu($addon_menus){
 
         if(GFCommon::current_user_can_any("gravityforms_edit_forms"))
             $parent = array("name" => "gf_edit_forms", "callback" => array("RGForms", "forms"));
@@ -357,6 +371,14 @@ class RGForms{
         else if(GFCommon::current_user_can_any("gravityforms_view_entries"))
             $parent = array("name" => "gf_entries", "callback" => array("RGForms", "all_leads_page"));
 
+        else if(is_array($addon_menus) && sizeof($addon_menus) > 0){
+            foreach($addon_menus as $addon_menu)
+                if(GFCommon::current_user_can_any($addon_menu["permission"]))
+                {
+                    $parent = array("name" => $addon_menu["name"], "callback" => $addon_menu["callback"]);
+                    break;
+                }
+        }
         else if(GFCommon::current_user_can_any("gravityforms_view_settings"))
             $parent = array("name" => "gf_settings", "callback" => array("RGForms", "settings_page"));
 
@@ -474,7 +496,7 @@ class RGForms{
             $plugin_name = "gravityforms/gravityforms.php";
 
             $new_version = version_compare(GFCommon::$version, $version_info["version"], '<') ? __('There is a new version of Gravity Forms available.', 'gravityforms') .' <a class="thickbox" title="Gravity Forms" href="plugin-install.php?tab=plugin-information&plugin=gravityforms&TB_iframe=true&width=640&height=808">'. sprintf(__('View version %s Details', 'gravityforms'), $version_info["version"]) . '</a>. ' : '';
-            echo '</tr><tr class="plugin-update-tr"><td colspan="5" class="plugin-update"><div class="update-message">' . $new_version . __('By <a href="http://www.gravityforms.com">registering your copy</a>, you will get access to automatic upgrades and support.', 'gravityforms') . '</div></td>';
+            echo '</tr><tr class="plugin-update-tr"><td colspan="5" class="plugin-update"><div class="update-message">' . $new_version . __('<a href="admin.php?page=gf_settings">Register</a> your copy of Gravity Forms to receive access to automatic upgrades and support. Need a license key? <a href="http://www.gravityforms.com">Purchase one now</a>.', 'gravityforms') . '</div></td>';
         }
     }
 
@@ -589,6 +611,11 @@ class RGForms{
     public static function settings_page(){
         require_once(GFCommon::get_base_path() . "/settings.php");
         GFSettings::settings_page();
+    }
+
+    public static function add_settings_page($name, $handle, $icon_path=""){
+        require_once(GFCommon::get_base_path() . "/settings.php");
+        GFSettings::add_settings_page($name, $handle, $icon_path);
     }
 
     public static function help_page(){
@@ -728,4 +755,6 @@ class RGForms{
 function gravity_form($id, $display_title=true, $display_description=true, $display_inactive=false, $field_values=null){
     echo RGForms::get_form($id, $display_title, $display_description, $display_inactive, $field_values);
 }
+
+
 ?>

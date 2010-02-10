@@ -1,8 +1,49 @@
 <?php
 class GFCommon{
 
-    public static $version = "1.3.8";
+    public static $version = "1.3.9";
     public static $tab_index = 1;
+
+
+    public static function get_selection_fields($form, $selected_field_id){
+        $str = "";
+        foreach($form["fields"] as $field){
+            $input_type = RGFormsModel::get_input_type($field);
+            $field_label = RGFormsModel::get_label($field);
+            if($input_type == "checkbox" || $input_type == "radio" || $input_type == "select"){
+                $selected = $field["id"] == $selected_field_id ? "selected='selected'" : "";
+                $str .= "<option value='" . $field["id"] . "' " . $selected . ">" . self::truncate_middle($field_label, 16) . "</option>";
+            }
+        }
+        return $str;
+    }
+
+    public static function is_numeric($value){
+        return preg_match("/^([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?)$/", $value) || preg_match("/^([0-9]{1,3}(?:\.?[0-9]{3})*(?:,[0-9]{2})?)$/", $value);
+    }
+
+    public static function clean_number($number){
+
+        //Removing all non-numeric characters
+        $array = str_split($number);
+        foreach($array as $char)
+            if (($char >= '0' && $char <= '9') || $char=="," || $char==".")
+                $clean_number .= $char;
+
+        //Removing thousand separators but keeping decimal point
+        $array = str_split($clean_number);
+        for($i=0, $count = sizeof($array); $i<$count; $i++)
+        {
+            $char = $array[$i];
+            if ($char >= '0' && $char <= '9')
+                $float_number .= $char;
+            else if(($char == "." || $char == ",") && strlen($clean_number) - $i <= 3)
+                $float_number .= ".";
+        }
+
+        return $float_number;
+
+    }
 
     public static function json_encode($value){
 
@@ -31,10 +72,10 @@ class GFCommon{
         }
     }
 
-        //Returns the url of the plugin's root folder
+    //Returns the url of the plugin's root folder
     public function get_base_url(){
         $folder = basename(dirname(__FILE__));
-        return WP_PLUGIN_URL . "/" . $folder;
+        return plugins_url($folder);
     }
 
     //Returns the physical path of the plugin's root folder
@@ -191,7 +232,7 @@ class GFCommon{
         }
     }
 
-    public static function replace_variables($text, $form, $lead, $url_encode = false){
+    public static function replace_variables($text, $form, $lead, $url_encode = false, $esc_html=true){
         $text = nl2br($text);
 
         //Replacing field variables
@@ -206,7 +247,10 @@ class GFCommon{
                 if(is_array($value))
                     $value = $value[$input_id];
 
-                $value = nl2br(esc_html($value));
+                if($esc_html)
+                    $value = esc_html($value);
+
+                $value = nl2br($value);
 
                 if($url_encode)
                     $value = urlencode($value);
@@ -259,15 +303,18 @@ class GFCommon{
         //embed url
         $text = str_replace("{embed_url}", $url_encode ? urlencode(RGFormsModel::get_current_page_url()) : RGFormsModel::get_current_page_url(), $text);
 
+        $local_timestamp = self::get_local_timestamp(time());
+
         //date (mm/dd/yyyy)
-        $text = str_replace("{date_mdy}", $url_encode ? urlencode(date("m/d/Y")) : date("m/d/Y"), $text);
+        $local_date_mdy = date_i18n("m/d/Y", $local_timestamp, true);
+        $text = str_replace("{date_mdy}", $url_encode ? urlencode($local_date_mdy) : $local_date_mdy, $text);
 
         //date (dd/mm/yyyy)
-        $text = str_replace("{date_dmy}", $url_encode ? urlencode(date("d/m/Y")) : date("d/m/Y"), $text);
+        $local_date_dmy = date_i18n("d/m/Y", $local_timestamp, true);
+        $text = str_replace("{date_dmy}", $url_encode ? urlencode($local_date_dmy) : $local_date_dmy, $text);
 
         //ip
         $text = str_replace("{ip}", $url_encode ? urlencode($_SERVER['REMOTE_ADDR']) : $_SERVER['REMOTE_ADDR'], $text);
-
 
         //embed post info
         global $post;
@@ -532,6 +579,10 @@ class GFCommon{
         update_option("rg_gforms_message", $message);
     }
 
+    public static function get_local_timestamp($timestamp){
+        return $timestamp + (get_option( 'gmt_offset' ) * 3600 );
+    }
+
     public static function format_date($datetime, $is_human = true){
         if(empty($datetime))
             return "";
@@ -697,11 +748,224 @@ class GFCommon{
 
 
     public static function get_countries(){
-        return array(__('Afghanistan', 'gravityforms'),__('Albania', 'gravityforms'),__('Algeria', 'gravityforms'),__('Andorra', 'gravityforms'),__('Angola', 'gravityforms'),__('Antigua and Barbuda', 'gravityforms'),__('Argentina', 'gravityforms'),__('Armenia', 'gravityforms'),__('Australia', 'gravityforms'),__('Austria', 'gravityforms'),__('Azerbaijan', 'gravityforms'),__('Bahamas', 'gravityforms'),__('Bahrain', 'gravityforms'),__('Bangladesh', 'gravityforms'),__('Barbados', 'gravityforms'),__('Belarus', 'gravityforms'),__('Belgium', 'gravityforms'),__('Belize', 'gravityforms'),__('Benin', 'gravityforms'),__('Bermuda', 'gravityforms'),__('Bhutan', 'gravityforms'),__('Bolivia', 'gravityforms'),__('Bosnia and Herzegovina', 'gravityforms'),__('Botswana', 'gravityforms'),__('Brazil', 'gravityforms'),__('Brunei', 'gravityforms'),__('Bulgaria', 'gravityforms'),__('Burkina Faso', 'gravityforms'),__('Burundi', 'gravityforms'),__('Cambodia', 'gravityforms'),__('Cameroon', 'gravityforms'),__('Canada', 'gravityforms'),__('Cape Verde', 'gravityforms'),__('Central African Republic', 'gravityforms'),__('Chad', 'gravityforms'),__('Chile', 'gravityforms'),__('China', 'gravityforms'),__('Colombia', 'gravityforms'),__('Comoros', 'gravityforms'),__('Congo', 'gravityforms'),__('Costa Rica', 'gravityforms'),__('C&ocirc;te d\'Ivoire', 'gravityforms'),__('Croatia', 'gravityforms'),__('Cuba', 'gravityforms'),__('Cyprus', 'gravityforms'),__('Czech Republic', 'gravityforms'),__('Denmark', 'gravityforms'),__('Djibouti', 'gravityforms'),__('Dominica', 'gravityforms'),__('Dominican Republic', 'gravityforms'),__('East Timor', 'gravityforms'),__('Ecuador', 'gravityforms'),__('Egypt', 'gravityforms'),__('El Salvador', 'gravityforms'),__('Equatorial Guinea', 'gravityforms'),__('Eritrea', 'gravityforms'),__('Estonia', 'gravityforms'),__('Ethiopia', 'gravityforms'),__('Fiji', 'gravityforms'),__('Finland', 'gravityforms'),__('France', 'gravityforms'),__('Gabon', 'gravityforms'),__('Gambia', 'gravityforms'),__('Georgia', 'gravityforms'),__('Germany', 'gravityforms'),__('Ghana', 'gravityforms'),__('Greece', 'gravityforms'),__('Grenada', 'gravityforms'),__('Guatemala', 'gravityforms'),__('Guinea', 'gravityforms'),__('Guinea-Bissau', 'gravityforms'),__('Guyana', 'gravityforms'),__('Haiti', 'gravityforms'),__('Honduras', 'gravityforms'),__('Hong Kong', 'gravityforms'),__('Hungary', 'gravityforms'),__('Iceland', 'gravityforms'),__('India', 'gravityforms'),__('Indonesia', 'gravityforms'),__('Iran', 'gravityforms'),__('Iraq', 'gravityforms'),__('Ireland', 'gravityforms'),__('Israel', 'gravityforms'),__('Italy', 'gravityforms'),__('Jamaica', 'gravityforms'),__('Japan', 'gravityforms'),__('Jordan', 'gravityforms'),__('Kazakhstan', 'gravityforms'),__('Kenya', 'gravityforms'),__('Kiribati', 'gravityforms'),__('North Korea', 'gravityforms'),__('South Korea', 'gravityforms'),__('Kuwait', 'gravityforms'),__('Kyrgyzstan', 'gravityforms'),__('Laos', 'gravityforms'),__('Latvia', 'gravityforms'),__('Lebanon', 'gravityforms'),__('Lesotho', 'gravityforms'),__('Liberia', 'gravityforms'),__('Libya', 'gravityforms'),__('Liechtenstein', 'gravityforms'),__('Lithuania', 'gravityforms'),__('Luxembourg', 'gravityforms'),__('Macedonia', 'gravityforms'),__('Madagascar', 'gravityforms'),__('Malawi', 'gravityforms'),__('Malaysia', 'gravityforms'),__('Maldives', 'gravityforms'),__('Mali', 'gravityforms'),__('Malta', 'gravityforms'),__('Marshall Islands', 'gravityforms'),__('Mauritania', 'gravityforms'),__('Mauritius', 'gravityforms'),__('Mexico', 'gravityforms'),__('Micronesia', 'gravityforms'),__('Moldova', 'gravityforms'),__('Monaco', 'gravityforms'),__('Mongolia', 'gravityforms'),__('Montenegro', 'gravityforms'),__('Morocco', 'gravityforms'),__('Mozambique', 'gravityforms'),__('Myanmar', 'gravityforms'),__('Namibia', 'gravityforms'),__('Nauru', 'gravityforms'),__('Nepal', 'gravityforms'),__('Netherlands', 'gravityforms'),__('New Zealand', 'gravityforms'),__('Nicaragua', 'gravityforms'),__('Niger', 'gravityforms'),__('Nigeria', 'gravityforms'),__('Norway', 'gravityforms'),__('Oman', 'gravityforms'),__('Pakistan', 'gravityforms'),__('Palau', 'gravityforms'),__('Palestine', 'gravityforms'),__('Panama', 'gravityforms'),__('Papua New Guinea', 'gravityforms'),__('Paraguay', 'gravityforms'),__('Peru', 'gravityforms'),__('Philippines', 'gravityforms'),__('Poland', 'gravityforms'),__('Portugal', 'gravityforms'),__('Puerto Rico', 'gravityforms'),__('Qatar', 'gravityforms'),__('Romania', 'gravityforms'),__('Russia', 'gravityforms'),__('Rwanda', 'gravityforms'),__('Saint Kitts and Nevis', 'gravityforms'),__('Saint Lucia', 'gravityforms'),__('Saint Vincent and the Grenadines', 'gravityforms'),__('Samoa', 'gravityforms'),__('San Marino', 'gravityforms'),__('Sao Tome and Principe', 'gravityforms'),__('Saudi Arabia', 'gravityforms'),__('Senegal', 'gravityforms'),__('Serbia and Montenegro', 'gravityforms'),__('Seychelles', 'gravityforms'),__('Sierra Leone', 'gravityforms'),__('Singapore', 'gravityforms'),__('Slovakia', 'gravityforms'),__('Slovenia', 'gravityforms'),__('Solomon Islands', 'gravityforms'),__('Somalia', 'gravityforms'),__('South Africa', 'gravityforms'),__('Spain', 'gravityforms'),__('Sri Lanka', 'gravityforms'),__('Sudan', 'gravityforms'),__('Suriname', 'gravityforms'),__('Swaziland', 'gravityforms'),__('Sweden', 'gravityforms'),__('Switzerland', 'gravityforms'),__('Syria', 'gravityforms'),__('Taiwan', 'gravityforms'),__('Tajikistan', 'gravityforms'),__('Tanzania', 'gravityforms'),__('Thailand', 'gravityforms'),__('Togo', 'gravityforms'),__('Tonga', 'gravityforms'),__('Trinidad and Tobago', 'gravityforms'),__('Tunisia', 'gravityforms'),__('Turkey', 'gravityforms'),__('Turkmenistan', 'gravityforms'),__('Tuvalu', 'gravityforms'),__('Uganda', 'gravityforms'),__('Ukraine', 'gravityforms'),__('United Arab Emirates', 'gravityforms'),__('United Kingdom', 'gravityforms'),__('United States', 'gravityforms'),__('Uruguay', 'gravityforms'),__('Uzbekistan', 'gravityforms'),__('Vanuatu', 'gravityforms'),__('Vatican City', 'gravityforms'),__('Venezuela', 'gravityforms'),__('Vietnam', 'gravityforms'),__('Yemen', 'gravityforms'),__('Zambia', 'gravityforms'),__('Zimbabwe', 'gravityforms'));
+        return array(
+        __('Afghanistan', 'gravityforms'),__('Albania', 'gravityforms'),__('Algeria', 'gravityforms'), __('American Samoa', 'gravityforms'), __('Andorra', 'gravityforms'),__('Angola', 'gravityforms'),__('Antigua and Barbuda', 'gravityforms'),__('Argentina', 'gravityforms'),__('Armenia', 'gravityforms'),__('Australia', 'gravityforms'),__('Austria', 'gravityforms'),__('Azerbaijan', 'gravityforms'),__('Bahamas', 'gravityforms'),__('Bahrain', 'gravityforms'),__('Bangladesh', 'gravityforms'),__('Barbados', 'gravityforms'),__('Belarus', 'gravityforms'),__('Belgium', 'gravityforms'),__('Belize', 'gravityforms'),__('Benin', 'gravityforms'),__('Bermuda', 'gravityforms'),__('Bhutan', 'gravityforms'),__('Bolivia', 'gravityforms'),__('Bosnia and Herzegovina', 'gravityforms'),__('Botswana', 'gravityforms'),__('Brazil', 'gravityforms'),__('Brunei', 'gravityforms'),__('Bulgaria', 'gravityforms'),__('Burkina Faso', 'gravityforms'),__('Burundi', 'gravityforms'),__('Cambodia', 'gravityforms'),__('Cameroon', 'gravityforms'),__('Canada', 'gravityforms'),__('Cape Verde', 'gravityforms'),__('Central African Republic', 'gravityforms'),__('Chad', 'gravityforms'),__('Chile', 'gravityforms'),__('China', 'gravityforms'),__('Colombia', 'gravityforms'),__('Comoros', 'gravityforms'),__('Congo', 'gravityforms'),__('Costa Rica', 'gravityforms'),__('C&ocirc;te d\'Ivoire', 'gravityforms'),__('Croatia', 'gravityforms'),__('Cuba', 'gravityforms'),__('Cyprus', 'gravityforms'),__('Czech Republic', 'gravityforms'),__('Denmark', 'gravityforms'),__('Djibouti', 'gravityforms'),__('Dominica', 'gravityforms'),__('Dominican Republic', 'gravityforms'),__('East Timor', 'gravityforms'),__('Ecuador', 'gravityforms'),__('Egypt', 'gravityforms'),__('El Salvador', 'gravityforms'),__('Equatorial Guinea', 'gravityforms'),__('Eritrea', 'gravityforms'),__('Estonia', 'gravityforms'),__('Ethiopia', 'gravityforms'),__('Fiji', 'gravityforms'),__('Finland', 'gravityforms'),__('France', 'gravityforms'),__('Gabon', 'gravityforms'),
+        __('Gambia', 'gravityforms'),__('Georgia', 'gravityforms'),__('Germany', 'gravityforms'),__('Ghana', 'gravityforms'),__('Greece', 'gravityforms'),__('Grenada', 'gravityforms'),__('Guam', 'gravityforms'),__('Guatemala', 'gravityforms'),__('Guinea', 'gravityforms'),__('Guinea-Bissau', 'gravityforms'),__('Guyana', 'gravityforms'),__('Haiti', 'gravityforms'),__('Honduras', 'gravityforms'),__('Hong Kong', 'gravityforms'),__('Hungary', 'gravityforms'),__('Iceland', 'gravityforms'),__('India', 'gravityforms'),__('Indonesia', 'gravityforms'),__('Iran', 'gravityforms'),__('Iraq', 'gravityforms'),__('Ireland', 'gravityforms'),__('Israel', 'gravityforms'),__('Italy', 'gravityforms'),__('Jamaica', 'gravityforms'),__('Japan', 'gravityforms'),__('Jordan', 'gravityforms'),__('Kazakhstan', 'gravityforms'),__('Kenya', 'gravityforms'),__('Kiribati', 'gravityforms'),__('North Korea', 'gravityforms'),__('South Korea', 'gravityforms'),__('Kuwait', 'gravityforms'),__('Kyrgyzstan', 'gravityforms'),__('Laos', 'gravityforms'),__('Latvia', 'gravityforms'),__('Lebanon', 'gravityforms'),__('Lesotho', 'gravityforms'),__('Liberia', 'gravityforms'),__('Libya', 'gravityforms'),__('Liechtenstein', 'gravityforms'),__('Lithuania', 'gravityforms'),__('Luxembourg', 'gravityforms'),__('Macedonia', 'gravityforms'),__('Madagascar', 'gravityforms'),__('Malawi', 'gravityforms'),__('Malaysia', 'gravityforms'),__('Maldives', 'gravityforms'),__('Mali', 'gravityforms'),__('Malta', 'gravityforms'),__('Marshall Islands', 'gravityforms'),__('Mauritania', 'gravityforms'),__('Mauritius', 'gravityforms'),__('Mexico', 'gravityforms'),__('Micronesia', 'gravityforms'),__('Moldova', 'gravityforms'),__('Monaco', 'gravityforms'),__('Mongolia', 'gravityforms'),__('Montenegro', 'gravityforms'),__('Morocco', 'gravityforms'),__('Mozambique', 'gravityforms'),__('Myanmar', 'gravityforms'),__('Namibia', 'gravityforms'),__('Nauru', 'gravityforms'),__('Nepal', 'gravityforms'),__('Netherlands', 'gravityforms'),__('New Zealand', 'gravityforms'),
+        __('Nicaragua', 'gravityforms'),__('Niger', 'gravityforms'),__('Nigeria', 'gravityforms'),__('Norway', 'gravityforms'), __('Northern Mariana Islands', 'gravityforms'), __('Oman', 'gravityforms'),__('Pakistan', 'gravityforms'),__('Palau', 'gravityforms'),__('Palestine', 'gravityforms'),__('Panama', 'gravityforms'),__('Papua New Guinea', 'gravityforms'),__('Paraguay', 'gravityforms'),__('Peru', 'gravityforms'),__('Philippines', 'gravityforms'),__('Poland', 'gravityforms'),__('Portugal', 'gravityforms'),__('Puerto Rico', 'gravityforms'),__('Qatar', 'gravityforms'),__('Romania', 'gravityforms'),__('Russia', 'gravityforms'),__('Rwanda', 'gravityforms'),__('Saint Kitts and Nevis', 'gravityforms'),__('Saint Lucia', 'gravityforms'),__('Saint Vincent and the Grenadines', 'gravityforms'),__('Samoa', 'gravityforms'),__('San Marino', 'gravityforms'),__('Sao Tome and Principe', 'gravityforms'),__('Saudi Arabia', 'gravityforms'),__('Senegal', 'gravityforms'),__('Serbia and Montenegro', 'gravityforms'),__('Seychelles', 'gravityforms'),__('Sierra Leone', 'gravityforms'),__('Singapore', 'gravityforms'),__('Slovakia', 'gravityforms'),__('Slovenia', 'gravityforms'),__('Solomon Islands', 'gravityforms'),__('Somalia', 'gravityforms'),__('South Africa', 'gravityforms'),__('Spain', 'gravityforms'),__('Sri Lanka', 'gravityforms'),__('Sudan', 'gravityforms'),__('Suriname', 'gravityforms'),__('Swaziland', 'gravityforms'),__('Sweden', 'gravityforms'),__('Switzerland', 'gravityforms'),__('Syria', 'gravityforms'),__('Taiwan', 'gravityforms'),__('Tajikistan', 'gravityforms'),__('Tanzania', 'gravityforms'),__('Thailand', 'gravityforms'),__('Togo', 'gravityforms'),__('Tonga', 'gravityforms'),__('Trinidad and Tobago', 'gravityforms'),__('Tunisia', 'gravityforms'),__('Turkey', 'gravityforms'),__('Turkmenistan', 'gravityforms'),__('Tuvalu', 'gravityforms'),__('Uganda', 'gravityforms'),__('Ukraine', 'gravityforms'),__('United Arab Emirates', 'gravityforms'),__('United Kingdom', 'gravityforms'),
+        __('United States', 'gravityforms'),__('Uruguay', 'gravityforms'),__('Uzbekistan', 'gravityforms'),__('Vanuatu', 'gravityforms'),__('Vatican City', 'gravityforms'),__('Venezuela', 'gravityforms'),__('Vietnam', 'gravityforms'), __('Virgin Islands, British', 'gravityforms'), __('Virgin Islands, U.S.', 'gravityforms'),__('Yemen', 'gravityforms'),__('Zambia', 'gravityforms'),__('Zimbabwe', 'gravityforms'));
+    }
+
+    public static function get_country_code($country_name) {
+        $codes = array(
+
+            __('AFGHANISTAN', 'gravityforms') => "AF" ,
+            __('ALBANIA', 'gravityforms') => "AL" ,
+            __('ALGERIA', 'gravityforms') => "DZ" ,
+            __('AMERICAN SAMOA', 'gravityforms') => "AS" ,
+            __('ANDORRA', 'gravityforms') => "AD" ,
+            __('ANGOLA', 'gravityforms') => "AO" ,
+            __('ANTIGUA AND BARBUDA', 'gravityforms') => "AG" ,
+            __('ARGENTINA', 'gravityforms') => "AR" ,
+            __('ARMENIA', 'gravityforms') => "AM" ,
+            __('AUSTRALIA', 'gravityforms') => "AU" ,
+            __('AUSTRIA', 'gravityforms') => "AT" ,
+            __('AZERBAIJAN', 'gravityforms') => "AZ" ,
+            __('BAHAMAS', 'gravityforms') => "BS" ,
+            __('BAHRAIN', 'gravityforms') => "BH" ,
+            __('BANGLADESH', 'gravityforms') => "BD" ,
+            __('BARBADOS', 'gravityforms') => "BB" ,
+            __('BELARUS', 'gravityforms') => "BY" ,
+            __('BELGIUM', 'gravityforms') => "BE" ,
+            __('BELIZE', 'gravityforms') => "BZ" ,
+            __('BENIN', 'gravityforms') => "BJ" ,
+            __('BERMUDA', 'gravityforms') => "BM" ,
+            __('BHUTAN', 'gravityforms') => "BT" ,
+            __('BOLIVIA', 'gravityforms') => "BO" ,
+            __('BOSNIA AND HERZEGOVINA', 'gravityforms') => "BA" ,
+            __('BOTSWANA', 'gravityforms') => "BW" ,
+            __('BRAZIL', 'gravityforms') => "BR" ,
+            __('BRUNEI', 'gravityforms') => "BN" ,
+            __('BULGARIA', 'gravityforms') => "BG" ,
+            __('BURKINA FASO', 'gravityforms') => "BF" ,
+            __('BURUNDI', 'gravityforms') => "BI" ,
+            __('CAMBODIA', 'gravityforms') => "KH" ,
+            __('CAMEROON', 'gravityforms') => "CM" ,
+            __('CANADA', 'gravityforms') => "CA" ,
+            __('CAPE VERDE', 'gravityforms') => "CV" ,
+            __('CENTRAL AFRICAN REPUBLIC', 'gravityforms') => "CF" ,
+            __('CHAD', 'gravityforms') => "TD" ,
+            __('CHILE', 'gravityforms') => "CL" ,
+            __('CHINA', 'gravityforms') => "CN" ,
+            __('COLOMBIA', 'gravityforms') => "CO" ,
+            __('COMOROS', 'gravityforms') => "KM" ,
+            __('CONGO', 'gravityforms') => "CG" ,
+            __('COSTA RICA', 'gravityforms') => "CR" ,
+            __('C&OCIRC;TE D\'IVOIRE', 'gravityforms') => "CI" ,
+            __('CROATIA', 'gravityforms') => "HR" ,
+            __('CUBA', 'gravityforms') => "CU" ,
+            __('CYPRUS', 'gravityforms') => "CY" ,
+            __('CZECH REPUBLIC', 'gravityforms') => "CZ" ,
+            __('DENMARK', 'gravityforms') => "DK" ,
+            __('DJIBOUTI', 'gravityforms') => "DJ" ,
+            __('DOMINICA', 'gravityforms') => "DM" ,
+            __('DOMINICAN REPUBLIC', 'gravityforms') => "DO" ,
+            __('EAST TIMOR', 'gravityforms') => "TL" ,
+            __('ECUADOR', 'gravityforms') => "EC" ,
+            __('EGYPT', 'gravityforms') => "EG" ,
+            __('EL SALVADOR', 'gravityforms') => "SV" ,
+            __('EQUATORIAL GUINEA', 'gravityforms') => "GQ" ,
+            __('ERITREA', 'gravityforms') => "ER" ,
+            __('ESTONIA', 'gravityforms') => "EE" ,
+            __('ETHIOPIA', 'gravityforms') => "ET" ,
+            __('FIJI', 'gravityforms') => "FJ" ,
+            __('FINLAND', 'gravityforms') => "FI" ,
+            __('FRANCE', 'gravityforms') => "FR" ,
+            __('GABON', 'gravityforms') => "GA" ,
+            __('GAMBIA', 'gravityforms') => "GM" ,
+            __('GEORGIA', 'gravityforms') => "GE" ,
+            __('GERMANY', 'gravityforms') => "DE" ,
+            __('GHANA', 'gravityforms') => "GH" ,
+            __('GREECE', 'gravityforms') => "GR" ,
+            __('GRENADA', 'gravityforms') => "GD" ,
+            __('GUAM', 'gravityforms') => "GU" ,
+            __('GUATEMALA', 'gravityforms') => "GT" ,
+            __('GUINEA', 'gravityforms') => "GN" ,
+            __('GUINEA-BISSAU', 'gravityforms') => "GW" ,
+            __('GUYANA', 'gravityforms') => "GY" ,
+            __('HAITI', 'gravityforms') => "HT" ,
+            __('HONDURAS', 'gravityforms') => "HN" ,
+            __('HONG KONG', 'gravityforms') => "HK" ,
+            __('HUNGARY', 'gravityforms') => "HU" ,
+            __('ICELAND', 'gravityforms') => "IS" ,
+            __('INDIA', 'gravityforms') => "IN" ,
+            __('INDONESIA', 'gravityforms') => "ID" ,
+            __('IRAN', 'gravityforms') => "IR" ,
+            __('IRAQ', 'gravityforms') => "IQ" ,
+            __('IRELAND', 'gravityforms') => "IE" ,
+            __('ISRAEL', 'gravityforms') => "IL" ,
+            __('ITALY', 'gravityforms') => "IT" ,
+            __('JAMAICA', 'gravityforms') => "JM" ,
+            __('JAPAN', 'gravityforms') => "JP" ,
+            __('JORDAN', 'gravityforms') => "JO" ,
+            __('KAZAKHSTAN', 'gravityforms') => "KZ" ,
+            __('KENYA', 'gravityforms') => "KE" ,
+            __('KIRIBATI', 'gravityforms') => "KI" ,
+            __('NORTH KOREA', 'gravityforms') => "KP" ,
+            __('SOUTH KOREA', 'gravityforms') => "KR" ,
+            __('KUWAIT', 'gravityforms') => "KW" ,
+            __('KYRGYZSTAN', 'gravityforms') => "KG" ,
+            __('LAOS', 'gravityforms') => "LA" ,
+            __('LATVIA', 'gravityforms') => "LV" ,
+            __('LEBANON', 'gravityforms') => "LB" ,
+            __('LESOTHO', 'gravityforms') => "LS" ,
+            __('LIBERIA', 'gravityforms') => "LR" ,
+            __('LIBYA', 'gravityforms') => "LY" ,
+            __('LIECHTENSTEIN', 'gravityforms') => "LI" ,
+            __('LITHUANIA', 'gravityforms') => "LT" ,
+            __('LUXEMBOURG', 'gravityforms') => "LU" ,
+            __('MACEDONIA', 'gravityforms') => "MK" ,
+            __('MADAGASCAR', 'gravityforms') => "MG" ,
+            __('MALAWI', 'gravityforms') => "MW" ,
+            __('MALAYSIA', 'gravityforms') => "MY" ,
+            __('MALDIVES', 'gravityforms') => "MV" ,
+            __('MALI', 'gravityforms') => "ML" ,
+            __('MALTA', 'gravityforms') => "MT" ,
+            __('MARSHALL ISLANDS', 'gravityforms') => "MH" ,
+            __('MAURITANIA', 'gravityforms') => "MR" ,
+            __('MAURITIUS', 'gravityforms') => "MU" ,
+            __('MEXICO', 'gravityforms') => "MX" ,
+            __('MICRONESIA', 'gravityforms') => "FM" ,
+            __('MOLDOVA', 'gravityforms') => "MD" ,
+            __('MONACO', 'gravityforms') => "MC" ,
+            __('MONGOLIA', 'gravityforms') => "MN" ,
+            __('MONTENEGRO', 'gravityforms') => "ME" ,
+            __('MOROCCO', 'gravityforms') => "MA" ,
+            __('MOZAMBIQUE', 'gravityforms') => "MZ" ,
+            __('MYANMAR', 'gravityforms') => "MM" ,
+            __('NAMIBIA', 'gravityforms') => "NA" ,
+            __('NAURU', 'gravityforms') => "NR" ,
+            __('NEPAL', 'gravityforms') => "NP" ,
+            __('NETHERLANDS', 'gravityforms') => "NL" ,
+            __('NEW ZEALAND', 'gravityforms') => "NZ" ,
+            __('NICARAGUA', 'gravityforms') => "NI" ,
+            __('NIGER', 'gravityforms') => "NE" ,
+            __('NIGERIA', 'gravityforms') => "NG" ,
+            __('NORTHERN MARIANA ISLANDS', 'gravityforms') => "MP" ,
+            __('NORWAY', 'gravityforms') => "NO" ,
+            __('OMAN', 'gravityforms') => "OM" ,
+            __('PAKISTAN', 'gravityforms') => "PK" ,
+            __('PALAU', 'gravityforms') => "PW" ,
+            __('PALESTINE', 'gravityforms') => "PS" ,
+            __('PANAMA', 'gravityforms') => "PA" ,
+            __('PAPUA NEW GUINEA', 'gravityforms') => "PG" ,
+            __('PARAGUAY', 'gravityforms') => "PY" ,
+            __('PERU', 'gravityforms') => "PE" ,
+            __('PHILIPPINES', 'gravityforms') => "PH" ,
+            __('POLAND', 'gravityforms') => "PL" ,
+            __('PORTUGAL', 'gravityforms') => "PT" ,
+            __('PUERTO RICO', 'gravityforms') => "PR" ,
+            __('QATAR', 'gravityforms') => "QA" ,
+            __('ROMANIA', 'gravityforms') => "RO" ,
+            __('RUSSIA', 'gravityforms') => "RU" ,
+            __('RWANDA', 'gravityforms') => "RW" ,
+            __('SAINT KITTS AND NEVIS', 'gravityforms') => "KN" ,
+            __('SAINT LUCIA', 'gravityforms') => "LC" ,
+            __('SAINT VINCENT AND THE GRENADINES', 'gravityforms') => "VC" ,
+            __('SAMOA', 'gravityforms') => "WS" ,
+            __('SAN MARINO', 'gravityforms') => "SM" ,
+            __('SAO TOME AND PRINCIPE', 'gravityforms') => "ST" ,
+            __('SAUDI ARABIA', 'gravityforms') => "SA" ,
+            __('SENEGAL', 'gravityforms') => "SN" ,
+            __('SERBIA AND MONTENEGRO', 'gravityforms') => "RS" ,
+            __('SEYCHELLES', 'gravityforms') => "SC" ,
+            __('SIERRA LEONE', 'gravityforms') => "SL" ,
+            __('SINGAPORE', 'gravityforms') => "SG" ,
+            __('SLOVAKIA', 'gravityforms') => "SK" ,
+            __('SLOVENIA', 'gravityforms') => "SI" ,
+            __('SOLOMON ISLANDS', 'gravityforms') => "SB" ,
+            __('SOMALIA', 'gravityforms') => "SO" ,
+            __('SOUTH AFRICA', 'gravityforms') => "ZA" ,
+            __('SPAIN', 'gravityforms') => "ES" ,
+            __('SRI LANKA', 'gravityforms') => "LK" ,
+            __('SUDAN', 'gravityforms') => "SD" ,
+            __('SURINAME', 'gravityforms') => "SR" ,
+            __('SWAZILAND', 'gravityforms') => "SZ" ,
+            __('SWEDEN', 'gravityforms') => "SE" ,
+            __('SWITZERLAND', 'gravityforms') => "CH" ,
+            __('SYRIA', 'gravityforms') => "SY" ,
+            __('TAIWAN', 'gravityforms') => "TW" ,
+            __('TAJIKISTAN', 'gravityforms') => "TJ" ,
+            __('TANZANIA', 'gravityforms') => "TZ" ,
+            __('THAILAND', 'gravityforms') => "TH" ,
+            __('TOGO', 'gravityforms') => "TG" ,
+            __('TONGA', 'gravityforms') => "TO" ,
+            __('TRINIDAD AND TOBAGO', 'gravityforms') => "TT" ,
+            __('TUNISIA', 'gravityforms') => "TN" ,
+            __('TURKEY', 'gravityforms') => "TR" ,
+            __('TURKMENISTAN', 'gravityforms') => "TM" ,
+            __('TUVALU', 'gravityforms') => "TV" ,
+            __('UGANDA', 'gravityforms') => "UG" ,
+            __('UKRAINE', 'gravityforms') => "UA" ,
+            __('UNITED ARAB EMIRATES', 'gravityforms') => "AE" ,
+            __('UNITED KINGDOM', 'gravityforms') => "GB" ,
+            __('UNITED STATES', 'gravityforms') => "US" ,
+            __('URUGUAY', 'gravityforms') => "UY" ,
+            __('UZBEKISTAN', 'gravityforms') => "UZ" ,
+            __('VANUATU', 'gravityforms') => "VU" ,
+            __('VATICAN CITY', 'gravityforms') => "" ,
+            __('VENEZUELA', 'gravityforms') => "VE" ,
+            __('VIRGIN ISLANDS, BRITISH', 'gravityforms') => "VG" ,
+            __('VIRGIN ISLANDS, U.S.', 'gravityforms') => "VI" ,
+            __('VIETNAM', 'gravityforms') => "VN" ,
+            __('YEMEN', 'gravityforms') => "YE" ,
+            __('ZAMBIA', 'gravityforms') => "ZM" ,
+            __('ZIMBABWE', 'gravityforms') => "ZW" );
+
+            return $codes[strtoupper($country_name)];
     }
 
     public static function get_us_states(){
-        return array(__("Alabama","gravityforms"),__("Alaska","gravityforms"),__("Arizona","gravityforms"),__("Arkansas","gravityforms"),__("California","gravityforms"),__("Colorado","gravityforms"),__("Connecticut","gravityforms"),__("Delaware","gravityforms"),__("Florida","gravityforms"),__("Georgia","gravityforms"),__("Hawaii","gravityforms"),__("Idaho","gravityforms"),__("Illinois","gravityforms"),__("Indiana","gravityforms"),__("Iowa","gravityforms"),__("Kansas","gravityforms"),__("Kentucky","gravityforms"),__("Louisiana","gravityforms"),__("Maine","gravityforms"),__("Maryland","gravityforms"),__("Massachusetts","gravityforms"),__("Michigan","gravityforms"),__("Minnesota","gravityforms"),__("Mississippi","gravityforms"),__("Missouri","gravityforms"),__("Montana","gravityforms"),__("Nebraska","gravityforms"),__("Nevada","gravityforms"),__("New Hampshire","gravityforms"),__("New Jersey","gravityforms"),__("New Mexico","gravityforms"),__("New York","gravityforms"),__("North Carolina","gravityforms"),__("North Dakota","gravityforms"),__("Ohio","gravityforms"),__("Oklahoma","gravityforms"),__("Oregon","gravityforms"),__("Pennsylvania","gravityforms"),__("Rhode Island","gravityforms"),__("South Carolina","gravityforms"),__("South Dakota","gravityforms"),__("Tennessee","gravityforms"),__("Texas","gravityforms"),__("Utah","gravityforms"),__("Vermont","gravityforms"),__("Virginia","gravityforms"),__("Washington","gravityforms"),__("West Virginia","gravityforms"),__("Wisconsin","gravityforms"),__("Wyoming","gravityforms"));
+        return array(__("Alabama","gravityforms"),__("Alaska","gravityforms"),__("Arizona","gravityforms"),__("Arkansas","gravityforms"),__("California","gravityforms"),__("Colorado","gravityforms"),__("Connecticut","gravityforms"),__("Delaware","gravityforms"),__("District of Columbia", "gravityforms"), __("Florida","gravityforms"),__("Georgia","gravityforms"),__("Hawaii","gravityforms"),__("Idaho","gravityforms"),__("Illinois","gravityforms"),__("Indiana","gravityforms"),__("Iowa","gravityforms"),__("Kansas","gravityforms"),__("Kentucky","gravityforms"),__("Louisiana","gravityforms"),__("Maine","gravityforms"),__("Maryland","gravityforms"),__("Massachusetts","gravityforms"),__("Michigan","gravityforms"),__("Minnesota","gravityforms"),__("Mississippi","gravityforms"),__("Missouri","gravityforms"),__("Montana","gravityforms"),__("Nebraska","gravityforms"),__("Nevada","gravityforms"),__("New Hampshire","gravityforms"),__("New Jersey","gravityforms"),__("New Mexico","gravityforms"),__("New York","gravityforms"),__("North Carolina","gravityforms"),__("North Dakota","gravityforms"),__("Ohio","gravityforms"),__("Oklahoma","gravityforms"),__("Oregon","gravityforms"),__("Pennsylvania","gravityforms"),__("Rhode Island","gravityforms"),__("South Carolina","gravityforms"),__("South Dakota","gravityforms"),__("Tennessee","gravityforms"),__("Texas","gravityforms"),__("Utah","gravityforms"),__("Vermont","gravityforms"),__("Virginia","gravityforms"),__("Washington","gravityforms"),__("West Virginia","gravityforms"),__("Wisconsin","gravityforms"),__("Wyoming","gravityforms"));
     }
 
     public static function get_canadian_provinces(){

@@ -60,7 +60,7 @@ class GFFormList{
                 UpdateCount("active_count", is_active ? -1 : 1);
                 UpdateCount("inactive_count", is_active ? 1 : -1);
 
-                var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+                var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
                 mysack.execute = 1;
                 mysack.method = 'POST';
                 mysack.setVar( "action", "rg_update_form_active" );
@@ -83,7 +83,10 @@ class GFFormList{
         <link rel="stylesheet" href="<?php echo GFCommon::get_base_url()?>/css/admin.css" />
         <div class="wrap">
             <img alt="<?php _e("Gravity Forms", "gravityforms") ?>" src="<?php echo GFCommon::get_base_url()?>/images/gravity-title-icon-32.png" style="float:left; margin:15px 7px 0 0;"/>
-            <h2><?php _e("Edit Forms", "gravityforms"); ?></h2>
+            <h2>
+                <?php _e("Edit Forms", "gravityforms"); ?>
+                <a class="button add-new-h2" href="admin.php?page=gf_new_form"><?php _e("Add New", "gravityforms") ?></a>
+            </h2>
             <form id="forms_form" method="post">
                 <?php wp_nonce_field('gforms_update_forms', 'gforms_update_forms') ?>
                 <input type="hidden" id="action" name="action"/>

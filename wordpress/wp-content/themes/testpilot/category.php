@@ -29,7 +29,6 @@
         if ($current == 0) {
         ?>
 		<div <?php post_class() ?>>
-				
 				<div class="entry">
 					<?php the_content() ?>
 				</div>
@@ -43,6 +42,17 @@
 		<div <?php post_class() ?>>
         
         <h2 id="post-<?php the_ID(); ?>"><a href="<?php the_permalink() ?>" rel="bookmark" title="Permanent Link to <?php the_title_attribute(); ?>"><?php the_title(); ?></a></h2>
+        <?php
+        $key = 'post-name';
+        $themeta = get_post_meta($post->ID, $key, TRUE);
+        if($themeta != '') { ?>
+				<dl class="custom">
+				    <dt>Contributed by:</dt>
+				    <dd><?php echo get_post_meta($post->ID, 'post-name', true); ?></dd>
+				    <dt>Original URL:</dt>
+				    <dd><a href="<?php echo get_post_meta($post->ID, 'posturl', true); ?>"><?php echo get_post_meta($post->ID, 'posturl', true); ?></a></dd>
+				</dl>
+        <?php } ?>
 				
 				<div class="entry">
 					<?php the_excerpt() ?>

@@ -613,15 +613,7 @@ Class GFNotification{
     }
 
     private static function get_routing_fields($form, $selected_field_id){
-        $str = "";
-        foreach($form["fields"] as $field){
-            $input_type = RGFormsModel::get_input_type($field);
-            if($input_type == "checkbox" || $input_type == "radio" || $input_type == "select"){
-                $selected = $field["id"] == $selected_field_id ? "selected='selected'" : "";
-                $str .= "<option value='" . $field["id"] . "' " . $selected . ">" . GFCommon::truncate_middle($field["label"], 16) . "</option>";
-            }
-        }
-        return $str;
+        return GFCommon::get_selection_fields($form, $selected_field_id);
     }
 
      private static function get_field_values($form, $field_id, $selected_value, $max_field_length = 16){

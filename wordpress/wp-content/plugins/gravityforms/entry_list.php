@@ -5,8 +5,6 @@ class GFEntryList{
         if(!GFCommon::ensure_wp_version())
             return;
 
-
-
         $forms = RGFormsModel::get_forms(true);
         $id = $_GET["id"];
 
@@ -76,8 +74,6 @@ class GFEntryList{
                 RGFormsModel::update_grid_column_meta($form_id, $columns);
             break;
         }
-
-
 
         $sort_field = empty($_GET["sort"]) ? 0 : $_GET["sort"];
         $sort_direction = empty($_GET["dir"]) ? "DESC" : $_GET["dir"];
@@ -172,7 +168,7 @@ class GFEntryList{
             }
 
             function UpdateLeadProperty(lead_id, name, value){
-                var mysack = new sack("<?php bloginfo( 'wpurl' ); ?>/wp-admin/admin-ajax.php" );
+                var mysack = new sack("<?php echo admin_url("admin-ajax.php")?>" );
                 mysack.execute = 1;
                 mysack.method = 'POST';
                 mysack.setVar( "action", "rg_update_lead_property" );

@@ -96,7 +96,8 @@ class GFFormDisplay{
             }
 
             if($is_postback && !$is_valid){
-                $form_string .= "<div class='validation_error'>" . __("There was a problem with your submission.", "gravityforms") . "<br /> " . __("Errors have been highlighted below ", "gravityforms") . "</div>";
+                $validation_message = "<div class='validation_error'>" . __("There was a problem with your submission.", "gravityforms") . "<br /> " . __("Errors have been highlighted below ", "gravityforms") . "</div>";
+                $form_string .= apply_filters("gform_validation_message", $validation_message, $form);
             }
 
             $form_string .= "
@@ -135,6 +136,9 @@ class GFFormDisplay{
                 </form>
                 </div>";
 
+            if(self::has_conditional_logic($form))
+                $form_string .= self::get_conditional_logic($form);
+
             return $form_string;
         }
         else{
@@ -156,7 +160,7 @@ class GFFormDisplay{
         {
             foreach($field["inputs"] as $input){
                 $value = $_POST["input_" . str_replace('.', '_', $input["id"])];
-                if(!empty($value))
+                if(strlen(trim($value)) > 0)
                     return false;
             }
             return true;
@@ -166,13 +170,13 @@ class GFFormDisplay{
             if(is_array($value)){
                 //empty if any of the inputs are empty (for inputs with the same name)
                 foreach($value as $input){
-                    if(empty($input))
+                    if(strlen(trim($input)) <= 0 )
                         return true;
                 }
                 return false;
             }
             else{
-                return empty($value);
+                return strlen(trim($value)) <= 0 ? true : false;
             }
         }
     }
@@ -186,9 +190,12 @@ class GFFormDisplay{
     }
 
     private static function validate_range($field, $value){
-        if( !is_numeric($value) ||
-            (is_numeric($field["rangeMin"]) && $value < $field["rangeMin"]) ||
-            (is_numeric($field["rangeMax"]) && $value > $field["rangeMax"])
+        if( !GFCommon::is_numeric($value) )
+            return false;
+
+        $number = GFCommon::clean_number($value);
+        if( (is_numeric($field["rangeMin"]) && $number < $field["rangeMin"]) ||
+            (is_numeric($field["rangeMax"]) && $number > $field["rangeMax"])
         )
             return false;
         else
@@ -259,16 +266,15 @@ class GFFormDisplay{
 
         //handling autoresponder email
         $to = stripslashes($_POST["input_" . $form["autoResponder"]["toField"]]);
-        $subject = GFCommon::replace_variables($form["autoResponder"]["subject"], $form, $lead );
+        $subject = GFCommon::replace_variables($form["autoResponder"]["subject"], $form, $lead, false, false);
         $message = GFCommon::replace_variables($form["autoResponder"]["message"], $form, $lead);
         self::send_email($form["autoResponder"]["from"], $to, $form["autoResponder"]["bcc"], $form["autoResponder"]["replyTo"], $subject, $message);
 
         //handling admin notification email
-        $subject = GFCommon::replace_variables($form["notification"]["subject"], $form, $lead);
+        $subject = GFCommon::replace_variables($form["notification"]["subject"], $form, $lead, false, false);
         $message = GFCommon::replace_variables($form["notification"]["message"], $form, $lead);
         $from = empty($form["notification"]["fromField"]) ? $form["notification"]["from"] : stripslashes($_POST["input_" . $form["notification"]["fromField"]]);
         $replyTo = empty($form["notification"]["replyToField"]) ? $form["notification"]["replyTo"] : stripslashes($_POST["input_" . $form["notification"]["replyToField"]]);
-
 
         $form_id = $form["id"];
 
@@ -475,14 +481,14 @@ class GFFormDisplay{
 
     public static function enqueue_scripts(){
         global $wp_query;
-        if(is_array($wp_query->posts)){
-        foreach($wp_query->posts as $post){
-            $forms = self::get_embedded_forms($post->post_content);
-            foreach($forms as $form){
-                self::enqueue_form_scripts($form);
+        if(isset($wp_query->posts) && is_array($wp_query->posts)){
+            foreach($wp_query->posts as $post){
+                $forms = self::get_embedded_forms($post->post_content);
+                foreach($forms as $form){
+                    self::enqueue_form_scripts($form);
+                }
             }
         }
-    }
     }
 
     private static function get_embedded_forms($post_content){
@@ -502,15 +508,13 @@ class GFFormDisplay{
         if(!get_option('rg_gforms_disable_css'))
             wp_enqueue_style("gforms_css", GFCommon::get_base_url() . "/css/forms.css");
 
-        if(self::has_date_field($form)){
-            wp_enqueue_script("gforms_ui_datepicker", GFCommon::get_base_url() . "/js/jquery-ui/ui.datepicker.js", array("jquery"), false, true);
-            wp_enqueue_script("gforms_datepicker", GFCommon::get_base_url() . "/js/datepicker.js", array("gforms_ui_datepicker"), false, true);
-            
+        if(self::has_conditional_logic($form)){
+            wp_enqueue_script("gforms_conditional_logic_lib", GFCommon::get_base_url() . "/js/conditional_logic.js", array("jquery"), GFCommon::$version);
         }
 
-        if(self::has_conditional_logic($form)){
-            wp_enqueue_script("gforms_conditional_logic_lib", GFCommon::get_base_url() . "/js/conditional_logic.js", array("jquery"), false, true);
-            wp_enqueue_script("gforms_conditional_logic_" . $form["id"], GFCommon::get_base_url() . "/js/conditional_logic.php?form_id=" . $form["id"], array("jquery"), false, true);
+        if(self::has_date_field($form)){
+            wp_enqueue_script("gforms_ui_datepicker", GFCommon::get_base_url() . "/js/jquery-ui/ui.datepicker.js", array("jquery"), GFCommon::$version, true);
+            wp_enqueue_script("gforms_datepicker", GFCommon::get_base_url() . "/js/datepicker.js", array("gforms_ui_datepicker"), GFCommon::$version, true);
         }
     }
 
@@ -523,6 +527,53 @@ class GFFormDisplay{
                 return true;
         }
         return false;
+    }
+
+    private static function get_conditional_logic($form){
+        $logics = "";
+        $dependents = "";
+        $fields_with_logic = array();
+        foreach($form["fields"] as $field){
+
+            //use section's logic if one exists
+            $section = RGFormsModel::get_section($form, $field["id"]);
+            $section_logic = !empty($section) ? $section["conditionalLogic"] : null;
+
+            $logic = $field["conditionalLogic"];
+
+            if(!empty($logic)){
+                $field_section_logic = array("field" => $logic, "section" => $section_logic);
+                $logics .= $field["id"] . ": " . GFCommon::json_encode($field_section_logic) . ",";
+                $fields_with_logic[] = $field["id"];
+
+                $peers = $field["type"] == "section" ? GFCommon::get_section_fields($form, $field["id"]) : array($field);
+                $peer_ids = array();
+
+                foreach ($peers as $peer)
+                    $peer_ids[] = $peer["id"];
+
+                $dependents .= $field["id"] . ": " . GFCommon::json_encode($peer_ids) . ",";
+            }
+        }
+
+        if(!empty($logics))
+            $logics = substr($logics, 0, strlen($logics) - 1); //removing last comma;
+
+        if(!empty($dependents))
+            $dependents = substr($dependents, 0, strlen($dependents) - 1); //removing last comma;
+
+
+        $str = "<script type='text/javascript'>
+        jQuery(document).ready(function(){
+            gf_apply_rules({$form['id']}, " . GFCommon::json_encode($fields_with_logic) . ");
+            jQuery('#gform_wrapper_{$form['id']}').show();
+        });
+        if(!window['gf_form_conditional_logic'])
+            window['gf_form_conditional_logic'] = new Array();
+
+        window['gf_form_conditional_logic'][{$form['id']}] = {'logic' : {" . $logics . "}, 'dependents' : {" . $dependents . "}};</script>";
+
+        return $str;
     }
 
     private static function has_date_field($form){

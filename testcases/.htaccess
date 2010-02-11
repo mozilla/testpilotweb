@@ -1,5 +1,3 @@
-DirectoryIndex index.php
-
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteRule ^a-week-life\.html$ aweeklife [R=302,L]

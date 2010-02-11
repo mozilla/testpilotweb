@@ -413,6 +413,7 @@ exports.handlers = {
   },
 
   onExperimentStartup: function(store) {
+    // Attatch a convenience method to the data store object:
     store.rec = function(eventCode, data) {
       store.storeEvent({ event_code: eventCode,
                          data1: data[0] || 0,
@@ -550,7 +551,23 @@ exports.webContent = {
      <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>\
      ' + DATA_DISPLAY_HTML + FINE_PRINT,
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
+
+  _deleteDataOlderThanAWeek: function(dataStore) {
+    let cutoffDate = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    /* TODO: we're breaking encapsulation here because there's no public
+     * method to do this on the data store object... this should be implemented
+     * there. */
+    let wipeSql = "DELETE FROM " + dataStore._tableName +
+      " WHERE timestamp < " + cutoffDate;
+    let wipeStmt = dataStore._createStatement(wipeSql);
+    wipeStmt.execute();
+    wipeStmt.finalize();
+  },
+
   onPageLoad: function(experiment, document, graphUtils) {
+    // Get rid of old data so it doesn't pollute current submission
+    this._deleteDataOlderThanAWeek(experiment.dataStore);
+
     let rawData = experiment.dataStoreAsJSON;
     let bkmks, folders, depth;
     let browserUseTimeData = [];

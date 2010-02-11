@@ -37,7 +37,7 @@ const WeekEventCodes = {
   PRIVATE_OFF: 18
 };
 
-var eventCodeToEventName = ["", "Firefox Startup", "Firefox Shutdown",
+var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown",
                             "Firefox Restart", "Resume Active Use",
                             "Begin Idle", "Search", "Search Settings Changed",
                             "Bookmark Count", "New Bookmark", "Bookmark Opened",
@@ -425,7 +425,8 @@ exports.handlers = {
     // Record the version of this study at startup: this lets us see
     // what data was recorded before and after an update, which lets us
     // know whether any given data included a given bug-fix or not.
-    store.rec(STUDY_STATUS, [exports.experimentInfo.versionNumber]);
+    store.rec(WeekEventCodes.STUDY_STATUS,
+              [exports.experimentInfo.versionNumber]);
 
     console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();
@@ -562,6 +563,7 @@ exports.webContent = {
     let wipeStmt = dataStore._createStatement(wipeSql);
     wipeStmt.execute();
     wipeStmt.finalize();
+    console.info("Executed " + wipeSql);
   },
 
   onPageLoad: function(experiment, document, graphUtils) {

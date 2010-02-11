@@ -12,7 +12,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
-  versionNumber: 3
+  versionNumber: 4
 };
 
 const WeekEventCodes = {
@@ -37,7 +37,7 @@ const WeekEventCodes = {
   PRIVATE_OFF: 18
 };
 
-var eventCodeToEventName = ["", "Firefox Startup", "Firefox Shutdown",
+var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown",
                             "Firefox Restart", "Resume Active Use",
                             "Begin Idle", "Search", "Search Settings Changed",
                             "Bookmark Count", "New Bookmark", "Bookmark Opened",
@@ -413,6 +413,7 @@ exports.handlers = {
   },
 
   onExperimentStartup: function(store) {
+    // Attatch a convenience method to the data store object:
     store.rec = function(eventCode, data) {
       store.storeEvent({ event_code: eventCode,
                          data1: data[0] || 0,
@@ -424,7 +425,8 @@ exports.handlers = {
     // Record the version of this study at startup: this lets us see
     // what data was recorded before and after an update, which lets us
     // know whether any given data included a given bug-fix or not.
-    store.rec(STUDY_STATUS, [exports.experimentInfo.versionNumber]);
+    store.rec(WeekEventCodes.STUDY_STATUS,
+              [exports.experimentInfo.versionNumber]);
 
     console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();
@@ -550,7 +552,24 @@ exports.webContent = {
      <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>\
      ' + DATA_DISPLAY_HTML + FINE_PRINT,
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
+
+  _deleteDataOlderThanAWeek: function(dataStore) {
+    let cutoffDate = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    /* TODO: we're breaking encapsulation here because there's no public
+     * method to do this on the data store object... this should be implemented
+     * there. */
+    let wipeSql = "DELETE FROM " + dataStore._tableName +
+      " WHERE timestamp < " + cutoffDate;
+    let wipeStmt = dataStore._createStatement(wipeSql);
+    wipeStmt.execute();
+    wipeStmt.finalize();
+    console.info("Executed " + wipeSql);
+  },
+
   onPageLoad: function(experiment, document, graphUtils) {
+    // Get rid of old data so it doesn't pollute current submission
+    this._deleteDataOlderThanAWeek(experiment.dataStore);
+
     let rawData = experiment.dataStoreAsJSON;
     let bkmks, folders, depth;
     let browserUseTimeData = [];

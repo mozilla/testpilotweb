@@ -12,7 +12,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
-  versionNumber: 3
+  versionNumber: 4
 };
 
 const WeekEventCodes = {

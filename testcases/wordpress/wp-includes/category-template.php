@@ -34,6 +34,9 @@ function get_category_link( $category_id ) {
 			$category_nicename = get_category_parents( $category->parent, false, '/', true ) . $category_nicename;
 
 		$catlink = str_replace( '%category%', $category_nicename, $catlink );
+		$p = get_category_parents( $category->parent, false, '/', true );
+        $catlink = str_replace($p, '', $catlink);
+
 		$catlink = get_option( 'home' ) . user_trailingslashit( $catlink, 'category' );
 	}
 	return apply_filters( 'category_link', $catlink, $category_id );

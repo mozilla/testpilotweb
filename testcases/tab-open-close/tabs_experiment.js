@@ -114,10 +114,6 @@ let ObserverHelper = {
     return id;
   },
 
-  onObserverInstalled: function(instance) {
-    this._installedObservers.push(instance);
-  },
-
   cleanup: function() {
     // Uninstall all installed observers
     for (let i = 0; i < this._installedObservers.length; i++) {
@@ -129,12 +125,15 @@ let ObserverHelper = {
   onNewWindow: function(window) {
     // Create an observer for each window.
     this._installedObservers.push( new TabWindowObserver(window, this._dataStore));
+    console.info("Pushed a tab observer in onNewWindow.");
   },
 
   onWindowClosed: function(window) {
     for (let i=0; i < this._installedObservers.length; i++) {
       if (this._installedObservers[i]._window == window) {
+        console.info("Uninstalled a tab observer in onWindowClosed.");
         this._installedObservers[i].uninstall();
+        // TODO remove the uninstalled observer from the list?
       }
     }
   },
@@ -165,6 +164,8 @@ let ObserverHelper = {
       tab_id: exports.experimentInfo.versionNumber,
       timestamp: Date.now()
     });
+
+    // TODO install observers in all windows that are already open!!
   },
 
   onExperimentShutdown: function() {
@@ -204,7 +205,6 @@ TabWindowObserver.prototype = {
     this._windowId = ObserverHelper.getNextWindowId();
     this._registeredListeners = [];
     this.install();
-    ObserverHelper.onObserverInstalled(this);
   },
 
   _listen: function TEO__listen(container, eventName, method, catchCap) {
@@ -250,7 +250,11 @@ TabWindowObserver.prototype = {
       this._listen(appcontent, "DOMContentLoaded", this.onUrlLoad, true);
     }
 
+    // TODO IMPORTANT: Right here, add IDs to any tabs opened with the
+    // window that don't already have IDs.
+
     // Record the window-opening event:
+    // (TODO move this to the WindowOpen handler?)
     if (!exports.handlers.privateMode) {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.OPEN_WINDOW_EVENT,
@@ -269,7 +273,9 @@ TabWindowObserver.prototype = {
 
     // Record the window-closing event:
     // (TODO uninstall is not always the result of a window close... these
-    // are two separate things now)
+    // are two separate things now.  Move to the window close handler.  This
+    // requires being able to get the windowId from the window object,
+    // instead of from the TabObserver.)
     console.info("Uninstalling tabsExperimentObserver.");
     let windowId = this._windowId;
     if (!exports.handlers.privateMode) {
@@ -358,7 +364,9 @@ TabWindowObserver.prototype = {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.LOAD_EVENT,
         timestamp: Date.now(),
-        tab_id: event.target.getAttribute(TAB_ID_ATTR),
+        // TODO this is not working -- tab_id always recorded as 0.
+        // Figure out what element has the attribute stored on it!
+        tab_id: browser.getAttribute(TAB_ID_ATTR),
         tab_position: index,
         num_tabs: tabBrowserSet.browsers.length,
         tab_site_hash: groupId,

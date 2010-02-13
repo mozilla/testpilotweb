@@ -124,8 +124,19 @@ let ObserverHelper = {
   // for handlers API:
   onNewWindow: function(window) {
     // Create an observer for each window.
+    let windowId = this._nextWindowId;
     this._installedObservers.push( new TabWindowObserver(window, this._dataStore));
     console.info("Pushed a tab observer in onNewWindow.");
+
+    // Record the window-opening event:
+    if (!this.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.OPEN_WINDOW_EVENT,
+        timestamp: Date.now(),
+        num_tabs: window.getBrowser().tabContainer.itemCount,
+        tab_window: windowId
+      });
+    }
   },
 
   onWindowClosed: function(window) {
@@ -133,6 +144,16 @@ let ObserverHelper = {
       if (this._installedObservers[i]._window == window) {
         console.info("Uninstalled a tab observer in onWindowClosed.");
         this._installedObservers[i].uninstall();
+        // Record the window-closing event:
+        console.info("Uninstalling tabsExperimentObserver.");
+        let windowId = this._installedObservers[i]._windowId;
+        if (!this.privateMode) {
+          this._dataStore.storeEvent({
+            event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
+            timestamp: Date.now(),
+            tab_window: windowId
+          });
+        }
         // TODO remove the uninstalled observer from the list?
       }
     }
@@ -252,38 +273,12 @@ TabWindowObserver.prototype = {
 
     // TODO IMPORTANT: Right here, add IDs to any tabs opened with the
     // window that don't already have IDs.
-
-    // Record the window-opening event:
-    // (TODO move this to the WindowOpen handler?)
-    if (!exports.handlers.privateMode) {
-      this._dataStore.storeEvent({
-        event_code: TabsExperimentConstants.OPEN_WINDOW_EVENT,
-        timestamp: Date.now(),
-        num_tabs: container.itemCount,
-        tab_window: self._windowId
-      });
-    }
   },
 
   uninstall: function TabsExperimentObserver_uninstall() {
     for (let i = 0; i < this._registeredListeners.length; i++) {
       let rl = this._registeredListeners[i];
       rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
-    }
-
-    // Record the window-closing event:
-    // (TODO uninstall is not always the result of a window close... these
-    // are two separate things now.  Move to the window close handler.  This
-    // requires being able to get the windowId from the window object,
-    // instead of from the TabObserver.)
-    console.info("Uninstalling tabsExperimentObserver.");
-    let windowId = this._windowId;
-    if (!exports.handlers.privateMode) {
-      this._dataStore.storeEvent({
-        event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
-        timestamp: Date.now(),
-        tab_window: windowId
-      });
     }
   },
 

@@ -11,7 +11,7 @@
 
 <p>Data is so much fun! There are so many ways to read it. By bringing your own perspective to the data, you may help us find new insights or flaws in existing analysis.  We are always excited to hear about new ways of interpreting the data and are happy to start a discussion about them any time.  We can even revise and re-run a study if someone thinks of additional data that would be illuminating to collect.</p>
 
-<p><a href="/wordpress/submit/" class="button">Submit your analysis</a></p>
+<p><a href="/testcases/submit/" class="button">Submit your analysis</a></p>
 </div>
 <h2>Jump to a Test Case</h2>
 	<form action="<?php bloginfo('url'); ?>/" method="get">

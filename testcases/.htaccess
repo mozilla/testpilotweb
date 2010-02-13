@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^a-week-life\.html$ aweeklife [R=302,L]
+RewriteRule ^amenu-item-usage\.html$ menuopenusage [R=302,L]
+RewriteRule ^account-password.html$ accountpassword [R=302,L]
+RewriteRule ^tab-open-close\.html$ tabopenclose [R=302,L]
+</IfModule>
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /testcases/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /testcases/index.php [L]
+</IfModule>
+
+# END WordPress
+
+

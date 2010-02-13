@@ -39,7 +39,7 @@ get_header(); ?>
         
 		$categories = get_categories('child_of=4');
         
-        echo '<h3>Archived Test Cases</h3>';
+        echo '<h3>Completed Test Cases</h3>';
 		foreach($categories as $category) {
 					  
 				 echo '<dl class="archived"><dt><a href="' . get_category_link( $category->term_id ) . '" title="' . sprintf( __( "View all posts in %s" ), $category->name ) . '" ' . '>' . $category->name.'</a></dt>';

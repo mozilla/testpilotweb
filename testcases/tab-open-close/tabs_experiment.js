@@ -36,10 +36,10 @@ const TabsExperimentConstants = {
 // TODO: Firefox blurs/focuses, i.e. user switches application?
 // Tabs that are 'permanenly open'
 
-const TABS_EXPERIMENT_FILE = "testpilot_tabs_experiment_results.sqlite";
+const TABS_EXPERIMENT_FILE = "testpilot_tabs_experiment_results_2.sqlite";
 /* In this schema, each row represents a single UI event. */
 
-const TABS_TABLE_NAME = "testpilot_tabs_experiment";
+const TABS_TABLE_NAME = "testpilot_tabs_experiment_2";
 
 /* Schema is generated from columns; the property names are also used to access
  * the properties of the uiEvent objects passed to storeEvent, and to create
@@ -49,6 +49,7 @@ var TABS_EXPERIMENT_COLUMNS =  [
   {property: "event_code", type: TYPE_INT_32, displayName: "Event",
    displayValue: ["Study status", "Open", "Close", "Drag", "Drop", "Switch",
                   "Load", "Startup", "Shutdown", "Window Open", "Window Close"]},
+  {property: "tab_id", type: TYPE_DOUBLE, displayName: "Tab ID"},
   {property: "tab_position", type: TYPE_INT_32, displayName: "Tab Pos."},
   {property: "tab_window", type: TYPE_INT_32, displayName: "Window ID"},
   {property: "ui_method", type: TYPE_INT_32, displayName: "UI Method",
@@ -59,6 +60,7 @@ var TABS_EXPERIMENT_COLUMNS =  [
   {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}];
 
+const TAB_ID_ATTR = "TestPilotTabId";
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
@@ -88,6 +90,9 @@ let ObserverHelper = {
   _installedObservers: [],
   _dataStore: null,
   privateMode: false,
+  // TODO store nextTabId in a pref so we don't start over at zero after
+  // a restart?
+  nextTabId: 0,
 
   getTabGroupIdFromUrl: function(url) {
     var ioService = Cc["@mozilla.org/network/io-service;1"]
@@ -152,12 +157,12 @@ let ObserverHelper = {
   onExperimentStartup: function(store) {
     this._dataStore = store;
     // Record study version:
-    // NOTE we're overloading tab_position to store the study version number
+    // NOTE we're overloading tab_id to store the study version number
     // which is lame but much easier than adding a dedicated column at this
     // point.
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.STUDY_STATUS,
-      tab_position: exports.experimentInfo.versionNumber,
+      tab_id: exports.experimentInfo.versionNumber,
       timestamp: Date.now()
     });
   },
@@ -295,6 +300,7 @@ TabWindowObserver.prototype = {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.DRAG_EVENT,
         timestamp: Date.now(),
+        tab_id: event.target.getAttribute(TAB_ID_ATTR),
         tab_position: index,
         num_tabs: event.target.parentNode.itemCount,
         ui_method: TabsExperimentConstants.UI_CLICK,
@@ -312,6 +318,7 @@ TabWindowObserver.prototype = {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.DROP_EVENT,
         timestamp: Date.now(),
+        tab_id: event.target.getAttribute(TAB_ID_ATTR),
         tab_position: index,
         num_tabs: event.target.parentNode.itemCount,
         ui_method: TabsExperimentConstants.UI_CLICK,
@@ -351,6 +358,7 @@ TabWindowObserver.prototype = {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.LOAD_EVENT,
         timestamp: Date.now(),
+        tab_id: event.target.getAttribute(TAB_ID_ATTR),
         tab_position: index,
         num_tabs: tabBrowserSet.browsers.length,
         tab_site_hash: groupId,
@@ -374,16 +382,25 @@ TabWindowObserver.prototype = {
       // recently-closed tab from the history menu).  Go figure.
       uiMethod = TabsExperimentConstants.UI_LINK;
     }
+    let tabId = exports.handlers.nextTabId;
+    // For bug 545968, store a new unique tab ID into event.target
+    // somehow.
+    event.target.setAttribute( TAB_ID_ATTR, tabId);
+    console.info("Tab opened - assigning tab ID of " + tabId);
+    exports.handlers.nextTabId ++;
+
     if (!exports.handlers.privateMode) {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.OPEN_EVENT,
         timestamp: Date.now(),
+        tab_id: tabId,
         tab_position: index,
         num_tabs: event.target.parentNode.itemCount,
         ui_method: uiMethod,
         tab_window: windowId
       });
     }
+
     // TODO add tab_position, tab_parent_position, tab_window, tab_parent_window,
     // ui_method, tab_site_hash, and num_tabs.
     // event has properties:
@@ -395,6 +412,7 @@ TabWindowObserver.prototype = {
     console.info("Tab closed.");
     let index = event.target.parentNode.getIndexOfItem(event.target);
     let windowId = this._windowId;
+
     // TODO not registering click here on close events.
     // cuz mouseup and mousedown both happen before the tab open event.
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
@@ -402,6 +420,7 @@ TabWindowObserver.prototype = {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.CLOSE_EVENT,
         timestamp: Date.now(),
+        tab_id: event.target.getAttribute(TAB_ID_ATTR),
         tab_position: index,
         num_tabs: event.target.parentNode.itemCount,
         ui_method: uiMethod,
@@ -425,6 +444,7 @@ TabWindowObserver.prototype = {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.SWITCH_EVENT,
         timestamp: Date.now(),
+        tab_id: event.target.getAttribute(TAB_ID_ATTR),
         tab_position: index,
         num_tabs: event.target.parentNode.itemCount,
         ui_method: uiMethod,

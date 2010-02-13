@@ -151,6 +151,15 @@ let ObserverHelper = {
 
   onExperimentStartup: function(store) {
     this._dataStore = store;
+    // Record study version:
+    // NOTE we're overloading tab_position to store the study version number
+    // which is lame but much easier than adding a dedicated column at this
+    // point.
+    this._dataStore.storeEvent({
+      event_code: TabsExperimentConstants.STUDY_STATUS,
+      tab_position: exports.experimentInfo.versionNumber,
+      timestamp: Date.now()
+    });
   },
 
   onExperimentShutdown: function() {

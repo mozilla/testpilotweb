@@ -10,6 +10,7 @@ const TYPE_DOUBLE = 1;
 
 const TabsExperimentConstants = {
   // constants for event_code
+  STUDY_STATUS: 0,
   OPEN_EVENT: 1,
   CLOSE_EVENT: 2,
   DRAG_EVENT: 3,
@@ -46,8 +47,8 @@ const TABS_TABLE_NAME = "testpilot_tabs_experiment";
  * event.timeStamp is milliseconds since epoch */
 var TABS_EXPERIMENT_COLUMNS =  [
   {property: "event_code", type: TYPE_INT_32, displayName: "Event",
-   displayValue: ["", "Open", "Close", "Drag", "Drop", "Switch", "Load", "Startup",
-              "Shutdown", "Window Open", "Window Close"]},
+   displayValue: ["Study status", "Open", "Close", "Drag", "Drop", "Switch",
+                  "Load", "Startup", "Shutdown", "Window Open", "Window Close"]},
   {property: "tab_position", type: TYPE_INT_32, displayName: "Tab Pos."},
   {property: "tab_window", type: TYPE_INT_32, displayName: "Window ID"},
   {property: "ui_method", type: TYPE_INT_32, displayName: "UI Method",
@@ -86,6 +87,8 @@ let ObserverHelper = {
   _tempHostHash: {},
   _installedObservers: [],
   _dataStore: null,
+  privateMode: false,
+
   getTabGroupIdFromUrl: function(url) {
     var ioService = Cc["@mozilla.org/network/io-service;1"]
                       .getService(Ci.nsIIOService);
@@ -132,11 +135,9 @@ let ObserverHelper = {
   },
 
   onAppStartup: function() {
-    // Nothing to do
   },
 
   onAppShutdown: function() {
-    // Nothing to do
   },
 
   onExperimentStartup: function(store) {
@@ -148,11 +149,12 @@ let ObserverHelper = {
   },
 
   onEnterPrivateBrowsing: function() {
-     // Nothing to do
+    // Don't record any events when in private mode
+    this.privateMode = true;
   },
 
   onExitPrivateBrowsing: function() {
-     // Nothing to do
+    this.privateMode = false;
   }
 
 };
@@ -226,12 +228,14 @@ TabWindowObserver.prototype = {
     }
 
     // Record the window-opening event:
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.OPEN_WINDOW_EVENT,
-      timestamp: Date.now(),
-      num_tabs: container.itemCount,
-      tab_window: self._windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.OPEN_WINDOW_EVENT,
+        timestamp: Date.now(),
+        num_tabs: container.itemCount,
+        tab_window: self._windowId
+      });
+    }
   },
 
   uninstall: function TabsExperimentObserver_uninstall() {
@@ -245,11 +249,13 @@ TabWindowObserver.prototype = {
     // are two separate things now)
     console.info("Uninstalling tabsExperimentObserver.");
     let windowId = this._windowId;
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
-      timestamp: Date.now(),
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
+        timestamp: Date.now(),
+        tab_window: windowId
+      });
+    }
   },
 
   onClick: function TabsExperimentObserver_onClick(event) {
@@ -267,14 +273,16 @@ TabWindowObserver.prototype = {
     let index = event.target.parentNode.getIndexOfItem(event.target);
     console.info("Index is " + index);
     let windowId = this._windowId;
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.DRAG_EVENT,
-      timestamp: Date.now(),
-      tab_position: index,
-      num_tabs: event.target.parentNode.itemCount,
-      ui_method: TabsExperimentConstants.UI_CLICK,
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.DRAG_EVENT,
+        timestamp: Date.now(),
+        tab_position: index,
+        num_tabs: event.target.parentNode.itemCount,
+        ui_method: TabsExperimentConstants.UI_CLICK,
+        tab_window: windowId
+      });
+    }
   },
 
   onDrop: function TabsExperimentObserver_onDrop(event) {
@@ -282,14 +290,16 @@ TabWindowObserver.prototype = {
     let index = event.target.parentNode.getIndexOfItem(event.target);
     console.info("Index is " + index );
     let windowId = this._windowId;
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.DROP_EVENT,
-      timestamp: Date.now(),
-      tab_position: index,
-      num_tabs: event.target.parentNode.itemCount,
-      ui_method: TabsExperimentConstants.UI_CLICK,
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.DROP_EVENT,
+        timestamp: Date.now(),
+        tab_position: index,
+        num_tabs: event.target.parentNode.itemCount,
+        ui_method: TabsExperimentConstants.UI_CLICK,
+        tab_window: windowId
+      });
+    }
   },
 
   getUrlInTab: function TabsExperimentObserver_getUrlInTab(index) {
@@ -319,14 +329,16 @@ TabWindowObserver.prototype = {
     let groupId = ObserverHelper.getTabGroupIdFromUrl(url);
     let windowId = this._windowId;
     // TODO ui_method for this load event.
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.LOAD_EVENT,
-      timestamp: Date.now(),
-      tab_position: index,
-      num_tabs: tabBrowserSet.browsers.length,
-      tab_site_hash: groupId,
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.LOAD_EVENT,
+        timestamp: Date.now(),
+        tab_position: index,
+        num_tabs: tabBrowserSet.browsers.length,
+        tab_site_hash: groupId,
+        tab_window: windowId
+      });
+    }
   },
 
   onTabOpened: function TabsExperimentObserver_onTabOpened(event) {
@@ -344,14 +356,16 @@ TabWindowObserver.prototype = {
       // recently-closed tab from the history menu).  Go figure.
       uiMethod = TabsExperimentConstants.UI_LINK;
     }
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.OPEN_EVENT,
-      timestamp: Date.now(),
-      tab_position: index,
-      num_tabs: event.target.parentNode.itemCount,
-      ui_method: uiMethod,
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.OPEN_EVENT,
+        timestamp: Date.now(),
+        tab_position: index,
+        num_tabs: event.target.parentNode.itemCount,
+        ui_method: uiMethod,
+        tab_window: windowId
+      });
+    }
     // TODO add tab_position, tab_parent_position, tab_window, tab_parent_window,
     // ui_method, tab_site_hash, and num_tabs.
     // event has properties:
@@ -366,14 +380,16 @@ TabWindowObserver.prototype = {
     // TODO not registering click here on close events.
     // cuz mouseup and mousedown both happen before the tab open event.
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.CLOSE_EVENT,
-      timestamp: Date.now(),
-      tab_position: index,
-      num_tabs: event.target.parentNode.itemCount,
-      ui_method: uiMethod,
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.CLOSE_EVENT,
+        timestamp: Date.now(),
+        tab_position: index,
+        num_tabs: event.target.parentNode.itemCount,
+        ui_method: uiMethod,
+        tab_window: windowId
+      });
+    }
   },
 
   onTabSelected: function TabsExperimentObserver_onTabSelected(event) {
@@ -387,14 +403,16 @@ TabWindowObserver.prototype = {
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
 
     console.info("Recording uiMethod of " + uiMethod );
-    this._dataStore.storeEvent({
-      event_code: TabsExperimentConstants.SWITCH_EVENT,
-      timestamp: Date.now(),
-      tab_position: index,
-      num_tabs: event.target.parentNode.itemCount,
-      ui_method: uiMethod,
-      tab_window: windowId
-    });
+    if (!exports.handlers.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.SWITCH_EVENT,
+        timestamp: Date.now(),
+        tab_position: index,
+        num_tabs: event.target.parentNode.itemCount,
+        ui_method: uiMethod,
+        tab_window: windowId
+      });
+    }
   }
 };
 

@@ -135,9 +135,18 @@ let ObserverHelper = {
   },
 
   onAppStartup: function() {
+    // Record app startup event:
+    this._dataStore.storeEvent({
+      event_code: TabsExperimentConstants.STARTUP_EVENT,
+      timestamp: Date.now()
+    });
   },
 
   onAppShutdown: function() {
+    this._dataStore.storeEvent({
+      event_code: TabsExperimentConstants.SHUTDOWN_EVENT,
+      timestamp: Date.now()
+    });
   },
 
   onExperimentStartup: function(store) {

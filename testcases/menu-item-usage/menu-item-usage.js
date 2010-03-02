@@ -491,6 +491,12 @@ Read more about the Menu Item Usage study here</a>. We will notify you when the\
     let stats = [];
     let item;
 
+    // TODO this is just debug here:
+    for (let q = 0; q < CMD_ID_STRINGS.length; q++) {
+      console.info( q + " : " + CMD_ID_STRINGS[q].name );
+    }
+    // end debug
+
     for (let row in rawData) {
       let id = rawData[row].item_id;
       let menuId = rawData[row].menu_id;

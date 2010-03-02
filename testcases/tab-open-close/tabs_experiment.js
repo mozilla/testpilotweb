@@ -33,8 +33,7 @@ const TabsExperimentConstants = {
   UI_HISTORY: 8
 };
 
-// TODO: Firefox blurs/focuses, i.e. user switches application?
-// Tabs that are 'permanenly open'
+// TODO: Add in the idle detection stuff from Week-in-the-life?
 
 const TABS_EXPERIMENT_FILE = "testpilot_tabs_experiment_results_2.sqlite";
 /* In this schema, each row represents a single UI event. */
@@ -186,10 +185,23 @@ let ObserverHelper = {
       timestamp: Date.now()
     });
 
-    // TODO install observers in all windows that are already open!!
+    // Install observers on all windows that are already open:
+    console.info("Trying to install observers on already open windows.");
+    let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                    .getService(Ci.nsIWindowMediator);
+    let enumerator = wm.getEnumerator("navigator:browser");
+    while(enumerator.hasMoreElements()) {
+      let win = enumerator.getNext();
+      this._installedObservers.push( new TabWindowObserver(win, this._dataStore));
+    }
+    console.info("I did it.");
+    // TODO BUT---!! we don't want to double-register on windows open at
+    // startup! I guess we should look at whether a window already has listeners
+    // registered on it or not...
   },
 
   onExperimentShutdown: function() {
+    console.info("Shutting down experiment, cleaning up observers.");
     this.cleanup();
   },
 
@@ -242,6 +254,14 @@ TabWindowObserver.prototype = {
        catchCap: catchCap});
   },
 
+  _assignTabId: function TabsExperimentObserver__assignTabId( tabElem ) {
+    let tabId = exports.handlers.nextTabId;
+    // tabElem.setAttribute seems to be failing silently?
+    tabElem.setAttribute( TAB_ID_ATTR, tabId);
+    console.info("Tab opened - assigning tab ID of " + tabId + " to a " + tabElem.tagName);
+    exports.handlers.nextTabId ++;
+  },
+
   install: function TabsExperimentObserver_install() {
     let self = this;
     let browser = this._window.getBrowser();
@@ -271,8 +291,15 @@ TabWindowObserver.prototype = {
       this._listen(appcontent, "DOMContentLoaded", this.onUrlLoad, true);
     }
 
-    // TODO IMPORTANT: Right here, add IDs to any tabs opened with the
+    // Add IDs to any tabs opened with the
     // window that don't already have IDs.
+    // Note that ids must be added to the <tab> element, not the browser or
+    // whatever. // these are children of <tabs> element.
+    console.info("Now attempting to add ids to all tabs already in this window");
+    //let tabs = this._window.document.getElementsByTagName("xul:tab");
+    for (let i = 0; i < container.itemCount; i++) {
+      this._assignTabId(container.getItemAtIndex(i));
+    }
   },
 
   uninstall: function TabsExperimentObserver_uninstall() {
@@ -385,12 +412,7 @@ TabWindowObserver.prototype = {
       // recently-closed tab from the history menu).  Go figure.
       uiMethod = TabsExperimentConstants.UI_LINK;
     }
-    let tabId = exports.handlers.nextTabId;
-    // For bug 545968, store a new unique tab ID into event.target
-    // somehow.
-    event.target.setAttribute( TAB_ID_ATTR, tabId);
-    console.info("Tab opened - assigning tab ID of " + tabId);
-    exports.handlers.nextTabId ++;
+    this._assignTabId(event.target);
 
     if (!exports.handlers.privateMode) {
       this._dataStore.storeEvent({

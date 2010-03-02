@@ -1,3 +1,7 @@
 {"experiments": [{"name": "Menu Item Usage Study",
-                  "filename": "menu-item-usage/menu-item-usage.js"}
-]}
+                  "filename": "menu-item-usage/menu-item-usage.js"},
+                 {"name": "Ghost Study",
+                  "filename": "dependency-experiment/ghost-study.js"}],
+"libraries": [{"name": "Ghost Study Library",
+                  "filename": "dependency-experiment/ghost-library.js"}]
+}

@@ -1,4 +1,10 @@
-var ghostlib = require("Ghost Study Library");
+var ghostlib;
+try {
+  ghostlib = require("Ghost Study Library");
+  console.info("Loaded ghostlib.");
+} catch (e) {
+  console.error("Error loading ghostlib: " + e );
+}
 
 exports.experimentInfo = {
   startDate: null,
@@ -33,7 +39,12 @@ exports.handlers = {
   },
 
   onExperimentStartup: function() {
-    console.info("Calling ghostlib: " + ghostlib.expFunc(2, 3));
+    console.info("Starting ghost study.");
+    try {
+      console.info("Calling ghostlib: " + ghostlib.expFunc(2, 3));
+    } catch (e) {
+      console.error("Error calling ghostlib: " + e);
+    }
   },
 
   onExperimentShutdown: function() {

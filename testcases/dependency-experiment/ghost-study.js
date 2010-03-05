@@ -1,12 +1,14 @@
 var ghostlib;
 try {
-  ghostlib = require("Ghost Study Library");
+  ghostlib = require("dependency-experiment/ghost-library.js");
+  // Error: Module "Ghost Study Library" not found
   console.info("Loaded ghostlib.");
 } catch (e) {
   console.error("Error loading ghostlib: " + e );
 }
 
 exports.experimentInfo = {
+  minTPVersion: "0.5",
   startDate: null,
   duration: 5,
   testName: "Ghost Study",

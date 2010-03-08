@@ -1,0 +1,206 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+  <title>Test Pilot: A Week in the Life of a Browser: Aggregated Data Samples</title>
+</head>
+<body>
+
+<div id="container">
+
+  <div id="content-standalone">
+    <p><a href="../../index.html">Home</a> &gt; <a href="../index.html">Test Cases</a> &gt; <a href="../menuitemusage">Menu Item Usage Study</a> &gt; Aggregated Data Samples</p>	
+    <div id="intro">
+		
+      <h1>Menu Item Usage Study: Aggregated Data Samples</h1>
+			
+      <h2>Test Description </h2>
+			
+      <ul>
+	<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/a-week-life.html">Menu Item Usage Study</a>.</li>
+	<li>Test duration: 5 days</li>
+        <li>Test type: Global</li>
+	<li>Firefox versions covered: 3.5 and above</li>
+	<li>Data submission: 8600 users, between Feb 8 and Feb 28, 2010</li>
+      </ul>
+    </div>
+		
+    <div id="data"> 
+		
+    <h2> Test Results </h2>
+			
+     <p>There's a lot more we can do with this data. If you have questions about it, ideas for how to analyze it, or derived metrics that you would be interested in seeing, please join the <a href="http://groups.google.com/group/mozilla-labs-testpilot"> Test Pilot Discussion Group </a>.  If you generate any statistics or charts from the data, we would of course look forward to seeing those posted in the discussion group as well.</p>
+			
+    <h2> Test Data </h2>
+    <p>Anyone is welcome to download and use the aggregated data files below.</p>
+
+    <table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">N (Number of users)</span></td><td><span class="headers">Description</span></td></tr>
+<tr><td><a href="menu-item-usage-10.csv">menu-item-usage-10.csv</a></td><td>12 Mb</td><td>933 users</td><td>10 percent sample</td></tr>
+<tr><td><a href="menu-item-usage-30.csv">menu-item-usage-30.csv</a></td><td>31 Mb</td><td>2795 users</td><td>30 percent sample</td></tr>
+<tr><td><a href="menu-item-usage-50.csv">menu-item-usage-50.csv</a></td><td>51 Mb</td><td>4666 users</td><td>50 percent sample</td></tr>
+<tr><td><a href="menu-item-usage-70.csv">menu-item-usage-70.csv</a></td><td>76 Mb</td><td>6534 users</td><td>70 percent sample</td></tr>
+</table>
+                  			
+			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+			
+			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+			
+			<h3>How to read the data</h3>
+                 <p>Data is in CSV (comma-separated value) format.  The first line of the file is the header and gives the names of all the columns.   After that, each line contains a summary of a single menu interaction event.  A menu interaction event is defined as one of the following:
+
+<ul>
+  <li>The user used the mouse to open the menu bar, and either chose a menu item, or closed the menus without choosing an item.</li>
+  <li>The user used a keyboard shortcut which is listed in one of the menus.  Firefox keyboard controls not listed in the menus as keyboard shortcuts were not recorded:  e.g. we recorded the use of Ctrl-F to do a search, but not the use of the forward-slash key to do a search.</li>
+  <li>On Windows, the user used the Alt key to open the menus, and then navigated through the menus visually using the keyboard, and either chose a menu item, or closed the menus without choosing an item.</li>
+</ul>
+
+The right-click context menu was not instrumented.
+
+Here are the names of the columns in the data files, and an explanation of each one:</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+  <tr><td>user</td><td>All rows that have the same user number came from the same submission, and so represent sequences of interaction events that were probably (but not definitely) executed by the same user.  These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</td></tr>
+  <tr><td>os</td><td>User's operating system.  This is in full string format; example values are "WINNT Windows NT 5.1" or "Darwin Intel Mac OS X 10.6".</td></tr>
+  <tr><td>f
+  <tr><td>ui_method</td><td>Shows whether this menu interaction was done via the mouse or by a keyboard shortcut:  0 = mouse; 1 = keyboard shortcut.  (Windows alt-key-based menu navigation was treated as a mouse-based interaction.)</td></tr>
+
+  <tr><td>start_menu_id</td><td>A menu ID code (see table below) identifying the menu where the user <i>began</i> the menu interaction.    Because a user can click on one menu and then move to a different menu before picking an item, the start_menu_id may be different from the menu that was actually chosen.</td></tr>
+  <tr><td>explore_ms</td><td>The amount of time, in milliseconds, between when the user first clicked on the menu bar and when they finally selected an item (or gave up and closed the menu without picking anything).  Only applies to mouse events; for keyboard shortcut events, it is always 0.</td></tr>
+  <tr><td>explore_num</td><td>The number of menus that the user opened between the first click and finally selecting an item.  Only applies to mouse events; for keyboard shortcuts, it's always 0.</td></tr>
+  <tr><td>menu_id</td><td>A menu ID code (see table below) identifying the menu that the user actually chose an item from.</td></tr>
+  <tr><td>item_id</td><td>An item ID code (see table below) identifying the specific menu item that the user chose.</td></tr>
+  <tr><td>timestamp</td><td>A timestamp (milliseconds since epoch) giving the time at which the menu item was chosen, or when the user closed the menu without picking anything.
+</table>
+
+<h3>Filtered Extensions</h3>
+
+The following extensions are known to cause major changes to the behavior of Firefox menus.  Data submissions from users who had one of these extensions installed have been filtered out of the data sets provided on this page, to ensure that the data sets are as representative as possible of default Firefox behavior:
+
+<ul>
+  <li>TinyMenu</li>
+  <li>Menu Editor</li>
+  <li>Compact Menu</li>
+  <li>More Tools Menu</li>
+  <li>Extended Copy Menu</li>
+  <li>Personal Menu</li>
+</ul>
+
+<h3>Menu ID and Item ID codes</h3>
+
+<p>The table below shows each of the menu ID codes.  These codes are used in the start_menu_id and menu_id columns of the data files.</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Menu ID</span></td><td><span class="headers">Menu Name</span></td><td><span class="headers">Comments</span></td></tr>
+ <tr><td>-3</td><td>Unknown</td><td>For some reason, the menu chosen was unidentifable.</td></tr>
+ <tr><td>-1</td><td>Aborted</td><td>No menu was chosen (e.g. user closed the menu without picking any item - only for mouse interactions).</td></tr>
+ <tr><td>0</td><td>File</td><td></td></tr>
+ <tr><td>1</td><td>Edit</td><td></td></tr>
+ <tr><td>2</td><td>View</td><td></td></tr>
+ <tr><td>3</td><td>History</td><td></td></tr>
+ <tr><td>4</td><td>Bookmarks</td><td></td></tr>
+ <tr><td>5</td><td>Tools</td><td></td></tr>
+ <tr><td>6</td><td>Windows</td><td>(Mac only)</td></tr>
+ <tr><td>7</td><td>Help</td><td></td></tr>
+</table>
+
+
+<p>The table below defines each of the item ID codes.  These codes are used in the item_id column of the data files.  Note that in some cases, multiple items all have the same ID code - for instance, every user has a different list of bookmarks in their Bookmarks menu (and we wouldn't want to record their names anyway, since we consider what bookmarks a user visits to be private information).  So we have a single ID code which is used for all user-specific bookmark menu items; therefore, any time the user picked any bookmark, it will show up as this code.</p>
+
+<p>Also note that due to some known bugs in the study code, there were a few menu items whose use we were unable to detect.  These items are listed along with their codes in the table below, but they do not show up at all in the data files since we could not detect them.  There are also some items which we could detect when the user picked them with the mouse, but we could not detect when activated by a keyboard shortcut.  These items are marked as such in the table below.  They will show up in the data files only as mouse events; the number of times they were used as keyboard shortcuts is unknown.</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Item ID</span></td><td><span class="headers">Menu Item Name</span></td><td><span class="headers">Comments</span></td></tr>
+
+<tr><td>-3</td><td>Unknown</td><td>The user picked a menu item that we could not recognize.  It may have been an item added to the Firefox menus by another extension.</td></tr>
+<tr><td>-1</td><td>Aborted</td><td>The user closed the menu without picking any item.  (This only happens with mouse interactions, obviously).  On Mac only, there is a known bug that makes some events incorrectly show up as Aborted, in which case the correct item ID will appear on the next line after that one.</td></tr>
+<tr><td>0</td><td>New Window</td><td></td></tr>
+<tr><td>1</td><td>New Tab</td><td></td></tr>
+<tr><td>2</td><td>Open Location</td><td></td></tr>
+<tr><td>3</td><td>Open File</td><td></td></tr>
+<tr><td>4</td><td>Close Window</td><td></td></tr>
+<tr><td>5</td><td>Close Tab</td><td></td></tr>
+<tr><td>6</td><td>Save Page As</td><td></td></tr>
+<tr><td>7</td><td>Send Link</td><td></td></tr>
+<tr><td>8</td><td>Page Setup</td><td></td></tr>
+<tr><td>9</td><td>Print Preview</td><td>Windows Only</td></tr>
+<tr><td>10</td><td>Print</td><td></td></tr>
+<tr><td>11</td><td>Import</td><td></td></tr>
+<tr><td>12</td><td>Work Offline</td><td></td></tr>
+<tr><td>13</td><td>Exit</td><td>(AKA "Quit Firefox" on Mac)</td></tr>
+<tr><td>14</td><td>Undo</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>15</td><td>Redo</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>16</td><td>Cut</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>17</td><td>Paste</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>18</td><td>Copy</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>19</td><td>Delete</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>20</td><td>Select All</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>21</td><td>Find</td><td></td></tr>
+<tr><td>22</td><td>Find Again</td><td></td></tr>
+<tr><td>23</td><td>Special Characters</td><td>Can't detect at all (mouse or keyboard).  Mac Only.</td></tr>
+<tr><td>24</td><td>Toolbars</td><td></td></tr>
+<tr><td>25</td><td>Toolbars/Customize</td><td></td></tr>
+<tr><td>26</td><td>Status Bar</td><td></td></tr>
+<tr><td>27</td><td>Sidebar/Bookmarks</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>28</td><td>Sidebar/History</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>29</td><td>Stop</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>30</td><td>Reload</td><td></td></tr>
+<tr><td>31</td><td>Zoom In</td><td></td></tr>
+<tr><td>32</td><td>Zoom Out</td><td></td></tr>
+<tr><td>33</td><td>Zoom/Reset</td><td></td></tr>
+<tr><td>34</td><td>Zoom Text Only</td><td></td></tr>
+<tr><td>35</td><td>Page Style/No Style</td><td></td></tr>
+<tr><td>36</td><td>Page Style/Basic Page Style</td><td></td></tr>
+<tr><td>37</td><td>Character Encoding/Autodetect/*</td><td>All items in this submenu are lumped together into this code.</td></tr>
+<tr><td>38</td><td>Character Encoding/More Encodings/*</td><td>All items in this submenu are lumped together into this code.</td></tr>
+<tr><td>39</td><td>Character Encoding/Customize List</td><td>Can't detect at all (mouse or keyboard)</td></tr>
+<tr><td>40</td><td>Character Encoding/Western</td><td></td></tr>
+<tr><td>41</td><td>Character Encoding/UTF-16</td><td></td></tr>
+<tr><td>42</td><td>View Source</td><td></td></tr>
+<tr><td>43</td><td>Full Screen</td><td></td></tr>
+<tr><td>44</td><td>Back</td><td></td></tr>
+<tr><td>45</td><td>Forward</td><td></td></tr>
+<tr><td>46</td><td>Home</td><td></td></tr>
+<tr><td>47</td><td>Show All History</td><td>Can't detect at all (mouse or keyboard)</td></tr>
+<tr><td>48</td><td>(User History Item)</td><td>All user-specific items in History menu are lumped together into this code.</td></tr>
+<tr><td>49</td><td>Recently Closed Tab</td><td>All recently-closed tab items are lumped together into this code.</td></tr>
+<tr><td>50</td><td>Restore All Tabs</td><td></td></tr>
+<tr><td>51</td><td>Recently Closed Window</td><td>All recently-closed window items are lumped together into this code.</td></tr>
+<tr><td>52</td><td>Restore All Windows</td><td></td></tr>
+<tr><td>53</td><td>Bookmark This Page</td><td></td></tr>
+<tr><td>54</td><td>Subscribe to This Page</td><td></td></tr>
+<tr><td>55</td><td>Bookmark All Tabs</td><td></td></tr>
+<tr><td>56</td><td>Organize Bookmarks</td><td>Can't detect at all (mouse or keyboard)</td></tr>
+<tr><td>57</td><td>(User Bookmark Item)</td><td>All user-specific items in bookmark menu are lumped together into this code.</td></tr>
+<tr><td>58</td><td>Web Search</td><td></td></tr>
+<tr><td>59</td><td>Downloads</td><td></td></tr>
+<tr><td>60</td><td>Add-Ons</td><td></td></tr>
+<tr><td>61</td><td>Error Console</td><td>Can't detect keyboard shortcut</td></tr>
+<tr><td>62</td><td>Page Info</td><td></td></tr>
+<tr><td>63</td><td>Private Browsing</td><td></td></tr>
+<tr><td>64</td><td>Clear Recent History</td><td></td></tr>
+<tr><td>65</td><td>Options</td><td>(AKA "Preferences", in the application menu, on Mac)</td></tr>
+<tr><td>66</td><td>Minimize</td><td>Can't detect at all (mouse or keyboard). Mac only</td></tr>
+<tr><td>67</td><td>Zoom</td><td>Can't detect at all (mouse or keyboard). Mac only</td></tr>
+<tr><td>68</td><td>(User Window)</td><td>Mac only.  All user-specific items in the Windows menu are lumped together into this code.</td></tr>
+<tr><td>69</td><td>Firefox Help</td><td></td></tr>
+<tr><td>70</td><td>For Internet Explorer Users</td><td>Windows Only</td></tr>
+<tr><td>71</td><td>Troubleshooting Information</td><td></td></tr>
+<tr><td>72</td><td>Release Notes</td><td></td></tr>
+<tr><td>73</td><td>Report Broken Web Site</td><td></td></tr>
+<tr><td>74</td><td>Report Web Forgery</td><td></td></tr>
+<tr><td>75</td><td>Check for Updates</td><td></td></tr>
+<tr><td>76</td><td>About Mozilla Firefox</td><td></td></tr>
+
+</table>
+
+			<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
+			
+		</div>
+	
+	</div>
+
+</div>
+
+</body></html>

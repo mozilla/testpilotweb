@@ -63,7 +63,7 @@ Here are the names of the columns in the data files, and an explanation of each 
       <td><span class="headers">Explanation</span></td></tr>
   <tr><td>user</td><td>All rows that have the same user number came from the same submission, and so represent sequences of interaction events that were probably (but not definitely) executed by the same user.  These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</td></tr>
   <tr><td>os</td><td>User's operating system.  This is in full string format; example values are "WINNT Windows NT 5.1" or "Darwin Intel Mac OS X 10.6".</td></tr>
-  <tr><td>f
+  <tr><td>fx_version</td><td>String giving user's Firefox version, e.g. "3.5", "3.6", "3.7a2pre".</td></tr>
   <tr><td>ui_method</td><td>Shows whether this menu interaction was done via the mouse or by a keyboard shortcut:  0 = mouse; 1 = keyboard shortcut.  (Windows alt-key-based menu navigation was treated as a mouse-based interaction.)</td></tr>
 
   <tr><td>start_menu_id</td><td>A menu ID code (see table below) identifying the menu where the user <i>began</i> the menu interaction.    Because a user can click on one menu and then move to a different menu before picking an item, the start_menu_id may be different from the menu that was actually chosen.</td></tr>

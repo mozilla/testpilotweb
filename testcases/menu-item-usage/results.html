@@ -1,0 +1,65 @@
+
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: Accounts and Passwords: Analysis</title>
+</head>
+<body>
+
+<div id="container">
+
+	<div id="content-standalone">
+	          <p><a href="../../index.html">Home</a> &gt; <a href="https://testpilot.mozillalabs.com/testcases">Test Cases</a> &gt; <a href="https://testpilot.mozillalabs.com/testcases/menuitemusage.html">Menu Item Usage</a> &gt; Analysis</p>
+
+		<div id="intro">
+		
+			<h1>Menu Item Usage: Analysis</h1>
+
+		        <p>Here are some analysis from the <a href="https://testpilot.mozillalabs.com/testcases/menuitemusage.html">Menu Item Usage Study</a>. The graphs on this page are based on the data submissions we received from about 8600 Test Pilots running Firefox versions 3.5 and above, between Feb.3rd and Feb.28th, 2010.</p>
+		  	<p>Contents:</p>
+			<ol><li><a href="#Q1"> Which menu items are the most or the least commonly used?</a></li>
+			  <li><a href="#Q2">What are most and least used Firefox menu items by only mouse interactions?</a></li>
+			  <li><a href="#Q3">Which menu items are the most or the least commonly used, by mouse click or keyboard shortcut?</a></p>
+			 
+			</ol>
+		
+                         <p> These analysis are generated based on early raw data, and they may not be super definitive or representative for all Firefox users. We are looking for help to firm them up! Please join the <a href="http://groups.google.com/group/mozilla-labs-testpilot"> Test Pilot discussion group </a>if you have any suggestions or questions. </p>
+		       	 <p> Also, if you would like to do your own analysis of the data from this study, you can <a href="https://testpilot.mozillalabs.com/testcases/menu-item-usage/aggregated-data.html">download samples of it here</a>.</br> </p>
+			
+
+		</div>
+
+         </div>
+
+		<div id="data">
+
+		  <h3><a name="Q1">Question 1: Which menu items are the most or the least commonly used?</a></h3>
+		  <p class="callout"><a href="graphs/itemid_all.png"><img src="graphs/itemid_all_s.png"></a></p>
+		  <p>Note: This data is based on both mouse clicks and keyboard shortcuts.  Menu items that are triggered by right-click on the mouse or by function key are not included.</p>
+		  
+		 <p>By simply aggregating the total number of menu item clicks for all users, we get the above graph. It shows just that, presenting each menu item’s relative use for all UI methods (both mouse and keyboard shortcuts). We can see some justification for a condensed toolbar as many of the items are used very infrequently compared to the other menu items. For example, the menu items from “Page Setup” to “Character Encoding/UTF-16″ each make up less than 0.01% of the total menu bar clicks.</p>
+		  		  
+		  <h3><a name="Q2">Question 2: What are most and least used Firefox menu items by only mouse interactions?</h3>
+                 <p class="callout"><a href="graphs/menu_graphic.png"><img src="graphs/menu_graphic_s.png"> </a></p>
+
+		  <p>Note: Since menu bars are designed for mouse use, it is more relevant to look at item usage for just the mouse UI method (excluding keyboard shortcuts). This data is based on number of menu item clicks for all users. Menu items that are triggered by right-click on the mouse is not included.</p>
+		  
+		  <p>This visualization presents information on two levels: the area of the circles are proportional to the total number of clicks for the menu group as a whole, and the slices correspond to the share of clicks for each item within the menu group. Bookmarks and Edit are by far the most utilized menus, representing over 70% of total clicks.</P>
+
+                  <P>The high use of the bookmarks menu is somewhat surprising; an obvious problem of looking at aggregated data like this is the potential for outliers to skew the data. It will be interesting to delve into this issue more in depth and determine if the Bookmark menu (and other menus and menu items) is genuinely an important menu group for all users, or if the high usage is driven by a set of relatively few users who interact with the Bookmark menu extremely frequently.</p>
+		   <h3><a name="Q3">Question 3: Which menu items are the most or the least commonly used, by mouse click or keyboard shortcut?</a></h3>
+		  <p class="callout"><a href="graphs/itemid_all_mouse_ordered.png"><img src="graphs/itemid_all_mouse_ordered_s.png"/></a></p>
+                  <p>Examining the data in this way presents a slightly different picture: the top 5 most commonly used menu items are now “User Bookmark Item”, “Copy”, “Paste”, “Add-Ons”, and “Back”. In addition to “Add-Ons”, “Options” and “Bookmark This Page” are newly part of the top 10, replacing “Find”, “Open Location”, and “Find Again”.</p>
+
+                 <p>Again these changes simply result from eliminating keyboard shortcut clicks and help us distinguish between mouse driven menu items and keyboard driven items. For example, by comparing the mouse UI chart (right) with the original all UI chart (left) we can clearly see that “New Tab” and “Close Tab” are predominately driven by keyboard shortcuts (as expected) and may not be the two most critical items to a mouse oriented toolbar (as suggested by the original chart).</p>
+		  
+
+		</div>
+	
+	</div>
+
+</div>
+
+</body>
+</html>

@@ -82,7 +82,7 @@ src: url('../fonts/DroidSans-Bold.ttf') format('truetype');
 	margin-right: 12px;
 }
 
-.downloadH1 {font-family: 'DroidSans-bold'; color: #3a3a3a; font-size: 24px; font-weight: normal; letter-spacing: -1px; margin-right: 8px;}
+.downloadH1 {font-family: 'DroidSans-bold'; color: #9f423b; font-size: 24px; font-weight: normal; letter-spacing: -1px; margin-right: 8px;}
 
 .downloadH2 {font-family: 'DroidSans'; color: #3a3a3a; font-size: 22px; font-weight: normal; letter-spacing: -1px; line-height: 28px; margin-left: 46px;}
 
@@ -99,6 +99,9 @@ src: url('../fonts/DroidSans-Bold.ttf') format('truetype');
 	margin-top: 30px;
 }
 
+#downloadsource {
+    cursor: pointer;
+}
 .button {
 	font-family: 'DroidSans';
 	font-size: 16px;

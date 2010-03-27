@@ -23,7 +23,7 @@ exports.surveyInfo = {
      free_entry: "Other:" },
   { question: "If you use multiple browsers, what's your primary browser?",
     type: MULTIPLE_CHOICE,
-    choices: ["I don't user other browsers, only use Firefox"," Firefox as the primary browser","Chrome as the primary browser","Safari as the primary browser","Opera as the primary browser","IE 8 as the primary browser","IE 7 as the primary browser","IE6 as the primary browser",],
+    choices: ["I don't user other browsers, only use Firefox"," Firefox as the primary browser","Chrome as the primary browser","Safari as the primary browser","Opera as the primary browser","IE 8 as the primary browser","IE 7 as the primary browser","IE6 as the primary browser"],
     free_entry: "Other:" },
   { question: "Your gender?",
     type: MULTIPLE_CHOICE,
@@ -35,8 +35,7 @@ exports.surveyInfo = {
              "26-35",
              "36-45",
              "46-55",
-             "older than 55"]}
-
+             "older than 55"]},
   { question: "How much time do you spend on the Web per day?",
     type: MULTIPLE_CHOICE,
     choices: ["Less than 1 hour",
@@ -49,7 +48,7 @@ exports.surveyInfo = {
     scale_minimum: 1,
     scale_maximum: 10,
     min_label: "Super low",
-    max_label: "Super high"]},
+    max_label: "Super high"},
    { question: "What are your main purposes to use the Web?",
      type: CHECK_BOXES_WITH_FREE_ENTRY,
      choices: ["Work: programing, coding, etc.",
@@ -60,9 +59,9 @@ exports.surveyInfo = {
 	       "Information retrieval: e.g. search",
 	       "Information consuming: news, blogs,etc.",
 	       "Information generation and sharing: blogs, photo, video.etc.",
-	       "Assisting my life: calendar, online booking, online finance. etc."]
+	       "Assisting my life: calendar, online booking, online finance. etc."],
     free_entry: "Other:" },
-  {question:"How would you describe yourself as a web user?", 
-   type: FREE_ENTRY,}
+  {question:"How would you describe yourself as a web user?",
+   type: FREE_ENTRY}
   ]
 };

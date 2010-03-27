@@ -23,7 +23,7 @@ exports.surveyInfo = {
      free_entry: "Other:" },
   { question: "If you use multiple browsers, what's your primary browser?",
     type: MULTIPLE_CHOICE,
-    choices: ["I don't user other browsers, only use Firefox"," Firefox as the primary browser","Chrome as the primary browser","Safari as the primary browser","Opera as the primary browser","IE 8 as the primary browser","IE 7 as the primary browser","IE6 as the primary browser"],
+    choices: ["I don't user other browsers, only use Firefox"," Firefox as the primary browser","Chrome as the primary browser","Safari as the primary browser","Opera as the primary browser","IE 8 as the primary browser","IE 7 as the primary browser","IE 6 as the primary browser"],
     free_entry: "Other:" },
   { question: "Your gender?",
     type: MULTIPLE_CHOICE,
@@ -49,7 +49,7 @@ exports.surveyInfo = {
     scale_maximum: 10,
     min_label: "Super low",
     max_label: "Super high"},
-   { question: "What are your main purposes to use the Web?",
+   { question: "What are your main purposes for using the Web?",
      type: CHECK_BOXES_WITH_FREE_ENTRY,
      choices: ["Work: programing, coding, etc.",
 	       "Work: documentation, presentation, etc.",
@@ -62,6 +62,8 @@ exports.surveyInfo = {
 	       "Assisting my life: calendar, online booking, online finance. etc."],
     free_entry: "Other:" },
   {question:"How would you describe yourself as a web user?",
-   type: FREE_ENTRY}
+   type: CHECK_BOXES_WITH_FREE_ENTRY,
+   choices:[],
+   free_entry: ""}
   ]
 };

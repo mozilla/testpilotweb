@@ -8,6 +8,7 @@ exports.surveyInfo = {
   surveyId: "basic_panel_survey",
   surveyName: "Pilot Background Survey",
   uploadWithExperiment: 2,
+  minTPVersion: "0.4",
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
      type: MULTIPLE_CHOICE,

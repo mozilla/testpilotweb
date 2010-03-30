@@ -12,7 +12,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
-  versionNumber: 4
+  versionNumber: 5
 };
 
 const WeekEventCodes = {
@@ -498,7 +498,7 @@ that you enter, or sites that you bookmark.  The uploaded test data is annotated
 with your locale settings, Firefox version, Test Pilot version, operating system \
 version, and any survey answers you have provided.';
 
-const DATA_DISPLAY_HTML =
+const IN_PROGRESS_DATA_DISPLAY_HTML =
    '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
     <div class="dataBox">\
     <h4>Facts About Your Browser Use This Week</h4>\
@@ -515,6 +515,31 @@ const DATA_DISPLAY_HTML =
     <span id="first-num-extensions"></span> Firefox extensions installed.  Now \
     you have <span id="num-extensions"></span> extensions installed.</p>\
     </div>';
+
+const COMPLETED_DATA_DISPLAY_HTML =
+   '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
+    <div class="dataBox">\
+    <h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
+    To <span id="usage-period-end-span"></span></h4>\
+    <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
+    hours actively using Firefox on that week. Firefox was running but \
+    idle for a total of <span id="idle-time-span"></span> hours.</p>\
+    <p><b>Bookmarks:</b> At the beginning of the week you had <span id="first-num-bkmks-span"></span>\
+    bookmarks. At the end you had <span id="num-bkmks-span"></span> bookmarks in \
+    <span id="num-folders-span"></span> folders, to a max folder depth of \
+    <span id="max-depth-span"></span>.</p>\
+    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> files\
+    during that period.</p>\
+    <p><b>Extensions:</b> At the beginning of the week you had \
+    <span id="first-num-extensions"></span> Firefox extensions installed.  \
+    At the end you had <span id="num-extensions"></span> extensions installed.</p>\
+    </div>';
+
+const ADDITIONAL_DISPLAY_HTML =
+    '<p>You can save the graph using the <strong>Save Graph</strong> button or \
+    press the <strong>Delete Data</strong> button to delete all data related to this study.</p>\
+    <button type="button" onclick="saveCanvas(document.getElementById(\'browser-use-time-canvas\'))">Save Graph</button>\
+    <button type="button" onclick="deleteData()">Delete Data</button>';
 
 exports.webContent = {
   inProgressHtml:
@@ -534,7 +559,7 @@ exports.webContent = {
      participate, please <a href="chrome://testpilot/content/status-quit.html?eid=2">\
      click here to quit</a>.</p>\
      <p>Otherwise, buckle up and get ready for the flight!</p>'
-    + DATA_DISPLAY_HTML + FINE_PRINT,
+     + IN_PROGRESS_DATA_DISPLAY_HTML + FINE_PRINT,
   completedHtml:
     '<h2>A Week in the Life of a Browser</h2><p>Greetings!  The &quot;a week in the \
      life of a browser&quot; study has just completed!  The last step is to submit \
@@ -542,28 +567,38 @@ exports.webContent = {
      You can <a onclick="showRawData(2);">click here to see</a> the complete raw \
      data set, just as it will be uploaded to Mozilla.</p>\
      <p>This test will automatically recur every 60 days for up to one year.\
-     If you would  prefer to have Test Pilot submit your data automatically next time, \
+     If you would prefer to have Test Pilot submit your data automatically next time, \
      instead of asking you, you can check the box below:<br/>\
      <input type="checkbox" id="always-submit-checkbox">\
      Automatically submit data for this test from now on<br/>\
      <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
      <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
      </span></div><p>If you don\'t want to upload your data, please \
-     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>\
-     ' + DATA_DISPLAY_HTML + FINE_PRINT,
+     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>'
+     + COMPLETED_DATA_DISPLAY_HTML + FINE_PRINT,
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
 
+  remainDataHtml: "<h3>Collected Data:</h3>" + COMPLETED_DATA_DISPLAY_HTML +
+    ADDITIONAL_DISPLAY_HTML,
+
   _deleteDataOlderThanAWeek: function(dataStore) {
-    let cutoffDate = Date.now() - 7 * 24 * 60 * 60 * 1000;
     /* TODO: we're breaking encapsulation here because there's no public
      * method to do this on the data store object... this should be implemented
      * there. */
-    let wipeSql = "DELETE FROM " + dataStore._tableName +
-      " WHERE timestamp < " + cutoffDate;
-    let wipeStmt = dataStore._createStatement(wipeSql);
-    wipeStmt.execute();
-    wipeStmt.finalize();
-    console.info("Executed " + wipeSql);
+    let selectSql = "SELECT timestamp FROM " + dataStore._tableName +
+      " ORDER BY timestamp DESC LIMIT 1";
+    let selectStmt = dataStore._createStatement(selectSql);
+    if (selectStmt.executeStep()) {
+      let timestamp = selectStmt.row.timestamp;
+      let cutoffDate = timestamp - (7 * 24 * 60 * 60 * 1000);
+      let wipeSql = "DELETE FROM " + dataStore._tableName +
+        " WHERE timestamp < " + cutoffDate;
+      let wipeStmt = dataStore._createStatement(wipeSql);
+      wipeStmt.execute();
+      wipeStmt.finalize();
+      console.info("Executed " + wipeSql);
+    }
+    selectStmt.finalize();
   },
 
   onPageLoad: function(experiment, document, graphUtils) {
@@ -584,8 +619,9 @@ exports.webContent = {
     let rowNum;
 
     for each ( let row in rawData ) {
-      if (firstTimestamp == 0 )
+      if (firstTimestamp == 0 ) {
         firstTimestamp = row.timestamp;
+      }
       switch(row.event_code) {
       case WeekEventCodes.BROWSER_START:
         browserUseTimeData.push( [row.timestamp, 2]);
@@ -629,7 +665,14 @@ exports.webContent = {
         maxBkmks = bkmks;
       }
     }
-    let lastTimestamp = (new Date()).getTime();
+    // use the end time from the last record if the status is STATUS_FINISHED or
+    // above.
+    let lastTimestamp;
+    if (rawData.length > 0 && (experiment.status >= 4)) {
+      lastTimestamp = rawData[(rawData.length - 1)].timestamp;
+    } else {
+      lastTimestamp = (new Date()).getTime();
+    }
     browserUseTimeData.push( [lastTimestamp, 2] );
     bookmarksData.push([lastTimestamp, bkmks]);
 
@@ -642,6 +685,8 @@ exports.webContent = {
                          height: 300 };
     let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
     console.log("xScale is " + xScale );
+    ctx.fillStyle = "white";
+    ctx.fillRect (0, 0, 500, 300);
 
     //Draw colored bar - orange for using the browser, yellow for running
     // but not being used, white for no use.
@@ -743,6 +788,21 @@ exports.webContent = {
     let getHours = function(x) {
       return Math.round( x / 36000 ) / 100;
     };
+    let getFormattedDateString = function(timestamp) {
+      let date = new Date(timestamp);
+      let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+                  "Sep", "Oct", "Nov", "Dec"];
+      return months[date.getMonth()] + " " + date.getDate() + ", "
+        + date.getFullYear();
+    };
+    let startSpan = document.getElementById("usage-period-start-span");
+    let endSpan = document.getElementById("usage-period-end-span");
+    if (startSpan) {
+      startSpan.innerHTML = getFormattedDateString(firstTimestamp);
+    }
+    if (endSpan) {
+      endSpan.innerHTML = getFormattedDateString(lastTimestamp);
+    }
     document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
     document.getElementById("num-bkmks-span").innerHTML = bkmks;
     document.getElementById("num-folders-span").innerHTML = folders;

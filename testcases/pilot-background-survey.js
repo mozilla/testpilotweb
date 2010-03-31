@@ -7,7 +7,7 @@ const CHECK_BOXES = 4;
 exports.surveyInfo = {
   surveyId: "basic_panel_survey",
   surveyName: "Pilot Background Survey",
-  uploadWithExperiment: 2,
+  surveyExplanation: "All questions are optional.",
   minTPVersion: "0.4",
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
@@ -21,7 +21,7 @@ exports.surveyInfo = {
    { question: "If you use other browsers besides Firefox, what are they?",
      type: CHECK_BOXES_WITH_FREE_ENTRY,
      choices: ["Chrome","Safari","Opera","IE 8","IE 7","IE6"],
-     free_entry: "Other:" },
+     free_entry: "Other" },
   { question: "If you use multiple browsers, what's your primary browser?",
     type: MULTIPLE_CHOICE,
     choices: ["I don't user other browsers, only use Firefox"," Firefox as the primary browser","Chrome as the primary browser","Safari as the primary browser","Opera as the primary browser","IE 8 as the primary browser","IE 7 as the primary browser","IE 6 as the primary browser"],
@@ -52,7 +52,7 @@ exports.surveyInfo = {
     max_label: "Super high"},
    { question: "What are your main purposes for using the Web?",
      type: CHECK_BOXES_WITH_FREE_ENTRY,
-     choices: ["Work: programing, coding, etc.",
+     choices: ["Work: programming, coding, etc.",
 	       "Work: documentation, presentation, etc.",
 	       "Communication: email, IM, etc.",
 	       "Socializing: Facebook, Twitter, MySpace. etc",
@@ -61,10 +61,8 @@ exports.surveyInfo = {
 	       "Information consuming: news, blogs,etc.",
 	       "Information generation and sharing: blogs, photo, video.etc.",
 	       "Assisting my life: calendar, online booking, online finance. etc."],
-    free_entry: "Other:" },
+    free_entry: "Other" },
   {question:"How would you describe yourself as a web user?",
-   type: CHECK_BOXES_WITH_FREE_ENTRY,
-   choices:[],
-   free_entry: ""}
+   type: FREE_ENTRY}
   ]
 };

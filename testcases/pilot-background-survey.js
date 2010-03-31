@@ -7,7 +7,7 @@ const CHECK_BOXES = 4;
 exports.surveyInfo = {
   surveyId: "basic_panel_survey",
   surveyName: "Pilot Background Survey",
-  surveyExplanation: "All questions are optional.",
+  surveyExplanation: "This survey is to understand... (edit this)",
   minTPVersion: "0.4",
   surveyQuestions:  [
    { question: "How long have you used Firefox?",

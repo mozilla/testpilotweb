@@ -1,0 +1,22 @@
+{"results": [{"title": "Min and Max Tabs",
+"summary": "Minimum, maximum, and average number of tabs that a user has open at a time.",
+"url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#minmax",
+"studyId": "1",
+"thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/min-max-avg-tabs-open-thumb.png",
+"date": ""},
+
+{"title": "Tab Lifespans",
+"summary": "How long does an individual tab stay open on average?",
+"url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#lifespans",
+"studyId": "1",
+"thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/min-max-avg-tabs-open-thumb.png",
+"date": ""},
+
+{"title": "Switching on Tab Closure":
+"summary": "When a user bla bla bla",
+"url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#close-switch",
+"studyId": "1",
+"thumbnail":
+"https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/close-switch-stats-thumb.png",
+"date": ""}
+]}

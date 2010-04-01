@@ -16,7 +16,7 @@
 "id": "1_results_lifespans",
 "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#lifespans",
 "studyId": "1",
-"thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/min-max-avg-tabs-open-thumb.png",
+"thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/tab-lifespans-thumb.png",
 "date": ""},
 
 {"title": "Switching on Tab Closure",

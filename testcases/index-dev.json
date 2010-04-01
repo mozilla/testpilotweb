@@ -15,7 +15,7 @@
 "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#minmax",
 "studyId": "1",
 "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/min-max-avg-tabs-open-thumb.png",
-"date": ""},
+"date": "Thu Oct 15 2009"},
 
 {"title": "Tab Lifespans",
 "summary": "How long does an individual tab stay open on average?",
@@ -23,7 +23,7 @@
 "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#lifespans",
 "studyId": "1",
 "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/tab-lifespans-thumb.png",
-"date": ""},
+"date": "Thu Oct 15 2009"},
 
 {"title": "Switching on Tab Closure",
 "summary": "When a user bla bla bla",
@@ -32,7 +32,7 @@
 "studyId": "1",
 "thumbnail":
 "https://testpilot.mozillalabs.com/testcases/tab-open-close/graphs/close-switch-stats-thumb.png",
-"date": ""},
+"date": "Thu Oct 15 2009"},
 
 {"title": "Bookmarks",
 "summary": "How many bookmarks do people use?",

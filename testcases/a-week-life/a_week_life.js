@@ -8,7 +8,7 @@ exports.experimentInfo = {
   testName: "A Week in the Life of a Browser",
   testId: 2,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/a-week-life.html",
-  testResultsUrl: undefined,
+  summary: "Collects basic data about Firefox such as how long and how often it is used.",
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,

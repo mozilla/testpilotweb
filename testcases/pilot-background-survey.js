@@ -7,6 +7,7 @@ const CHECK_BOXES = 4;
 exports.surveyInfo = {
   surveyId: "basic_panel_survey",
   surveyName: "Pilot Background Survey",
+  summary: "A basic survey to help us understand who our Test Pilots are.",
   surveyExplanation: "This survey is to understand... (edit this)",
   minTPVersion: "0.4",
   surveyQuestions:  [

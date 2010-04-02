@@ -67,6 +67,10 @@ exports.experimentInfo = {
   testName: "Tab Open/Close Study",
   testId: MY_EXPERIMENT_ID,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
+  summary: "Tabbed browsing is offered by all major web browsers. The first " +
+           "question we want to explore: what would be the best default " +
+           "browser behavior after users close or open a tab when many tabs " +
+           "are open?",
   testResultsUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html",
   optInRequired: false,
   recursAutomatically: false,

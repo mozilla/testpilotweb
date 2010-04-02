@@ -8,7 +8,11 @@ exports.experimentInfo = {
   testName: "A Week in the Life of a Browser",
   testId: 2,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/a-week-life.html",
-  summary: "Collects basic data about Firefox such as how long and how often it is used.",
+  summary: "This auto-recurring study aims to explore larger trends of how "
+           + "browser is being used over time. It will periodically collect "
+           + "data on the browser's basic performance for one week, running "
+           + "the same study again every 60 days, through Dec. 2009 to "
+           + "Dec.2010.",
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,

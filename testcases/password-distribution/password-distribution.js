@@ -7,7 +7,10 @@ exports.experimentInfo = {
   testName: "Accounts and Passwords Study",
   testId: 3,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/account-password.html",
-  testResultsUrl: "",
+  summary: "Remembering which username/password combination to use on a "
+           + "given site can be very frustrating. Firefox tries to help solve "
+           + "a part of this  problem with the Password Manager feature. "
+           + "Can it be more helpful? ",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,

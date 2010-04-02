@@ -6,8 +6,11 @@ exports.experimentInfo = {
   duration: 5,
   testName: "Menu Item Usage Study",
   testId: 4,
-  testInfoUrl: "",
-  testResultsUrl: "",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/menuitemusage",
+  summary: "Remembering which username/password combination to use "
+           + "on a given site can be very frustrating. Firefox tries "
+           + "to help solve a part of this  problem with the Password "
+           + "Manager feature. Can it be more helpful? ",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,

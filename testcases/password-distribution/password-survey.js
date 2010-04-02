@@ -8,6 +8,7 @@ exports.surveyInfo = {
   surveyId: "account_password_survey",
   surveyName: "Accounts and Passwords Survey",
   uploadWithExperiment: 3,
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   surveyQuestions: [
     {question: "Do you share your computer with others?",
      type: MULTIPLE_CHOICE,

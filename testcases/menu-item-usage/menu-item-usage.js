@@ -11,6 +11,7 @@ exports.experimentInfo = {
            + "on a given site can be very frustrating. Firefox tries "
            + "to help solve a part of this  problem with the Password "
            + "Manager feature. Can it be more helpful? ",
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/menu-item-usage/menu-study-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,

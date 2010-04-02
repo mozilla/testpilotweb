@@ -13,6 +13,7 @@ exports.experimentInfo = {
            + "data on the browser's basic performance for one week, running "
            + "the same study again every 60 days, through Dec. 2009 to "
            + "Dec.2010.",
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/a-week-life/week-life-thumbnail.png",
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,

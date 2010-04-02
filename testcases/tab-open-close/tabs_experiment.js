@@ -71,7 +71,7 @@ exports.experimentInfo = {
            "question we want to explore: what would be the best default " +
            "browser behavior after users close or open a tab when many tabs " +
            "are open?",
-  testResultsUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html",
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-study-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,

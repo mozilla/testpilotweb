@@ -13,7 +13,8 @@ exports.surveyInfo = {
 <p>Please help us understand our Test Pilot community better by filling out \
 this survey. This survey doesn't contain any personally identifiable questions.\
 It will be uploaded along with any Test Pilot study data that you choose to \
-submit. You can always use the button below to review or change your answers.</p>",
+  submit. You can always use the button below to review or change your answers.</p>",
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   minTPVersion: "0.4",
   surveyQuestions:  [
    { question: "How long have you used Firefox?",

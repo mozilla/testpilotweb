@@ -4,7 +4,7 @@
                   "filename": "pilot-background-survey.js"}],
 
 "results": [{"title": "Min and Max Tabs",
-"summary": "Minimum, maximum, and average number of tabs that a user has open at a time.",
+"summary": "How many tabs do users have open at a time?",
 "id": "1_results_min_max",
 "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#minmax",
 "studyId": "1",
@@ -20,7 +20,7 @@
 "date": "Thu Oct 15 2009"},
 
 {"title": "Switching on Tab Closure",
-"summary": "When a user bla bla bla",
+"summary": "When a user closes a tab, Firefox automatically switches to another tab (call it the 'default' tab). Is this default tab usually the one that the user wants or not?",
 "id": "1_results_switch_on_close",
 "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#close-switch",
 "studyId": "1",
@@ -37,11 +37,11 @@
 "date": "Thu Jan 14 2010"},
 
 {"title": "Bookmark  Folders",
-"summary": "How many bookmarks do people use?",
-"id": "2_results_num_folders",
+"summary": "How many folders do people use to manage their bookmarks?",
+"id": "2_results_bookmark_folders",
 "url": "https://testpilot.mozillalabs.com/testcases/a-week-life/results.html#folder",
 "studyId": "2",
-"thumbnail":"https://testpilot.mozillalabs.com/testcases/a-week-life/graphs/bookmark-density.png",
+"thumbnail":"https://testpilot.mozillalabs.com/testcases/a-week-life/graphs/folder-count.png",
 "date": "Thu Jan 14 2010"},
 
 {"title": "Bookmark Levels",

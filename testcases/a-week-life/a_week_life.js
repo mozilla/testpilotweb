@@ -9,7 +9,7 @@ exports.experimentInfo = {
   testId: 2,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/a-week-life.html",
   summary: "This auto-recurring study aims to explore larger trends of how "
-           + "browser is being used over time. It will periodically collect "
+           + "the browser is being used over time. It will periodically collect "
            + "data on the browser's basic performance for one week, running "
            + "the same study again every 60 days, through Dec. 2009 to "
            + "Dec.2010.",
@@ -505,6 +505,7 @@ version, and any survey answers you have provided.';
 
 const IN_PROGRESS_DATA_DISPLAY_HTML =
    '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
+    <button type="button" onclick="saveCanvas(document.getElementById(\'browser-use-time-canvas\'))">Save Graph</button>\
     <div class="dataBox">\
     <h4>Facts About Your Browser Use This Week</h4>\
     <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
@@ -523,6 +524,7 @@ const IN_PROGRESS_DATA_DISPLAY_HTML =
 
 const COMPLETED_DATA_DISPLAY_HTML =
    '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
+    <button type="button" onclick="saveCanvas(document.getElementById(\'browser-use-time-canvas\'))">Save Graph</button>\
     <div class="dataBox">\
     <h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
     To <span id="usage-period-end-span"></span></h4>\
@@ -539,12 +541,6 @@ const COMPLETED_DATA_DISPLAY_HTML =
     <span id="first-num-extensions"></span> Firefox extensions installed.  \
     At the end you had <span id="num-extensions"></span> extensions installed.</p>\
     </div>';
-
-const ADDITIONAL_DISPLAY_HTML =
-    '<p>You can save the graph using the <strong>Save Graph</strong> button or \
-    press the <strong>Delete Data</strong> button to delete all data related to this study.</p>\
-    <button type="button" onclick="saveCanvas(document.getElementById(\'browser-use-time-canvas\'))">Save Graph</button>\
-    <button type="button" onclick="deleteData()">Delete Data</button>';
 
 exports.webContent = {
   inProgressHtml:
@@ -583,8 +579,7 @@ exports.webContent = {
      + COMPLETED_DATA_DISPLAY_HTML + FINE_PRINT,
   upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
 
-  remainDataHtml: "<h3>Collected Data:</h3>" + COMPLETED_DATA_DISPLAY_HTML +
-    ADDITIONAL_DISPLAY_HTML,
+  remainDataHtml: "<h3>Collected Data:</h3>" + COMPLETED_DATA_DISPLAY_HTML,
 
   _deleteDataOlderThanAWeek: function(dataStore) {
     /* TODO: we're breaking encapsulation here because there's no public

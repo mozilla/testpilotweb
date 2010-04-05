@@ -7,7 +7,9 @@ const CHECK_BOXES = 4;
 exports.surveyInfo = {
   surveyId: "basic_panel_survey",
   surveyName: "Pilot Background Survey",
-  summary: "This survey aims to help understand who Test Pilots are, and what we need to do in order to build a community that are able to represent Firefox users and the Web users.",
+  summary: "This survey aims to help understand who Test Pilots are, and what "
+    + "we need to do in order to build a community representative of Firefox "
+    + "users and Web users.",
   thumbnail: "",
   surveyExplanation: "<p>Thank you for joining the Test Pilot team!</p> \
 <p>Please help us understand our Test Pilot community better by filling out \

@@ -5,7 +5,7 @@ const FREE_ENTRY = 3;
 const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
-  surveyId: "basic_panel_survey",
+  surveyId: "basic_panel_survey_2",
   surveyName: "Pilot Background Survey",
   summary: "This survey aims to help understand who Test Pilots are, and what "
     + "we need to do in order to build a community representative of Firefox "
@@ -17,7 +17,8 @@ this survey. This survey doesn't contain any personally identifiable questions.\
 It will be uploaded along with any Test Pilot study data that you choose to \
   submit. You can always use the button below to review or change your answers.</p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
-  minTPVersion: "0.4",
+  minTPVersion: "1.0a1",
+  versionNumber: 2,
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
      type: MULTIPLE_CHOICE,

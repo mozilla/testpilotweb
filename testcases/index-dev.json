@@ -4,6 +4,8 @@
                   "filename": "a-week-life/a_week_life.js"},
                  {"name": "Pilot Background Survey",
                   "filename": "pilot-background-survey.js"},
+                 {"name": "Tab Switch Study",
+                  "filename": "tab-open-close/tab_switch_study.js"},
                  {"name": "Ghost Study",
                   "filename": "dependency-experiment/ghost-study.js"}],
 "libraries": [{"name": "Ghost Study Library",

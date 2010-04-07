@@ -36,7 +36,7 @@ const TABS_TABLE_NAME = "testpilot_tabs_experiment_2";
 const TAB_ID_ATTR = "TestPilotTabStudyTabId";
 const WINDOW_ID_ATTR = "TestPilotTabStudyWindowId";
 
-// TODO add columns:  parent_tab?   is_search_results ?
+// TODO add columns:  parent_tab?
 var TABS_EXPERIMENT_COLUMNS =  [
   {property: "event_code", type: TYPE_INT_32, displayName: "Event",
    displayValue: ["Study status", "Open", "Close", "Drag", "Drop", "Switch",
@@ -48,6 +48,7 @@ var TABS_EXPERIMENT_COLUMNS =  [
    displayValue: ["", "Click", "Keyboard", "Menu", "Link", "URL Entry", "Search",
               "Bookmark", "History"]},
   {property: "tab_site_hash", type: TYPE_INT_32, displayName: "Tab Group ID"},
+  {property: "is_search_results", type: TYPE_INT_32, displayName: "Search results?"},
   {property: "num_tabs", type: TYPE_INT_32, displayName: "Num. Tabs"},
   {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}];
@@ -511,82 +512,6 @@ exports.webContent = {
   upcomingHtml: "",    // For tests which don't start automatically, this gets
                        // displayed in status page before test starts.
 
-  _drawNumTabsTimeSeries: function(rawData, canvas, graphUtils) {
-    let data = [];
-    let row;
-    let boundingRect = { originX: 40,
-                         originY: 210,
-                         width: 400,
-                         height: 200 };
-    // Time Series plot of tabs over time:
-    let firstTimestamp = null;
-    let maxTabs = 0;
-    for (row = 0; row < rawData.length; row++) {
-      if (row == 0) {
-        firstTimestamp = rawData[row].timestamp;
-      }
-      if (rawData[row].num_tabs > maxTabs) {
-        maxTabs = rawData[row].num_tabs;
-      }
-      if (row > 0) {
-        data.push( [rawData[row].timestamp - firstTimestamp,
-	            rawData[row-1].num_tabs] );
-      }
-      data.push( [ rawData[row].timestamp - firstTimestamp,
-                   rawData[row].num_tabs ] );
-    }
-
-    let lastTimestamp = data[data.length - 1][0];
-
-    let red = "rgb(200,0,0)";
-    let axes = {xScale: boundingRect.width / lastTimestamp,
-                yScale: boundingRect.height / maxTabs,
-                xMin: firstTimestamp,
-                xMax: lastTimestamp,
-                yMin: 0,
-                yMax: maxTabs };
-    // drawTimeSeriesGraph is defined in client-side graphs.js
-    graphUtils.drawTimeSeriesGraph(canvas, data, boundingRect, axes, red);
-  },
-
-  _drawTabClosePieChart: function(rawData, canvas, graphUtils) {
-    let origin = {x: 125, y: 125};
-    let radius = 100;
-    let row;
-
-    // Pie chart of close-and-switch vs. close-and-don't-switch
-    let minTimeDiff = 5000; // 5 seconds
-
-    let numCloseEvents = 0;
-    let numSwitchEvents = 0;
-    let numClosedAndSwitched = 0;
-    let lastCloseEventTime = 0;
-
-    // TODO should we interpret it differently if you close a tab that
-    // is not the one you're looking at?
-    for (row=0; row < rawData.length; row++) {
-      if ( rawData[row].event_code == TabsExperimentConstants.CLOSE_EVENT ) {
-        numCloseEvents ++;
-        numSwitchEvents = 0;
-        lastCloseEventTime = rawData[row].timestamp;
-      }
-      if (rawData[row].event_code == TabsExperimentConstants.SWITCH_EVENT ) {
-       numSwitchEvents ++;
-        if (numSwitchEvents == 2 &&
-           (rawData[row].timestamp - lastCloseEventTime) <= minTimeDiff) {
-          numClosedAndSwitched ++;
-        }
-      }
-    }
-
-    if (numCloseEvents > 0) {
-      let data = [numClosedAndSwitched,
-                  numCloseEvents - numClosedAndSwitched];
-      graphUtils.drawPieChart(canvas, data, origin, radius,
-                   ["rgb(200, 0, 0)", "rgb(0, 0, 200)"],
-                   ["Switched", "Stayed"]);
-    }
-  },
 
   onPageLoad: function(experiment, document, graphUtils) {
     // Get raw data:
@@ -595,9 +520,6 @@ exports.webContent = {
     if (rawData.length > 0) {
       let canvas1 = document.getElementById("tabs-over-time-canvas");
       let canvas2 = document.getElementById("tab-close-pie-chart-canvas");
-      this._drawNumTabsTimeSeries(rawData, canvas1, graphUtils);
-      this._drawTabClosePieChart(rawData, canvas2, graphUtils);
-      return;
-    } // Otherwise, there's nothing to graph.
+    }
   }
 };

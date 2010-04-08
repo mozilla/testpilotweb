@@ -35,6 +35,8 @@ const TABS_EXPERIMENT_FILE = "testpilot_tabs_experiment_results_2.sqlite";
 const TABS_TABLE_NAME = "testpilot_tabs_experiment_2";
 const TAB_ID_ATTR = "TestPilotTabStudyTabId";
 const WINDOW_ID_ATTR = "TestPilotTabStudyWindowId";
+const LAST_TAB_ID = "tab_switch_study.last_tab_id";
+const LAST_WINDOW_ID = "tab_switch_study.last_window_id";
 
 // TODO add columns:  parent_tab?
 var TABS_EXPERIMENT_COLUMNS =  [
@@ -77,16 +79,15 @@ exports.dataStoreInfo = {
 };
 
 let ObserverHelper = {
-  /* TODO: Make nextWindowId, nextTabId, nextTabGroupId, and tempHostHash
-   * all persistent across runs.
-   */
+  // TODO: Make nextTabGroupId and tempHostHash persistent across runs.
   _nextWindowId: 1,
+  _nextTabId: 0,
   _nextTabGroupId: 0,
   _tempHostHash: {},
   _installedObservers: [],
   _dataStore: null,
   privateMode: false,
-  nextTabId: 0,
+
 
   _sessionStore: null,
   get sessionStore() {
@@ -95,6 +96,16 @@ let ObserverHelper = {
                     .getService(Ci.nsISessionStore);
     }
     return this._sessionStore;
+  },
+
+  _prefBranch: null,
+  get prefBranch() {
+    if (!this._prefBranch) {
+      let prefs = Cc["@mozilla.org/preferences-service;1"]
+                    .getService(Ci.nsIPrefService);
+      this._prefBranch = prefs.getBranch("extensions.testpilot.");
+    }
+    return this._prefBranch;
   },
 
   getTabGroupIdFromUrl: function(url) {
@@ -114,7 +125,15 @@ let ObserverHelper = {
   _getNextWindowId: function() {
     let id = this._nextWindowId;
     this._nextWindowId ++;
+    this.prefBranch.setIntPref(LAST_WINDOW_ID, this._nextWindowId);
     return id;
+  },
+
+  getNextTabId: function ObserverHelper_getNextTabId() {
+    let tabId = this._nextTabId;
+    this._nextTabId ++;
+    this.prefBranch.setIntPref(LAST_TAB_ID, this._nextTabId);
+    return tabId;
   },
 
   _getIdFromWindow: function(window) {
@@ -234,6 +253,14 @@ let ObserverHelper = {
   onExperimentStartup: function(store) {
     dump("Tab study ObserverHelper.onExperimentStartup()\n");
     this._dataStore = store;
+
+    if (this.prefBranch.prefHasUserValue(LAST_WINDOW_ID)) {
+      this._nextWindowId = this.prefBranch.getIntPref(LAST_WINDOW_ID);
+    }
+    if (this.prefBranch.prefHasUserValue(LAST_TAB_ID)) {
+      this._nextTabId = this.prefBranch.getIntPref(LAST_TAB_ID);
+    }
+
     // Record study version:
     // NOTE we're overloading tab_id to store the study version number
     // which is lame but much easier than adding a dedicated column at this
@@ -317,12 +344,6 @@ TabWindowObserver.prototype = {
        catchCap: catchCap});
   },
 
-  _getNextTabId: function TabsExperimentObserver__getNextTabId() {
-    let tabId = exports.handlers.nextTabId;
-    exports.handlers.nextTabId ++; // TODO persist this
-    return tabId;
-  },
-
   install: function TabsExperimentObserver_install() {
     dump("Tab study TabWindowObserver.install()\n");
     let self = this;
@@ -371,7 +392,7 @@ TabWindowObserver.prototype = {
      * ensures every tab gets an ID whether it came from SessionStore or
      * whether it was just open.) */
     if (tabId == "") {
-      tabId = this._getNextTabId();
+      tabId = ObserverHelper.getNextTabId();
       sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
       dump("Stored tab id = " + tabId + " in session store for this tab.");
     }

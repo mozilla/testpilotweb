@@ -111,10 +111,57 @@ let ObserverHelper = {
     return this._tempHostHash[host];
   },
 
-  getNextWindowId: function() {
+  _getNextWindowId: function() {
     let id = this._nextWindowId;
     this._nextWindowId ++;
     return id;
+  },
+
+  _getIdFromWindow: function(window) {
+    let id = this.sessionStore.getWindowValue(window, WINDOW_ID_ATTR);
+    if (id == "") {
+      return null;
+    } else {
+      return id;
+    }
+  },
+
+  _getObserverForWindow: function(window) {
+    let windowId = this._getIdFromWindow(window);
+    if (!windowId) {
+      return null;
+    }
+    for (let i = 0; i < this._installedObservers.length; i++) {
+      if (this._installedObservers[i]._windowId == windowId) {
+        return this._installedObservers[i];
+      }
+    }
+    return null;
+  },
+
+  _registerWindow: function(window) {
+    // First check window doesn't already have registration, so that this
+    // function can be called multiple times with no ill effect:
+    dump("in _registerWindow.\n");
+    let windowId = this._getIdFromWindow(window);
+    if (windowId) {
+      dump("This window has an ID already!\n");
+      if (this._getObserverForWindow(window)) {
+        dump("This window is already registered.\n");
+        return;
+      }
+    }
+
+    // OK, we don't already have registration on this window... start one
+    if (!windowId) {
+      dump("Establishing ID for this window.\n");
+      // Create and store a new window ID:
+      windowId = this._getNextWindowId();
+      this.sessionStore.setWindowValue(window, WINDOW_ID_ATTR, windowId);
+    }
+    let newObserver = new TabWindowObserver(window, windowId, this._dataStore);
+    this._installedObservers.push(newObserver);
+    dump("Done registering window.\n");
   },
 
   cleanup: function() {
@@ -123,14 +170,15 @@ let ObserverHelper = {
     for (let i = 0; i < this._installedObservers.length; i++) {
       this._installedObservers[i].uninstall();
     }
+    this._installedObservers = [];
   },
 
   // for handlers API:
   onNewWindow: function(window) {
     dump("Tab study ObserverHelper.onNewWindow()\n");
     // Create an observer for each window.
-    let windowId = this._nextWindowId;
-    this._installedObservers.push( new TabWindowObserver(window, this._dataStore));
+    this._registerWindow(window);
+    let id = this._getIdFromWindow(window);
     console.info("Pushed a tab observer in onNewWindow.");
 
     // Record the window-opening event:
@@ -139,31 +187,30 @@ let ObserverHelper = {
         event_code: TabsExperimentConstants.OPEN_WINDOW_EVENT,
         timestamp: Date.now(),
         num_tabs: window.getBrowser().tabContainer.itemCount,
-        tab_window: windowId
+        tab_window: id
       });
     }
   },
 
   onWindowClosed: function(window) {
     dump("Tab study ObserverHelper.onWindowClosed()\n");
-    // TODO any tabs that are still open, let's use session restore API
-    // to store the tab GUIDs for late restoration.
-    for (let i=0; i < this._installedObservers.length; i++) {
-      if (this._installedObservers[i]._window == window) {
-        console.info("Uninstalled a tab observer in onWindowClosed.");
-        this._installedObservers[i].uninstall();
-        // Record the window-closing event:
-        console.info("Uninstalling tabsExperimentObserver.");
-        let windowId = this._installedObservers[i]._windowId;
-        if (!this.privateMode) {
-          this._dataStore.storeEvent({
-            event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
-            timestamp: Date.now(),
-            tab_window: windowId
-          });
-        }
-        // TODO remove the uninstalled observer from the list?
-      }
+    let observer = this._getObserverForWindow(window);
+    if (observer) {
+      console.info("Uninstalled a tab observer in onWindowClosed.");
+      observer.uninstall();
+      let index = this._installedObservers.indexOf(observer);
+      this._installedObservers.splice(index, 1);
+      dump("Uninstalled and deleted observer " + index + "\n");
+    }
+
+    // Record the window-closing event:
+    let windowId = getIdFromWindow(window);
+    if (!this.privateMode) {
+      this._dataStore.storeEvent({
+        event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,
+        timestamp: Date.now(),
+        tab_window: windowId
+      });
     }
   },
 
@@ -191,11 +238,13 @@ let ObserverHelper = {
     // NOTE we're overloading tab_id to store the study version number
     // which is lame but much easier than adding a dedicated column at this
     // point.
+    dump("Storing study status...\n");
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.STUDY_STATUS,
       tab_id: exports.experimentInfo.versionNumber,
       timestamp: Date.now()
     });
+    dump("Done storing study status.\n");
 
     // Install observers on all windows that are already open:
     console.info("Trying to install observers on already open windows.");
@@ -203,13 +252,12 @@ let ObserverHelper = {
                     .getService(Ci.nsIWindowMediator);
     let enumerator = wm.getEnumerator("navigator:browser");
     while(enumerator.hasMoreElements()) {
+      dump("Gonna register a window...\n");
       let win = enumerator.getNext();
-      this._installedObservers.push( new TabWindowObserver(win, this._dataStore));
+      dump("Here is the window...\n");
+      this._registerWindow(win);
     }
     console.info("I did it.");
-    // TODO BUT---!! we don't want to double-register on windows open at
-    // startup! I guess we should look at whether a window already has listeners
-    // registered on it or not...
     dump("Done with Tab Study onExperimentStartup.\n");
   },
 
@@ -241,27 +289,16 @@ require("unload").when(
 
 
 // The per-window observer class:
-function TabWindowObserver(window, store) {
-  this._init(window, store);
+function TabWindowObserver(window, windowId, store) {
+  this._init(window, windowId, store);
 };
 TabWindowObserver.prototype = {
-  _init: function TabsExperimentObserver__init(window, store) {
+  _init: function TabsExperimentObserver__init(window, windowId, store) {
     dump("Tab study TabWindowObserver._init()\n");
     this._lastEventWasClick = null;
     this._window = window;
     this._dataStore = store;
-
-    let windowId = ObserverHelper.sessionStore.getWindowValue(window,
-                                                              WINDOW_ID_ATTR);
-    if (windowId != "") {
-      this._windowId = windowId;
-    } else {
-      // doesn't have a windowId yet - make one up:
-      this._windowId = ObserverHelper.getNextWindowId();
-      ObserverHelper.sessionStore.setWindowValue(window,
-                                                 WINDOW_ID_ATTR,
-                                                 this._windowId);
-    }
+    this._windowId = windowId;
     this._registeredListeners = [];
     this.install();
   },

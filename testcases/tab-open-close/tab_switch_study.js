@@ -317,12 +317,10 @@ TabWindowObserver.prototype = {
        catchCap: catchCap});
   },
 
-  _assignTabId: function TabsExperimentObserver__assignTabId( tabElem ) {
+  _getNextTabId: function TabsExperimentObserver__getNextTabId() {
     let tabId = exports.handlers.nextTabId;
-    ObserverHelper.sessionStore.setTabValue( tabElem, TAB_ID_ATTR, tabId);
-    dump("Stored tab id = " + tabId + " in session store for this tab.");
-    console.info("Tab opened - assigning tab ID of " + tabId + " to a " + tabElem.tagName);
-    exports.handlers.nextTabId ++;
+    exports.handlers.nextTabId ++; // TODO persist this
+    return tabId;
   },
 
   install: function TabsExperimentObserver_install() {
@@ -354,14 +352,6 @@ TabWindowObserver.prototype = {
     if (appcontent) {
       this._listen(appcontent, "DOMContentLoaded", this.onUrlLoad, true);
     }
-
-    //https://developer.mozilla.org/en/nsISessionStore
-
-    // Try:  sessionStore.setTabValue(domNode, key, value)
-    // and sessionStore.getTabValue(domNode, key)
-    //
-
-    // This can be used to persist the site id hash too?
   },
 
   _recordEvent: function TabsExperimentObserver__recordEvent(tab,
@@ -375,7 +365,17 @@ TabWindowObserver.prototype = {
     // (when called from load events)
     let index = tab.parentNode.getIndexOfItem(tab);
     let count = tab.parentNode.itemCount;
-    let tabId = ObserverHelper.sessionStore.getTabValue(tab, TAB_ID_ATTR);
+    let sStore = ObserverHelper.sessionStore;
+    let tabId = sStore.getTabValue(tab, TAB_ID_ATTR);
+    /* If tab doesn't have an ID, assign it one now (doing it just-in-time
+     * ensures every tab gets an ID whether it came from SessionStore or
+     * whether it was just open.) */
+    if (tabId == "") {
+      tabId = this._getNextTabId();
+      sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
+      dump("Stored tab id = " + tabId + " in session store for this tab.");
+    }
+
     let windowId = this._windowId;
     if (!ObserverHelper.privateMode) {
       this._dataStore.storeEvent({
@@ -462,6 +462,7 @@ TabWindowObserver.prototype = {
   },
 
   onTabOpened: function TabsExperimentObserver_onTabOpened(event) {
+    dump("Recording open tab event.\n");
     console.info("Tab opened. Last event was click? " + this._lastEventWasClick );
     // TODO Not registering click here on open events -- because mouse up and
     // mousedown both happen before the tab open event.
@@ -474,8 +475,6 @@ TabWindowObserver.prototype = {
       // recently-closed tab from the history menu).  Go figure.
       uiMethod = TabsExperimentConstants.UI_LINK;
     }
-    this._assignTabId(event.target);
-
     this._recordEvent(event.target, TabsExperimentConstants.OPEN_EVENT,
                       uiMethod);
     // event has properties:
@@ -484,6 +483,7 @@ TabWindowObserver.prototype = {
   },
 
   onTabClosed: function TabsExperimentObserver_onTabClosed(event) {
+    dump("Recording tab close event.\n");
     console.info("Tab closed.");
 
     // TODO not registering click here on close events.

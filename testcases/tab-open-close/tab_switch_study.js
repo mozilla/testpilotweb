@@ -655,6 +655,9 @@ delete the data without sending it</a>.</p>'
         let yCenter = (yBottom + yTop) / 2;
         if (total > 0) {
           ctx.lineWidth = total / 5;
+          if (total/5 > 3) {
+            ctx.lineWidth = 3;
+          }
           ctx.arc(40, yCenter, radius, -1 * Math.PI / 2, Math.PI / 2, false);
           ctx.stroke();
           ctx.lineWidth = 1;

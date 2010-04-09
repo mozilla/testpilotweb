@@ -119,7 +119,10 @@ let ObserverHelper = {
 
   getTabGroupIdFromUrl: function(url) {
     // TODO this next line can sometimes throw a data:no exception.
-    // It doesn't seem to cause any serious problems.
+    // If left untreated this will stop load from getting recorded.
+    if (url == "about:blank") {
+      return -1;
+    }
     let host = this.ioService.newURI(url, null, null).host;
 
     if (this._tempHostHash[host] == undefined) {
@@ -132,15 +135,15 @@ let ObserverHelper = {
   isUrlSearchResults: function(url) {
     let path = this.ioService.newURI(url, null, null).path;
     dump("Path is " + path + "\n");
-    let argPart = path.split("?")[1];
-    if (argPart) {
-      let args = argPart.split("&");
-      if (args) {
-        if (args.indexOf("q=") > -1 || args.indexOf("query=") > -1) {
-          dump("Found a query - i think this is search results.\n");
-          return true;
-        }
+    let query = path.split("?").pop();
+    let args = query.split("&");
+    for each (let arg in args) {
+      if (arg.indexOf("q=") == 0 || arg.indexOf("query=") == 0) {
+        return true;
       }
+    }
+    if (path.indexOf("search") > -1 && args.length > 1) {
+      return true;
     }
     return false;
   },
@@ -418,6 +421,13 @@ TabWindowObserver.prototype = {
       tabId = ObserverHelper.getNextTabId();
       sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
     }
+    let url = this.getUrlInTab(index);
+    dump("Url " + url + "\n");
+    let groupId = ObserverHelper.getTabGroupIdFromUrl(url);
+    dump("Group ID is " + groupId + "\n");
+    let isSearch = ObserverHelper.isUrlSearchResults(url);
+    dump("Search results? " + isSearch + "\n");
+
     dump("Tab id " + tabId + "\n");
     let windowId = this._windowId;
     if (!ObserverHelper.privateMode) {
@@ -429,10 +439,10 @@ TabWindowObserver.prototype = {
         num_tabs: overrides.count ? overrides.count : count,
         ui_method: uiMethod,
         tab_window: overrides.windowId ? overrides.windowId : windowId,
-        tab_site_hash: overrides.group? overrides.group: 0
+        tab_site_hash: overrides.group? overrides.group: groupId,
+        is_search_results: isSearch
       });
     }
-    // TODO record is_search_results column
   },
 
   uninstall: function TabsExperimentObserver_uninstall() {
@@ -478,14 +488,17 @@ TabWindowObserver.prototype = {
   },
 
   onUrlLoad: function TabsExperimentObserver_onUrlLoaded(event) {
-    dump("Recording url load. ");
     let url = event.originalTarget.URL;
-    let tabBrowserSet = this._window.getBrowser();
-    let browser = tabBrowserSet.getBrowserForDocument(event.target);
+    // event.originalTarget is the document inside the tab.
+    // How do we get from this document to the tab element itself?
+    dump("Loaded url " + url + "\n");
+    /*let tabBrowserSet = this._window.getBrowser();
+    let browser = tabBrowserSet.getBrowserForDocument(event.originalTarget);
     if (!browser) {
+      dump("No browser.\n");
       return;
     }
-
+    dump("Looking up index.\n");
     let index = null;
     for (let i = 0; i < tabBrowserSet.browsers.length; i ++) {
       if (tabBrowserSet.getBrowserAtIndex(i) == browser) {
@@ -493,14 +506,12 @@ TabWindowObserver.prototype = {
 	break;
       }
     }
-    // TODO move groupId detection to _recordEvent so it happens every time
-    let groupId = ObserverHelper.getTabGroupIdFromUrl(url);
 
-    // TODO is browser the right object here?
+    // TODO browser doesn't appear to be the object I want.
     this._recordEvent(browser, TabsExperimentConstants.LOAD_EVENT,
                       TabsExperimentConstants.UI_CLICK,
                       {index: index, count: tabBrowserSet.browsers.length,
-                       group: groupId});
+                       group: groupId});*/
     // TODO UI method
   },
 

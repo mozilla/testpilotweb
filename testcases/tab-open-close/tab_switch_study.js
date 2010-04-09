@@ -53,10 +53,10 @@ var TABS_EXPERIMENT_COLUMNS =  [
   {property: "is_search_results", type: TYPE_INT_32, displayName: "Search results?"},
   {property: "num_tabs", type: TYPE_INT_32, displayName: "Num. Tabs"},
   {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
-   displayValue: function(value) {return new Date(value).toLocaleString();}}];
+   displayValue: function(value) {return new Date(value).toLocaleString();}}
+];
 
 
-// This is a different study from the Tab Switch study!
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 7, // Days
@@ -394,9 +394,8 @@ TabWindowObserver.prototype = {
     if (tabId == "") {
       tabId = ObserverHelper.getNextTabId();
       sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
-      dump("Stored tab id = " + tabId + " in session store for this tab.");
     }
-
+    dump("Tab id " + tabId + "\n");
     let windowId = this._windowId;
     if (!ObserverHelper.privateMode) {
       this._dataStore.storeEvent({
@@ -433,14 +432,14 @@ TabWindowObserver.prototype = {
 
   onDragStart: function TabsExperimentObserver_onDragStart(event) {
     console.info("You started dragging a tab.");
-    dump("Recording tab drag.\n");
+    dump("Recording tab drag. ");
     this._recordEvent(event.target, TabsExperimentConstants.DRAG_EVENT,
                       TabsExperimentConstants.UI_CLICK);
   },
 
   onDrop: function TabsExperimentObserver_onDrop(event) {
     console.info("You dropped a dragged tab.");
-    dump("Recording tab drop.\n");
+    dump("Recording tab drop. ");
     console.info("Index is " + index );
     this._recordEvent(event.target, TabsExperimentConstants.DROP_EVENT,
                       TabsExperimentConstants.UI_CLICK);
@@ -456,7 +455,7 @@ TabWindowObserver.prototype = {
   },
 
   onUrlLoad: function TabsExperimentObserver_onUrlLoaded(event) {
-    dump("Recording url load.\n");
+    dump("Recording url load. ");
     let url = event.originalTarget.URL;
     let tabBrowserSet = this._window.getBrowser();
     let browser = tabBrowserSet.getBrowserForDocument(event.target);
@@ -483,7 +482,7 @@ TabWindowObserver.prototype = {
   },
 
   onTabOpened: function TabsExperimentObserver_onTabOpened(event) {
-    dump("Recording open tab event.\n");
+    dump("Recording open tab event. ");
     console.info("Tab opened. Last event was click? " + this._lastEventWasClick );
     // TODO Not registering click here on open events -- because mouse up and
     // mousedown both happen before the tab open event.
@@ -504,7 +503,7 @@ TabWindowObserver.prototype = {
   },
 
   onTabClosed: function TabsExperimentObserver_onTabClosed(event) {
-    dump("Recording tab close event.\n");
+    dump("Recording tab close event. ");
     console.info("Tab closed.");
 
     // TODO not registering click here on close events.
@@ -519,6 +518,7 @@ TabWindowObserver.prototype = {
     // after each close.  Right now these get listed as 'keyboard', which is
     // not accurate.  Should we try to figure them out and mark them as auto-
     // matic?
+    dump("Recording tab switch event. ");
     console.info("Tab selected.  Last event was click? " + this._lastEventWasClick );
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
 
@@ -572,9 +572,60 @@ delete the data without sending it</a>.</p>'
     // Get raw data:
     let rawData = experiment.dataStoreAsJSON;
     // Graph it:
-    if (rawData.length > 0) {
-      let canvas1 = document.getElementById("tabs-over-time-canvas");
-      let canvas2 = document.getElementById("tab-close-pie-chart-canvas");
+    if (rawData.length == 0) {
+      return;
+    }
+
+    let canvas = document.getElementById("tab-switch-arcs");
+    let ctx = canvas.getContext("2d");
+    let maxTab = ObserverHelper._nextTabId + 1;
+
+    // zero-fill 2-d array:
+    let i, j;
+    let switchCounts = new Array(maxTab);
+    for (i = 0; i < maxTab; i++) {
+      switchCounts[i] = new Array(maxTab);
+      for (j = 0; j < maxTab; j++) {
+        switchCounts[i][j] = 0;
+      }
+    }
+    // Count switch events by id.  switchCounts[i][j] holds
+    // the number of switch events from tab id i to tab id j.
+    let prevTabId = null;
+    for each ( let row in rawData) {
+      if (row.event_code != TabsExperimentConstants.SWITCH_EVENT) {
+        continue;
+      }
+      let thisTabId = row.tab_id;
+      if (prevTabId != null) {
+        switchCounts[prevTabId][thisTabId] ++;
+      }
+      prevTabId = thisTabId;
+    }
+
+    //Draw a rectangle for each tab.
+
+    for (i = 0; i < maxTab; i++) {
+      ctx.strokeRect(5, 5 + i * 20, 35, 20 + i * 20);
+    }
+
+    // Draw arcs between each rectangle with line weight proportional
+    // to number of switches.
+    for (i = 0; i < maxTab; i++) {
+      for (j = i+1; j < maxTab; j++) {
+        // don't care about direction of the switch here
+        let total = switchCounts[i][j] + switchCounts[j][i];
+        let yTop = 10 + i * 20;
+        let yBottom = 10 + j * 20;
+        let radius = (yBottom - yTop) / 2;
+        let yCenter = (yBottom + yTop) / 2;
+        if (total > 0) {
+          ctx.lineWidth = total / 5;
+          ctx.arc(35, yCenter, radius, -1 * Math.PI / 2, Math.PI / 2, false);
+          ctx.stroke();
+          ctx.lineWidth = 1;
+        }
+      }
     }
   }
 };

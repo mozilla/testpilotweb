@@ -37,6 +37,8 @@ const TAB_ID_ATTR = "TestPilotTabStudyTabId";
 const WINDOW_ID_ATTR = "TestPilotTabStudyWindowId";
 const LAST_TAB_ID = "tab_switch_study.last_tab_id";
 const LAST_WINDOW_ID = "tab_switch_study.last_window_id";
+const HOST_HASH_PREF = "tab_switch_study.host_hash";
+const LAST_GROUP_ID = "tab_switch_study.last_group_id";
 
 // TODO add columns:  parent_tab?
 var TABS_EXPERIMENT_COLUMNS =  [
@@ -80,7 +82,6 @@ exports.dataStoreInfo = {
 };
 
 let ObserverHelper = {
-  // TODO: Make nextTabGroupId and tempHostHash persistent across runs.
   _nextWindowId: 1,
   _nextTabId: 0,
   _nextTabGroupId: 0,
@@ -129,6 +130,9 @@ let ObserverHelper = {
     if (this._tempHostHash[host] == undefined) {
       this._tempHostHash[host] = this._nextTabGroupId;
       this._nextTabGroupId ++;
+      this.prefBranch.setCharPref(HOST_HASH_PREF,
+                                  JSON.stringify(this._tempHostHash));
+      this.prefBranch.setIntPref(LAST_GROUP_ID, this._nextTabGroupId);
     }
     return this._tempHostHash[host];
   },
@@ -286,6 +290,12 @@ let ObserverHelper = {
     }
     if (this.prefBranch.prefHasUserValue(LAST_TAB_ID)) {
       this._nextTabId = this.prefBranch.getIntPref(LAST_TAB_ID);
+    }
+    if (this.prefBranch.prefHasUserValue(LAST_GROUP_ID)) {
+      this._nextTabGroupId = this.prefBranch.getIntPref(LAST_GROUP_ID);
+    }
+    if (this.prefBranch.prefHasUserValue(HOST_HASH_PREF)) {
+      this._hostHash = JSON.parse(this.prefBranch.getCharPref(HOST_HASH_PREF));
     }
 
     // Record study version:

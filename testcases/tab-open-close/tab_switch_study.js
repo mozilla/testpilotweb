@@ -59,12 +59,13 @@ var TABS_EXPERIMENT_COLUMNS =  [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 7, // Days
+  duration: 5, // Days
   testName: "Tab Switch Study",
   testId: 5,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
-  summary: "Do people switch more often among a group of related tabs than they "
-           + "do between unrelated tabs?  This study is to test that hypothesis.",
+  summary: "This 5-day study aims to understand how people switch between \
+tabs. The result of this study will help Firefox team design better ways \
+for people to manage their tabs. ",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-switch-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,

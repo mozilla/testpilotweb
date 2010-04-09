@@ -566,7 +566,7 @@ const DATA_CANVAS = '<div class="dataBox"> \
     with <span id="md-num-ext"></span> installed.</p> \
     <p><a onclick="showRawData(5);">Click here</a> to see a display of all\
     the collected data in its raw form, exactly as it will be sent.</p>\
-    <canvas id="tab-switch-arcs" width="450" height="220"></canvas> \
+    <canvas id="tab-switch-arcs" width="450" height="680"></canvas> \
 </div>';
 
 exports.webContent = {
@@ -644,7 +644,7 @@ delete the data without sending it</a>.</p>'
         let yCenter = (yBottom + yTop) / 2;
         if (total > 0) {
           ctx.lineWidth = total / 5;
-          ctx.arc(35, yCenter, radius, -1 * Math.PI / 2, Math.PI / 2, false);
+          ctx.arc(40, yCenter, radius, -1 * Math.PI / 2, Math.PI / 2, false);
           ctx.stroke();
           ctx.lineWidth = 1;
         }

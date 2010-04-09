@@ -65,7 +65,7 @@ exports.experimentInfo = {
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
   summary: "Do people switch more often among a group of related tabs than they "
            + "do between unrelated tabs?  This study is to test that hypothesis.",
-  thumbnail: "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-study-thumbnail.png",
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-switch-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
@@ -108,18 +108,41 @@ let ObserverHelper = {
     return this._prefBranch;
   },
 
-  getTabGroupIdFromUrl: function(url) {
-    var ioService = Cc["@mozilla.org/network/io-service;1"]
+  _ioService: null,
+  get ioService() {
+    if (!this._ioService) {
+      this._ioService = Cc["@mozilla.org/network/io-service;1"]
                       .getService(Ci.nsIIOService);
+    }
+    return this._ioService;
+  },
+
+  getTabGroupIdFromUrl: function(url) {
     // TODO this next line can sometimes throw a data:no exception.
     // It doesn't seem to cause any serious problems.
-    let host = ioService.newURI(url, null, null).host;
+    let host = this.ioService.newURI(url, null, null).host;
 
     if (this._tempHostHash[host] == undefined) {
       this._tempHostHash[host] = this._nextTabGroupId;
       this._nextTabGroupId ++;
     }
     return this._tempHostHash[host];
+  },
+
+  isUrlSearchResults: function(url) {
+    let path = this.ioService.newURI(url, null, null).path;
+    dump("Path is " + path + "\n");
+    let argPart = path.split("?")[1];
+    if (argPart) {
+      let args = argPart.split("&");
+      if (args) {
+        if (args.indexOf("q=") > -1 || args.indexOf("query=") > -1) {
+          dump("Found a query - i think this is search results.\n");
+          return true;
+        }
+      }
+    }
+    return false;
   },
 
   _getNextWindowId: function() {

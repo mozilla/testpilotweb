@@ -85,7 +85,7 @@ let ObserverHelper = {
   _nextWindowId: 1,
   _nextTabId: 0,
   _nextTabGroupId: 0,
-  _tempHostHash: {},
+  _hostHash: {},
   _installedObservers: [],
   _dataStore: null,
   privateMode: false,
@@ -127,14 +127,14 @@ let ObserverHelper = {
     }
     let host = this.ioService.newURI(url, null, null).host;
 
-    if (this._tempHostHash[host] == undefined) {
-      this._tempHostHash[host] = this._nextTabGroupId;
+    if (this._hostHash[host] == undefined) {
+      this._hostHash[host] = this._nextTabGroupId;
       this._nextTabGroupId ++;
       this.prefBranch.setCharPref(HOST_HASH_PREF,
-                                  JSON.stringify(this._tempHostHash));
+                                  JSON.stringify(this._hostHash));
       this.prefBranch.setIntPref(LAST_GROUP_ID, this._nextTabGroupId);
     }
-    return this._tempHostHash[host];
+    return this._hostHash[host];
   },
 
   isUrlSearchResults: function(url) {

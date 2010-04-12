@@ -433,13 +433,9 @@ TabWindowObserver.prototype = {
       sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
     }
     let url = this.getUrlInTab(index);
-    dump("Url " + url + "\n");
     let groupId = ObserverHelper.getTabGroupIdFromUrl(url);
-    dump("Group ID is " + groupId + "\n");
     let isSearch = ObserverHelper.isUrlSearchResults(url);
-    dump("Search results? " + isSearch + "\n");
 
-    dump("Tab id " + tabId + "\n");
     let windowId = this._windowId;
     if (!ObserverHelper.privateMode) {
       this._dataStore.storeEvent({
@@ -623,14 +619,22 @@ delete the data without sending it</a>.</p>'
 
     let canvas = document.getElementById("tab-switch-arcs");
     let ctx = canvas.getContext("2d");
-    let maxTab = ObserverHelper._nextTabId + 1;
+    let prefBranch = ObserverHelper.prefBranch;
+    let maxTab; /* Read it out of prefs instead of calling ObserverHelper._nextTabId
+     * because onExperimentStartup() may not have been called, if the experiment is
+     * done collecting data. */
+    if (prefBranch.prefHasUserValue(LAST_TAB_ID)) {
+      maxTab = prefBranch.getIntPref(LAST_TAB_ID) + 1;
+    } else {
+      maxTab = 1;
+    }
 
     // zero-fill 2-d array:
     let i, j;
-    let switchCounts = new Array(maxTab);
-    for (i = 0; i < maxTab; i++) {
-      switchCounts[i] = new Array(maxTab);
-      for (j = 0; j < maxTab; j++) {
+    let switchCounts = new Array(maxTab + 1);
+    for (i = 0; i <= maxTab; i++) {
+      switchCounts[i] = new Array(maxTab + 1);
+      for (j = 0; j <= maxTab; j++) {
         switchCounts[i][j] = 0;
       }
     }

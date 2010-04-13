@@ -244,7 +244,7 @@ let ObserverHelper = {
     }
 
     // Record the window-closing event:
-    let windowId = getIdFromWindow(window);
+    let windowId = this._getIdFromWindow(window);
     if (!this.privateMode) {
       this._dataStore.storeEvent({
         event_code: TabsExperimentConstants.CLOSE_WINDOW_EVENT,

@@ -285,13 +285,15 @@ let ObserverHelper = {
       this._hostHash = JSON.parse(this.prefBranch.getCharPref(HOST_HASH_PREF));
     }
 
-    // Record study version:
-    // NOTE we're overloading tab_id to store the study version number
-    // which is lame but much easier than adding a dedicated column at this
-    // point.
+    // Record study metadata.  Note that we're totally abusing the schema and
+    // overloading the columns with different meanings -
+    // using tab_id to store the study version number
+    // and using tab_position to store the tabOpenRelative preference.
+    // This is lame but much easier than adding dedicated columns for this one event.
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.STUDY_STATUS,
       tab_id: exports.experimentInfo.versionNumber,
+      tab_position: this.getTabOpenRelativeSetting()?0:1,
       timestamp: Date.now()
     });
 
@@ -319,6 +321,13 @@ let ObserverHelper = {
 
   onExitPrivateBrowsing: function() {
     this.privateMode = false;
+  },
+
+  getTabOpenRelativeSetting: function() {
+    let prefs = Cc["@mozilla.org/preferences-service;1"]
+                    .getService(Ci.nsIPrefService);
+    let branch = prefs.getBranch("browser.tabs");
+    return branch.getBoolPref("insertRelatedAfterCurrent");
   }
 
 };
@@ -565,7 +574,7 @@ exports.webContent = {
   inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
 <p><b>You are currently in a study to help us understand how tabs are used.</b></p>\
 <p>Read more details for the \
-<a href="https://testpilot.mozillalabs.com/testcases/tabswitch">"Tab Switch" study</a></p>.\
+<a href="https://testpilot.mozillalabs.com/testcases/tabswitch">"Tab Switch" study</a>.</p>\
 <p>If you are not comfortable participating this time, please \
 <a href="chrome://testpilot/content/status-quit.html?eid=5">click here to quit</a>.</p>\
 The study will end in 5 days. <b>At the end of it, you will be prompted to choose \

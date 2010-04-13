@@ -583,9 +583,10 @@ const FINE_PRINT = '<h3>The fine print:</h3> \
 
 const DATA_CANVAS = '<div class="dataBox"> \
     <h3>View Your Data:</h3>\
-    <p>You are using the <span id="md-locale"></span> language version\
-    of Firefox <span id="md-version"></span> on <span id="md-os"></span>\
-    with <span id="md-num-ext"></span> installed.</p> \
+    <p>In the chart below, each rectangle represents a tab.  The arcs represent\
+    switches between tabs.  The thicker the arc line is, the more times you have\
+    switched between those two tabs.  (The rectangles in this chart\
+    do not change even if you have closed or rearranged some of the tabs.)\
     <p><a onclick="showRawData(5);">Click here</a> to see a display of all\
     the collected data in its raw form, exactly as it will be sent.</p>\
     <canvas id="tab-switch-arcs" width="450" height="680"></canvas> \
@@ -674,8 +675,8 @@ delete the data without sending it</a>.</p>'
         let yCenter = (yBottom + yTop) / 2;
         if (total > 0) {
           ctx.lineWidth = total / 5;
-          if (total/5 > 3) {
-            ctx.lineWidth = 3;
+          if (total/5 > 6) {
+            ctx.lineWidth = 6;
           }
           ctx.arc(40, yCenter, radius, -1 * Math.PI / 2, Math.PI / 2, false);
           ctx.stroke();

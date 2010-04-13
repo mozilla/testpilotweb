@@ -516,9 +516,6 @@ TabWindowObserver.prototype = {
     }
     this._recordEvent(event.target, TabsExperimentConstants.OPEN_EVENT,
                       uiMethod);
-    // event has properties:
-    // target, originalTarget, currentTarget, type.
-    // Target is the tab.  currentTarget is the tabset (xul:tabs).
   },
 
   onTabClosed: function TabsExperimentObserver_onTabClosed(event) {
@@ -565,22 +562,34 @@ const DATA_CANVAS = '<div class="dataBox"> \
 </div>';
 
 exports.webContent = {
-  inProgressHtml: ' <h2>Hello Test Pilot,</h2> \
-    <h3>Thank you for helping with our Tab Switch Study!</h3> \
-    <p><b>This study aims to understand how tab switch events are clustered.</b></p> \
-    <h4>This study is currently running.  It will end <span id="test-end-time"></span>. If you don\'t want to participate, please <a href="chrome://testpilot/content/status-quit.html?eid=5">click here to quit</a>.</h4>'
-    + FINE_PRINT + DATA_CANVAS,
+  inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
+<p><b>You are currently in a study to help us understand how tabs are used.</b></p>\
+<p>Read more details for the \
+<a href="https://testpilot.mozillalabs.com/testcases/tabswitch">"Tab Switch" study</a></p>.\
+<p>If you are not comfortable participating this time, please \
+<a href="chrome://testpilot/content/status-quit.html?eid=5">click here to quit</a>.</p>\
+The study will end in 5 days. <b>At the end of it, you will be prompted to choose \
+whether you want to submit your test data or not.</b> All test data you submit will\
+be anonymized and will not be personally identifiable. We do not record any search\
+  terms or what sites you visit.</p><p>So, buckle up and get ready for the flight!</p>'
+  + DATA_CANVAS,
 
-  completedHtml: '<h2>Congratulations!</h2> \
-    <h3>You have completed the <a href="">Tab Open/Close Study</a>!</h3> \
+  completedHtml: '<h2>Excellent! You just finished the "Tab Switch" Study!</h2>\
+<b>Please submit your test data.</b>\
     <p>&nbsp;</p> \
-    <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png"> <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a></span></div> \
+    <div class="home_callout_continue">\
+<img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
+<span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
+</span></div> \
     <p>&nbsp;</p> \
-    <p>We will analyze the data submitted by all Test Pilots in order to to detect patterns that will help us build a better browser.  When the analysis is done, we will let you know where you can see the results.</p>\
-    <p> If there is anything there that you are not comfortable with sending to us, you can\
- <a href="chrome://testpilot/content/status-quit.html?eid=5">click here to \
-delete the data without sending it</a>.</p>'
-    + FINE_PRINT + DATA_CANVAS,
+</p>All test data you submit will be anonymized and will not be personally identifiable.\
+The data you submit will help us directly with improvements to the tab management \
+interface. <b>After we analyze the data from all submissions, you will be able to see \
+all new study findings by clicking on the Test Pilot icon on the bottom-right corner \
+and choosing "All your studies".</b></p>\
+<p>If you are not comfortable submitting your data this time, \
+<a href="chrome://testpilot/content/status-quit.html?eid=5"> click here to cancel</a>.</p>'
+ + DATA_CANVAS,
 
   upcomingHtml: "",    // For tests which don't start automatically, this gets
                        // displayed in status page before test starts.

@@ -285,6 +285,8 @@ let ObserverHelper = {
       this._hostHash = JSON.parse(this.prefBranch.getCharPref(HOST_HASH_PREF));
     }
 
+    let tabOpenRelativeSetting = this.getTabOpenRelativeSetting()?1:0;
+
     // Record study metadata.  Note that we're totally abusing the schema and
     // overloading the columns with different meanings -
     // using tab_id to store the study version number
@@ -293,7 +295,7 @@ let ObserverHelper = {
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.STUDY_STATUS,
       tab_id: exports.experimentInfo.versionNumber,
-      tab_position: this.getTabOpenRelativeSetting()?0:1,
+      tab_position: tabOpenRelativeSetting,
       timestamp: Date.now()
     });
 
@@ -325,9 +327,9 @@ let ObserverHelper = {
 
   getTabOpenRelativeSetting: function() {
     let prefs = Cc["@mozilla.org/preferences-service;1"]
-                    .getService(Ci.nsIPrefService);
-    let branch = prefs.getBranch("browser.tabs");
-    return branch.getBoolPref("insertRelatedAfterCurrent");
+                    .getService(Ci.nsIPrefBranch);
+    let setting = prefs.getBoolPref("browser.tabs.insertRelatedAfterCurrent");
+    return setting;
   }
 
 };

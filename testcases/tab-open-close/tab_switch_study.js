@@ -139,7 +139,6 @@ let ObserverHelper = {
 
   isUrlSearchResults: function(url) {
     let path = this.ioService.newURI(url, null, null).path;
-    dump("Path is " + path + "\n");
     let query = path.split("?").pop();
     let args = query.split("&");
     for each (let arg in args) {
@@ -192,30 +191,24 @@ let ObserverHelper = {
   _registerWindow: function(window) {
     // First check window doesn't already have registration, so that this
     // function can be called multiple times with no ill effect:
-    dump("in _registerWindow.\n");
     let windowId = this._getIdFromWindow(window);
     if (windowId) {
-      dump("This window has an ID already!\n");
       if (this._getObserverForWindow(window)) {
-        dump("This window is already registered.\n");
         return;
       }
     }
 
     // OK, we don't already have registration on this window... start one
     if (!windowId) {
-      dump("Establishing ID for this window.\n");
       // Create and store a new window ID:
       windowId = this._getNextWindowId();
       this.sessionStore.setWindowValue(window, WINDOW_ID_ATTR, windowId);
     }
     let newObserver = new TabWindowObserver(window, windowId, this._dataStore);
     this._installedObservers.push(newObserver);
-    dump("Done registering window.\n");
   },
 
   cleanup: function() {
-    dump("Tab study ObserverHelper.cleanup()\n");
     // Uninstall all installed observers
     for (let i = 0; i < this._installedObservers.length; i++) {
       this._installedObservers[i].uninstall();
@@ -225,7 +218,6 @@ let ObserverHelper = {
 
   // for handlers API:
   onNewWindow: function(window) {
-    dump("Tab study ObserverHelper.onNewWindow()\n");
     // Create an observer for each window.
     this._registerWindow(window);
     let id = this._getIdFromWindow(window);
@@ -243,14 +235,12 @@ let ObserverHelper = {
   },
 
   onWindowClosed: function(window) {
-    dump("Tab study ObserverHelper.onWindowClosed()\n");
     let observer = this._getObserverForWindow(window);
     if (observer) {
       console.info("Uninstalled a tab observer in onWindowClosed.");
       observer.uninstall();
       let index = this._installedObservers.indexOf(observer);
       this._installedObservers.splice(index, 1);
-      dump("Uninstalled and deleted observer " + index + "\n");
     }
 
     // Record the window-closing event:
@@ -265,7 +255,6 @@ let ObserverHelper = {
   },
 
   onAppStartup: function() {
-    dump("Tab study ObserverHelper.onAppStartup()\n");
     // Record app startup event:
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.STARTUP_EVENT,
@@ -274,7 +263,6 @@ let ObserverHelper = {
   },
 
   onAppShutdown: function() {
-    dump("Tab study ObserverHelper.onAppShutdown()\n");
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.SHUTDOWN_EVENT,
       timestamp: Date.now()
@@ -282,7 +270,6 @@ let ObserverHelper = {
   },
 
   onExperimentStartup: function(store) {
-    dump("Tab study ObserverHelper.onExperimentStartup()\n");
     this._dataStore = store;
 
     if (this.prefBranch.prefHasUserValue(LAST_WINDOW_ID)) {
@@ -302,13 +289,11 @@ let ObserverHelper = {
     // NOTE we're overloading tab_id to store the study version number
     // which is lame but much easier than adding a dedicated column at this
     // point.
-    dump("Storing study status...\n");
     this._dataStore.storeEvent({
       event_code: TabsExperimentConstants.STUDY_STATUS,
       tab_id: exports.experimentInfo.versionNumber,
       timestamp: Date.now()
     });
-    dump("Done storing study status.\n");
 
     // Install observers on all windows that are already open:
     console.info("Trying to install observers on already open windows.");
@@ -316,17 +301,13 @@ let ObserverHelper = {
                     .getService(Ci.nsIWindowMediator);
     let enumerator = wm.getEnumerator("navigator:browser");
     while(enumerator.hasMoreElements()) {
-      dump("Gonna register a window...\n");
       let win = enumerator.getNext();
-      dump("Here is the window...\n");
       this._registerWindow(win);
     }
     console.info("I did it.");
-    dump("Done with Tab Study onExperimentStartup.\n");
   },
 
   onExperimentShutdown: function() {
-    dump("Tab study ObserverHelper.onExperimentShutdown()\n");
     console.info("Shutting down experiment, cleaning up observers.");
     this.cleanup();
   },
@@ -358,7 +339,6 @@ function TabWindowObserver(window, windowId, store) {
 };
 TabWindowObserver.prototype = {
   _init: function TabsExperimentObserver__init(window, windowId, store) {
-    dump("Tab study TabWindowObserver._init()\n");
     this._lastEventWasClick = null;
     this._window = window;
     this._dataStore = store;
@@ -382,7 +362,6 @@ TabWindowObserver.prototype = {
   },
 
   install: function TabsExperimentObserver_install() {
-    dump("Tab study TabWindowObserver.install()\n");
     let self = this;
     let browser = this._window.getBrowser();
     let container = browser.tabContainer;
@@ -432,7 +411,6 @@ TabWindowObserver.prototype = {
       tabId = ObserverHelper.getNextTabId();
       sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
     }
-    dump("TabID is " + tabId + "\n");
     let url = this.getUrlInTab(index);
     let groupId = ObserverHelper.getTabGroupIdFromUrl(url);
     let isSearch = ObserverHelper.isUrlSearchResults(url);
@@ -454,7 +432,6 @@ TabWindowObserver.prototype = {
   },
 
   uninstall: function TabsExperimentObserver_uninstall() {
-    dump("Tab study TabWindowObserver.uninstall()\n");
     for (let i = 0; i < this._registeredListeners.length; i++) {
       let rl = this._registeredListeners[i];
       rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
@@ -473,14 +450,12 @@ TabWindowObserver.prototype = {
 
   onDragStart: function TabsExperimentObserver_onDragStart(event) {
     console.info("You started dragging a tab.");
-    dump("Recording tab drag. ");
     this._recordEvent(event.target, TabsExperimentConstants.DRAG_EVENT,
                       TabsExperimentConstants.UI_CLICK);
   },
 
   onDrop: function TabsExperimentObserver_onDrop(event) {
     console.info("You dropped a dragged tab.");
-    dump("Recording tab drop. ");
     console.info("Index is " + index );
     this._recordEvent(event.target, TabsExperimentConstants.DROP_EVENT,
                       TabsExperimentConstants.UI_CLICK);
@@ -504,7 +479,7 @@ TabWindowObserver.prototype = {
     let browser = tabBrowserSet.getBrowserForDocument(event.originalTarget);
     if (!browser) {
       // This happens sometimes and I'm not sure why.
-      dump("Browser undefined.\n");
+      console.info.warn("Tab load event: browser undefined.");
       return;
     }
     let index = null;
@@ -515,7 +490,7 @@ TabWindowObserver.prototype = {
       }
     }
     if (index == null ) {
-      dump("Index not found.\n");
+      console.info.warn("Tab load event: index not found.");
       return;
     }
     let container = this._window.getBrowser().tabContainer;
@@ -527,7 +502,6 @@ TabWindowObserver.prototype = {
   },
 
   onTabOpened: function TabsExperimentObserver_onTabOpened(event) {
-    dump("Recording open tab event. ");
     console.info("Tab opened. Last event was click? " + this._lastEventWasClick );
     // TODO Not registering click here on open events -- because mouse up and
     // mousedown both happen before the tab open event.
@@ -548,7 +522,6 @@ TabWindowObserver.prototype = {
   },
 
   onTabClosed: function TabsExperimentObserver_onTabClosed(event) {
-    dump("Recording tab close event. ");
     console.info("Tab closed.");
 
     // TODO not registering click here on close events.
@@ -563,7 +536,6 @@ TabWindowObserver.prototype = {
     // after each close.  Right now these get listed as 'keyboard', which is
     // not accurate.  Should we try to figure them out and mark them as auto-
     // matic?
-    dump("Recording tab switch event. ");
     console.info("Tab selected.  Last event was click? " + this._lastEventWasClick );
     let uiMethod = this._lastEventWasClick ? TabsExperimentConstants.UI_CLICK:TabsExperimentConstants.UI_KEYBOARD;
 

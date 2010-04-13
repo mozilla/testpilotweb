@@ -432,6 +432,7 @@ TabWindowObserver.prototype = {
       tabId = ObserverHelper.getNextTabId();
       sStore.setTabValue( tab, TAB_ID_ATTR, tabId);
     }
+    dump("TabID is " + tabId + "\n");
     let url = this.getUrlInTab(index);
     let groupId = ObserverHelper.getTabGroupIdFromUrl(url);
     let isSearch = ObserverHelper.isUrlSearchResults(url);
@@ -495,17 +496,17 @@ TabWindowObserver.prototype = {
   },
 
   onUrlLoad: function TabsExperimentObserver_onUrlLoaded(event) {
+    // TODO: Doesn't get called when you do back or forward?
     let url = event.originalTarget.URL;
-    // event.originalTarget is the document inside the tab.
-    // How do we get from this document to the tab element itself?
-    dump("Loaded url " + url + "\n");
-    /*let tabBrowserSet = this._window.getBrowser();
+    // event.originalTarget is the document inside the tab.  From there unfortunately
+    // we have a very roundabout way of getting to the tab element itself...
+    let tabBrowserSet = this._window.getBrowser();
     let browser = tabBrowserSet.getBrowserForDocument(event.originalTarget);
     if (!browser) {
-      dump("No browser.\n");
+      // This happens sometimes and I'm not sure why.
+      dump("Browser undefined.\n");
       return;
     }
-    dump("Looking up index.\n");
     let index = null;
     for (let i = 0; i < tabBrowserSet.browsers.length; i ++) {
       if (tabBrowserSet.getBrowserAtIndex(i) == browser) {
@@ -513,13 +514,16 @@ TabWindowObserver.prototype = {
 	break;
       }
     }
+    if (index == null ) {
+      dump("Index not found.\n");
+      return;
+    }
+    let container = this._window.getBrowser().tabContainer;
+    let tab = container.children[index];
 
-    // TODO browser doesn't appear to be the object I want.
-    this._recordEvent(browser, TabsExperimentConstants.LOAD_EVENT,
-                      TabsExperimentConstants.UI_CLICK,
-                      {index: index, count: tabBrowserSet.browsers.length,
-                       group: groupId});*/
     // TODO UI method
+    this._recordEvent(tab, TabsExperimentConstants.LOAD_EVENT,
+                      TabsExperimentConstants.UI_CLICK);
   },
 
   onTabOpened: function TabsExperimentObserver_onTabOpened(event) {

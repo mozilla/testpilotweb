@@ -488,7 +488,7 @@ TabWindowObserver.prototype = {
     let browser = tabBrowserSet.getBrowserForDocument(event.originalTarget);
     if (!browser) {
       // This happens sometimes and I'm not sure why.
-      console.info.warn("Tab load event: browser undefined.");
+      console.warn("Tab load event: browser undefined.");
       return;
     }
     let index = null;
@@ -499,7 +499,7 @@ TabWindowObserver.prototype = {
       }
     }
     if (index == null ) {
-      console.info.warn("Tab load event: index not found.");
+      console.warn("Tab load event: index not found.");
       return;
     }
     let container = this._window.getBrowser().tabContainer;

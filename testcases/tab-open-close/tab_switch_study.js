@@ -570,6 +570,7 @@ const DATA_CANVAS = '<div class="dataBox"> \
     <p><a onclick="showRawData(5);">Click here</a> to see a display of all\
     the collected data in its raw form, exactly as it will be sent.</p>\
     <canvas id="tab-switch-arcs" width="450" height="680"></canvas> \
+    <button type="button" onclick="saveCanvas(document.getElementById(\'tab-switch-arcs\'))">Save Graph</button>\
 </div>';
 
 exports.webContent = {

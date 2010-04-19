@@ -6,6 +6,8 @@
                   "filename": "pilot-background-survey.js"},
                  {"name": "Tab Switch Study",
                   "filename": "tab-open-close/tab_switch_study.js"},
+                 {"name": "Toolbar Study",
+                  "filename": "toolbars/toolbar-study.js"},
                  {"name": "Ghost Study",
                   "filename": "dependency-experiment/ghost-study.js"}],
 "libraries": [{"name": "Ghost Study Library",

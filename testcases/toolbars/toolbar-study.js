@@ -194,6 +194,8 @@ function ToolbarWindowObserver(window) {
 ToolbarWindowObserver.prototype = {
   _init: function ToolbarWindowObserver__init(window) {
     this.window = window;
+    this._registeredListeners = [];
+    this.install();
   },
 
   _listen: function TEO__listen(container, eventName, method, catchCap) {
@@ -231,23 +233,16 @@ const DATA_CANVAS = '<div class="dataBox"> \
 exports.webContent = {
   inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
 <p>You are currently in a study to find out how the Firefox toolbars are used.</p>\
- ' + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
+ ' + BaseClasses.rawDataLink(6) + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
 
   completedHtml: '<h2>Excellent! You just finished the Toolbar Study!</h2>\
-<b>Please submit your test data.</b>\
-    <p>&nbsp;</p> \
-    <div class="home_callout_continue">\
-<img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
-<span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
-</span></div> \
-    <p>&nbsp;</p> \
 </p>All test data you submit will be anonymized and will not be personally identifiable.\
 <b>After we analyze the data from all submissions, you will be able to see \
 all new study findings by clicking on the Test Pilot icon on the bottom-right corner \
-and choosing "All your studies".</b></p>\
-<p>If you are not comfortable submitting your data this time, \
-<a href="chrome://testpilot/content/status-quit.html?eid=6"> click here to cancel</a>.</p>'
- + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
+and choosing "All your studies".</b></p>'
+    + BaseClasses.optOutLink(6) +
+    + BaseClasses.rawDataLink(6) + BaseClasses.UPLOAD_DATA
+    + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
 
   upcomingHtml: "",
 

@@ -11,7 +11,9 @@
                  {"name": "Ghost Study",
                   "filename": "dependency-experiment/ghost-study.js"}],
 "libraries": [{"name": "Ghost Study Library",
-                  "filename": "dependency-experiment/ghost-library.js"}],
+                  "filename": "dependency-experiment/ghost-library.js"},
+              {"name": "Study Base Classes Library",
+                  "filename": "study_base_classes.js"}],
 
 "results": [{"title": "Min and Max Tabs",
 "summary": "How many tabs do users have open at a time?",

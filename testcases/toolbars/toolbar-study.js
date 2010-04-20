@@ -1,5 +1,4 @@
-const TYPE_INT_32 = 0;
-const TYPE_DOUBLE = 1;
+BaseClasses = require("study_base_classes.js");
 
 const ToolbarWidget = {
   // which widget are you interacting with
@@ -59,12 +58,12 @@ const TOOLBAR_TABLE_NAME = "testpilot_toolbar_study";
  */
 
 var TOOLBAR_EXPERIMENT_COLUMNS =  [
-  {property: "event", type: TYPE_INT_32, displayName: "Event",
+  {property: "event", type: BaseClasses.TYPE_INT_32, displayName: "Event",
    displayValue: ["Action", "Customization", "Study Metadata"]},
-  {property: "item_id", type: TYPE_INT_32, displayName: "Widget"},
-  {property: "interaction_type", type: TYPE_INT_32,
+  {property: "item_id", type: BaseClasses.TYPE_INT_32, displayName: "Widget"},
+  {property: "interaction_type", type: BaseClasses.TYPE_INT_32,
    displayName: "Interaction"},
-  {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
+  {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
 
@@ -226,20 +225,13 @@ ToolbarWindowObserver.prototype = {
 };
 
 
-const FINE_PRINT = '<h3>The fine print:</h3> \
-      <ul> \
-	<li>The websites (URLs) that you visit will never be recorded.</li> \
-    <li>At the end of the test, you will be able to choose if you want to submit your test data or not.</li> \
-       <li>All test data you submit will be anonymized and will not be personally identifiable.</li> \
-</ul>';
-
 const DATA_CANVAS = '<div class="dataBox"> \
 </div>';
 
 exports.webContent = {
   inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
 <p>You are currently in a study to find out how the Firefox toolbars are used.</p>\
- ' + DATA_CANVAS,
+ ' + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
 
   completedHtml: '<h2>Excellent! You just finished the Toolbar Study!</h2>\
 <b>Please submit your test data.</b>\
@@ -255,11 +247,9 @@ all new study findings by clicking on the Test Pilot icon on the bottom-right co
 and choosing "All your studies".</b></p>\
 <p>If you are not comfortable submitting your data this time, \
 <a href="chrome://testpilot/content/status-quit.html?eid=6"> click here to cancel</a>.</p>'
- + DATA_CANVAS,
+ + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
 
-  upcomingHtml: "",    // For tests which don't start automatically, this gets
-                       // displayed in status page before test starts.
-
+  upcomingHtml: "",
 
   onPageLoad: function(experiment, document, graphUtils) {
   }

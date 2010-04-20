@@ -1,17 +1,72 @@
 const TYPE_INT_32 = 0;
 const TYPE_DOUBLE = 1;
 
-const ToolbarExperimentConstants = {
+const ToolbarWidget = {
+  // which widget are you interacting with
+  BACK: 0,
+  FORWARD: 1,
+  DROP_DOWN_RECENT_PAGE: 2,
+  TOP_LEFT_ICON: 3,
+  WINDOW_MENU_ICON: 4,
+  MENU_BAR: 5,
+  RELOAD: 6,
+  STOP: 7,
+  HOME: 8,
+  SIDE_BUTTON_NEAR: 9,
+  RSS_ICON: 10,
+  BOOKMARK_STAR: 11,
+  GO_BUTTON: 12,
+  DROP_DOWN_MOST_VISITED: 13,
+  DROP_DOWN_SEARCH: 14,
+  SEARCH_ICON: 15,
+  BOOKMARK_TOOLBAR_CLICK: 16,
+  TAB_SCROLL_LEFT: 17,
+  TAB_SCROLL_RIGHT: 18,
+  NEW_TAB_BUTTON: 19,
+  DROP_DOWN_LIST_TABS: 20,
+  SCROLL_UP: 21,
+  SCROLL_DOWN: 22,
+  SCROLL_LEFT: 23,
+  SCROLL_RIGHT: 24,
+  STATUS_BAR_CLICK: 25,
+  STATUS_BAR_LOCK: 26,
+  CUSTOMIZE_TOOLBAR_MENU: 27
+  // More?
+};
+
+const ToolbarAction = {
+  CLICK: 0,
+  FOCUS: 1,
+  ENTER_URL: 2,
+  SEARCH: 3,
+  CLICK_SUGGESTION: 4,
+  EXPLORE_SUGGESTIONS: 5,
+  SWITCH_SEARCH_ENGINE: 6
+  // More?
+};
+
+const ToolbarEvent = {
+  ACTION: 0,
+  CUSTOMIZE: 1,
+  STUDY: 2
 };
 
 const TOOLBAR_EXPERIMENT_FILE = "testpilot_toolbar_study_results.sqlite";
 const TOOLBAR_TABLE_NAME = "testpilot_toolbar_study";
 
+/* On expeirment startup, if the user has customized their toolbars,
+ * then we'll record a
+ */
+
 var TOOLBAR_EXPERIMENT_COLUMNS =  [
+  {property: "event", type: TYPE_INT_32, displayName: "Event",
+   displayValue: ["Action", "Customization", "Study Metadata"]},
+  {property: "item_id", type: TYPE_INT_32, displayName: "Widget"},
+  {property: "interaction_type", type: TYPE_INT_32,
+   displayName: "Interaction"},
   {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
-
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
@@ -35,10 +90,38 @@ exports.dataStoreInfo = {
 };
 
 let GlobalToolbarObserver = {
+  privateMode: false,
+  _store: null,
+  _windowObservers: [],
+
+  _getObserverForWindow: function(window) {
+    for (let i = 0; i < this._windowObservers.length; i++) {
+      if (this._windowObservers[i].window === window) {
+        return this._windowObservers[i];
+      }
+    }
+    return null;
+  },
+
+  _registerWindow: function(window) {
+    if (this._getObserverForWindow(window) == null) {
+      let newObserver = new ToolbarWindowObserver(window);
+      this._windowObservers.push(newObserver);
+    }
+  },
+
   onNewWindow: function(window) {
+    this._registerWindow(window);
   },
 
   onWindowClosed: function(window) {
+    let obs = this._getObserverForWindow(window);
+    if (obs) {
+      obs.uninstall();
+      let index = this._windowObservers.indexOf(obs);
+      this._windowObservers[index] = null;
+      this._windowObservers.splice(index, 1);
+    }
   },
 
   onAppStartup: function() {
@@ -49,9 +132,24 @@ let GlobalToolbarObserver = {
 
   onExperimentStartup: function(store) {
     this._store = store;
+
+    // TODO record study version.
+
+    // TODO if there is customization, record the customized toolbar
+    // order now.
+
+    // Install observers on all windows that are already open:
+    let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                    .getService(Ci.nsIWindowMediator);
+    let enumerator = wm.getEnumerator("navigator:browser");
+    while(enumerator.hasMoreElements()) {
+      let win = enumerator.getNext();
+      this._registerWindow(win);
+    }
   },
 
   onExperimentShutdown: function() {
+    this.uninstallAll();
   },
 
   onEnterPrivateBrowsing: function() {
@@ -61,6 +159,24 @@ let GlobalToolbarObserver = {
 
   onExitPrivateBrowsing: function() {
     this.privateMode = false;
+  },
+
+  record: function(event, itemId, interactionType) {
+    if (!this.privateMode) {
+      this._store.storeEvent({
+        event: event,
+        item_id: itemId,
+        interaction_type: interactionType,
+        timestamp: Date.now()
+      });
+    }
+  },
+
+  uninstallAll: function() {
+    for (let i = 0; i < this._windowObservers.length; i++) {
+      this._windowObservers[i].uninstall();
+    }
+    this._windowObservers = [];
   }
 };
 
@@ -68,15 +184,17 @@ exports.handlers = GlobalToolbarObserver;
 
 require("unload").when(
   function myDestructor() {
+    GlobalToolbarObserver.uninstallAll();
   });
 
 
 // The per-window observer class:
-function ToolbarWindowObserver(window, windowId, store) {
-  this._init(window, windowId, store);
+function ToolbarWindowObserver(window) {
+  this._init(window);
 };
 ToolbarWindowObserver.prototype = {
-  _init: function ToolbarWindowObserver__init(window, windowId, store) {
+  _init: function ToolbarWindowObserver__init(window) {
+    this.window = window;
   },
 
   _listen: function TEO__listen(container, eventName, method, catchCap) {
@@ -95,7 +213,7 @@ ToolbarWindowObserver.prototype = {
 
   install: function ToolbarWindowObserver_install() {
     let self = this;
-    let browser = this._window.getBrowser();
+    let browser = this.window.getBrowser();
   },
 
 
@@ -119,8 +237,9 @@ const DATA_CANVAS = '<div class="dataBox"> \
 </div>';
 
 exports.webContent = {
-  inProgressHtml: '<h2>Thank you, Test Pilot!</h2>'
-  + DATA_CANVAS,
+  inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
+<p>You are currently in a study to find out how the Firefox toolbars are used.</p>\
+ ' + DATA_CANVAS,
 
   completedHtml: '<h2>Excellent! You just finished the Toolbar Study!</h2>\
 <b>Please submit your test data.</b>\

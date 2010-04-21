@@ -95,32 +95,30 @@ function ToolbarWindowObserver(window) {
   dump("ToolbarWindowObserver constructed for " + window + "\n");
 };
 BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
-ToolbarWindowObserver.prototype = {
-};
+
 
 function GlobalToolbarObserver()  {
   GlobalToolbarObserver.baseConstructor.call(ToolbarWindowObserver);
 }
 BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
-GlobalToolbarObserver.prototype = {
-  onExperimentStartup: function(store) {
-    GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
-    // TODO record study version.
+GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
+  GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
+  // TODO record study version.
 
-    // TODO if there is customization, record the customized toolbar
-    // order now.
-    dump("GlobalToolbarObserver.onExperimentStartup.\n");
-  },
+  // TODO if there is customization, record the customized toolbar
+  // order now.
+  dump("GlobalToolbarObserver.onExperimentStartup.\n");
+};
 
-  record: function(event, itemId, interactionType) {
-    if (!this.privateMode) {
-      this._store.storeEvent({
-        event: event,
-        item_id: itemId,
-        interaction_type: interactionType,
-        timestamp: Date.now()
-      });
-    }
+GlobalToolbarObserver.prototype.record = function(event, itemId,
+                                                  interactionType) {
+  if (!this.privateMode) {
+    this._store.storeEvent({
+      event: event,
+      item_id: itemId,
+      interaction_type: interactionType,
+      timestamp: Date.now()
+    });
   }
 };
 

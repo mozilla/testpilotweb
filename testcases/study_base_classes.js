@@ -26,3 +26,127 @@ exports.UPLOAD_DATA = '<b>Please submit your test data.</b>\
 <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
 </span></div> \
     <p>&nbsp;</p>';
+
+exports.GenericGlobalObserver = function(windowHandler) {
+  this.privateMode = false;
+  this._store = null;
+  this._windowObservers = [];
+  this._windowObserverClass = windowHandler;
+};
+exports.GenericGlobalObserver.prototype = {
+  _getObserverForWindow: function(window) {
+    for (let i = 0; i < this._windowObservers.length; i++) {
+      if (this._windowObservers[i].window === window) {
+        return this._windowObservers[i];
+      }
+    }
+    return null;
+  },
+
+  _registerWindow: function(window) {
+    if (this._windowObserverClass) {
+      if (this._getObserverForWindow(window) == null) {
+        let newObserver = new this._windowObserverClass(window);
+        newObserver.install();
+        this._windowObservers.push(newObserver);
+      }
+    }
+  },
+
+  onNewWindow: function(window) {
+    this._registerWindow(window);
+  },
+
+  onWindowClosed: function(window) {
+    let obs = this._getObserverForWindow(window);
+    if (obs) {
+      obs.uninstall();
+      let index = this._windowObservers.indexOf(obs);
+      this._windowObservers[index] = null;
+      this._windowObservers.splice(index, 1);
+    }
+  },
+
+  onAppStartup: function() {
+  },
+
+  onAppShutdown: function() {
+  },
+
+  onExperimentStartup: function(store) {
+    this._store = store;
+    // Install observers on all windows that are already open:
+    let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                    .getService(Ci.nsIWindowMediator);
+    let enumerator = wm.getEnumerator("navigator:browser");
+    while(enumerator.hasMoreElements()) {
+      let win = enumerator.getNext();
+      this._registerWindow(win);
+    }
+    dump("GenericGlobalObserver.onExperimentStartup.\n");
+  },
+
+  onExperimentShutdown: function() {
+    this.uninstallAll();
+  },
+
+  onEnterPrivateBrowsing: function() {
+    // Don't record any events when in private mode
+    this.privateMode = true;
+  },
+
+  onExitPrivateBrowsing: function() {
+    this.privateMode = false;
+  },
+
+  uninstallAll: function() {
+    for (let i = 0; i < this._windowObservers.length; i++) {
+      this._windowObservers[i].uninstall();
+    }
+    this._windowObservers = [];
+  }
+};
+
+exports.GenericWindowObserver = function(window) {
+  dump("GenericWindowObserver constructed for " + window +".\n");
+  this.window = window;
+  this._registeredListeners = [];
+};
+exports.GenericWindowObserver.prototype = {
+  _listen: function GenericWindowObserver__listen(container,
+                                                  eventName,
+                                                  method,
+                                                  catchCap) {
+    // Keep a record of this so that we can automatically unregister during
+    // uninstall:
+    let self = this;
+    let handler = function(event) {
+      method.call(self, event);
+    };
+    container.addEventListener(eventName, handler, catchCap);
+
+    this._registeredListeners.push(
+      {container: container, eventName: eventName, handler: handler,
+       catchCap: catchCap});
+  },
+
+  install: function GenericWindowObserver_install() {
+  },
+
+  uninstall: function ToolbarWindowObserver_uninstall() {
+    for (let i = 0; i < this._registeredListeners.length; i++) {
+      let rl = this._registeredListeners[i];
+      rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
+    }
+  }
+};
+
+exports.extend = function(subClass, baseClass) {
+  function inheritance() {}
+  inheritance.prototype = baseClass.prototype;
+
+  subClass.prototype = new inheritance();
+  subClass.prototype.constructor = subClass;
+  subClass.baseConstructor = baseClass;
+  subClass.superClass = baseClass.prototype;
+};

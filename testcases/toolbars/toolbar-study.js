@@ -54,7 +54,8 @@ const TOOLBAR_EXPERIMENT_FILE = "testpilot_toolbar_study_results.sqlite";
 const TOOLBAR_TABLE_NAME = "testpilot_toolbar_study";
 
 /* On expeirment startup, if the user has customized their toolbars,
- * then we'll record a
+ * then we'll record a CUSTOMIZE event for each item the have in their
+ * toolbar.
  */
 
 var TOOLBAR_EXPERIMENT_COLUMNS =  [
@@ -88,76 +89,27 @@ exports.dataStoreInfo = {
   columns: TOOLBAR_EXPERIMENT_COLUMNS
 };
 
-let GlobalToolbarObserver = {
-  privateMode: false,
-  _store: null,
-  _windowObservers: [],
+// The per-window observer class:
+function ToolbarWindowObserver(window) {
+  ToolbarWindowObserver.baseConstructor.call(window);
+  dump("ToolbarWindowObserver constructed for " + window + "\n");
+};
+BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
+ToolbarWindowObserver.prototype = {
+};
 
-  _getObserverForWindow: function(window) {
-    for (let i = 0; i < this._windowObservers.length; i++) {
-      if (this._windowObservers[i].window === window) {
-        return this._windowObservers[i];
-      }
-    }
-    return null;
-  },
-
-  _registerWindow: function(window) {
-    if (this._getObserverForWindow(window) == null) {
-      let newObserver = new ToolbarWindowObserver(window);
-      this._windowObservers.push(newObserver);
-    }
-  },
-
-  onNewWindow: function(window) {
-    this._registerWindow(window);
-  },
-
-  onWindowClosed: function(window) {
-    let obs = this._getObserverForWindow(window);
-    if (obs) {
-      obs.uninstall();
-      let index = this._windowObservers.indexOf(obs);
-      this._windowObservers[index] = null;
-      this._windowObservers.splice(index, 1);
-    }
-  },
-
-  onAppStartup: function() {
-  },
-
-  onAppShutdown: function() {
-  },
-
+function GlobalToolbarObserver()  {
+  GlobalToolbarObserver.baseConstructor.call(ToolbarWindowObserver);
+}
+BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
+GlobalToolbarObserver.prototype = {
   onExperimentStartup: function(store) {
-    this._store = store;
-
+    GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
     // TODO record study version.
 
     // TODO if there is customization, record the customized toolbar
     // order now.
-
-    // Install observers on all windows that are already open:
-    let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-                    .getService(Ci.nsIWindowMediator);
-    let enumerator = wm.getEnumerator("navigator:browser");
-    while(enumerator.hasMoreElements()) {
-      let win = enumerator.getNext();
-      this._registerWindow(win);
-    }
-  },
-
-  onExperimentShutdown: function() {
-    this.uninstallAll();
-  },
-
-  onEnterPrivateBrowsing: function() {
-    // Don't record any events when in private mode
-    this.privateMode = true;
-  },
-
-  onExitPrivateBrowsing: function() {
-    this.privateMode = false;
+    dump("GlobalToolbarObserver.onExperimentStartup.\n");
   },
 
   record: function(event, itemId, interactionType) {
@@ -169,62 +121,15 @@ let GlobalToolbarObserver = {
         timestamp: Date.now()
       });
     }
-  },
-
-  uninstallAll: function() {
-    for (let i = 0; i < this._windowObservers.length; i++) {
-      this._windowObservers[i].uninstall();
-    }
-    this._windowObservers = [];
   }
 };
 
-exports.handlers = GlobalToolbarObserver;
+exports.handlers = new GlobalToolbarObserver();
 
 require("unload").when(
   function myDestructor() {
-    GlobalToolbarObserver.uninstallAll();
+    exports.handlers.uninstallAll();
   });
-
-
-// The per-window observer class:
-function ToolbarWindowObserver(window) {
-  this._init(window);
-};
-ToolbarWindowObserver.prototype = {
-  _init: function ToolbarWindowObserver__init(window) {
-    this.window = window;
-    this._registeredListeners = [];
-    this.install();
-  },
-
-  _listen: function TEO__listen(container, eventName, method, catchCap) {
-    // Keep a record of this so that we can automatically unregister during
-    // uninstall:
-    let self = this;
-    let handler = function(event) {
-      method.call(self, event);
-    };
-    container.addEventListener(eventName, handler, catchCap);
-
-    this._registeredListeners.push(
-      {container: container, eventName: eventName, handler: handler,
-       catchCap: catchCap});
-  },
-
-  install: function ToolbarWindowObserver_install() {
-    let self = this;
-    let browser = this.window.getBrowser();
-  },
-
-
-  uninstall: function ToolbarWindowObserver_uninstall() {
-    for (let i = 0; i < this._registeredListeners.length; i++) {
-      let rl = this._registeredListeners[i];
-      rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
-    }
-  }
-};
 
 
 const DATA_CANVAS = '<div class="dataBox"> \
@@ -245,6 +150,8 @@ and choosing "All your studies".</b></p>'
     + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
 
   upcomingHtml: "",
+
+  remainDataHtml: "",
 
   onPageLoad: function(experiment, document, graphUtils) {
   }

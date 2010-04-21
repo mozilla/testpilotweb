@@ -606,6 +606,7 @@ and choosing "All your studies".</b></p>\
   upcomingHtml: "",    // For tests which don't start automatically, this gets
                        // displayed in status page before test starts.
 
+  remainDataHtml: DATA_CANVAS,
 
   onPageLoad: function(experiment, document, graphUtils) {
     // Get raw data:
@@ -645,6 +646,14 @@ and choosing "All your studies".</b></p>\
       }
       let thisTabId = row.tab_id;
       if (prevTabId != null) {
+        // For some reason, we can sometimes get tabs with a higher ID than
+        // maxTab?  I don't know why, but no reason to die...
+        if (!switchCounts[prevTabId]) {
+          switchCounts[prevTabId] = [];
+        }
+        if (!switchCounts[prevTabId][thisTabId]) {
+          switchCounts[prevTabId][thisTabId] = 0;
+        }
         switchCounts[prevTabId][thisTabId] ++;
       }
       prevTabId = thisTabId;

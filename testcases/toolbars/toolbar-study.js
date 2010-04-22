@@ -91,14 +91,15 @@ exports.dataStoreInfo = {
 
 // The per-window observer class:
 function ToolbarWindowObserver(window) {
-  ToolbarWindowObserver.baseConstructor.call(window);
+  ToolbarWindowObserver.baseConstructor.call(this, window);
   dump("ToolbarWindowObserver constructed for " + window + "\n");
 };
 BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
 
 
 function GlobalToolbarObserver()  {
-  GlobalToolbarObserver.baseConstructor.call(ToolbarWindowObserver);
+  dump("GlobalToolbarObserver is calling baseConstructor...\n");
+  GlobalToolbarObserver.baseConstructor.call(this, ToolbarWindowObserver);
 }
 BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
 GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {

@@ -87,6 +87,7 @@ exports.GenericGlobalObserver.prototype = {
   },
 
   onExperimentShutdown: function() {
+    dump("ExperimentShutdown called.\n");
     this.uninstallAll();
   },
 
@@ -100,7 +101,9 @@ exports.GenericGlobalObserver.prototype = {
   },
 
   uninstallAll: function() {
+    dump("Gonna uninstall All window observers.\n");
     for (let i = 0; i < this._windowObservers.length; i++) {
+      dump("Uninstalling a window observer!\n");
       this._windowObservers[i].uninstall();
     }
     this._windowObservers = [];
@@ -117,6 +120,7 @@ exports.GenericWindowObserver.prototype = {
                                                   eventName,
                                                   method,
                                                   catchCap) {
+    dump("Installing a listener.\n");
     // Keep a record of this so that we can automatically unregister during
     // uninstall:
     let self = this;
@@ -134,7 +138,9 @@ exports.GenericWindowObserver.prototype = {
   },
 
   uninstall: function ToolbarWindowObserver_uninstall() {
+    dump("Uninstalling ye window observer.\n");
     for (let i = 0; i < this._registeredListeners.length; i++) {
+      dump("Uninstalling a listener.\n");
       let rl = this._registeredListeners[i];
       rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
     }
@@ -142,6 +148,7 @@ exports.GenericWindowObserver.prototype = {
 };
 
 exports.extend = function(subClass, baseClass) {
+  //http://www.kevlindev.com/tutorials/javascript/inheritance/index.htm
   function inheritance() {}
   inheritance.prototype = baseClass.prototype;
 

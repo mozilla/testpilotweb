@@ -197,7 +197,7 @@ ToolbarWindowObserver.prototype.install = function() {
    * need to track what input is focused and listen for the enter key to be hit
    * or the search button to be clicked. */
 
-  let urlBar = this.window.document.getElementById("searchbar");
+  let urlBar = this.window.document.getElementById("urlbar");
   this._listen(urlBar, "select", function(evt) {
                  dump("U SELEKTID URL TXT\n");
                }, false);
@@ -208,6 +208,76 @@ ToolbarWindowObserver.prototype.install = function() {
                  dump("U FOAKUST URL TXT\n");
                }, false);
 
+  this._listen(urlBar, "popupshown", function(evt) {
+                 dump("A popup was shown from the url bar...\n");
+                 dump("tagname " + evt.originalTarget.tagName + "\n");
+                 dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
+               }, false);
+  this._listen(urlBar, "command", function(evt) {
+                 if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
+                   dump("You clicked on the history drop down marker.\n");
+                 } else {
+                   dump("A command came from the url bar...\n");
+                   dump("tagname " + evt.originalTarget.tagName + "\n");
+                   dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
+                 }
+               }, false);
+  //watch for command with anonid = historydropmarker
+
+  // tabbrowser id="content" contains XBL children anonid="scrollbutton-up"
+  // and "scrollbutton-down-stack" and anonid="newtab-button"
+
+  let tabBar = this.window.document.getElementById("content");
+  this._listen(tabBar, "mouseup", function(evt) {
+                 if (evt.button == 0) {
+                   switch (evt.originalTarget.getAttribute("anonid")) {
+                   case "scrollbutton-up":
+                     dump("You clicked on left tab scrollbutton.\n");
+                     break;
+                   case "scrollbutton-down":
+                     dump("You clicked on right tab scrollbutton.\n");
+                     break;
+                   case "newtab-button":
+                     dump("You clicked on new tab button.\n");
+                     break;
+                   }
+                 }
+               }, false);
+
+   this._listen(tabBar, "popupshown", function(evt) {
+                 if (evt.originalTarget.getAttribute("anonid") =="alltabs-popup") {
+                   dump("You popped open the all tabs menu.\n");
+                 }
+               }, false);
+    this._listen(tabBar, "command", function(evt) {
+                   if (evt.originalTarget.tagName == "menuitem") {
+                     dump("You picked an item from the all tabs menu.\n");
+                   }
+               }, false);
+  /* Note we also get command events when you hit the tab scroll bars and
+   * they actually scroll (the tagName will be "xul:toolbarbutton") -- as
+   * opposed to moseup which triggers even if there's nowhere to scroll, this
+   * might be a more precise way to get that event.  In fact look at using
+   * more command events on all the toolbar buttons...*/
+
+
+  let bkmkPanel = this.window.document.getElementById("editBookmarkPanel");
+  this._listen(bkmkPanel, "popupshown", function(evt) {
+                 dump("You opened the edit-bookmark panel.\n");
+               }, false);
+
+  this._listen(bkmkPanel, "command", function(evt) {
+                 switch (evt.originalTarget.getAttribute("id")) {
+                 case "editBookmarkPanelRemoveButton":
+                   dump("You clicked the remove bookmark button.\n");
+                   break;
+                 }
+                 // Other buttons we can get here:
+                 //editBMPanel_foldersExpander
+                 //editBMPanel_tagsSelectorExpander
+                 //editBookmarkPanelDeleteButton
+                 //editBookmarkPanelDoneButton
+               }, false);
 };
 
 
@@ -289,9 +359,16 @@ site ID button win/mac	clicks on it DONE
 bookmark toolbar	win/mac	-how many items DONE
                   - how many clicks on bookmarks DONE
 bookmark star	win/mac		- sing clicks on it
+Bookmark star- single click and see the menu window	clicks on "remove bookmark"
+
 Search bar = magn glass - search go	win/mac		clicks on it DONE
 URL bar/right arrow - Go button	win/mac		clicks on it  DONE
 
+left/right button for tab scroll	win/mac		clicks on it DONE
+plus button for opening a tab	win/mac		clicks on it DONE
+drop down: list of all tabs	win/mac		clicks on it	clicks on items on the list
+
+drop down - recent site 	win/mac		clicks  on it DONE
 
 
 TODO:
@@ -304,25 +381,15 @@ TODO:
   menu bar	win/mac	?
  search box	win/mac		same query, but different engine
 
+bookmark star - single click on already bookmarked star to get popup
+                 VS double click on not yet bookmarked star to get popup
 
-Within the URL bar:
-
-
-location bar	win/mac		- 1 click
+location bar	win/mac- 1 click
 - 2 clicks together
 - 1 click&drag
-
-Bookmark star - double clicks on it
-Bookmark star- single click and see the menu window	clicks on "remove bookmark"
-
-drop down - recent site 	win/mac		clicks  on it	-any clicks on the items in the drop-down list?
-- how many people did that?
--how many times if a person click on it?
+-any clicks on the items in the URL bar drop-down list?
 content in URL bar	win/mac		- content in URL that is a search rather than a url (if user hit enter after typing something that's not url, e.g. it has a space: browse by name) - only tr track when the focus in in the loca URL bar
 
-left/right button for tab scroll	win/mac		clicks on it
-plus button for opening a tab	win/mac		clicks on it
-drop down: list of all tabs	win/mac		clicks on it	clicks on items on the list
 
 vertical scroll bar for web page	win/mac		clicks on arrows, the bar,
 horizental scroll bar for web page	win/mac

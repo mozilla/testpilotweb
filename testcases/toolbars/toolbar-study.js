@@ -240,6 +240,22 @@ ToolbarWindowObserver.prototype.install = function() {
                    case "newtab-button":
                      dump("You clicked on new tab button.\n");
                      break;
+                   default:
+                     let parent = evt.originalTarget.parentNode;
+                     if (parent.tagName == "scrollbar") {
+                       if (parent.parentNode.tagName == "HTML") {
+                         let orientation = parent.getAttribute("orient");
+                         let part = evt.originalTarget.tagName;
+                         if (part == "xul:slider") {
+                           dump("You clicked the slider of the ");
+                           dump(orientation + " scrollbar.\n");
+                         } else if (part == "xul:scrollbarbutton") {
+                           dump("You clicked the button of the ");
+                           dump(orientation + " scrollbar.\n");
+                           //look for sbattr
+                         }
+                       }
+                     }
                    }
                  }
                }, false);

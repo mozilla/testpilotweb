@@ -101,10 +101,7 @@ ToolbarWindowObserver.prototype.install = function() {
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
              "home-button", "identity-box", "feed-button", "star-button",
              "go-button", "identity-popup-more-info-button",
-                   "back-forward-dropmarker"];
-
-  // TODO despite what DOMInspector says, apparently there is no
-  // "search-go-button".
+                   "back-forward-dropmarker", "security-button"];
 
   dump("Starting to register stuff...\n");
   for (let i = 0; i < buttonIds.length; i++) {
@@ -250,9 +247,10 @@ ToolbarWindowObserver.prototype.install = function() {
                            dump("You clicked the slider of the ");
                            dump(orientation + " scrollbar.\n");
                          } else if (part == "xul:scrollbarbutton") {
-                           dump("You clicked the button of the ");
+                           let upOrDown = evt.originalTarget.getAttribute("type");
+                           // type is "increment" or "decrement".
+                           dump("You clicked the " + upOrDown + " button of the ");
                            dump(orientation + " scrollbar.\n");
-                           //look for sbattr
                          }
                        }
                      }
@@ -294,6 +292,14 @@ ToolbarWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDeleteButton
                  //editBookmarkPanelDoneButton
                }, false);
+
+  let statusBar = this.window.document.getElementById("status-bar");
+  if (statusBar.getAttribute("hidden") == "true") {
+    dump("Status bar is hidden.\n");
+  } else {
+    dump("Status bar is shown.\n");
+  }
+
 };
 
 

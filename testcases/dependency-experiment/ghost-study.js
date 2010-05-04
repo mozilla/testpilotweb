@@ -8,7 +8,7 @@ try {
 }
 
 exports.experimentInfo = {
-  minTPVersion: "0.5",
+  minTPVersion: "1.1",
   startDate: null,
   duration: 5,
   testName: "Ghost Study",

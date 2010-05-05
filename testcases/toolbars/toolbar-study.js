@@ -1,7 +1,34 @@
 BaseClasses = require("study_base_classes.js");
 
 const ToolbarWidget = {
-  // which widget are you interacting with
+/*"unified-back-forward-button", "reload-button",
+                          "stop-button", "home-button", "urlbar-container",
+                          "urlbar-search-splitter", "search-container",
+  "fullscreenflex", "window-controls"*/
+
+  // Customization ids:
+  UNKNOWN: -1,
+  UNIFIED_BACK_FWD: 0,
+  RELOAD: 1,
+  STOP: 2,
+  HOME: 3,
+  URLBAR: 4,
+  SPACER: 5, // also covers splitters, flex, etc
+  SEARCH: 6,
+  PERSONAL_BOOKMARKS: 7,
+  THROBBER: 8,
+  DOWNLOADS_BUTTON: 9,
+  PRINT_BUTTON: 10,
+  BOOKMARKS_BUTTON: 11,
+  HISTORY_BUTTON: 12,
+  NEW_TAB_BUTTON: 13,
+  NEW_WINDOW_BUTTON: 14,
+  CUT_BUTTON: 15,
+  COPY_BUTTON: 16,
+  PASTE_BUTTON: 17,
+  FULLSCREEN_BUTTON: 18,
+  MENU_BAR: 19,
+
   BACK: 0,
   FORWARD: 1,
   DROP_DOWN_RECENT_PAGE: 2,
@@ -30,10 +57,17 @@ const ToolbarWidget = {
   STATUS_BAR_CLICK: 25,
   STATUS_BAR_LOCK: 26,
   CUSTOMIZE_TOOLBAR_MENU: 27
-  // More?
 };
 
+// Use for interaction_type field
 const ToolbarAction = {
+  // for customize events -- what toolbar is the item in?
+  CUST_IN_NAVBAR: 0,
+  CUST_IN_CUSTOM_TOOLBAR: 1,
+  CUST_IN_PERSONAL: 2,
+  CUST_IN_MENUBAR: 3,
+
+  // for interaction events -- what did you do to the item?
   CLICK: 0,
   FOCUS: 1,
   ENTER_URL: 2,
@@ -44,11 +78,64 @@ const ToolbarAction = {
   // More?
 };
 
+// Use for event field
 const ToolbarEvent = {
   ACTION: 0,
   CUSTOMIZE: 1,
   STUDY: 2
 };
+
+
+function getNumberCodeForWidget(elem) {
+  let id = elem.getAttribute("id");
+  let tagName = elem.tagName;
+  switch (tagName) {
+  case "toolbarspacer", "toolbarspring", "toolbarseparator", "splitter", "hbox":
+    return ToolbarWidget.SPACER;
+    break;
+  case "toolbaritem":
+    switch(id) {
+    case "unified-back-forward-button": return ToolbarWidget.UNIFIED_BACK_FWD;
+    case "urlbar-container": return ToolbarWidget.URLBAR;
+    case "search-container": return ToolbarWidget.SEARCH;
+    case "navigator-throbber": return ToolbarWidget.THROBBER;
+    case "personal-bookmarks": return ToolbarWidget.PERSONAL_BOOKMARKS;
+    case "menubar-items": return ToolbarWidget.MENU_BAR;
+    }
+    break;
+  case "toolbarbutton":
+    switch (id) {
+    case "downloads-button": return ToolbarWidget.DOWNLOADS_BUTTON;
+    case "print-button": return ToolbarWidget.PRINT_BUTTON;
+    case "bookmarks-button": return ToolbarWidget.BOOKMARKS_BUTTON;
+    case "history-button": return ToolbarWidget.HISTORY_BUTTON;
+    case "new-tab-button": return ToolbarWidget.NEW_TAB_BUTTON;
+    case "new-window-button":return ToolbarWidget.NEW_WINDOW_BUTTON;
+    case "cut-button":return ToolbarWidget.CUT_BUTTON;
+    case "copy-button":return ToolbarWidget.COPY_BUTTON;
+    case "paste-button":return ToolbarWidget.PASTE_BUTTON;
+    case "fullscreen-button":return ToolbarWidget.FULLSCREEN_BUTTON;
+    case "reload-button":return ToolbarWidget.RELOAD;
+    case "stop-button":return ToolbarWidget.STOP;
+    case "home-button":return ToolbarWidget.HOME;
+    }
+    break;
+  }
+  return ToolbarWidget.UNKNOWN; // should never happen.
+}
+
+function getNumberCodeForToolbarId(id) {
+  switch(id) {
+  case "nav-bar":
+    return ToolbarAction.CUST_IN_NAVBAR;
+  case "PersonalToolbar":
+    return ToolbarAction.CUST_IN_PERSONAL;
+  case "toolbar-menubar":
+    return ToolbarAction.CUST_IN_MENUBAR;
+  default:
+    return ToolbarAction.CUST_IN_CUSTOM_TOOLBAR;
+  }
+}
 
 const TOOLBAR_EXPERIMENT_FILE = "testpilot_toolbar_study_results.sqlite";
 const TOOLBAR_TABLE_NAME = "testpilot_toolbar_study";
@@ -318,32 +405,9 @@ ToolbarWindowObserver.prototype.addListeners = function() {
 };
 
 ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
-  // The toolbars are all basically underneath id="navigator-toolbox".
-  // under that is toolbar-menubar, nav-bar, customToolbars, PersonalToolbar.
-  // nav-bar normally contains:
-  // unified-back-forward-button, reload-button, stop-button,
-  // home-button, urlbar-container, urlbar-search-splitter,
-  // search-container, fullscreenflex, window-controls.
 
-  /*
-   * new toolbars have id= "__customToolbar_TheJonobar"
-   * other items that can be added have class "chromeclass-toolbar-additional"
-   * (may be in addition to other classes)
-   * ids of other items that can be added include:
-   * <toolbaritem id=navigator-throbber>,
-   * <toolbarspacer>, <toolbarspring>, <toolbarspacer>
-   * <toolbarbutton> with id = one of:
-   * downloads-button, sprint-button, bookmarks-button, history-button,
-   * new-tab-button, new-window-button, cut-button, copy-button,
-   * paste-button, fullscreen-button.
-   *
-   * If the user has hidden one of the toolbars that is normally there...
-   *
-   * If the user has removed a regular item from the toolbar...
-   *
-   * If the user has chosen icons/icons+text/text/small icons
-   *
-   */
+  // TODO figure out how to tell if toolbars are set to "icons",
+  // "Icons and text", or "text" and whether "small icons" is on or not.
 
   let navBar = this.window.document.getElementById("nav-bar");
   let expectedChildren = ["unified-back-forward-button", "reload-button",
@@ -379,15 +443,31 @@ ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
     }
   }
 
+  // Expect PersonalToolbar to contain personal-bookmarks and nothing else
+  let personalToolbar = this.window.document.getElementById("PersonalToolbar");
+  if (personalToolbar.childNodes.length != 1 ||
+      personalToolbar.childNodes[0].getAttribute("id") != "personal-bookmarks") {
+    dump("Personal Toolbar modified.\n");
+    return true;
+  }
+
   return false;
 };
 
 ToolbarWindowObserver.prototype.recordToolbarCustomizations = function() {
   dump("Recording customized toolbars!\n");
-  let navBar = this.window.document.getElementById("nav-bar");
-  let navBarItems = navBar.childNodes;
-  for (let i = 0; i < navBarItems.length; i++) {
-    dump("Navbar item: " + navBarItems[i].getAttribute("id") + "\n");
+  let toolbox = this.window.document.getElementById("navigator-toolbox");
+  for (let i = 0; i < toolbox.childNodes.length; i++) {
+    let toolbar = toolbox.childNodes[i];
+    let toolbarId = toolbar.getAttribute("id");
+    let toolbarItems = toolbar.childNodes;
+    for (let j = 0; j < toolbarItems.length; j++) {
+      let itemId = toolbarItems[j].getAttribute("id");
+      dump("Toolbar " + toolbarId + " item " + itemId + "\n");
+      exports.handlers.record(ToolbarEvent.CUSTOMIZE,
+                              getNumberCodeForWidget(toolbarItems[j]),
+                              getNumberCodeForToolbarId(toolbarId));
+    }
   }
 };
 
@@ -402,7 +482,8 @@ GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
   // TODO record study version.
 
   // TODO if there is customization, record the customized toolbar
-  // order now.
+  // order now.... we don't need to record it on every window open so it
+  // really makes more sense to be here than in the per-window class.
   dump("GlobalToolbarObserver.onExperimentStartup.\n");
 };
 
@@ -454,43 +535,15 @@ and choosing "All your studies".</b></p>'
 
 
 /*
-DONE:
-   Back	Mac/win clicks DONE
- Forward	Mac/win		clicks on it  DONE
-  reload	win/mac		clicks on it   DONE
-  stop	win/mac		clicks on it    DONE
-home	win/mac		clicks on it DONE
-site ID button win/mac	clicks on it DONE
-  site ID button       Click on "More Info" button in popup DONE
- Drop down - recent page	Mac/win		clicks on it  DONE
- drop down - Search Icon	win/mac		clicks  on it DONE
-     -any clicks on the search enginesin the drop-down list? DONE
-  RSS icon	win/mac		-clicks DONE
-  RSS icon 	left clicks on it to see the sub menu window DONE
-bookmark toolbar	win/mac	-how many items DONE
-                  - how many clicks on bookmarks DONE
-bookmark star	win/mac		- sing clicks on it
-Bookmark star- single click and see the menu window	clicks on "remove bookmark"
-
-Search bar = magn glass - search go	win/mac		clicks on it DONE
-URL bar/right arrow - Go button	win/mac		clicks on it  DONE
-
-left/right button for tab scroll	win/mac		clicks on it DONE
-plus button for opening a tab	win/mac		clicks on it DONE
-drop down: list of all tabs	win/mac		clicks on it	clicks on items on the list
-
-drop down - recent site 	win/mac		clicks  on it DONE
-
-
 TODO:
  Back	Mac only	click, hold, select from drop-down
  site ID button 	Is site id ssl, EV, or nothing?
  Reload -                                Is the page currently loading?
 
  top left icon	win		clicks on it	right/left click on it
-  window menu (after left click on the top icon)	win		clicks on each menu item
-  menu bar	win/mac	?
- search box	win/mac		same query, but different engine
+ window menu (after left click on the top icon)	win		clicks on each menu item
+ menu bar	win/mac	?
+search box	win/mac		same query, but different engine
 
 bookmark star - single click on already bookmarked star to get popup
                  VS double click on not yet bookmarked star to get popup
@@ -501,13 +554,8 @@ location bar	win/mac- 1 click
 -any clicks on the items in the URL bar drop-down list?
 content in URL bar	win/mac		- content in URL that is a search rather than a url (if user hit enter after typing something that's not url, e.g. it has a space: browse by name) - only tr track when the focus in in the loca URL bar
 
+Scroll bar: Track vs. slider?
 
-vertical scroll bar for web page	win/mac		clicks on arrows, the bar,
-horizental scroll bar for web page	win/mac
-
-status bar 	win/mac		on or off
-status bar - lock	win/mac		clicks on it
-drag to resize the window	win/mac		interaction on it
+drag to resize the window	win/mac
 right click on the Chrome to see the "customize toolbar"	win/mac	P2	clicks on it	choices on this customization window
-
  */

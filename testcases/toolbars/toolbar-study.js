@@ -96,6 +96,13 @@ function ToolbarWindowObserver(window) {
 };
 BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
 ToolbarWindowObserver.prototype.install = function() {
+  if (this.toolbarsAreCustomized()) {
+    this.recordToolbarCustomizations();
+  }
+  this.addListeners();
+};
+
+ToolbarWindowObserver.prototype.addListeners = function() {
   // Here are the IDs of objects to listen on:
 
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
@@ -300,6 +307,88 @@ ToolbarWindowObserver.prototype.install = function() {
     dump("Status bar is shown.\n");
   }
 
+  // also look at id="FindToolbar" and whether it has hidden = true or not.
+
+  // This doesn't work on Mac... try it on Windows though.
+  let windowControls = this.window.document.getElementById("window-controls");
+  this._listen(theWindow, "command", function(evt) {
+                 dump("Window controls: " + evt.originalTarget.getAttribute("id") + "\n");
+               }, false);
+
+};
+
+ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
+  // The toolbars are all basically underneath id="navigator-toolbox".
+  // under that is toolbar-menubar, nav-bar, customToolbars, PersonalToolbar.
+  // nav-bar normally contains:
+  // unified-back-forward-button, reload-button, stop-button,
+  // home-button, urlbar-container, urlbar-search-splitter,
+  // search-container, fullscreenflex, window-controls.
+
+  /*
+   * new toolbars have id= "__customToolbar_TheJonobar"
+   * other items that can be added have class "chromeclass-toolbar-additional"
+   * (may be in addition to other classes)
+   * ids of other items that can be added include:
+   * <toolbaritem id=navigator-throbber>,
+   * <toolbarspacer>, <toolbarspring>, <toolbarspacer>
+   * <toolbarbutton> with id = one of:
+   * downloads-button, sprint-button, bookmarks-button, history-button,
+   * new-tab-button, new-window-button, cut-button, copy-button,
+   * paste-button, fullscreen-button.
+   *
+   * If the user has hidden one of the toolbars that is normally there...
+   *
+   * If the user has removed a regular item from the toolbar...
+   *
+   * If the user has chosen icons/icons+text/text/small icons
+   *
+   */
+
+  let navBar = this.window.document.getElementById("nav-bar");
+  let expectedChildren = ["unified-back-forward-button", "reload-button",
+                          "stop-button", "home-button", "urlbar-container",
+                          "urlbar-search-splitter", "search-container",
+                          "fullscreenflex", "window-controls"];
+  dump("Attempting to read children of navBar...\n");
+  if (navBar.childNodes.length != expectedChildren.length) {
+    dump("Navbar modified (different number of children).\n");
+    return true;
+  } else {
+    for (let i = 0; i < expectedChildren.length; i++) {
+      if (navBar.childNodes[i].getAttribute("id") != expectedChildren[i]) {
+        dump("Navbar modified (different children item).\n");
+        return true;
+      }
+    }
+  }
+  dump("Read children of navBar.\n");
+
+  let expectedBars = ["toolbar-menubar", "nav-bar", "customToolbars",
+                      "PersonalToolbar"];
+  let toolbox = this.window.document.getElementById("navigator-toolbox");
+  if (toolbox.childNodes.length != expectedChildren.length) {
+    dump("Toolbars modified (different number of toolbars).\n");
+    return true;
+  } else {
+    for (let i = 0; i < expectedBars.length; i++) {
+      if (toolbox.childNodes[i].getAttribute("id") != expectedBars[i]) {
+        dump("Toolbars modified (different toolbar item).\n");
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+ToolbarWindowObserver.prototype.recordToolbarCustomizations = function() {
+  dump("Recording customized toolbars!\n");
+  let navBar = this.window.document.getElementById("nav-bar");
+  let navBarItems = navBar.childNodes;
+  for (let i = 0; i < navBarItems.length; i++) {
+    dump("Navbar item: " + navBarItems[i].getAttribute("id") + "\n");
+  }
 };
 
 

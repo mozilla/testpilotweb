@@ -116,7 +116,7 @@ function widgetIdToString(id) {
       return x;
     }
   }
-  return "Unknown";
+  return id;
 }
 
 function actionIdToString(id) {
@@ -125,7 +125,7 @@ function actionIdToString(id) {
       return x;
     }
   }
-  return "Unknown";
+  return id;
 }
 
 var TOOLBAR_EXPERIMENT_COLUMNS =  [
@@ -382,7 +382,8 @@ function GlobalToolbarObserver()  {
 BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
 GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
   GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
-  // TODO record study version here.
+  // Record study version on startup:
+  this.record(ToolbarEvent.STUDY, 0, exports.experimentInfo.versionNumber);
 
   // Look at the front window and see if its toolbars have been customized;
   // if they have, then record all toolbar customization.

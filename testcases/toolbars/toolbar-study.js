@@ -110,12 +110,31 @@ const TOOLBAR_TABLE_NAME = "testpilot_toolbar_study";
  * toolbar.
  */
 
+function widgetIdToString(id) {
+  for (let x in ToolbarWidget) {
+    if (ToolbarWidget[x] == id) {
+      return x;
+    }
+  }
+  return "Unknown";
+}
+
+function actionIdToString(id) {
+  for (let x in ToolbarAction) {
+    if (ToolbarAction[x] == id) {
+      return x;
+    }
+  }
+  return "Unknown";
+}
+
 var TOOLBAR_EXPERIMENT_COLUMNS =  [
   {property: "event", type: BaseClasses.TYPE_INT_32, displayName: "Event",
    displayValue: ["Action", "Customization", "Study Metadata"]},
-  {property: "item_id", type: BaseClasses.TYPE_INT_32, displayName: "Widget"},
+  {property: "item_id", type: BaseClasses.TYPE_INT_32, displayName: "Widget",
+   displayValue: widgetIdToString},
   {property: "interaction_type", type: BaseClasses.TYPE_INT_32,
-   displayName: "Interaction"},
+   displayName: "Interaction", displayValue: actionIdToString},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
@@ -375,13 +394,13 @@ GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
   }
 
   // How many bookmarks in the bookmark toolbar, and is status bar shown?
-  let bkmkToolbar = this.window.document.getElementById("bookmarksBarContent");
+  let bkmkToolbar = frontWindow.document.getElementById("bookmarksBarContent");
   let bkmks = bkmkToolbar.getElementsByClassName("bookmark-item");
   for (let b = 0; b < bkmks.length; b++) {
     this.record(ToolbarEvent.CUSTOMIZE, ToolbarWidget.PERSONAL_BOOKMARKS, ToolbarAction.PRESENT);
   }
 
-  let statusBar = this.window.document.getElementById("status-bar");
+  let statusBar = frontWindow.document.getElementById("status-bar");
   if (statusBar.getAttribute("hidden") == "true") {
     this.record(ToolbarEvent.CUSTOMIZE, ToolbarWidget.STATUS_BAR, ToolbarAction.ABSENT);
   } else {

@@ -68,8 +68,8 @@ const ToolbarAction = {
   REPEATED_SEARCH_DIFF_ENGINE: 8,
 
   // For status bar hidden/shown and bookmark toolbar count:
-  SHOWN: 9,
-  NOT_SHOWN: 10,
+  PRESENT: 9,
+  ABSENT: 10,
 
   // For edit bookmark panel
 
@@ -299,13 +299,13 @@ ToolbarWindowObserver.prototype.install = function() {
                  if (evt.button == 0) {
                    switch (evt.originalTarget.getAttribute("anonid")) {
                    case "scrollbutton-up":
-                     record(ToolbarButton.TABBAR_SCROLL, ToolbarAction.SCROLL_UP);
+                     record(ToolbarWidget.TABBAR_SCROLL, ToolbarAction.SCROLL_BTN_UP);
                      break;
                    case "scrollbutton-down":
-                     record(ToolbarButton.TABBAR_SCROLL, ToolbarAction.SCROLL_DOWN);
+                     record(ToolbarWidget.TABBAR_SCROLL, ToolbarAction.SCROLL_BTN_DOWN);
                      break;
                    case "newtab-button":
-                     record(ToolbarButton.TABBAR_NEW_BTN, ToolbarAction.CLICK);
+                     record(ToolbarWidget.TABBAR_NEW_BTN, ToolbarAction.CLICK);
                      break;
                    default:
                      let parent = evt.originalTarget.parentNode;
@@ -338,12 +338,12 @@ ToolbarWindowObserver.prototype.install = function() {
 
    this._listen(tabBar, "popupshown", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") =="alltabs-popup") {
-                   record( ToolbarWidget.DROP_DOWN_LIST_TABS, ToolbarAction.CLICK);
+                   record( ToolbarWidget.TABBAR_DROP_DOWN, ToolbarAction.CLICK);
                  }
                }, false);
     this._listen(tabBar, "command", function(evt) {
                    if (evt.originalTarget.tagName == "menuitem") {
-                     record( ToolbarWidget.DROP_DOWN_LIST_TABS, ToolbarAction.MENU_PICK);
+                     record( ToolbarWidget.TABBAR_DROP_DOWN, ToolbarAction.MENU_PICK);
                    }
                }, false);
   /* Note we also get command events when you hit the tab scroll bars and

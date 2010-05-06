@@ -1,11 +1,6 @@
 BaseClasses = require("study_base_classes.js");
 
 const ToolbarWidget = {
-/*"unified-back-forward-button", "reload-button",
-                          "stop-button", "home-button", "urlbar-container",
-                          "urlbar-search-splitter", "search-container",
-  "fullscreenflex", "window-controls"*/
-
   // Customization ids:
   UNKNOWN: -1,
   UNIFIED_BACK_FWD: 0,
@@ -395,13 +390,6 @@ ToolbarWindowObserver.prototype.addListeners = function() {
   }
 
   // also look at id="FindToolbar" and whether it has hidden = true or not.
-
-  // This doesn't work on Mac... try it on Windows though.
-  let windowControls = this.window.document.getElementById("window-controls");
-  this._listen(theWindow, "command", function(evt) {
-                 dump("Window controls: " + evt.originalTarget.getAttribute("id") + "\n");
-               }, false);
-
 };
 
 ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {

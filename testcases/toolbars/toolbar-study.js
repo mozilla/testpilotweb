@@ -11,43 +11,44 @@ const ToolbarWidget = {
   SPACER: 5, // also covers splitters, flex, etc
   SEARCH: 6,
   PERSONAL_BOOKMARKS: 7,
-  THROBBER: 8,
-  DOWNLOADS_BUTTON: 9,
-  PRINT_BUTTON: 10,
-  BOOKMARKS_BUTTON: 11,
-  HISTORY_BUTTON: 12,
-  NEW_TAB_BUTTON: 13,
-  NEW_WINDOW_BUTTON: 14,
-  CUT_BUTTON: 15,
-  COPY_BUTTON: 16,
-  PASTE_BUTTON: 17,
-  FULLSCREEN_BUTTON: 18,
-  MENU_BAR: 19,
+  MENU_BAR: 8,
 
-  BACK: 0,
-  FORWARD: 1,
-  DROP_DOWN_RECENT_PAGE: 2,
-  TOP_LEFT_ICON: 3,
-  WINDOW_MENU_ICON: 4,
-  SIDE_BUTTON_NEAR: 9,
-  RSS_ICON: 10,
-  BOOKMARK_STAR: 11,
-  GO_BUTTON: 12,
-  DROP_DOWN_MOST_VISITED: 13,
-  DROP_DOWN_SEARCH: 14,
-  SEARCH_ICON: 15,
-  BOOKMARK_TOOLBAR_CLICK: 16,
-  TAB_SCROLL_LEFT: 17,
-  TAB_SCROLL_RIGHT: 18,
-  NEW_TAB_BUTTON: 19,
-  DROP_DOWN_LIST_TABS: 20,
-  SCROLL_UP: 21,
-  SCROLL_DOWN: 22,
-  SCROLL_LEFT: 23,
-  SCROLL_RIGHT: 24,
-  STATUS_BAR_CLICK: 25,
-  STATUS_BAR_LOCK: 26,
-  CUSTOMIZE_TOOLBAR_MENU: 27
+  // These are things that aren't normally in the toolbar but can be added:
+  THROBBER: 9,
+  DOWNLOADS_BUTTON: 10,
+  PRINT_BUTTON: 11,
+  BOOKMARKS_BUTTON: 12,
+  HISTORY_BUTTON: 13,
+  NEW_TAB_BUTTON: 14, // not to be confused with TABBAR_NEW_BTN below
+  NEW_WINDOW_BUTTON: 15,
+  CUT_BUTTON: 16,
+  COPY_BUTTON: 17,
+  PASTE_BUTTON: 18,
+  FULLSCREEN_BUTTON: 19,
+
+  // Stuff that can't be individually customized but still takes events:
+  BACK: 20,
+  FORWARD: 21,
+  DROP_DOWN_RECENT_PAGE: 22,
+  TOP_LEFT_ICON: 23, // Windows Only
+  SITE_ID_BUTTON: 24,
+  SITE_ID_MORE_INFO: 25,
+  RSS_ICON: 26,
+  BOOKMARK_STAR: 27,
+  GO_BUTTON: 28,
+  DROP_DOWN_MOST_VISITED: 29,
+  SEARCH_ENGINE_DROP_DOWN: 30,
+  SEARCH_GO_BUTTON: 31,
+  EDIT_BOOKMARK_PANEL: 32,
+  TABBAR_SCROLL: 33,
+  TABBAR_NEW_BTN: 34, // not to be confused with NEW_TAB_BUTTON under customize
+  TABBAR_DROP_DOWN: 36,
+  VERTICAL_SCROLLBAR: 37,
+  HORIZONTAL_SCROLLBAR: 38,
+  STATUS_BAR: 41,
+  STATUS_BAR_LOCK: 42,
+  CUSTOMIZE_TOOLBAR_MENU: 43
+
 };
 
 // Use for interaction_type field
@@ -59,14 +60,39 @@ const ToolbarAction = {
   CUST_IN_MENUBAR: 3,
 
   // for interaction events -- what did you do to the item?
-  CLICK: 0,
-  FOCUS: 1,
-  ENTER_URL: 2,
-  SEARCH: 3,
-  CLICK_SUGGESTION: 4,
-  EXPLORE_SUGGESTIONS: 5,
-  SWITCH_SEARCH_ENGINE: 6
+  CLICK: 4,
+  MENU_PICK: 5,
+  ENTER_KEY: 6,
+
+  REPEATED_SEARCH_SAME_ENGINE: 7,
+  REPEATED_SEARCH_DIFF_ENGINE: 8,
+
+  // For status bar hidden/shown and bookmark toolbar count:
+  SHOWN: 9,
+  NOT_SHOWN: 10,
+
+  // For edit bookmark panel
+
+  // What's all this then?
+  /*FOCUS: 5,
+  ENTER_URL: 6,
+  SEARCH: 7,
+  CLICK_SUGGESTION: 8,
+  EXPLORE_SUGGESTIONS: 9,
+  SWITCH_SEARCH_ENGINE: 10,*/
+
   // More?
+
+  // For clicks on site id:
+  SITE_ID_SSL: 12,
+  SITE_ID_EV: 13,
+  SITE_ID_NONE: 14,
+
+  // For scroll bars:
+  SCROLL_BTN_UP: 15, // or left
+  SCROLL_BTN_DOWN: 16, // or right
+  SCROLL_SLIDER: 17,
+  SCROLL_TRACK: 18
 };
 
 // Use for event field
@@ -124,10 +150,17 @@ BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
 ToolbarWindowObserver.prototype.install = function() {
   // Here are the IDs of objects to listen on:
 
+  let record = function( widget, interaction ) {
+    exports.handlers.record(ToolbarEvent.ACTION, widget, interaction);
+  };
+
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
-             "home-button", "identity-box", "feed-button", "star-button",
-             "go-button", "identity-popup-more-info-button",
-                   "back-forward-dropmarker", "security-button"];
+                   "home-button", "identity-box", "feed-button", "star-button",
+                   "go-button", "identity-popup-more-info-button",
+                   "back-forward-dropmarker", "security-button",
+                   "downloads-button", "print-button", "bookmarks-button",
+                   "history-button", "new-tab-button", "new-window-button",
+                   "cut-button", "copy-button", "paste-button", "fullscreen-button"];
 
   dump("Starting to register stuff...\n");
   for (let i = 0; i < buttonIds.length; i++) {
@@ -139,22 +172,16 @@ ToolbarWindowObserver.prototype.install = function() {
     }
     this._listen(elem, "mouseup",
                  function(evt) {
-                   if (evt.target == elem) {
-                     switch (evt.button) {
-                       case 0:
-                         dump("You left-clicked on " + id + "\n");
-                       break;
-                       case 2:
-                         dump("You right-clicked on " + id + "\n");
-                       break;
-                     }
-                   } else {
-                     //dump("Click off target.\n");
+                   // only count left button clicks and only on the element itself:
+                     // (evt.button = 2 for right-click)
+                   if (evt.target == elem && evt.button == 0) {
+                     let code = exports.handlers._getNumberCodeForWidget(evt.target);
+                     record( code, ToolbarAction.CLICK );
                    }
                  }, false);
     // Problem with just listening for "mouseup" is that it triggers even
     // if you clicked a greyed-out button... we really want something more
-    // like "button clicked".
+    // like "button clicked".  Try listening for "command"?
   }
 
 
@@ -166,36 +193,33 @@ ToolbarWindowObserver.prototype.install = function() {
   // my handlers for the regular window - and this persists even after I close
   // the "inspect chrome" window.
 
-  this._listen( this.window.document.getElementById("feed-menu"),
-                "command", function() {dump("U PICKED FEED!\n");}, false);
+  let self = this;
+  let register = function(elemId, event, widgetCode, actionCode) {
+    self._listen( self.window.document.getElementById(elemId), event, function() {
+                    record(widgetCode, actionCode);}, false);
+  };
+
+  register( "feed-menu", "command", ToolbarWidget.RSS_ICON, ToolbarAction.MENU_PICK);
 
   let bkFwdMenu = this.window.document.getElementById("back-forward-dropmarker").getElementsByTagName("menupopup").item(0);
-  dump( "Registering listener to " + bkFwdMenu + "\n");
-  this._listen( bkFwdMenu,
-                "command", function() {dump("U PICKED RECENT HISTORY!\n");}, false);
+  this._listen( bkFwdMenu, "command", function() {
+                  record(ToolbarWidget.DROP_DOWN_RECENT_PAGE, ToolbarAction.MENU_PICK);
+                }, false);
 
-
-  this._listen(this.window.document.getElementById("search-container"),
-               "popupshown", function() {dump("U LOOKD SRCH ENJIN MENU\n");}, false);
-
-  this._listen(this.window.document.getElementById("search-container"),
-               "command", function() {dump("U PIKD SRCH ENJIN\n");}, false);
-
-  // Note: this one don't work.
-  this._listen(this.window.document.getElementById("back-button"),
-               "command", function() {dump("U PIKD RESINT HISTERY FRUM BAK BUTN.\n");}, false);
-  // can also listen for "popupshown", "popuphidden".
-
+  register( "search-container", "popupshown", ToolbarWidget.SEARCH_ENGINE_DROP_DOWN,
+            ToolbarAction.CLICK);
+  register( "search-container", "command", ToolbarWidget.SEARCH_ENGINE_DROP_DOWN,
+            ToolbarAction.MENU_PICK);
+  // TODO: this listener below doesn't work.
+  register("back-button", "command",ToolbarWidget.BACK, ToolbarAction.MENU_PICK);
 
   let bkmkToolbar = this.window.document.getElementById("bookmarksBarContent");
   this._listen(bkmkToolbar, "mouseup", function(evt) {
                  if (evt.button == 0 && evt.target.tagName == "toolbarbutton") {
-                   dump("U KLIKD BUKMARK IN BUKMARK TULBAR\n");
+                   record(ToolbarWidget.PERSONAL_BOOKMARKS, ToolbarAction.CLICK);
                  }}, false);
 
-  let bkmks = bkmkToolbar.getElementsByClassName("bookmark-item");
-  dump("U HAS " + bkmks.length + " TULBAR BKMKS.\n");
-
+  // TODO get from these raw events to the advanced search bar behavior we care about.
   let searchBar = this.window.document.getElementById("searchbar");
   this._listen(searchBar, "select", function(evt) {
                  dump("U SELEKTID SRCH TXT\n");
@@ -209,7 +233,7 @@ ToolbarWindowObserver.prototype.install = function() {
 
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
-                   dump("U CLICKD SRCH GO BTN\n");
+                   record(ToolbarWidget.SEARCH_GO_BUTTON, ToolbarAction.CLICK);
                  }
                }, false);
 
@@ -220,6 +244,7 @@ ToolbarWindowObserver.prototype.install = function() {
    * need to track what input is focused and listen for the enter key to be hit
    * or the search button to be clicked. */
 
+  // TODO turn these low-level events into the advanced behavior we want.
   let urlBar = this.window.document.getElementById("urlbar");
   this._listen(urlBar, "select", function(evt) {
                  dump("U SELEKTID URL TXT\n");
@@ -238,14 +263,14 @@ ToolbarWindowObserver.prototype.install = function() {
                }, false);
   this._listen(urlBar, "command", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
-                   dump("You clicked on the history drop down marker.\n");
+                   record(ToolbarWidget.DROP_DOWN_MOST_VISITED, ToolbarAction.CLICK);
                  } else {
+                   // TODO how do we get the clicks on the actual items in it though?
                    dump("A command came from the url bar...\n");
                    dump("tagname " + evt.originalTarget.tagName + "\n");
                    dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
                  }
                }, false);
-  //watch for command with anonid = historydropmarker
 
   // tabbrowser id="content" contains XBL children anonid="scrollbutton-up"
   // and "scrollbutton-down-stack" and anonid="newtab-button"
@@ -255,28 +280,36 @@ ToolbarWindowObserver.prototype.install = function() {
                  if (evt.button == 0) {
                    switch (evt.originalTarget.getAttribute("anonid")) {
                    case "scrollbutton-up":
-                     dump("You clicked on left tab scrollbutton.\n");
+                     record(ToolbarButton.TABBAR_SCROLL, ToolbarAction.SCROLL_UP);
                      break;
                    case "scrollbutton-down":
-                     dump("You clicked on right tab scrollbutton.\n");
+                     record(ToolbarButton.TABBAR_SCROLL, ToolbarAction.SCROLL_DOWN);
                      break;
                    case "newtab-button":
-                     dump("You clicked on new tab button.\n");
+                     record(ToolbarButton.TABBAR_NEW_BTN, ToolbarAction.CLICK);
                      break;
                    default:
                      let parent = evt.originalTarget.parentNode;
                      if (parent.tagName == "scrollbar") {
                        if (parent.parentNode.tagName == "HTML") {
+                         let widget;
                          let orientation = parent.getAttribute("orient");
+                         if (orientation == "horizontal") { // vs "vertical"
+                           widget = ToolbarWidget.HORIZONTAL_SCROLLBAR;
+                         } else {
+                           widget = ToolbarWidget.VERTICAL_SCROLLBAR;
+                         }
                          let part = evt.originalTarget.tagName;
                          if (part == "xul:slider") {
-                           dump("You clicked the slider of the ");
-                           dump(orientation + " scrollbar.\n");
+                           // TODO can't distinguish slider from track...
+                           record(widget, ToolbarAction.SCROLL_SLIDER);
                          } else if (part == "xul:scrollbarbutton") {
                            let upOrDown = evt.originalTarget.getAttribute("type");
-                           // type is "increment" or "decrement".
-                           dump("You clicked the " + upOrDown + " button of the ");
-                           dump(orientation + " scrollbar.\n");
+                           if (upOrDown == "increment") { // vs. "decrement"
+                             record(widget, ToolbarAction.SCROLL_BTN_UP);
+                           } else {
+                             record(widget, ToolbarAction.SCROLL_BTN_DOWN);
+                           }
                          }
                        }
                      }
@@ -286,12 +319,12 @@ ToolbarWindowObserver.prototype.install = function() {
 
    this._listen(tabBar, "popupshown", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") =="alltabs-popup") {
-                   dump("You popped open the all tabs menu.\n");
+                   record( ToolbarWidget.DROP_DOWN_LIST_TABS, ToolbarAction.CLICK);
                  }
                }, false);
     this._listen(tabBar, "command", function(evt) {
                    if (evt.originalTarget.tagName == "menuitem") {
-                     dump("You picked an item from the all tabs menu.\n");
+                     record( ToolbarWidget.DROP_DOWN_LIST_TABS, ToolbarAction.MENU_PICK);
                    }
                }, false);
   /* Note we also get command events when you hit the tab scroll bars and
@@ -319,12 +352,6 @@ ToolbarWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDoneButton
                }, false);
 
-  let statusBar = this.window.document.getElementById("status-bar");
-  if (statusBar.getAttribute("hidden") == "true") {
-    dump("Status bar is hidden.\n");
-  } else {
-    dump("Status bar is shown.\n");
-  }
 
   // also look at id="FindToolbar" and whether it has hidden = true or not.
 };
@@ -345,6 +372,20 @@ GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
   let frontWindow = wm.getMostRecentWindow("navigator:browser");
   if (this.toolbarsAreCustomized(frontWindow)) {
     this.recordToolbarCustomizations(frontWindow);
+  }
+
+  // How many bookmarks in the bookmark toolbar, and is status bar shown?
+  let bkmkToolbar = this.window.document.getElementById("bookmarksBarContent");
+  let bkmks = bkmkToolbar.getElementsByClassName("bookmark-item");
+  for (let b = 0; b < bkmks.length; b++) {
+    this.record(ToolbarEvent.CUSTOMIZE, ToolbarWidget.PERSONAL_BOOKMARKS, ToolbarAction.PRESENT);
+  }
+
+  let statusBar = this.window.document.getElementById("status-bar");
+  if (statusBar.getAttribute("hidden") == "true") {
+    this.record(ToolbarEvent.CUSTOMIZE, ToolbarWidget.STATUS_BAR, ToolbarAction.ABSENT);
+  } else {
+    this.record(ToolbarEvent.CUSTOMIZE, ToolbarWidget.STATUS_BAR, ToolbarAction.PRESENT);
   }
 
   dump("GlobalToolbarObserver.onExperimentStartup.\n");
@@ -396,6 +437,31 @@ GlobalToolbarObserver.prototype._getNumberCodeForWidget = function(elem) {
     case "reload-button":return ToolbarWidget.RELOAD;
     case "stop-button":return ToolbarWidget.STOP;
     case "home-button":return ToolbarWidget.HOME;
+    case "back-button":return ToolbarWidget.BACK;
+    case "forward-button":return ToolbarWidget.FORWARD;
+    case "back-forward-dropmarker":return ToolbarWidget.DROP_DOWN_RECENT_PAGE;
+    }
+    break;
+  case "box":
+    switch (id) {
+    case "identity-box": return ToolbarWidget.SITE_ID_BUTTON;
+    }
+    break;
+  case "image":
+    switch (id) {
+    case "star-button": return ToolbarWidget.BOOKMARK_STAR;
+    case "go-button": return ToolbarWidget.GO_BUTTON;
+    }
+    break;
+  case "statusbarpanel":
+    switch (id) {
+    case "security-button": return ToolbarWidget.STATUS_BAR_LOCK;
+    }
+    break;
+  case "button":
+    switch (id) {
+    case "feed-button": return ToolbarWidget.RSS_ICON;
+    case "identity-popup-more-info-button": return ToolbarWidget.SITE_ID_MORE_INFO;
     }
     break;
   }

@@ -76,60 +76,6 @@ const ToolbarEvent = {
   STUDY: 2
 };
 
-
-function getNumberCodeForWidget(elem) {
-  let id = elem.getAttribute("id");
-  let tagName = elem.tagName;
-  dump("Getting number code for widget tag " + tagName + " id " + id + "\n");
-  switch (tagName) {
-  case "toolbarspacer": case "toolbarspring": case "toolbarseparator":
-  case "splitter": case "hbox":
-    return ToolbarWidget.SPACER;
-    break;
-  case "toolbaritem":
-    switch(id) {
-    case "unified-back-forward-button": return ToolbarWidget.UNIFIED_BACK_FWD;
-    case "urlbar-container": return ToolbarWidget.URLBAR;
-    case "search-container": return ToolbarWidget.SEARCH;
-    case "navigator-throbber": return ToolbarWidget.THROBBER;
-    case "personal-bookmarks": return ToolbarWidget.PERSONAL_BOOKMARKS;
-    case "menubar-items": return ToolbarWidget.MENU_BAR;
-    }
-    break;
-  case "toolbarbutton":
-    switch (id) {
-    case "downloads-button": return ToolbarWidget.DOWNLOADS_BUTTON;
-    case "print-button": return ToolbarWidget.PRINT_BUTTON;
-    case "bookmarks-button": return ToolbarWidget.BOOKMARKS_BUTTON;
-    case "history-button": return ToolbarWidget.HISTORY_BUTTON;
-    case "new-tab-button": return ToolbarWidget.NEW_TAB_BUTTON;
-    case "new-window-button":return ToolbarWidget.NEW_WINDOW_BUTTON;
-    case "cut-button":return ToolbarWidget.CUT_BUTTON;
-    case "copy-button":return ToolbarWidget.COPY_BUTTON;
-    case "paste-button":return ToolbarWidget.PASTE_BUTTON;
-    case "fullscreen-button":return ToolbarWidget.FULLSCREEN_BUTTON;
-    case "reload-button":return ToolbarWidget.RELOAD;
-    case "stop-button":return ToolbarWidget.STOP;
-    case "home-button":return ToolbarWidget.HOME;
-    }
-    break;
-  }
-  return ToolbarWidget.UNKNOWN; // should never happen.
-}
-
-function getNumberCodeForToolbarId(id) {
-  switch(id) {
-  case "nav-bar":
-    return ToolbarAction.CUST_IN_NAVBAR;
-  case "PersonalToolbar":
-    return ToolbarAction.CUST_IN_PERSONAL;
-  case "toolbar-menubar":
-    return ToolbarAction.CUST_IN_MENUBAR;
-  default:
-    return ToolbarAction.CUST_IN_CUSTOM_TOOLBAR;
-  }
-}
-
 const TOOLBAR_EXPERIMENT_FILE = "testpilot_toolbar_study_results.sqlite";
 const TOOLBAR_TABLE_NAME = "testpilot_toolbar_study";
 
@@ -176,13 +122,6 @@ function ToolbarWindowObserver(window) {
 };
 BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
 ToolbarWindowObserver.prototype.install = function() {
-  if (this.toolbarsAreCustomized()) {
-    this.recordToolbarCustomizations();
-  }
-  this.addListeners();
-};
-
-ToolbarWindowObserver.prototype.addListeners = function() {
   // Here are the IDs of objects to listen on:
 
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
@@ -390,12 +329,98 @@ ToolbarWindowObserver.prototype.addListeners = function() {
   // also look at id="FindToolbar" and whether it has hidden = true or not.
 };
 
-ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
+function GlobalToolbarObserver()  {
+  dump("GlobalToolbarObserver is calling baseConstructor...\n");
+  GlobalToolbarObserver.baseConstructor.call(this, ToolbarWindowObserver);
+}
+BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
+GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
+  GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
+  // TODO record study version here.
+
+  // Look at the front window and see if its toolbars have been customized;
+  // if they have, then record all toolbar customization.
+  let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                        .getService(Ci.nsIWindowMediator);
+  let frontWindow = wm.getMostRecentWindow("navigator:browser");
+  if (this.toolbarsAreCustomized(frontWindow)) {
+    this.recordToolbarCustomizations(frontWindow);
+  }
+
+  dump("GlobalToolbarObserver.onExperimentStartup.\n");
+};
+
+GlobalToolbarObserver.prototype.record = function(event, itemId,
+                                                  interactionType) {
+  if (!this.privateMode) {
+    this._store.storeEvent({
+      event: event,
+      item_id: itemId,
+      interaction_type: interactionType,
+      timestamp: Date.now()
+    });
+  }
+};
+
+GlobalToolbarObserver.prototype._getNumberCodeForWidget = function(elem) {
+  let id = elem.getAttribute("id");
+  let tagName = elem.tagName;
+  dump("Getting number code for widget tag " + tagName + " id " + id + "\n");
+  switch (tagName) {
+  case "toolbarspacer": case "toolbarspring": case "toolbarseparator":
+  case "splitter": case "hbox":
+    return ToolbarWidget.SPACER;
+    break;
+  case "toolbaritem":
+    switch(id) {
+    case "unified-back-forward-button": return ToolbarWidget.UNIFIED_BACK_FWD;
+    case "urlbar-container": return ToolbarWidget.URLBAR;
+    case "search-container": return ToolbarWidget.SEARCH;
+    case "navigator-throbber": return ToolbarWidget.THROBBER;
+    case "personal-bookmarks": return ToolbarWidget.PERSONAL_BOOKMARKS;
+    case "menubar-items": return ToolbarWidget.MENU_BAR;
+    }
+    break;
+  case "toolbarbutton":
+    switch (id) {
+    case "downloads-button": return ToolbarWidget.DOWNLOADS_BUTTON;
+    case "print-button": return ToolbarWidget.PRINT_BUTTON;
+    case "bookmarks-button": return ToolbarWidget.BOOKMARKS_BUTTON;
+    case "history-button": return ToolbarWidget.HISTORY_BUTTON;
+    case "new-tab-button": return ToolbarWidget.NEW_TAB_BUTTON;
+    case "new-window-button":return ToolbarWidget.NEW_WINDOW_BUTTON;
+    case "cut-button":return ToolbarWidget.CUT_BUTTON;
+    case "copy-button":return ToolbarWidget.COPY_BUTTON;
+    case "paste-button":return ToolbarWidget.PASTE_BUTTON;
+    case "fullscreen-button":return ToolbarWidget.FULLSCREEN_BUTTON;
+    case "reload-button":return ToolbarWidget.RELOAD;
+    case "stop-button":return ToolbarWidget.STOP;
+    case "home-button":return ToolbarWidget.HOME;
+    }
+    break;
+  }
+  return ToolbarWidget.UNKNOWN; // should never happen.
+};
+
+GlobalToolbarObserver.prototype._getNumberCodeForToolbarId = function(id) {
+  switch(id) {
+  case "nav-bar":
+    return ToolbarAction.CUST_IN_NAVBAR;
+  case "PersonalToolbar":
+    return ToolbarAction.CUST_IN_PERSONAL;
+  case "toolbar-menubar":
+    return ToolbarAction.CUST_IN_MENUBAR;
+  default:
+    return ToolbarAction.CUST_IN_CUSTOM_TOOLBAR;
+  }
+};
+
+GlobalToolbarObserver.prototype.toolbarsAreCustomized = function(win) {
 
   // TODO figure out how to tell if toolbars are set to "icons",
   // "Icons and text", or "text" and whether "small icons" is on or not.
 
-  let navBar = this.window.document.getElementById("nav-bar");
+  let navBar = win.document.getElementById("nav-bar");
   let expectedChildren = ["unified-back-forward-button", "reload-button",
                           "stop-button", "home-button", "urlbar-container",
                           "urlbar-search-splitter", "search-container",
@@ -416,7 +441,7 @@ ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
 
   let expectedBars = ["toolbar-menubar", "nav-bar", "customToolbars",
                       "PersonalToolbar"];
-  let toolbox = this.window.document.getElementById("navigator-toolbox");
+  let toolbox = win.document.getElementById("navigator-toolbox");
   if (toolbox.childNodes.length != expectedChildren.length) {
     dump("Toolbars modified (different number of toolbars).\n");
     return true;
@@ -430,7 +455,7 @@ ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
   }
 
   // Expect PersonalToolbar to contain personal-bookmarks and nothing else
-  let personalToolbar = this.window.document.getElementById("PersonalToolbar");
+  let personalToolbar = win.document.getElementById("PersonalToolbar");
   if (personalToolbar.childNodes.length != 1 ||
       personalToolbar.childNodes[0].getAttribute("id") != "personal-bookmarks") {
     dump("Personal Toolbar modified.\n");
@@ -440,9 +465,9 @@ ToolbarWindowObserver.prototype.toolbarsAreCustomized = function() {
   return false;
 };
 
-ToolbarWindowObserver.prototype.recordToolbarCustomizations = function() {
+GlobalToolbarObserver.prototype.recordToolbarCustomizations = function(win) {
   dump("Recording customized toolbars!\n");
-  let toolbox = this.window.document.getElementById("navigator-toolbox");
+  let toolbox = win.document.getElementById("navigator-toolbox");
   for (let i = 0; i < toolbox.childNodes.length; i++) {
     let toolbar = toolbox.childNodes[i];
     let toolbarId = toolbar.getAttribute("id");
@@ -450,41 +475,14 @@ ToolbarWindowObserver.prototype.recordToolbarCustomizations = function() {
     for (let j = 0; j < toolbarItems.length; j++) {
       let itemId = toolbarItems[j].getAttribute("id");
       dump("Toolbar " + toolbarId + " item " + itemId + "\n");
-      let widgetCode = getNumberCodeForWidget(toolbarItems[j]);
+      let widgetCode = this._getNumberCodeForWidget(toolbarItems[j]);
+      let toolbarCode = this._getNumberCodeForToolbarId(toolbarId);
       dump("Got widget code " + widgetCode + "\n");
-      exports.handlers.record(ToolbarEvent.CUSTOMIZE, widgetCode,
-                              getNumberCodeForToolbarId(toolbarId));
+      this.record(ToolbarEvent.CUSTOMIZE, widgetCode, toolbarCode);
     }
   }
 };
 
-
-function GlobalToolbarObserver()  {
-  dump("GlobalToolbarObserver is calling baseConstructor...\n");
-  GlobalToolbarObserver.baseConstructor.call(this, ToolbarWindowObserver);
-}
-BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
-GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
-  GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
-  // TODO record study version.
-
-  // TODO if there is customization, record the customized toolbar
-  // order now.... we don't need to record it on every window open so it
-  // really makes more sense to be here than in the per-window class.
-  dump("GlobalToolbarObserver.onExperimentStartup.\n");
-};
-
-GlobalToolbarObserver.prototype.record = function(event, itemId,
-                                                  interactionType) {
-  if (!this.privateMode) {
-    this._store.storeEvent({
-      event: event,
-      item_id: itemId,
-      interaction_type: interactionType,
-      timestamp: Date.now()
-    });
-  }
-};
 
 exports.handlers = new GlobalToolbarObserver();
 

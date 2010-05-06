@@ -29,10 +29,6 @@ const ToolbarWidget = {
   DROP_DOWN_RECENT_PAGE: 2,
   TOP_LEFT_ICON: 3,
   WINDOW_MENU_ICON: 4,
-  MENU_BAR: 5,
-  RELOAD: 6,
-  STOP: 7,
-  HOME: 8,
   SIDE_BUTTON_NEAR: 9,
   RSS_ICON: 10,
   BOOKMARK_STAR: 11,
@@ -84,8 +80,10 @@ const ToolbarEvent = {
 function getNumberCodeForWidget(elem) {
   let id = elem.getAttribute("id");
   let tagName = elem.tagName;
+  dump("Getting number code for widget tag " + tagName + " id " + id + "\n");
   switch (tagName) {
-  case "toolbarspacer", "toolbarspring", "toolbarseparator", "splitter", "hbox":
+  case "toolbarspacer": case "toolbarspring": case "toolbarseparator":
+  case "splitter": case "hbox":
     return ToolbarWidget.SPACER;
     break;
   case "toolbaritem":
@@ -452,8 +450,9 @@ ToolbarWindowObserver.prototype.recordToolbarCustomizations = function() {
     for (let j = 0; j < toolbarItems.length; j++) {
       let itemId = toolbarItems[j].getAttribute("id");
       dump("Toolbar " + toolbarId + " item " + itemId + "\n");
-      exports.handlers.record(ToolbarEvent.CUSTOMIZE,
-                              getNumberCodeForWidget(toolbarItems[j]),
+      let widgetCode = getNumberCodeForWidget(toolbarItems[j]);
+      dump("Got widget code " + widgetCode + "\n");
+      exports.handlers.record(ToolbarEvent.CUSTOMIZE, widgetCode,
                               getNumberCodeForToolbarId(toolbarId));
     }
   }

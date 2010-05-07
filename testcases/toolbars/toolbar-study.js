@@ -64,24 +64,13 @@ const ToolbarAction = {
   MENU_PICK: 5,
   ENTER_KEY: 6,
 
+  // For search bar:
   REPEATED_SEARCH_SAME_ENGINE: 7,
   REPEATED_SEARCH_DIFF_ENGINE: 8,
 
   // For status bar hidden/shown and bookmark toolbar count:
   PRESENT: 9,
   ABSENT: 10,
-
-  // For edit bookmark panel
-
-  // What's all this then?
-  /*FOCUS: 5,
-  ENTER_URL: 6,
-  SEARCH: 7,
-  CLICK_SUGGESTION: 8,
-  EXPLORE_SUGGESTIONS: 9,
-  SWITCH_SEARCH_ENGINE: 10,*/
-
-  // More?
 
   // For clicks on site id:
   SITE_ID_SSL: 12,
@@ -98,11 +87,16 @@ const ToolbarAction = {
   MOUSE_DOWN: 19,
   MOUSE_UP: 20,
   MOUSE_DRAG: 21,
-  SEARCH_TERM_IN_URL_BAR: 22,
+  URL_SELECT: 22,
+  URL_CHANGE: 23,
+  SEARCH_TERM_IN_URL_BAR: 24,
 
   // For bookmark edit panel:
-  PANEL_OPEN: 23,
-  REMOVE_BKMK: 24
+  PANEL_OPEN: 25,
+  REMOVE_BKMK: 26,
+
+  // For reload button:
+  RELOAD_WHILE_LOADING: 27
 };
 
 // Use for event field
@@ -296,7 +290,6 @@ ToolbarWindowObserver.prototype.install = function() {
    * need to track what input is focused and listen for the enter key to be hit
    * or the search button to be clicked. */
 
-  // TODO turn these low-level events into the advanced behavior we want.
   let urlBar = this.window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
@@ -317,16 +310,44 @@ ToolbarWindowObserver.prototype.install = function() {
                    record(ToolbarWidget.URLBAR, ToolbarAction.SEARCH_TERM_IN_URL_BAR);
                  }
                }, false);
-  // TODO with urlbar:
-  // -- distinguish click from 2 clicks together from click-and-drag
-  // (or ensure that we can distinguish this in analysis)
-  // so what if on any mouseup inside the urlbar, we check urlbar selection
-  // and see whether it's all selected, none selected, or some subchunk selected?
-  // those correspond to the three behaviors...
-  //
-  // Get clicks on items in URL bar drop-down (or whether an awesomebar
-  // suggestion was hilighted when you hit enter?)
 
+  self._urlBarMouseState = false;
+  this._listen(urlBar, "mouseup", function(evt) {
+                 if (self._urlBarMouseState) {
+                   record(ToolbarWidget.URLBAR, ToolbarAction.MOUSE_UP);
+                   self._urlBarMouseState = false;
+                 }
+               }, false);
+  this._listen(urlBar, "mousedown", function(evt) {
+                 if (evt.originalTarget.tagName == "div") {
+                   record(ToolbarWidget.URLBAR, ToolbarAction.MOUSE_DOWN);
+                   self._urlBarMouseState = true;
+                 }
+               }, false);
+  this._listen(urlBar, "mousemove", function(evt) {
+                 if (self._urlBarMouseState) {
+                   record(ToolbarWidget.URLBAR, ToolbarAction.MOUSE_DRAG);
+                 }
+               }, false);
+
+  this._listen(urlBar, "change", function(evt) {
+                 record(ToolbarWidget.URLBAR, ToolbarAction.URL_CHANGE);
+               }, false);
+  this._listen(urlBar, "select", function(evt) {
+                 record(ToolbarWidget.URLBAR, ToolbarAction.URL_SELECT);
+               }, false);
+  // A single click (select all) followed by edit will look like:
+  // mouse down, mouse up, selected, changed.
+  //
+  // Click twice to insert and then edit looks like:
+  // mouse down mouse up select, mouse down mouse up change.
+  //
+  // Click drag and to select and then edit looks like:
+  // mouse down mouse move move move move move mouse up select changed.
+
+
+  // TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
+  // suggestion was hilighted when you hit enter?)
 
   this._listen(urlBar, "popupshown", function(evt) {
                  // TODO this doesn't seem to work.

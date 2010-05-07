@@ -98,7 +98,11 @@ const ToolbarAction = {
   MOUSE_DOWN: 19,
   MOUSE_UP: 20,
   MOUSE_DRAG: 21,
-  SEARCH_TERM_IN_URL_BAR: 22
+  SEARCH_TERM_IN_URL_BAR: 22,
+
+  // For bookmark edit panel:
+  PANEL_OPEN: 23,
+  REMOVE_BKMK: 24
 };
 
 // Use for event field
@@ -405,13 +409,14 @@ ToolbarWindowObserver.prototype.install = function() {
 
   let bkmkPanel = this.window.document.getElementById("editBookmarkPanel");
   this._listen(bkmkPanel, "popupshown", function(evt) {
-                 dump("You opened the edit-bookmark panel.\n");
+                 record( ToolbarWidget.EDIT_BOOKMARK_PANEL, ToolbarAction.PANEL_OPEN);
                }, false);
 
   this._listen(bkmkPanel, "command", function(evt) {
                  switch (evt.originalTarget.getAttribute("id")) {
                  case "editBookmarkPanelRemoveButton":
-                   dump("You clicked the remove bookmark button.\n");
+                   record( ToolbarWidget.EDIT_BOOKMARK_PANEL,
+                           ToolbarAction.REMOVE_BKMK);
                    break;
                  }
                  // Other buttons we can get here:

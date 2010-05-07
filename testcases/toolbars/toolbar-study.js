@@ -156,7 +156,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 2,
+  versionNumber: 3,
   minTPVersion: "1.0a1"
 };
 
@@ -316,6 +316,10 @@ ToolbarWindowObserver.prototype.install = function() {
   // TODO with urlbar:
   // -- distinguish click from 2 clicks together from click-and-drag
   // (or ensure that we can distinguish this in analysis)
+  // so what if on any mouseup inside the urlbar, we check urlbar selection
+  // and see whether it's all selected, none selected, or some subchunk selected?
+  // those correspond to the three behaviors...
+  //
   // Get clicks on items in URL bar drop-down (or whether an awesomebar
   // suggestion was hilighted when you hit enter?)
 
@@ -661,15 +665,9 @@ TODO:
  window menu (after left click on the top icon)	win		clicks on each menu item
  menu bar	win/mac	?
 
-
-search box	win/mac		same query, but different engine
-
-   -- Need to detect "enter" keypresses in search box
-      (look for event.keyCode or event.charCode.
-   -- on an "enter" or a "search-go-click", record search term and engine used
-
 bookmark star - single click on already bookmarked star to get popup
                  VS double click on not yet bookmarked star to get popup
+               record clicks on buttons inside the popup (already detected)
 
 location bar	win/mac- 1 click
 - 2 clicks together

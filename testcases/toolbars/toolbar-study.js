@@ -92,7 +92,13 @@ const ToolbarAction = {
   SCROLL_BTN_UP: 15, // or left
   SCROLL_BTN_DOWN: 16, // or right
   SCROLL_SLIDER: 17,
-  SCROLL_TRACK: 18
+  SCROLL_TRACK: 18,
+
+  // For URL bar:
+  MOUSE_DOWN: 19,
+  MOUSE_UP: 20,
+  MOUSE_DRAG: 21,
+  SEARCH_TERM_IN_URL_BAR: 22
 };
 
 // Use for event field
@@ -166,6 +172,11 @@ function ToolbarWindowObserver(window) {
   dump("ToolbarWindowObserver constructed for " + window + "\n");
 };
 BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
+ToolbarWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
+  // How to tell when a URL looks more like a search?  First approximation:
+  // if there are spaces in it.  Second approximation: No periods.
+  return ( (url.indexOf(" ") > -1) || (url.indexOf(".") == -1) );
+};
 ToolbarWindowObserver.prototype.install = function() {
   // Here are the IDs of objects to listen on:
 
@@ -175,7 +186,7 @@ ToolbarWindowObserver.prototype.install = function() {
 
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
                    "home-button", "identity-box", "feed-button", "star-button",
-                   "go-button", "identity-popup-more-info-button",
+                   "identity-popup-more-info-button",
                    "back-forward-dropmarker", "security-button",
                    "downloads-button", "print-button", "bookmarks-button",
                    "history-button", "new-tab-button", "new-window-button",
@@ -249,13 +260,18 @@ ToolbarWindowObserver.prototype.install = function() {
   this._listen(searchBar, "focus", function(evt) {
                  dump("U FOAKUST SRCH TXT\n");
                }, false);
+  this._listen(searchBar, "keydown", function(evt) {
+                 if (evt.keyCode == 13) { // Enter key
+                   record(ToolbarWidget.SEARCH, ToolbarAction.ENTER_KEY);
+                 }
+               }, false);
+
 
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
                    record(ToolbarWidget.SEARCH_GO_BUTTON, ToolbarAction.CLICK);
                  }
                }, false);
-
 
   /* click in search box results in a focus event followed by a select event.
    * If you edit, then when you do a search OR unfocus the box, you get a "changed" event.
@@ -265,17 +281,34 @@ ToolbarWindowObserver.prototype.install = function() {
 
   // TODO turn these low-level events into the advanced behavior we want.
   let urlBar = this.window.document.getElementById("urlbar");
-  this._listen(urlBar, "select", function(evt) {
-                 dump("U SELEKTID URL TXT\n");
-               }, false);
-  this._listen(urlBar, "change", function(evt) {
-                 dump("U CHAINJD URL TXT\n");
-               }, false);
-  this._listen(urlBar, "focus", function(evt) {
-                 dump("U FOAKUST URL TXT\n");
+  this._listen(urlBar, "keydown", function(evt) {
+                 if (evt.keyCode == 13) { // Enter key
+                   dump("Hit Enter with URL = " + evt.originalTarget.value + "\n");
+                   record(ToolbarWidget.URLBAR, ToolbarAction.ENTER_KEY);
+                   if (self.urlLooksMoreLikeSearch(evt.originalTarget.value)) {
+                     record(ToolbarWidget.URLBAR, ToolbarAction.SEARCH_TERM_IN_URL_BAR);
+                   }
+                 }
                }, false);
 
+  let urlGoButton = this.window.document.getElementById("go-button");
+  dump("urlGoBUtton is " + urlGoButton + "\n");
+  this._listen(urlGoButton, "mouseup", function(evt) {
+                 record(ToolbarWidget.GO_BUTTON, ToolbarAction.CLICK);
+                 dump("Clicked GO button with URL = " + urlBar.value + "\n");
+                 if (self.urlLooksMoreLikeSearch(urlBar.value)) {
+                   record(ToolbarWidget.URLBAR, ToolbarAction.SEARCH_TERM_IN_URL_BAR);
+                 }
+               }, false);
+  // TODO with urlbar:
+  // -- distinguish click from 2 clicks together from click-and-drag
+  // (or ensure that we can distinguish this in analysis)
+  // Get clicks on items in URL bar drop-down (or whether an awesomebar
+  // suggestion was hilighted when you hit enter?)
+
+
   this._listen(urlBar, "popupshown", function(evt) {
+                 // TODO this doesn't seem to work.
                  dump("A popup was shown from the url bar...\n");
                  dump("tagname " + evt.originalTarget.tagName + "\n");
                  dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
@@ -614,7 +647,13 @@ TODO:
  top left icon	win		clicks on it	right/left click on it
  window menu (after left click on the top icon)	win		clicks on each menu item
  menu bar	win/mac	?
+
+
 search box	win/mac		same query, but different engine
+
+   -- Need to detect "enter" keypresses in search box
+      (look for event.keyCode or event.charCode.
+   -- on an "enter" or a "search-go-click", record search term and engine used
 
 bookmark star - single click on already bookmarked star to get popup
                  VS double click on not yet bookmarked star to get popup
@@ -623,7 +662,8 @@ location bar	win/mac- 1 click
 - 2 clicks together
 - 1 click&drag
 -any clicks on the items in the URL bar drop-down list?
-content in URL bar	win/mac		- content in URL that is a search rather than a url (if user hit enter after typing something that's not url, e.g. it has a space: browse by name) - only tr track when the focus in in the loca URL bar
+
+- only tr track when the focus in in the loca URL bar
 
 Scroll bar: Track vs. slider?
 

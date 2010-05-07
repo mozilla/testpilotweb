@@ -177,6 +177,23 @@ ToolbarWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
   // if there are spaces in it.  Second approximation: No periods.
   return ( (url.indexOf(" ") > -1) || (url.indexOf(".") == -1) );
 };
+ToolbarWindowObserver.prototype.compareSearchTerms = function(searchTerm, searchEngine) {
+  if (searchTerm == this._lastSearchTerm) {
+    if (searchEngine == this._lastSearchEngine) {
+      dump("Repeated Search, Same Engine!\n");
+      exports.handlers.record(ToolbarEvent.ACTION,
+                              ToolbarWidget.SEARCH,
+                              ToolbarAction.REPEATED_SEARCH_SAME_ENGINE);
+    } else {
+      dump("Repeated Search, Different Engine!\n");
+      exports.handlers.record(ToolbarEvent.ACTION,
+                              ToolbarWidget.SEARCH,
+                              ToolbarAction.REPEATED_SEARCH_DIFF_ENGINE);
+    }
+  }
+  this._lastSearchTerm = searchTerm;
+  this._lastSearchEngine = searchEngine;
+};
 ToolbarWindowObserver.prototype.install = function() {
   // Here are the IDs of objects to listen on:
 
@@ -249,20 +266,13 @@ ToolbarWindowObserver.prototype.install = function() {
                    record(ToolbarWidget.PERSONAL_BOOKMARKS, ToolbarAction.CLICK);
                  }}, false);
 
-  // TODO get from these raw events to the advanced search bar behavior we care about.
   let searchBar = this.window.document.getElementById("searchbar");
-  this._listen(searchBar, "select", function(evt) {
-                 dump("U SELEKTID SRCH TXT\n");
-               }, false);
-  this._listen(searchBar, "change", function(evt) {
-                 dump("U CHAINJD SRCH TXT\n");
-               }, false);
-  this._listen(searchBar, "focus", function(evt) {
-                 dump("U FOAKUST SRCH TXT\n");
-               }, false);
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
                    record(ToolbarWidget.SEARCH, ToolbarAction.ENTER_KEY);
+                   dump("Selected search engine is " + searchBar.searchService.currentEngine.name + "\n");
+                   self.compareSearchTerms(searchBar.value,
+                                          searchBar.searchService.currentEngine.name);
                  }
                }, false);
 
@@ -270,6 +280,9 @@ ToolbarWindowObserver.prototype.install = function() {
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
                    record(ToolbarWidget.SEARCH_GO_BUTTON, ToolbarAction.CLICK);
+                   dump("Selected search engine is " + searchBar.searchService.currentEngine.name + "\n");
+                   self.compareSearchTerms(searchBar.value,
+                                          searchBar.searchService.currentEngine.name);
                  }
                }, false);
 

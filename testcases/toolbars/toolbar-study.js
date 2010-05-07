@@ -147,7 +147,7 @@ var TOOLBAR_EXPERIMENT_COLUMNS =  [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 5, // Days
+  duration: 2, // Days
   testName: "Toolbar Study",
   testId: 6,
   testInfoUrl: null,

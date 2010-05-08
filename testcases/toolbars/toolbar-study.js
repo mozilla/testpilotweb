@@ -154,7 +154,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 4,
+  versionNumber: 5,
   minTPVersion: "1.0a1"
 };
 

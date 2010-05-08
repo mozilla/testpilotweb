@@ -255,8 +255,19 @@ ToolbarWindowObserver.prototype.install = function() {
             ToolbarAction.CLICK);
   register( "search-container", "command", ToolbarWidget.SEARCH_ENGINE_DROP_DOWN,
             ToolbarAction.MENU_PICK);
-  // TODO: this listener below doesn't work.
-  register("back-button", "command",ToolbarWidget.BACK, ToolbarAction.MENU_PICK);
+
+  this._listen(this.window.document.getElementById("back-button"),
+               "mouseup", function(evt) {
+                 if (evt.originalTarget.tagName == "menuitem") {
+                   record(ToolbarWidget.BACK, ToolbarAction.MENU_PICK);
+                 }
+               }, false);
+  this._listen(this.window.document.getElementById("forward-button"),
+               "mouseup", function(evt) {
+                 if (evt.originalTarget.tagName == "menuitem") {
+                   record(ToolbarWidget.FORWARD, ToolbarAction.MENU_PICK);
+                 }
+               }, false);
 
   let bkmkToolbar = this.window.document.getElementById("bookmarksBarContent");
   this._listen(bkmkToolbar, "mouseup", function(evt) {

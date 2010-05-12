@@ -12,9 +12,8 @@ exports.GenericWebContent.prototype = {
   },
 
   get optOutLink() {
-    return '<p>If you are not comfortable participating this time, '
-    + '<a href="chrome://testpilot/content/status-quit.html?eid='
-    + this.expInfo.testId + '"> click here to cancel</a>.</p>';
+    return '<a href="chrome://testpilot/content/status-quit.html?eid='
+    + this.expInfo.testId + '">click here to cancel</a>';
   },
 
   get uploadData() {
@@ -51,9 +50,9 @@ exports.GenericWebContent.prototype = {
 
   get dataCanvas() {
     return '<div class="dataBox"><h3>View Your Data:</h3>' +
-      this.dataViewExplanation + this.rawDataLink() +
+      this.dataViewExplanation + this.rawDataLink +
       '<canvas id="data-canvas" width="450" height="680"></canvas></div>' +
-      this.saveButtions() + '</div>';
+      this.saveButtions + '</div>';
   },
 
   get inProgressHtml () {
@@ -61,8 +60,10 @@ exports.GenericWebContent.prototype = {
     '<p><b>' + this.expInfo.summary + '</b></p>' +
     '<p>Read more details for the ' + this.titleLink + ' study.</p>\
     <p>You can save your test graph or export the raw data now, or after you \
-    submit your data.</p>'
-      + this.thinkThereIsAnError + this.optOutLink + this.dataCanvas;
+    submit your data.</p>' +
+      this.thinkThereIsAnError +
+      '<p>If you are not comfortable participating this time, ' +
+      this.optOutLink + '.</p>' + this.dataCanvas;
   },
 
   get completedHtml() {
@@ -76,9 +77,8 @@ exports.GenericWebContent.prototype = {
     you data.</p>' + this.thinkThereIsAnError +
     '<p>If you choose to cancel the study now, your data will be removed from \
     your computer immediately. You won\'t be able to see your chart or the raw \
-    data after you cancel the study. You can <a \
-    href="chrome://testpilot/content/status-quit.html?eid=5">click here to \
-    cancel</a>.</p>' + this.uploadData + this.dataCanvas;
+    data after you cancel the study. You can ' + this.optOutLink +
+    '.</p>' + this.uploadData + this.dataCanvas;
   },
 
   upcomingHtml: "",

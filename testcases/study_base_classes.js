@@ -1,6 +1,23 @@
 exports.TYPE_INT_32 = 0;
 exports.TYPE_DOUBLE = 1;
 
+exports.genericWebContent = {
+  inProgressHtml: "",
+  completedHtml: "",
+  upcomingHtml: "",
+  canceledHtml: "",
+  remainDataHtml: "",
+  dataExpiredHtml: "",
+  deletedRemainDataHtml: "",
+
+  inProgressDataPrivacyHtml: "",
+  completedDataPrivacyHtml: "",
+  canceledDataPrivacyHtml: "",
+  dataExpiredDataPrivacyHtml: "",
+  remainDataPrivacyHtml: "",
+  deletedRemainDataPrivacyHtml: ""
+};
+
 exports.STD_FINE_PRINT = '<h3>The fine print:</h3> \
       <ul> \
 	<li>The websites (URLs) that you visit will never be recorded.</li> \

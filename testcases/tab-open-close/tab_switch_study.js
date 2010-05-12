@@ -72,7 +72,7 @@ for people to manage their tabs. ",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 1 // for minor changes in format within the same experiment
+  versionNumber: 2 // for minor changes in format within the same experiment
 };
 
 exports.dataStoreInfo = {
@@ -89,7 +89,6 @@ let ObserverHelper = {
   _installedObservers: [],
   _dataStore: null,
   privateMode: false,
-
 
   _sessionStore: null,
   get sessionStore() {
@@ -554,59 +553,121 @@ TabWindowObserver.prototype = {
 };
 
 
-const FINE_PRINT = '<h3>The fine print:</h3> \
-      <ul> \
-	<li>The websites (URLs) that you visit will never be recorded.</li> \
-    <li>At the end of the test, you will be able to choose if you want to submit your test data or not.</li> \
-       <li>All test data you submit will be anonymized and will not be personally identifiable.</li> \
-</ul>';
+const FINE_PRINT = '<h3>The fine print:</h3>\
+  <ul>\
+  <li>The websites (URLs) that you visit will never be recorded.</li>\
+  <li>At the end of the test, you will be able to choose if you want to submit \
+  your test data or not.</li>\
+  <li>All test data you submit will be anonymized and will not be personally \
+  identifiable.</li>\
+  </ul>';
 
-const DATA_CANVAS = '<div class="dataBox"> \
-    <h3>View Your Data:</h3>\
-    <p>In the chart below, each rectangle represents a tab.  The arcs represent\
-    switches between tabs.  The thicker the arc line is, the more times you have\
-    switched between those two tabs.  (The rectangles in this chart\
-    do not change even if you have closed or rearranged some of the tabs.)\
-    <p><a onclick="showRawData(5);">Click here</a> to see a display of all\
-    the collected data in its raw form, exactly as it will be sent.</p>\
-    <canvas id="tab-switch-arcs" width="450" height="680"></canvas> \
-    <button type="button" onclick="saveCanvas(document.getElementById(\'tab-switch-arcs\'))">Save Graph</button>\
-</div>';
+const DATA_CANVAS = '<div class="dataBox">\
+  <h3>View Your Data:</h3>\
+  <p>In the chart below, each rectangle represents a tab.  The arcs represent\
+  switches between tabs.  The thicker the arc line is, the more times you have\
+  switched between those two tabs.  (The rectangles in this chart\
+  do not change even if you have closed or rearranged some of the tabs.)\
+  <p><a onclick="showRawData(5);">Click here</a> to see a display of all\
+  the collected data in its raw form, exactly as it will be sent.</p>\
+  <canvas id="tab-switch-arcs" width="450" height="680"></canvas></div>\
+  <div><button type="button" onclick="saveCanvas(document.getElementById(\'tab-switch-arcs\'))">Save Graph</button>\
+  &nbsp;&nbsp;<button type="button" onclick="exportData();">Export Data</button></div>';
 
 exports.webContent = {
-  inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
-<p><b>You are currently in a study to help us understand how tabs are used.</b></p>\
-<p>Read more details for the \
-<a href="https://testpilot.mozillalabs.com/testcases/tabswitch">"Tab Switch" study</a>.</p>\
-<p>If you are not comfortable participating this time, please \
-<a href="chrome://testpilot/content/status-quit.html?eid=5">click here to quit</a>.</p>\
-The study will end in 5 days. <b>At the end of it, you will be prompted to choose \
-whether you want to submit your test data or not.</b> All test data you submit will\
-be anonymized and will not be personally identifiable. We do not record any search\
-  terms or what sites you visit.</p><p>So, buckle up and get ready for the flight!</p>'
-  + DATA_CANVAS,
-
-  completedHtml: '<h2>Excellent! You just finished the "Tab Switch" Study!</h2>\
-<b>Please submit your test data.</b>\
-    <p>&nbsp;</p> \
-    <div class="home_callout_continue">\
-<img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
-<span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
-</span></div> \
-    <p>&nbsp;</p> \
-</p>All test data you submit will be anonymized and will not be personally identifiable.\
-The data you submit will help us directly with improvements to the tab management \
-interface. <b>After we analyze the data from all submissions, you will be able to see \
-all new study findings by clicking on the Test Pilot icon on the bottom-right corner \
-and choosing "All your studies".</b></p>\
-<p>If you are not comfortable submitting your data this time, \
-<a href="chrome://testpilot/content/status-quit.html?eid=5"> click here to cancel</a>.</p>'
- + DATA_CANVAS,
-
   upcomingHtml: "",    // For tests which don't start automatically, this gets
                        // displayed in status page before test starts.
 
-  remainDataHtml: DATA_CANVAS,
+  inProgressDataPrivacyHtml: '<p>The study will end in 5 days. <b>At the end \
+    of it, you will be prompted to choose whether you want to submit your test \
+    data or not.</b> All test data you submit will be anonymized and will not \
+    be personally identifiable. We do not record any search terms or what \
+    sites you visit.</p>',
+
+  inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
+    <p><b>You are currently in a study to help us understand how tabs are \
+    used.</b></p>\
+    <p>Read more details for the \
+    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    "Tab Switch"</a> study.</p>\
+    <p>You can save your test graph or export the raw data now, or after you \
+    submit your data.</p>\
+    <p>If you think there is an error in this data, \
+    <a href="http://groups.google.com/group/mozilla-labs-testpilot">\
+    click here to post</a> a message to notify the Test Pilot team about it</p>\
+    <p>If you are not comfortable participating this time, please \
+    <a href="chrome://testpilot/content/status-quit.html?eid=5">click here \
+    to quit</a>.</p>'
+    + DATA_CANVAS,
+
+  completedDataPrivacyHtml: '<p>All test data you submit will be \
+    anonymized and will not be personally identifiable. The data you submit \
+    will help us directly with improvements to the tab management interface. \
+    <b>After we analyze the data from all submissions, you will be able to see \
+    all new study findings by clicking on the Test Pilot icon on the \
+    bottom-right corner and choosing "All your studies".</b></p>',
+
+  completedHtml: '<h2>Excellent! You just finished the "Tab Switch" Study!</h2>\
+    <b>The study is complete and your test data is ready to submit!</b>\
+    <p>You have 7 days to decide if you want to submit your data.  7 days \
+    after the study is complete, your data will be automatically removed from \
+    your computer if you don\'t submit it.</p>\
+    <p>You can save your graph or export the raw data now or after you submit \
+    you data.</p>\
+    <p>If you think there is an error in this data, \
+    <a href="http://groups.google.com/group/mozilla-labs-testpilot">\
+    click here to post</a> a message to notify the test pilot team about it</p>\
+    <p>If you choose to cancel the study now, your data will be removed from \
+    your computer immediately. You won\'t be able to see your chart or the raw \
+    data after you cancel the study. You can <a \
+    href="chrome://testpilot/content/status-quit.html?eid=5">click here to \
+    cancel</a>.</p> \
+    <p>&nbsp;</p>\
+    <div class="home_callout_continue">\
+    <img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
+    <span id="upload-status"><a onclick="uploadData();">Submit your \
+    data &raquo;</a></span></div>'
+    + DATA_CANVAS,
+
+  dataExpiredDataPrivacyHtml: '',
+
+  dataExpiredHtml: '<h2>Your \
+    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    "Tab Switch"</a> study data is expired.</h2> \
+    <p>It has been more than 7 days since the study is completed. Since you \
+    decide not to submit the data, it has been removed automatically from your \
+    computer.  Sorry we won\'t be able to show your data anymore.',
+
+  canceledDataPrivacyHtml: '',
+
+  canceledHtml: '<h2>You canceled the \
+    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    "Tab Switch"</a> study.</h2> \
+    <p>You have canceled this study so your data is removed. Sorry we won\'t \
+    be able to show your data anymore.</p> \
+    <p>Test Pilot will offer you new studies and surveys as they become \
+    available.</p>',
+
+  remainDataDataPrivacyHtml: '',
+
+  remainDataHtml: '<h2>Thank you for submitting your \
+    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    "Tab Switch"</a> study data!</h2> \
+    <p>Please remember to save your test graph or export the raw data now if \
+    you are interested!</p>\
+    <p>If you choose not to save them, they will be removed from your computer \
+    7 days after your submission.</p>'
+    + DATA_CANVAS,
+
+  deletedRemainDataDataPrivacyHtml: '',
+
+  deletedRemainDataHtml: '<h2>Your \
+    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    "Tab Switch"</a> study data is removed.</h2> \
+    <p>All the data that was collected has been transmitted to Mozilla and \
+    removed from your computer.</p> \
+    <p>The results of the study will be available soon.  When they are ready \
+    to view, Test Pilot will let you know.</p>',
 
   onPageLoad: function(experiment, document, graphUtils) {
     // Get raw data:

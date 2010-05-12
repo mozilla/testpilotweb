@@ -659,37 +659,13 @@ GlobalToolbarObserver.prototype.recordToolbarCustomizations = function(win) {
 
 exports.handlers = new GlobalToolbarObserver();
 
+exports.webContent = new BaseClasses.GenericWebContent(exports.experimentInfo);
+
 require("unload").when(
   function myDestructor() {
     dump("Calling myDestructor.\n");
     exports.handlers.uninstallAll();
   });
-
-
-const DATA_CANVAS = '<div class="dataBox"> \
-</div>';
-
-exports.webContent = {
-  inProgressHtml: '<h2>Thank you, Test Pilot!</h2>\
-<p>You are currently in a study to find out how the Firefox toolbars are used.</p>\
- ' + BaseClasses.rawDataLink(6) + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
-
-  completedHtml: '<h2>Excellent! You just finished the Toolbar Study!</h2>\
-</p>All test data you submit will be anonymized and will not be personally identifiable.\
-<b>After we analyze the data from all submissions, you will be able to see \
-all new study findings by clicking on the Test Pilot icon on the bottom-right corner \
-and choosing "All your studies".</b></p>'
-    + BaseClasses.optOutLink(6) +
-    + BaseClasses.rawDataLink(6) + BaseClasses.UPLOAD_DATA
-    + BaseClasses.STD_FINE_PRINT + DATA_CANVAS,
-
-  upcomingHtml: "",
-
-  remainDataHtml: "",
-
-  onPageLoad: function(experiment, document, graphUtils) {
-  }
-};
 
 
 /*

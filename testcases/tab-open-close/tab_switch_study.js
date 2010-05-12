@@ -588,12 +588,12 @@ exports.webContent = {
     <p><b>You are currently in a study to help us understand how tabs are \
     used.</b></p>\
     <p>Read more details for the \
-    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    <a onclick="openLink(\'https://testpilot.mozillalabs.com/testcases/tabswitch\')">\
     "Tab Switch"</a> study.</p>\
     <p>You can save your test graph or export the raw data now, or after you \
     submit your data.</p>\
     <p>If you think there is an error in this data, \
-    <a href="http://groups.google.com/group/mozilla-labs-testpilot">\
+    <a onclick="openLink(\'http://groups.google.com/group/mozilla-labs-testpilot\')">\
     click here to post</a> a message to notify the Test Pilot team about it</p>\
     <p>If you are not comfortable participating this time, please \
     <a href="chrome://testpilot/content/status-quit.html?eid=5">click here \
@@ -615,7 +615,7 @@ exports.webContent = {
     <p>You can save your graph or export the raw data now or after you submit \
     you data.</p>\
     <p>If you think there is an error in this data, \
-    <a href="http://groups.google.com/group/mozilla-labs-testpilot">\
+    <a onclick="openLink(\'http://groups.google.com/group/mozilla-labs-testpilot\')">\
     click here to post</a> a message to notify the test pilot team about it</p>\
     <p>If you choose to cancel the study now, your data will be removed from \
     your computer immediately. You won\'t be able to see your chart or the raw \
@@ -632,7 +632,7 @@ exports.webContent = {
   dataExpiredDataPrivacyHtml: '',
 
   dataExpiredHtml: '<h2>Your \
-    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    <a onclick="openLink(\'https://testpilot.mozillalabs.com/testcases/tabswitch\')">\
     "Tab Switch"</a> study data is expired.</h2> \
     <p>It has been more than 7 days since the study is completed. Since you \
     decide not to submit the data, it has been removed automatically from your \
@@ -641,7 +641,7 @@ exports.webContent = {
   canceledDataPrivacyHtml: '',
 
   canceledHtml: '<h2>You canceled the \
-    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    <a onclick="openLink(\'https://testpilot.mozillalabs.com/testcases/tabswitch\')">\
     "Tab Switch"</a> study.</h2> \
     <p>You have canceled this study so your data is removed. Sorry we won\'t \
     be able to show your data anymore.</p> \
@@ -651,7 +651,7 @@ exports.webContent = {
   remainDataDataPrivacyHtml: '',
 
   remainDataHtml: '<h2>Thank you for submitting your \
-    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    <a onclick="openLink(\'https://testpilot.mozillalabs.com/testcases/tabswitch\')">\
     "Tab Switch"</a> study data!</h2> \
     <p>Please remember to save your test graph or export the raw data now if \
     you are interested!</p>\
@@ -662,7 +662,7 @@ exports.webContent = {
   deletedRemainDataDataPrivacyHtml: '',
 
   deletedRemainDataHtml: '<h2>Your \
-    <a href="https://testpilot.mozillalabs.com/testcases/tabswitch">\
+    <a onclick="openLink(\'https://testpilot.mozillalabs.com/testcases/tabswitch\')">\
     "Tab Switch"</a> study data is removed.</h2> \
     <p>All the data that was collected has been transmitted to Mozilla and \
     removed from your computer.</p> \

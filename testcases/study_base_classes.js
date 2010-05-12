@@ -27,7 +27,7 @@ exports.GenericWebContent.prototype = {
 
   get thinkThereIsAnError() {
       return '<p>If you think there is an error in this data, \
-    <a href="http://groups.google.com/group/mozilla-labs-testpilot">\
+    <a onclick="openLink(\'http://groups.google.com/group/mozilla-labs-testpilot\');">\
     click here to post</a> a message to notify the Test Pilot team about it</p>';
   },
 
@@ -43,8 +43,8 @@ exports.GenericWebContent.prototype = {
   },
 
   get titleLink() {
-    return '<a href="' +
-      this.expInfo.testInfoUrl + '">&quot;' + this.expInfo.testName
+    return '<a onclick="openLink(\'' +
+      this.expInfo.testInfoUrl + '\');">&quot;' + this.expInfo.testName
       + '&quot;</a>';
   },
 

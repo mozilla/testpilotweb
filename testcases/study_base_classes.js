@@ -39,7 +39,7 @@ exports.GenericWebContent.prototype = {
     return '<div><button type="button" \
     onclick="saveCanvas(document.getElementById(\'data-canvas\'))">\
     Save Graph</button>&nbsp;&nbsp;<button type="button"\
-    onclick="exportData();">Export Data</button>';
+    onclick="exportData();">Export Data</button></div>';
   },
 
   get titleLink() {
@@ -52,7 +52,7 @@ exports.GenericWebContent.prototype = {
     return '<div class="dataBox"><h3>View Your Data:</h3>' +
       this.dataViewExplanation + this.rawDataLink +
       '<canvas id="data-canvas" width="450" height="680"></canvas></div>' +
-      this.saveButtions + '</div>';
+      this.saveButtons;
   },
 
   get inProgressHtml () {

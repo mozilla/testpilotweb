@@ -659,7 +659,76 @@ GlobalToolbarObserver.prototype.recordToolbarCustomizations = function(win) {
 
 exports.handlers = new GlobalToolbarObserver();
 
-exports.webContent = new BaseClasses.GenericWebContent(exports.experimentInfo);
+function ToolbarStudyWebContent()  {
+  ToolbarStudyWebContent.baseConstructor.call(this, exports.experimentInfo);
+}
+BaseClasses.extend(ToolbarStudyWebContent, BaseClasses.GenericWebContent);
+ToolbarStudyWebContent.prototype.__defineGetter__("dataCanvas",
+  function() {
+      return '<div class="dataBox"><h3>View Your Data:</h3>' +
+      this.dataViewExplanation +
+      this.rawDataLink +
+      '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
+      this.saveButtons + '</div>';
+  });
+ToolbarStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
+  function() {
+    return "The length of each bar below shows the number of times " +
+      "that you interacted with that toolbar widget.";
+  });
+
+ToolbarStudyWebContent.prototype.onPageLoad = function(experiment,
+                                                       document,
+                                                       graphUtils) {
+  let plotDiv = document.getElementById("data-plot-div");
+  let rawData = experiment.dataStoreAsJSON;
+  let stats = [];
+  let item;
+  let lastActionId;
+  for each( let row in rawData) {
+    if (row.event != ToolbarEvent.ACTION) {
+      continue;
+    }
+    // Only show me one mouse drag in a row...
+    if (row.interaction_type == ToolbarAction.MOUSE_DRAG &&
+        lastActionId == ToolbarAction.MOUSE_DRAG) {
+      continue;
+    }
+    let match = false;
+    for (item in stats) {
+      if (stats[item].id == row.item_id) {
+        match = true;
+        stats[item].quantity ++;
+        break;
+      }
+    }
+    if (!match) {
+      stats.push( {id: row.item_id, quantity: 1} );
+    }
+    lastActionId = row.interaction_type;
+  }
+
+  let d1 = [];
+  for each (item in stats) {
+    d1.push([item.quantity, item.id ]);
+  }
+
+  let label;
+  let yAxisLabels = [];
+  for ( label in ToolbarWidget) {
+    let labelText = label.toLowerCase().replace("/_/g", " ");
+    yAxisLabels.push([ToolbarWidget[label], labelText]);
+  }
+
+  try {
+    graphUtils.plot(plotDiv, [{data: d1}],
+                    {series: {bars: {show: true, horizontal: true}},
+                     yaxis: {ticks: yAxisLabels}});
+  } catch(e) {
+    dump("Problem with graphutils: " + e + "\n");
+  }
+};
+exports.webContent = new ToolbarStudyWebContent();
 
 require("unload").when(
   function myDestructor() {
@@ -678,16 +747,9 @@ TODO:
  window menu (after left click on the top icon)	win		clicks on each menu item
  menu bar	win/mac	?
 
-bookmark star - single click on already bookmarked star to get popup
-                 VS double click on not yet bookmarked star to get popup
-               record clicks on buttons inside the popup (already detected)
+ any clicks on the items in the URL bar drop-down list?
 
-location bar	win/mac- 1 click
-- 2 clicks together
-- 1 click&drag
--any clicks on the items in the URL bar drop-down list?
-
-- only tr track when the focus in in the loca URL bar
+ only tr track when the focus in in the loca URL bar
 
 Scroll bar: Track vs. slider?
 

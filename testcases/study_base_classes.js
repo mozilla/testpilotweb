@@ -62,7 +62,7 @@ exports.GenericWebContent.prototype = {
     <p>You can save your test graph or export the raw data now, or after you \
     submit your data.</p>' +
       this.thinkThereIsAnError +
-      '<p>If you are not comfortable participating this time, ' +
+      '<p>If you don\'t want to submit your data this time, ' +
       this.optOutLink + '.</p>' + this.dataCanvas;
   },
 
@@ -117,7 +117,7 @@ exports.GenericWebContent.prototype = {
   },
 
   get inProgressDataPrivacyHtml() {
-    return '<p>The study will end in ' + this.expInfo.duration + 'days.\
+    return '<p>The study will end in ' + this.expInfo.duration + ' days.\
     <b>At the end of it, you will be prompted to choose whether you want to \
     submit your test data or not.</b> All test data you submit will be \
     anonymized and will not be personally identifiable. We do not record \
@@ -127,8 +127,8 @@ exports.GenericWebContent.prototype = {
   completedDataPrivacyHtml: '<p>All test data you submit will be \
     anonymized and will not be personally identifiable. The data you submit \
     will help us directly with improvements to the tab management interface. \
-    <b>After we analyze the data from all submissions, you will be able to see \
-    all new study findings by clicking on the Test Pilot icon on the \
+    <b>After we\'ve analyzed the data from all submissions, you will be able \
+    to see the new study findings by clicking on the Test Pilot icon on the \
     bottom-right corner and choosing "All your studies".</b></p>',
 
   canceledDataPrivacyHtml: "",

@@ -572,6 +572,7 @@ GlobalToolbarObserver.prototype._getNumberCodeForWidget = function(elem) {
     }
     break;
   }
+  console.warn("Unknown Widget: " + tagName + " id = " + id + "\n");
   return ToolbarWidget.UNKNOWN; // should never happen.
 };
 

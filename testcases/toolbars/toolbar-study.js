@@ -244,6 +244,19 @@ ToolbarWindowObserver.prototype.install = function() {
                     record(widgetCode, actionCode);}, false);
   };
 
+  // Listen on reload button, see if page is currently loading when reload
+  // button is clicked:
+  this._listen(this.window.document.getElementById("reload-button"),
+               "mouseup",
+               function(evt) {
+                 let browser = this.window.gBrowser;
+                 let tab = browser.getBrowserForTab(browser.selectedTab);
+                 if (tab.webProgress.isLoadingDocument) {
+                   record(ToolbarWidget.RELOAD, ToolbarAction.RELOAD_WHILE_LOADING);
+                 } else {
+                 }
+               }, false);
+
   register( "feed-menu", "command", ToolbarWidget.RSS_ICON, ToolbarAction.MENU_PICK);
 
   let bkFwdMenu = this.window.document.getElementById("back-forward-dropmarker").getElementsByTagName("menupopup").item(0);
@@ -711,14 +724,15 @@ ToolbarStudyWebContent.prototype.onPageLoad = function(experiment,
 
   let d1 = [];
   for each (item in stats) {
-    d1.push([item.quantity, item.id ]);
+    d1.push([item.quantity, item.id - 0.5 ]);
   }
 
   let label;
   let yAxisLabels = [];
   for ( label in ToolbarWidget) {
     let labelText = label.toLowerCase().replace("/_/g", " ");
-    yAxisLabels.push([ToolbarWidget[label], labelText]);
+    let y = ToolbarWidget[label];
+    yAxisLabels.push([y, labelText]);
   }
 
   try {
@@ -757,3 +771,6 @@ Scroll bar: Track vs. slider?
 drag to resize the window	win/mac
 right click on the Chrome to see the "customize toolbar"	win/mac	P2	clicks on it	choices on this customization window
  */
+
+
+

@@ -200,7 +200,7 @@ ToolbarWindowObserver.prototype.install = function() {
   };
 
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
-                   "home-button", "identity-box", "feed-button", "star-button",
+                   "home-button", "feed-button", "star-button",
                    "identity-popup-more-info-button",
                    "back-forward-dropmarker", "security-button",
                    "downloads-button", "print-button", "bookmarks-button",
@@ -254,6 +254,25 @@ ToolbarWindowObserver.prototype.install = function() {
                  if (tab.webProgress.isLoadingDocument) {
                    record(ToolbarWidget.RELOAD, ToolbarAction.RELOAD_WHILE_LOADING);
                  } else {
+                 }
+               }, false);
+
+  // Listen on site ID button, see if page is SSL, or extended validation,
+  // or nothing.  (TODO this triggers again if you click to close; should
+  // trigger on popupshown or something.
+  let idBox = this.window.document.getElementById("identity-box");
+  this._listen(idBox, "mouseup",
+                 dump("Click on site ID button...\n");
+                 let idBoxClass = idBox.getAttribute("class");
+                 if (idBoxClass.indexOf("verifiedIdentity") > -1) {
+                   record( ToolbarWidget.SITE_ID_BUTTON,
+                           ToolbarAction.SITE_ID_EV);
+                 } else if (idBoxClass.indexOf("verifiedDomain") > -1) {
+                   record( ToolbarWidget.SITE_ID_BUTTON,
+                   ToolbarAction.SITE_ID_SSL);
+                 } else {
+                   record( ToolbarWidget.SITE_ID_BUTTON,
+                   ToolbarAction.SITE_ID_NONE);
                  }
                }, false);
 
@@ -754,22 +773,25 @@ require("unload").when(
 
 /*
 TODO:
- Back	Mac only	click, hold, select from drop-down
  site ID button 	Is site id ssl, EV, or nothing?
- Reload -                                Is the page currently loading?
+ any clicks on the items in the URL bar drop-down list?
+right click on the Chrome to see the "customize toolbar"	win/mac	P2	clicks on it	choices on this customization window
+Manage Search Engines
+Bug - opening of site id panel not recorded?
 
+We get a lot of "Undefined" clicks -- what are they?
+
+
+// Not doing:
+
+Scroll bar: Track vs. slider?
+ only tr track when the focus in in the loca URL bar
  top left icon	win		clicks on it	right/left click on it
  window menu (after left click on the top icon)	win		clicks on each menu item
  menu bar	win/mac	?
 
- any clicks on the items in the URL bar drop-down list?
-
- only tr track when the focus in in the loca URL bar
-
-Scroll bar: Track vs. slider?
-
 drag to resize the window	win/mac
-right click on the Chrome to see the "customize toolbar"	win/mac	P2	clicks on it	choices on this customization window
+
  */
 
 

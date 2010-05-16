@@ -145,7 +145,7 @@ var TOOLBAR_EXPERIMENT_COLUMNS =  [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 2, // Days
+  duration: 5, // Days
   testName: "Toolbar Widgets",
   testId: 6,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/toolbar",

@@ -98,7 +98,7 @@ exports.GenericWebContent.prototype = {
     you are interested!</p>\
     <p>If you choose not to save them, they will be removed from your computer \
     7 days after your submission.</p>'
-    + dataCanvas;
+    + this.dataCanvas;
   },
 
   get dataExpiredHtml() {

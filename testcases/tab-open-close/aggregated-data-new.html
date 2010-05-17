@@ -1,0 +1,95 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: Tab Open/Close Study: Aggregated Data Samples</title>
+</head>
+<body>
+
+<div id="container">
+
+	<div id="content-standalone">
+          <p><a href="../../index.html">Home</a> &gt; <a href="https://testpilot.mozillalabs.com/testcases">Test Cases</a> &gt; <a href="../tab-open-close.html">Tab Open/Close Study</a> &gt; Aggregated Data Samples</p>	
+		<div id="intro">
+		
+			<h1>Tab Switch Study: Aggregated Data Samples</h1>
+			
+			<h2>Test Description </h2>
+			
+			<ul>
+			<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/tab-open-close.html">Tab Switch study </a>.</li>
+			<li>Test duration: 5 days*</li>
+			<li>Test type: Global</li>
+			<li>Firefox versions covered: 3.5 - 3.7a5pre</li>
+			<li>Data submission: over 10,000 test sets submitted from 50+ locales, April 2010.</li>
+			</ul>
+			
+			<p>*  (i.e. for each user, data collection began when they installed the extension and ended 1 week later)</p>
+		
+		</div>
+		
+		<div id="data"> 
+			
+			<h2> Test Data </h2>
+			<p>Anyone is welcome to download and use the aggregated data files below.</p>
+			
+			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+			
+			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+			
+			<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">Lines</span></td><td><span class="headers">N (Number of users)</span></td><td><span class="headers">Description</span></td></tr>
+			<tr><td><a href="outfiles/tab_100_users.csv.zip">tab_100_users.csv.zip</a></td><td>19.1 MB</td><td>322487</td><td>100</td><td>100 user sample</td></tr>
+			<tr><td><a href="outfiles/tab_2000_users.csv.zip">tab_2000_users.csv.zip</a></td><td>313.8 MB</td><td>5184084</td><td>2000</td><td>2000 user sample</td></tr>			
+			</table>
+			
+			<h3>How to read the data</h3>
+			
+			The data is in CSV (comma-separated value) format.  The first line of the file contains the column names.  A chunk of sample data might look like this:
+			
+			<pre>
+			"user","event.code","id","position","window","tab.site.hash","search.result","num.tabs","timestamp","os","fx.version.major"
+			0,"Status",1,0,0,0,0,0,1271329454580,"OS X","3.6"
+			0,"Startup",0,0,0,0,0,0,1271329454588,"OS X","3.6"
+			0,"Open Window",0,0,4,0,0,1,1271329454591,"OS X","3.6"
+			0,"Open Window",0,0,3,0,0,11,1271329454593,"OS X","3.6"
+			0,"Open Window",0,0,2,0,0,6,1271329454595,"OS X","3.6"
+			0,"Open Window",0,0,1,0,0,10,1271329454598,"OS X","3.6"
+			0,"Load",0,0,1,0,0,10,1271329455943,"OS X","3.6"				
+			</pre>
+			
+			Each row represents a single event in which a user interacted with the Firefox tabs bar.
+			Here's what the columns mean.
+			
+			
+			<ol><li><strong>user:</strong> All rows that have the same user number came from the same submission.  Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.)  These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</li>
+			<li><strong>event_code:</strong> Can be interpreted using the following table:<br/>
+			<ol><li>Status: gets recorded every time the browser starts up AND when the experiment is first installed.</li>
+				<li>Open: a new tab was opened.</li>				
+				<li>Close: a tab was closed.</li>
+				<li>Drag: user began dragging a tab away from its current location.</li>
+				<li>Drop: this data wasn't collected.</li>
+				<li>Switch: the tab became the active tab, either because the user switched to it manually, or because of automatic browser behavior (i.e. opening a new tab usually generates an automatic switch to that tab.)</li>
+				<li>Load: the URL displayed in the tab changed, whether because of a click on a link, a URL entered into the location bar, etc.</li>
+				<li>Startup: Firefox was opened.</li>
+				<li>Shutdown: Firefox was closed.</li>				
+				<li>Open Window: a new browser window was opened.</li>
+				<li>Close Window: an open browser window was closed.</li></ol></li>
+			
+			<li><strong>id:</strong> a unique identifier for tabs by user.</li>			
+			<li><strong>tab.position:</strong> the position of the affected tab within the window.  They are numbered left to right, starting at 0.  Be aware that these position numbers are ephemeral: the position of a tab can change several times between when it is opened and when it is closed, due to drag-drop events, or due to tabs being opened or closed to the left of the tab in question.  If you want to track a single tab over time, you will need to keep track of changes in its position.</li>
+			<li><strong>tab.window:</strong> a number identifying the window to which the tab belongs.  The first window opened during the session will be numbered 1, and the window ids increase from there.</li>
+			<li><strong>tab.site.hash:</strong> Identifies the 'tab group' to which the tab belongs.  Tabs which have the same number in this column are open to pages in the same domain.  For example, if a user had three tabs open to different pages on the www.mozilla.org site, those three tabs would all have the same number in the tab_site_hash column, but a tab open to a site beginning with labs.mozilla.com would have a different number.  The actual number is an index into a client-side hash of the domain name, so it should not be possible to recover from this number any information about actual URLs visited.</li>
+			<li><strong>search.results:</strong> 1 if we think the page currently in the tab is a search results page, 0 otherwise.</li>
+			<li><strong>num.tabs:</strong> The number of tabs which were open in the same window after this event was processed.  It's per-window, so if you want the number of tabs open in all windows you will need to sum this value across multiple windows.  If the event changed the number of tabs (e.g. OPEN_EVENT, CLOSE_EVENT) then the number in num_tabs represents the state after that event.</li>
+			<li><strong>timestamp:</strong> The time at which the event occured, given in milliseconds since epoch.</li>
+			</ol>
+			
+			<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
+			
+		</div>
+	
+	</div>
+
+</div>
+
+</body></html>

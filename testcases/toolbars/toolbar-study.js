@@ -261,7 +261,7 @@ ToolbarWindowObserver.prototype.install = function() {
   // or nothing.  (TODO this triggers again if you click to close; should
   // trigger on popupshown or something.
   let idBox = this.window.document.getElementById("identity-box");
-  this._listen(idBox, "mouseup",
+  this._listen(idBox, "mouseup", function(evt) {
                  dump("Click on site ID button...\n");
                  let idBoxClass = idBox.getAttribute("class");
                  if (idBoxClass.indexOf("verifiedIdentity") > -1) {
@@ -490,6 +490,12 @@ ToolbarWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDoneButton
                }, false);
 
+  let viewMenu = this.window.document.getElementById("viewToolbarsMenu");
+  let customizeToolbarPopup = viewMenu.getElementsByTagName("menupopup")[0];
+  dump("customizeToolbarPopup = " + customizeToolbarPopup + "\n");
+  this._listen(customizeToolbarPopup, "mouseup", function(evt) {
+                 dump("Customize Toolbar Popup was clicked on.\n");
+               }, false);
 
   // also look at id="FindToolbar" and whether it has hidden = true or not.
 };
@@ -771,11 +777,12 @@ require("unload").when(
   });
 
 
+
+
 /*
 TODO:
- site ID button 	Is site id ssl, EV, or nothing?
  any clicks on the items in the URL bar drop-down list?
-right click on the Chrome to see the "customize toolbar"	win/mac	P2	clicks on it	choices on this customization window
+ right click on the Chrome to see the "customize toolbar"	win/mac	P2	clicks on it	choices on this customization window
 Manage Search Engines
 Bug - opening of site id panel not recorded?
 

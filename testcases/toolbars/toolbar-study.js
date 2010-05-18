@@ -157,7 +157,7 @@ directly used to improve the toolbar design for Firefox 4.",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 6,
+  versionNumber: 7,
   minTPVersion: "1.0a1"
 };
 

@@ -149,7 +149,10 @@ exports.experimentInfo = {
   testName: "Toolbar Widgets",
   testId: 6,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/toolbar",
-  summary: "Toolbar study",
+  summary: "We would like to have a better understanding of how Firefox's \
+current toolbar is commonly used. How often do people click on the Back \
+button, how often do people switch search engines? The study data will be \
+directly used to improve the toolbar design for Firefox 4.",
   thumbnail: null,
   optInRequired: false,
   recursAutomatically: false,
@@ -167,7 +170,6 @@ exports.dataStoreInfo = {
 // The per-window observer class:
 function ToolbarWindowObserver(window) {
   ToolbarWindowObserver.baseConstructor.call(this, window);
-  dump("ToolbarWindowObserver constructed for " + window + "\n");
 };
 BaseClasses.extend(ToolbarWindowObserver, BaseClasses.GenericWindowObserver);
 ToolbarWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
@@ -178,12 +180,10 @@ ToolbarWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
 ToolbarWindowObserver.prototype.compareSearchTerms = function(searchTerm, searchEngine) {
   if (searchTerm == this._lastSearchTerm) {
     if (searchEngine == this._lastSearchEngine) {
-      dump("Repeated Search, Same Engine!\n");
       exports.handlers.record(ToolbarEvent.ACTION,
                               ToolbarWidget.SEARCH,
                               ToolbarAction.REPEATED_SEARCH_SAME_ENGINE);
     } else {
-      dump("Repeated Search, Different Engine!\n");
       exports.handlers.record(ToolbarEvent.ACTION,
                               ToolbarWidget.SEARCH,
                               ToolbarAction.REPEATED_SEARCH_DIFF_ENGINE);
@@ -195,6 +195,7 @@ ToolbarWindowObserver.prototype.compareSearchTerms = function(searchTerm, search
 ToolbarWindowObserver.prototype.install = function() {
   // Here are the IDs of objects to listen on:
 
+  console.info("Starting to install listeners for toolbar window observer.");
   let record = function( widget, interaction ) {
     exports.handlers.record(ToolbarEvent.ACTION, widget, interaction);
   };
@@ -207,12 +208,11 @@ ToolbarWindowObserver.prototype.install = function() {
                    "history-button", "new-tab-button", "new-window-button",
                    "cut-button", "copy-button", "paste-button", "fullscreen-button"];
 
-  dump("Starting to register stuff...\n");
   for (let i = 0; i < buttonIds.length; i++) {
     let id = buttonIds[i];
     let elem = this.window.document.getElementById(id);
     if (!elem) {
-      dump("There is no such element as " + id + "\n");
+      console.warn("Can't install listener: no element with id " + id);
       continue;
     }
     this._listen(elem, "mouseup",
@@ -262,7 +262,6 @@ ToolbarWindowObserver.prototype.install = function() {
   // trigger on popupshown or something.
   let idBox = this.window.document.getElementById("identity-box");
   this._listen(idBox, "mouseup", function(evt) {
-                 dump("Click on site ID button...\n");
                  let idBoxClass = idBox.getAttribute("class");
                  if (idBoxClass.indexOf("verifiedIdentity") > -1) {
                    record( ToolbarWidget.SITE_ID_BUTTON,
@@ -311,7 +310,6 @@ ToolbarWindowObserver.prototype.install = function() {
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
                    record(ToolbarWidget.SEARCH, ToolbarAction.ENTER_KEY);
-                   dump("Selected search engine is " + searchBar.searchService.currentEngine.name + "\n");
                    self.compareSearchTerms(searchBar.value,
                                           searchBar.searchService.currentEngine.name);
                  }
@@ -321,7 +319,6 @@ ToolbarWindowObserver.prototype.install = function() {
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
                    record(ToolbarWidget.SEARCH_GO_BUTTON, ToolbarAction.CLICK);
-                   dump("Selected search engine is " + searchBar.searchService.currentEngine.name + "\n");
                    self.compareSearchTerms(searchBar.value,
                                           searchBar.searchService.currentEngine.name);
                  }
@@ -336,7 +333,6 @@ ToolbarWindowObserver.prototype.install = function() {
   let urlBar = this.window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
-                   dump("Hit Enter with URL = " + evt.originalTarget.value + "\n");
                    record(ToolbarWidget.URLBAR, ToolbarAction.ENTER_KEY);
                    if (self.urlLooksMoreLikeSearch(evt.originalTarget.value)) {
                      record(ToolbarWidget.URLBAR, ToolbarAction.SEARCH_TERM_IN_URL_BAR);
@@ -345,10 +341,8 @@ ToolbarWindowObserver.prototype.install = function() {
                }, false);
 
   let urlGoButton = this.window.document.getElementById("go-button");
-  dump("urlGoBUtton is " + urlGoButton + "\n");
   this._listen(urlGoButton, "mouseup", function(evt) {
                  record(ToolbarWidget.GO_BUTTON, ToolbarAction.CLICK);
-                 dump("Clicked GO button with URL = " + urlBar.value + "\n");
                  if (self.urlLooksMoreLikeSearch(urlBar.value)) {
                    record(ToolbarWidget.URLBAR, ToolbarAction.SEARCH_TERM_IN_URL_BAR);
                  }
@@ -492,16 +486,15 @@ ToolbarWindowObserver.prototype.install = function() {
 
   let viewMenu = this.window.document.getElementById("viewToolbarsMenu");
   let customizeToolbarPopup = viewMenu.getElementsByTagName("menupopup")[0];
-  dump("customizeToolbarPopup = " + customizeToolbarPopup + "\n");
   this._listen(customizeToolbarPopup, "mouseup", function(evt) {
                  dump("Customize Toolbar Popup was clicked on.\n");
                }, false);
 
+  console.info("Done registering toolbar listeners for window.");
   // also look at id="FindToolbar" and whether it has hidden = true or not.
 };
 
 function GlobalToolbarObserver()  {
-  dump("GlobalToolbarObserver is calling baseConstructor...\n");
   GlobalToolbarObserver.baseConstructor.call(this, ToolbarWindowObserver);
 }
 BaseClasses.extend(GlobalToolbarObserver, BaseClasses.GenericGlobalObserver);
@@ -532,8 +525,6 @@ GlobalToolbarObserver.prototype.onExperimentStartup = function(store) {
   } else {
     this.record(ToolbarEvent.CUSTOMIZE, ToolbarWidget.STATUS_BAR, ToolbarAction.PRESENT);
   }
-
-  dump("GlobalToolbarObserver.onExperimentStartup.\n");
 };
 
 GlobalToolbarObserver.prototype.record = function(event, itemId,
@@ -551,7 +542,6 @@ GlobalToolbarObserver.prototype.record = function(event, itemId,
 GlobalToolbarObserver.prototype._getNumberCodeForWidget = function(elem) {
   let id = elem.getAttribute("id");
   let tagName = elem.tagName;
-  dump("Getting number code for widget tag " + tagName + " id " + id + "\n");
   switch (tagName) {
   case "toolbarspacer": case "toolbarspring": case "toolbarseparator":
   case "splitter": case "hbox":
@@ -637,30 +627,24 @@ GlobalToolbarObserver.prototype.toolbarsAreCustomized = function(win) {
                           "stop-button", "home-button", "urlbar-container",
                           "urlbar-search-splitter", "search-container",
                           "fullscreenflex", "window-controls"];
-  dump("Attempting to read children of navBar...\n");
   if (navBar.childNodes.length != expectedChildren.length) {
-    dump("Navbar modified (different number of children).\n");
     return true;
   } else {
     for (let i = 0; i < expectedChildren.length; i++) {
       if (navBar.childNodes[i].getAttribute("id") != expectedChildren[i]) {
-        dump("Navbar modified (different children item).\n");
         return true;
       }
     }
   }
-  dump("Read children of navBar.\n");
 
   let expectedBars = ["toolbar-menubar", "nav-bar", "customToolbars",
                       "PersonalToolbar"];
   let toolbox = win.document.getElementById("navigator-toolbox");
   if (toolbox.childNodes.length != expectedChildren.length) {
-    dump("Toolbars modified (different number of toolbars).\n");
     return true;
   } else {
     for (let i = 0; i < expectedBars.length; i++) {
       if (toolbox.childNodes[i].getAttribute("id") != expectedBars[i]) {
-        dump("Toolbars modified (different toolbar item).\n");
         return true;
       }
     }
@@ -670,7 +654,6 @@ GlobalToolbarObserver.prototype.toolbarsAreCustomized = function(win) {
   let personalToolbar = win.document.getElementById("PersonalToolbar");
   if (personalToolbar.childNodes.length != 1 ||
       personalToolbar.childNodes[0].getAttribute("id") != "personal-bookmarks") {
-    dump("Personal Toolbar modified.\n");
     return true;
   }
 
@@ -678,7 +661,7 @@ GlobalToolbarObserver.prototype.toolbarsAreCustomized = function(win) {
 };
 
 GlobalToolbarObserver.prototype.recordToolbarCustomizations = function(win) {
-  dump("Recording customized toolbars!\n");
+  console.info("Recording toolbar customizations.");
   let toolbox = win.document.getElementById("navigator-toolbox");
   for (let i = 0; i < toolbox.childNodes.length; i++) {
     let toolbar = toolbox.childNodes[i];
@@ -686,10 +669,8 @@ GlobalToolbarObserver.prototype.recordToolbarCustomizations = function(win) {
     let toolbarItems = toolbar.childNodes;
     for (let j = 0; j < toolbarItems.length; j++) {
       let itemId = toolbarItems[j].getAttribute("id");
-      dump("Toolbar " + toolbarId + " item " + itemId + "\n");
       let widgetCode = this._getNumberCodeForWidget(toolbarItems[j]);
       let toolbarCode = this._getNumberCodeForToolbarId(toolbarId);
-      dump("Got widget code " + widgetCode + "\n");
       this.record(ToolbarEvent.CUSTOMIZE, widgetCode, toolbarCode);
     }
   }
@@ -765,14 +746,14 @@ ToolbarStudyWebContent.prototype.onPageLoad = function(experiment,
                     {series: {bars: {show: true, horizontal: true}},
                      yaxis: {ticks: yAxisLabels}});
   } catch(e) {
-    dump("Problem with graphutils: " + e + "\n");
+    console.warn("Problem with graphutils: " + e + "\n");
   }
 };
 exports.webContent = new ToolbarStudyWebContent();
 
 require("unload").when(
   function myDestructor() {
-    dump("Calling myDestructor.\n");
+    console.info("Toolbar study destructor called.");
     exports.handlers.uninstallAll();
   });
 

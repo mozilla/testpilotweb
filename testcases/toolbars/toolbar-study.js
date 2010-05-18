@@ -153,7 +153,7 @@ exports.experimentInfo = {
 current toolbar is commonly used. How often do people click on the Back \
 button, how often do people switch search engines? The study data will be \
 directly used to improve the toolbar design for Firefox 4.",
-  thumbnail: null,
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/toolbars/toolbar-study-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,

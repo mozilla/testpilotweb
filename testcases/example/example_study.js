@@ -71,9 +71,9 @@ exports.dataStoreInfo = {
 // Define a per-window observer class by extending the generic one from
 // BaseClasses:
 
-function ExampleStudyWindowObserver(window) {
+function ExampleStudyWindowObserver(window, globalInstance) {
   // Call base class constructor:
-  ExampleStudyWindowObserver.baseConstructor.call(this, window);
+  ExampleStudyWindowObserver.baseConstructor.call(this, window, globalInstance);
 }
 // I use a helper method for extending classes, since I always get
 // Javascript inheritance wrong otherwise ;-)
@@ -137,7 +137,7 @@ ExampleStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
    * low-level with it. */
 
   // you MUST call the base class onExperimentStartup:
-  GlobalToolbarObserver.superClass.onExperimentStartup.call(this, store);
+  ExampleStudyGlobalObserver.superClass.onExperimentStartup.call(this, store);
 
   /* Any code that you only want to run once per Firefox session
    * can go here.  It can install additional observers if you like.
@@ -199,7 +199,7 @@ ExampleWebContent.prototype.onPageLoad = function(experiment,
 }
 
 // Instantiate and export the web content (required!)
-exports.webContent = new ExampleStudyWebContent();
+exports.webContent = new ExampleWebContent();
 
 
 require("unload").when(

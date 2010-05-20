@@ -160,7 +160,7 @@ exports.GenericGlobalObserver.prototype = {
   _registerWindow: function(window) {
     if (this._windowObserverClass) {
       if (this._getObserverForWindow(window) == null) {
-        let newObserver = new this._windowObserverClass(window);
+        let newObserver = new this._windowObserverClass(window, this);
         newObserver.install();
         this._windowObservers.push(newObserver);
       }
@@ -221,13 +221,20 @@ exports.GenericGlobalObserver.prototype = {
       this._windowObservers[i].uninstall();
     }
     this._windowObservers = [];
+  },
+
+  record: function(event) {
+    if (!this.privateMode) {
+      this._store.storeEvent(event);
+    }
   }
 };
 
-exports.GenericWindowObserver = function(window) {
+exports.GenericWindowObserver = function(window, globalInstance) {
   dump("GenericWindowObserver constructed for " + window +".\n");
   this.window = window;
   this._registeredListeners = [];
+  this._globalObserverInstance = globalInstance;
 };
 exports.GenericWindowObserver.prototype = {
   _listen: function GenericWindowObserver__listen(container,
@@ -249,15 +256,20 @@ exports.GenericWindowObserver.prototype = {
   },
 
   install: function GenericWindowObserver_install() {
+    // override this
   },
 
-  uninstall: function ToolbarWindowObserver_uninstall() {
+  uninstall: function GenericWindowObserver_uninstall() {
     dump("Uninstalling ye window observer.\n");
     for (let i = 0; i < this._registeredListeners.length; i++) {
       dump("Uninstalling a listener.\n");
       let rl = this._registeredListeners[i];
       rl.container.removeEventListener(rl.eventName, rl.handler, rl.catchCap);
     }
+  },
+
+  record: function(event) {
+    this._globalObserverInstance.record(event);
   }
 };
 

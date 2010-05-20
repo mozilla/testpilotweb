@@ -4,7 +4,8 @@
                   "filename": "toolbars/toolbar-study.js"},
                  {"name": "Pilot Background Survey",
                   "filename": "pilot-background-survey.js"}],
-
+"libraries": [{"name": "Study Base Classes Library",
+                  "filename": "study_base_classes.js"}],
 "results": [{"title": "Min and Max Tabs",
 "summary": "How many tabs do users have open at a time?",
 "id": "1_results_min_max",

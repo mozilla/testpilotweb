@@ -9,6 +9,9 @@ exports.surveyInfo = {
   surveyName: "Example Survey",
   uploadWithExperiment: 1010,  // the "example experiment"
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
+  surveyExplanation: "This is just an example survey, don't take it seriously.",
+  versionNumber: 3,
+  minTPVersion: "1.0a1",
   surveyQuestions: [
     {question: "Please check the races you play in Starcraft.",
      type: CHECK_BOXES,

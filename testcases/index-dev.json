@@ -17,7 +17,7 @@
 "experiment_jars": [{"name": "Toolbar Study",
                      "jarfile": "toolbars/toolbar-study.jar",
                      "studyfile": "toolbar-study.js",
-                     "MD5": "2363e13b5e11cf83ecadcd77e940569f"}],
+                     "hash": "822103ac18b7a49c489aa129ee8bf0a6375d8a74c8e156b00a604dded3e02f9c"}],
 "libraries": [{"name": "Ghost Study Library",
                   "filename": "dependency-experiment/ghost-library.js"},
               {"name": "Study Base Classes Library",

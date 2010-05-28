@@ -20,15 +20,15 @@ exports.GenericWebContent.prototype = {
     return '<p>&nbsp;</p> \
     <div class="home_callout_continue">\
 <img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
-<span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
+<span id="upload-status"><a onclick="uploadData();">Submit my data! &raquo;</a>\
 </span></div> \
       <p>&nbsp;</p>';
   },
 
   get thinkThereIsAnError() {
-      return '<p>If you think there is an error in this data, \
+      return '<li>If you think there is an error in this data, \
     <a onclick="openLink(\'http://groups.google.com/group/mozilla-labs-testpilot\');">\
-    click here to post</a> a message to notify the Test Pilot team about it</p>';
+    click here to post</a> a message to notify the Test Pilot team about it.</li>';
   },
 
   get dataViewExplanation() {
@@ -58,27 +58,25 @@ exports.GenericWebContent.prototype = {
   get inProgressHtml () {
     return '<h2>Thank you, Test Pilot!</h2>' +
     '<p><b>' + this.expInfo.summary + '</b></p>' +
-    '<p>Read more details for the ' + this.titleLink + ' study.</p>\
-    <p>You can save your test graph or export the raw data now, or after you \
-    submit your data.</p>' +
-      this.thinkThereIsAnError +
-      '<p>If you don\'t want to submit your data this time, ' +
-      this.optOutLink + '.</p>' + this.dataCanvas;
+    '<p> The study will end in ' + this.expInfo.duration + ' days. Read more details for this ' + this.titleLink + ' study.\</p>\
+    <ul><li>You can save your test graph or export the raw data now, or after you \
+    submit your data.</li>' + this.thinkThereIsAnError +
+      '<li>If you don\'t want to submit your data this time, ' +
+      this.optOutLink + '.</li></ul>' + this.dataCanvas;
   },
 
   get completedHtml() {
-    return '<h2>Excellent! You just finished the &quot;' +
-      this.expInfo.testName + '&quot; Study!</h2>' +
+    return '<h2>Excellent! You just finished the ' + this.titleLink + ' Study!</h2>' +
     '<b>The study is complete and your test data is ready to submit!</b>\
-    <p>You have 7 days to decide if you want to submit your data.  7 days \
+    <ul><li>You have 7 days to decide if you want to submit your data.  7 days \
     after the study is complete, your data will be automatically removed from \
-    your computer if you don\'t submit it.</p>\
-    <p>You can save your graph or export the raw data now or after you submit \
-    you data.</p>' + this.thinkThereIsAnError +
-    '<p>If you choose to cancel the study now, your data will be removed from \
+    your computer if you don\'t submit it.</li>\
+    <li>You can save your graph or export the raw data now or after you submit \
+    you data.</li>' + this.thinkThereIsAnError +
+    '<li>If you choose to cancel the study now, your data will be removed from \
     your computer immediately. You won\'t be able to see your chart or the raw \
     data after you cancel the study. You can ' + this.optOutLink +
-    '.</p>' + this.uploadData + this.dataCanvas;
+    '.</li>' + this.uploadData + this.dataCanvas;
   },
 
   upcomingHtml: "",
@@ -94,10 +92,10 @@ exports.GenericWebContent.prototype = {
   get remainDataHtml() {
     return '<h2>Thank you for submitting your ' + this.titleLink +
     'study data!</h2> \
-    <p>Please remember to save your test graph or export the raw data now if \
-    you are interested!</p>\
-    <p>If you choose not to save them, they will be removed from your computer \
-    7 days after your submission.</p>'
+    <ul> <li>Please remember to save your test graph or export the raw data now if \
+    you are interested!</li>\
+    <li>If you choose not to save them, they will be removed from your computer \
+    7 days after your submission.</li></ul>'
     + this.dataCanvas;
   },
 
@@ -110,30 +108,28 @@ exports.GenericWebContent.prototype = {
 
   get deletedRemainDataHtml() {
     return '<h2>Your ' + this.titleLink + 'study data is removed.</h2> \
-    <p>All the data that was collected has been transmitted to Mozilla and \
-    removed from your computer.</p> \
-    <p>The results of the study will be available soon.  When they are ready \
-    to view, Test Pilot will let you know.</p>';
+    <ul><li>All the data that was collected has been transmitted to Mozilla and \
+    removed from your computer.</li> \
+    <li>The results of the study will be available soon.  When they are ready \
+    to view, Test Pilot will let you know.</li></ul>';
   },
 
   get inProgressDataPrivacyHtml() {
-    return '<p>The study will end in ' + this.expInfo.duration + ' days.\
-    <b>At the end of it, you will be prompted to choose whether you want to \
-    submit your test data or not.</b> All test data you submit will be \
+    return '<p>At the end of the study, you will be prompted to choose whether you want to \
+    submit your test data or not. All test data you submit will be \
     anonymized and will not be personally identifiable. We do not record \
     any search terms or what sites you visit.</p>';
   },
 
   completedDataPrivacyHtml: '<p>All test data you submit will be \
-    anonymized and will not be personally identifiable. The data you submit \
-    will help us directly with improvements to the tab management interface. \
-    <b>After we\'ve analyzed the data from all submissions, you will be able \
-    to see the new study findings by clicking on the Test Pilot icon on the \
-    bottom-right corner and choosing "All your studies".</b></p>',
+    anonymized and will not be personally identifiable. \
+    After we\'ve analyzed the data from all submissions, you will be able \
+    to see the new study findings by clicking on the Test Pilot icon \
+    and choosing "All your studies".</p>',
 
   canceledDataPrivacyHtml: "",
   dataExpiredDataPrivacyHtml: "",
-  remainDataPrivacyHtml: "",
+  remainDataPrivacyHtml:"",
   deletedRemainDataPrivacyHtml: "",
 
   onPageLoad: function(experiment, document, graphUtils) {

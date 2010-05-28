@@ -1,27 +1,27 @@
-{"experiments": [{"name": "Menu Item Usage Study",
-                  "filename": "menu-item-usage/menu-item-usage.js"},
-                 {"name": "A Week in the Life of a Browser",
-                  "filename": "a-week-life/a_week_life.js"},
-                 {"name": "Pilot Background Survey",
-                  "filename": "pilot-background-survey.js"},
-                 {"name": "Tab Switch Study",
-                  "filename": "tab-open-close/tab_switch_study.js"},
-                 {"name": "Toolbar Study",
-                  "filename": "toolbars/toolbar-study.js"},
-                 {"name": "Ghost Study",
-                  "filename": "dependency-experiment/ghost-study.js"},
-                 {"name": "Example Study",
-                  "filename": "example/example_study.js"},
-                 {"name": "Example Survey",
-                  "filename": "example/example_survey.js"}],
-"experiment_jars": [{"name": "Toolbar Study",
-                     "jarfile": "toolbars/toolbar-study.jar",
-                     "studyfile": "toolbar-study.js",
-                     "hash": "822103ac18b7a49c489aa129ee8bf0a6375d8a74c8e156b00a604dded3e02f9c"}],
-"libraries": [{"name": "Ghost Study Library",
-                  "filename": "dependency-experiment/ghost-library.js"},
-              {"name": "Study Base Classes Library",
-                  "filename": "study_base_classes.js"}],
+{"experiment_jars": [
+  {"name": "Dependencies",
+   "jarfile": "base_classes.jar",
+   "hash": "509ec24619abf2f4bbb7c2d98e8f64052e6ac96dba8595996fb93477928c1793"
+  },
+
+  {"name": "Toolbar Study",
+   "jarfile": "toolbars/toolbar-study.jar",
+   "studyfile": "toolbar-study.js",
+   "hash": "822103ac18b7a49c489aa129ee8bf0a6375d8a74c8e156b00a604dded3e02f9c"
+  },
+
+  {"name": "Pilot Background Survey",
+   "jarfile": "basic-survey.jar",
+   "studyfile": "pilot-background-survey.js",
+   "hash": "3eb27d9e7d551ad006692368b6186dac315c8d6a51a91a226cbc4d7ba70e4652"
+  },
+
+  {"name": "A Week in the Life of a Browser",
+   "jarfile": "a-week-life/week_life.jar",
+   "studyfile": "a_week_life.js",
+   "hash": "5090d703ac7716048ab66affc754307ddf26f27487f12a235ea8d5ea94532544"
+  }
+],
 
 "results": [{"title": "Min and Max Tabs",
 "summary": "How many tabs do users have open at a time?",

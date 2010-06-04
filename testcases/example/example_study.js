@@ -18,7 +18,7 @@ BaseClasses = require("study_base_classes.js");
 exports.experimentInfo = {
 
   testName: "Example",
-  testId: 2000,  // must be unique across all test pilot studies
+  testId: 1010,  // must be unique across all test pilot studies
   testInfoUrl: "https://", // URL of page explaining your study
   summary: "A sentence or two explaining what your study is about",
   thumbnail: "http://", // URL of image representing your study
@@ -29,6 +29,7 @@ exports.experimentInfo = {
   duration: 5, // a number of days - fractions OK.
   minTPVersion: "1.0a1", // Test Pilot versions older than this
     // will not run the study.
+  minFXVersion: "4.0",
 
   // For studies that automatically recur:
   recursAutomatically: false,

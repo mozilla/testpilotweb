@@ -23,6 +23,45 @@
   }
 ],
 
+"legacy": [
+{ "name": "Tab Open/Close Study",
+  "id": "1",
+  "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
+  "summary": "Tabbed browsing is offered by all major web browsers. The first question we want to explore: what would be the best default browser behavior after users close or open a tab when many tabs are open?",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-study-thumbnail.png"
+},
+
+{ "name": "Tab Switch Study",
+  "id": "5",
+  "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
+  "summary": "This 5-day study aims to understand how people switch between tabs. The result of this study will help Firefox team design better ways for people to manage their tabs. ",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-switch-thumbnail.png"
+},
+
+{ "name": "Menu Item Usage Study",
+  "id": "4",
+  "url": "https://testpilot.mozillalabs.com/testcases/menuitemusage",
+  "summary": "Remembering which username/password combination to use on a given site can be very frustrating. Firefox tries to help solve a part of this  problem with the Password Manager feature. Can it be more helpful? ",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/menu-item-usage/menu-study-thumbnail.png"
+},
+
+{
+  "name": "Accounts and Passwords Study",
+  "id": "3",
+  "url": "https://testpilot.mozillalabs.com/testcases/account-password.html",
+  "summary": "Remembering which username/password combination to use on a given site can be very frustrating. Firefox tries to help solve a part of this  problem with the Password Manager feature. Can it be more helpful? ",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/password-distribution/account-password-study-thumbnail.png"
+},
+
+{
+  "name": "Accounts and Passwords Survey",
+  "id": "account_password_survey",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
+  "summary": ""
+}
+
+],
+
 "results": [{"title": "Min and Max Tabs",
 "summary": "How many tabs do users have open at a time?",
 "id": "1_results_min_max",

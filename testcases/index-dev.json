@@ -33,7 +33,7 @@
 
 { "name": "Tab Switch Study",
   "id": "5",
-  "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
+  "url": "https://testpilot.mozillalabs.com/testcases/tab-switch-study",
   "summary": "This 5-day study aims to understand how people switch between tabs. The result of this study will help Firefox team design better ways for people to manage their tabs. ",
   "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-switch-thumbnail.png"
 },
@@ -56,6 +56,7 @@
 {
   "name": "Accounts and Passwords Survey",
   "id": "account_password_survey",
+  "url": "https://testpilot.mozillalabs.com/testcases/account-password.html",
   "thumbnail": "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   "summary": ""
 }

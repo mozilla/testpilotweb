@@ -605,212 +605,213 @@ exports.webContent = {
     // Get rid of old data so it doesn't pollute current submission
     this._deleteDataOlderThanAWeek(experiment.dataStore);
 
-    let rawData = experiment.dataStoreAsJSON;
-    let bkmks, folders, depth;
-    let browserUseTimeData = [];
-    let bookmarksData = [];
-    let addonsData = [];
-    let firstTimestamp = 0;
-    let maxBkmks = 0;
-    let totalUseTime = 0;
-    let idleTime = 0;
-    let numDownloads = 0;
-    let numAddons = 0;
-    let rowNum;
+    experiment.getDataStoreAsJSON(function(rawData) {
+      let bkmks, folders, depth;
+      let browserUseTimeData = [];
+      let bookmarksData = [];
+      let addonsData = [];
+      let firstTimestamp = 0;
+      let maxBkmks = 0;
+      let totalUseTime = 0;
+      let idleTime = 0;
+      let numDownloads = 0;
+      let numAddons = 0;
+      let rowNum;
 
-    for each ( let row in rawData ) {
-      if (firstTimestamp == 0 ) {
-        firstTimestamp = row.timestamp;
-      }
-      switch(row.event_code) {
-      case WeekEventCodes.BROWSER_START:
-        browserUseTimeData.push( [row.timestamp, 2]);
-        // TODO treat this as a crash if there was no shutdown first!
-        // what is the logic for that, though?
-      break;
-      case WeekEventCodes.BROWSER_SHUTDOWN:
-        browserUseTimeData.push( [row.timestamp, 0]);
-      break;
-      case WeekEventCodes.BROWSER_ACTIVATE:
-        browserUseTimeData.push( [row.timestamp, 2]);
-      break;
-      case WeekEventCodes.BROWSER_INACTIVE:
-        browserUseTimeData.push( [row.timestamp, 1]);
-      break;
-      case WeekEventCodes.BOOKMARK_STATUS:
-        bkmks = row.data1;
-        folders = row.data2;
-        depth = row.data3;
-        bookmarksData.push( [row.timestamp, bkmks] );
-      break;
-      case WeekEventCodes.BOOKMARK_CREATE:
-        bkmks += 1;
-        bookmarksData.push( [row.timestamp, bkmks] );
-      break;
-        // TODO bookmark remove!
-      case WeekEventCodes.DOWNLOAD:
-        numDownloads += 1;
-      break;
-      case WeekEventCodes.ADDON_STATUS:
-        numAddons = row.data1;
-        addonsData.push( [row.timestamp, numAddons] );
+      for each ( let row in rawData ) {
+        if (firstTimestamp == 0 ) {
+         firstTimestamp = row.timestamp;
+        }
+        switch(row.event_code) {
+        case WeekEventCodes.BROWSER_START:
+          browserUseTimeData.push( [row.timestamp, 2]);
+          // TODO treat this as a crash if there was no shutdown first!
+          // what is the logic for that, though?
         break;
-      case WeekEventCodes.ADDON_INSTALL:
-        numAddons += 1;
-        addonsData.push( [row.timestamp, numAddons] );
+        case WeekEventCodes.BROWSER_SHUTDOWN:
+          browserUseTimeData.push( [row.timestamp, 0]);
         break;
-        // TODO add-on uninstall!
-      }
-      if (bkmks > maxBkmks) {
-        maxBkmks = bkmks;
-      }
-    }
-    // use the end time from the last record if the status is STATUS_FINISHED or
-    // above.
-    let lastTimestamp;
-    if (rawData.length > 0 && (experiment.status >= 4)) {
-      lastTimestamp = rawData[(rawData.length - 1)].timestamp;
-    } else {
-      lastTimestamp = (new Date()).getTime();
-    }
-    browserUseTimeData.push( [lastTimestamp, 2] );
-    bookmarksData.push([lastTimestamp, bkmks]);
-
-    let canvas = document.getElementById("browser-use-time-canvas");
-    let ctx = canvas.getContext("2d");
-
-    let boundingRect = { originX: 40,
-                         originY: 210,
-                         width: 500,
-                         height: 300 };
-    let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
-    console.log("xScale is " + xScale );
-    ctx.fillStyle = "white";
-    ctx.fillRect (0, 0, 500, 300);
-
-    //Draw colored bar - orange for using the browser, yellow for running
-    // but not being used, white for no use.
-    for (rowNum = 0; rowNum < browserUseTimeData.length - 1; rowNum++) {
-      let row = browserUseTimeData[rowNum];
-      let nextRow = browserUseTimeData[rowNum + 1];
-      let timeLength = nextRow[0] - row[0];
-      let x = xScale * ( row[0] - firstTimestamp );
-      let width = xScale * timeLength;
-      switch( row[1]) {
-      case 0:
-        continue;
-      case 1:
-        idleTime += timeLength;
-        ctx.fillStyle = "yellow";
+        case WeekEventCodes.BROWSER_ACTIVATE:
+          browserUseTimeData.push( [row.timestamp, 2]);
         break;
-      case 2:
-        totalUseTime += timeLength;
-        ctx.fillStyle = "orange";
+        case WeekEventCodes.BROWSER_INACTIVE:
+          browserUseTimeData.push( [row.timestamp, 1]);
         break;
+        case WeekEventCodes.BOOKMARK_STATUS:
+          bkmks = row.data1;
+          folders = row.data2;
+          depth = row.data3;
+          bookmarksData.push( [row.timestamp, bkmks] );
+        break;
+        case WeekEventCodes.BOOKMARK_CREATE:
+          bkmks += 1;
+          bookmarksData.push( [row.timestamp, bkmks] );
+        break;
+          // TODO bookmark remove!
+        case WeekEventCodes.DOWNLOAD:
+          numDownloads += 1;
+        break;
+        case WeekEventCodes.ADDON_STATUS:
+          numAddons = row.data1;
+          addonsData.push( [row.timestamp, numAddons] );
+          break;
+        case WeekEventCodes.ADDON_INSTALL:
+          numAddons += 1;
+          addonsData.push( [row.timestamp, numAddons] );
+          break;
+          // TODO add-on uninstall!
+        }
+        if (bkmks > maxBkmks) {
+          maxBkmks = bkmks;
+        }
       }
-      ctx.fillRect(x, 180, width, 50);
-    }
-    // Add legend to explain colored bar:
-    ctx.strokeStyle ="black";
-    ctx.fillStyle = "orange";
-    ctx.fillRect(5, 235, 15, 15);
-    ctx.strokeRect(5, 235, 15, 15);
-    ctx.fillStyle = "yellow";
-    ctx.fillRect(5, 255, 15, 15);
-    ctx.strokeRect(5, 255, 15, 15);
-    ctx.fillStyle = "grey";
-    ctx.save();
-    ctx.translate(25, 250);
-    ctx.mozDrawText("= Firefox actively running");
-    ctx.restore();
-    ctx.save();
-    ctx.translate(25, 270);
-    ctx.mozDrawText("= Firefox running but idle");
-    ctx.restore();
-
-    // Draw line to show bookmarks over time:
-    let bkmkYScale = boundingRect.height / (maxBkmks * 2);
-    ctx.strokeStyle = "blue";
-    ctx.beginPath();
-    for (rowNum = 0; rowNum < bookmarksData.length; rowNum++) {
-      let row = bookmarksData[rowNum];
-      if (rowNum == 0) {
-        ctx.moveTo(xScale * (row[0] - firstTimestamp),
-                   (boundingRect.height/2) - bkmkYScale * row[1] + 10);
+      // use the end time from the last record if the status is STATUS_FINISHED or
+      // above.
+      let lastTimestamp;
+      if (rawData.length > 0 && (experiment.status >= 4)) {
+        lastTimestamp = rawData[(rawData.length - 1)].timestamp;
       } else {
-        ctx.lineTo(xScale * (row[0] - firstTimestamp),
-                   (boundingRect.height/2) - bkmkYScale * row[1] + 10);
+        lastTimestamp = (new Date()).getTime();
       }
-    }
-    ctx.stroke();
-    // Label starting and finishing bookmarks:
-    ctx.mozTextStyle = "10pt sans serif";
-    ctx.fillStyle = "grey";
-    ctx.save();
-    ctx.translate(5, (boundingRect.height/2) -
-                  bkmkYScale * bookmarksData[0][1] + 25);
-    ctx.mozDrawText(bookmarksData[0][1] + " bookmarks");
-    ctx.restore();
-    ctx.save();
-    let lastNumBkmks = bookmarksData[bookmarksData.length -1][1];
-    ctx.translate(boundingRect.width - 80,
-                  (boundingRect.height/2) - bkmkYScale * lastNumBkmks + 25);
-    ctx.mozDrawText(lastNumBkmks + " bookmarks");
-    ctx.restore();
+      browserUseTimeData.push( [lastTimestamp, 2] );
+      bookmarksData.push([lastTimestamp, bkmks]);
 
-    // Add scale with dates on it
-    let firstDay = new Date(firstTimestamp);
-    console.info("Beginning date is " + firstDay.toString());
-    console.info("Ending date is " + (new Date(lastTimestamp)).toString());
-    firstDay.setDate( firstDay.getDate() + 1 );
-    firstDay.setHours(0);
-    firstDay.setMinutes(0);
-    firstDay.setSeconds(0);
-    firstDay.setMilliseconds(0);
-    ctx.fillStyle = "grey";
-    ctx.strokeStyle = "grey";
-    let dayMarker = firstDay;
-    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    while (dayMarker.getTime() < lastTimestamp) {
-      let x = xScale * (dayMarker.getTime() - firstTimestamp);
-      ctx.beginPath();
-      ctx.moveTo(x, 5);
-      ctx.lineTo(x, boundingRect.height - 5);
-      ctx.stroke();
+      let canvas = document.getElementById("browser-use-time-canvas");
+      let ctx = canvas.getContext("2d");
+
+      let boundingRect = { originX: 40,
+                           originY: 210,
+                           width: 500,
+                           height: 300 };
+      let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
+      console.log("xScale is " + xScale );
+      ctx.fillStyle = "white";
+      ctx.fillRect (0, 0, 500, 300);
+
+      //Draw colored bar - orange for using the browser, yellow for running
+      // but not being used, white for no use.
+      for (rowNum = 0; rowNum < browserUseTimeData.length - 1; rowNum++) {
+        let row = browserUseTimeData[rowNum];
+        let nextRow = browserUseTimeData[rowNum + 1];
+        let timeLength = nextRow[0] - row[0];
+        let x = xScale * ( row[0] - firstTimestamp );
+        let width = xScale * timeLength;
+        switch( row[1]) {
+        case 0:
+          continue;
+        case 1:
+          idleTime += timeLength;
+          ctx.fillStyle = "yellow";
+        break;
+        case 2:
+          totalUseTime += timeLength;
+          ctx.fillStyle = "orange";
+        break;
+        }
+        ctx.fillRect(x, 180, width, 50);
+      }
+      // Add legend to explain colored bar:
+      ctx.strokeStyle ="black";
+      ctx.fillStyle = "orange";
+      ctx.fillRect(5, 235, 15, 15);
+      ctx.strokeRect(5, 235, 15, 15);
+      ctx.fillStyle = "yellow";
+      ctx.fillRect(5, 255, 15, 15);
+      ctx.strokeRect(5, 255, 15, 15);
+      ctx.fillStyle = "grey";
       ctx.save();
-      ctx.translate(x + 5, 295);
-      ctx.mozDrawText(days[dayMarker.getDay()] + " " + dayMarker.getDate());
+      ctx.translate(25, 250);
+      ctx.mozDrawText("= Firefox actively running");
       ctx.restore();
-      dayMarker.setDate( dayMarker.getDate() + 1 );
-    }
+      ctx.save();
+      ctx.translate(25, 270);
+      ctx.mozDrawText("= Firefox running but idle");
+      ctx.restore();
 
-    // Fill in missing values from html paragraphs:
-    let getHours = function(x) {
-      return Math.round( x / 36000 ) / 100;
-    };
-    let getFormattedDateString = function(timestamp) {
-      let date = new Date(timestamp);
-      let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
-                  "Sep", "Oct", "Nov", "Dec"];
-      return months[date.getMonth()] + " " + date.getDate() + ", "
-        + date.getFullYear();
-    };
-    let startSpan = document.getElementById("usage-period-start-span");
-    let endSpan = document.getElementById("usage-period-end-span");
-    if (startSpan) {
-      startSpan.innerHTML = getFormattedDateString(firstTimestamp);
-    }
-    if (endSpan) {
-      endSpan.innerHTML = getFormattedDateString(lastTimestamp);
-    }
-    document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
-    document.getElementById("num-bkmks-span").innerHTML = bkmks;
-    document.getElementById("num-folders-span").innerHTML = folders;
-    document.getElementById("max-depth-span").innerHTML = depth;
-    document.getElementById("num-downloads").innerHTML = numDownloads;
-    document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
-    document.getElementById("num-extensions").innerHTML = numAddons;
-    document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
-    document.getElementById("idle-time-span").innerHTML = getHours(idleTime);
+      // Draw line to show bookmarks over time:
+      let bkmkYScale = boundingRect.height / (maxBkmks * 2);
+      ctx.strokeStyle = "blue";
+      ctx.beginPath();
+      for (rowNum = 0; rowNum < bookmarksData.length; rowNum++) {
+        let row = bookmarksData[rowNum];
+        if (rowNum == 0) {
+          ctx.moveTo(xScale * (row[0] - firstTimestamp),
+                     (boundingRect.height/2) - bkmkYScale * row[1] + 10);
+        } else {
+          ctx.lineTo(xScale * (row[0] - firstTimestamp),
+                     (boundingRect.height/2) - bkmkYScale * row[1] + 10);
+        }
+      }
+      ctx.stroke();
+      // Label starting and finishing bookmarks:
+      ctx.mozTextStyle = "10pt sans serif";
+      ctx.fillStyle = "grey";
+      ctx.save();
+      ctx.translate(5, (boundingRect.height/2) -
+                    bkmkYScale * bookmarksData[0][1] + 25);
+      ctx.mozDrawText(bookmarksData[0][1] + " bookmarks");
+      ctx.restore();
+      ctx.save();
+      let lastNumBkmks = bookmarksData[bookmarksData.length -1][1];
+      ctx.translate(boundingRect.width - 80,
+                    (boundingRect.height/2) - bkmkYScale * lastNumBkmks + 25);
+      ctx.mozDrawText(lastNumBkmks + " bookmarks");
+      ctx.restore();
+
+      // Add scale with dates on it
+      let firstDay = new Date(firstTimestamp);
+      console.info("Beginning date is " + firstDay.toString());
+      console.info("Ending date is " + (new Date(lastTimestamp)).toString());
+      firstDay.setDate( firstDay.getDate() + 1 );
+      firstDay.setHours(0);
+      firstDay.setMinutes(0);
+      firstDay.setSeconds(0);
+      firstDay.setMilliseconds(0);
+      ctx.fillStyle = "grey";
+      ctx.strokeStyle = "grey";
+      let dayMarker = firstDay;
+      let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      while (dayMarker.getTime() < lastTimestamp) {
+        let x = xScale * (dayMarker.getTime() - firstTimestamp);
+        ctx.beginPath();
+        ctx.moveTo(x, 5);
+        ctx.lineTo(x, boundingRect.height - 5);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(x + 5, 295);
+        ctx.mozDrawText(days[dayMarker.getDay()] + " " + dayMarker.getDate());
+        ctx.restore();
+        dayMarker.setDate( dayMarker.getDate() + 1 );
+      }
+
+      // Fill in missing values from html paragraphs:
+      let getHours = function(x) {
+        return Math.round( x / 36000 ) / 100;
+      };
+      let getFormattedDateString = function(timestamp) {
+        let date = new Date(timestamp);
+        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+                    "Sep", "Oct", "Nov", "Dec"];
+        return months[date.getMonth()] + " " + date.getDate() + ", "
+          + date.getFullYear();
+      };
+      let startSpan = document.getElementById("usage-period-start-span");
+      let endSpan = document.getElementById("usage-period-end-span");
+      if (startSpan) {
+        startSpan.innerHTML = getFormattedDateString(firstTimestamp);
+      }
+      if (endSpan) {
+        endSpan.innerHTML = getFormattedDateString(lastTimestamp);
+      }
+      document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
+      document.getElementById("num-bkmks-span").innerHTML = bkmks;
+      document.getElementById("num-folders-span").innerHTML = folders;
+      document.getElementById("max-depth-span").innerHTML = depth;
+      document.getElementById("num-downloads").innerHTML = numDownloads;
+      document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
+      document.getElementById("num-extensions").innerHTML = numAddons;
+      document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
+      document.getElementById("idle-time-span").innerHTML = getHours(idleTime);
+    });
   }
 };

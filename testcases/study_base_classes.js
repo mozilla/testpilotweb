@@ -219,9 +219,13 @@ exports.GenericGlobalObserver.prototype = {
     this._windowObservers = [];
   },
 
-  record: function(event) {
+  record: function(event, callback) {
     if (!this.privateMode) {
-      this._store.storeEvent(event);
+      this._store.storeEvent(event, callback);
+    } else {
+      if (callback) {
+        callback(false);
+      }
     }
   }
 };

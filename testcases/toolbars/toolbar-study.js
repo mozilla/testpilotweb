@@ -536,6 +536,7 @@ GlobalToolbarObserver.prototype.record = function(event, itemId,
       interaction_type: interactionType,
       timestamp: Date.now()
     });
+    // storeEvent can also take a callback, which we're not using here.
   }
 };
 
@@ -701,53 +702,58 @@ ToolbarStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {
   let plotDiv = document.getElementById("data-plot-div");
-  let rawData = experiment.dataStoreAsJSON;
-  let stats = [];
-  let item;
-  let lastActionId;
-  for each( let row in rawData) {
-    if (row.event != ToolbarEvent.ACTION) {
-      continue;
+  experiment.dataStoreAsJSON(function(rawData) {
+    if (rawData.length == 0) {
+      return;
     }
-    // Only show me one mouse drag in a row...
-    if (row.interaction_type == ToolbarAction.MOUSE_DRAG &&
-        lastActionId == ToolbarAction.MOUSE_DRAG) {
-      continue;
-    }
-    let match = false;
-    for (item in stats) {
-      if (stats[item].id == row.item_id) {
-        match = true;
-        stats[item].quantity ++;
-        break;
+
+    let stats = [];
+    let item;
+    let lastActionId;
+    for each( let row in rawData) {
+      if (row.event != ToolbarEvent.ACTION) {
+        continue;
       }
+      // Only show me one mouse drag in a row...
+      if (row.interaction_type == ToolbarAction.MOUSE_DRAG &&
+          lastActionId == ToolbarAction.MOUSE_DRAG) {
+        continue;
+      }
+      let match = false;
+      for (item in stats) {
+        if (stats[item].id == row.item_id) {
+          match = true;
+          stats[item].quantity ++;
+          break;
+        }
+      }
+      if (!match) {
+        stats.push( {id: row.item_id, quantity: 1} );
+      }
+      lastActionId = row.interaction_type;
     }
-    if (!match) {
-      stats.push( {id: row.item_id, quantity: 1} );
+
+    let d1 = [];
+    for each (item in stats) {
+      d1.push([item.quantity, item.id - 0.5 ]);
     }
-    lastActionId = row.interaction_type;
-  }
 
-  let d1 = [];
-  for each (item in stats) {
-    d1.push([item.quantity, item.id - 0.5 ]);
-  }
+    let label;
+    let yAxisLabels = [];
+    for ( label in ToolbarWidget) {
+      let labelText = label.toLowerCase().replace("/_/g", " ");
+      let y = ToolbarWidget[label];
+      yAxisLabels.push([y, labelText]);
+    }
 
-  let label;
-  let yAxisLabels = [];
-  for ( label in ToolbarWidget) {
-    let labelText = label.toLowerCase().replace("/_/g", " ");
-    let y = ToolbarWidget[label];
-    yAxisLabels.push([y, labelText]);
-  }
-
-  try {
-    graphUtils.plot(plotDiv, [{data: d1}],
-                    {series: {bars: {show: true, horizontal: true}},
-                     yaxis: {ticks: yAxisLabels}});
-  } catch(e) {
-    console.warn("Problem with graphutils: " + e + "\n");
-  }
+    try {
+      graphUtils.plot(plotDiv, [{data: d1}],
+                      {series: {bars: {show: true, horizontal: true}},
+                       yaxis: {ticks: yAxisLabels}});
+    } catch(e) {
+      console.warn("Problem with graphutils: " + e + "\n");
+    }
+  });
 };
 exports.webContent = new ToolbarStudyWebContent();
 

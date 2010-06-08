@@ -24,6 +24,7 @@
 ],
 
 "legacy": [
+
 { "name": "Tab Open/Close Study",
   "id": "1",
   "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",

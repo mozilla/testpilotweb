@@ -1,11 +1,85 @@
 {"experiments": [{"name": "A Week in the Life of a Browser",
                   "filename": "a-week-life/a_week_life.js"},
-                 {"name": "Toolbar Widgets",
-                  "filename": "toolbars/toolbar-study.js"},
                  {"name": "Pilot Background Survey",
                   "filename": "pilot-background-survey.js"}],
 "libraries": [{"name": "Study Base Classes Library",
                   "filename": "study_base_classes.js"}],
+
+"experiment_jars": [
+  {"name": "Dependencies",
+   "jarfile": "base_classes.jar",
+   "hash": "8b30783a417999ec91b0ad7bcb91c058bfa79b6c386e7b27a247d09d89b1e3c9"
+  },
+
+  {"name": "Toolbar Study",
+   "jarfile": "toolbars/toolbar-study.jar",
+   "studyfile": "toolbar-study.js",
+   "hash": "c1bf4b98ca0a779d49689071cf6b66a52e1506562410ee42ac7bbe7d34ec7b8e"
+  },
+
+  {"name": "Pilot Background Survey",
+   "jarfile": "basic-survey.jar",
+   "studyfile": "pilot-background-survey.js",
+   "hash": "3eb27d9e7d551ad006692368b6186dac315c8d6a51a91a226cbc4d7ba70e4652"
+  },
+
+  {"name": "A Week in the Life of a Browser",
+   "jarfile": "a-week-life/week_life.jar",
+   "studyfile": "a_week_life.js",
+   "hash": "be2845a5d4f8e003e782edd83ec7841cd83b4f53cca28c4b568c5b5233555c4d"
+  }
+],
+
+"legacy": [
+{"name": "Toolbar Study",
+ "id": "6",
+ "url": "https://testpilot.mozillalabs.com/testcases/toolbar",
+ "summary": "We would like to have a better understanding of how Firefox's \
+current toolbar is commonly used. How often do people click on the Back \
+button, how often do people switch search engines? The study data will be \
+directly used to improve the toolbar design for Firefox 4.",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/toolbars/toolbar-study-thumbnail.png",
+},
+
+{ "name": "Tab Open/Close Study",
+  "id": "1",
+  "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
+  "summary": "Tabbed browsing is offered by all major web browsers. The first question we want to explore: what would be the best default browser behavior after users close or open a tab when many tabs are open?",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-study-thumbnail.png"
+},
+
+{ "name": "Tab Switch Study",
+  "id": "5",
+  "url": "https://testpilot.mozillalabs.com/testcases/tab-switch-study",
+  "summary": "This 5-day study aims to understand how people switch between tabs. The result of this study will help Firefox team design better ways for people to manage their tabs. ",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-switch-thumbnail.png"
+},
+
+{ "name": "Menu Item Usage Study",
+  "id": "4",
+  "url": "https://testpilot.mozillalabs.com/testcases/menuitemusage",
+  "summary": "Remembering which username/password combination to use on a given site can be very frustrating. Firefox tries to help solve a part of this  problem with the Password Manager feature. Can it be more helpful? ",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/menu-item-usage/menu-study-thumbnail.png"
+},
+
+{
+  "name": "Accounts and Passwords Study",
+  "id": "3",
+  "url": "https://testpilot.mozillalabs.com/testcases/account-password.html",
+  "summary": "Remembering which username/password combination to use on a given site can be very frustrating. Firefox tries to help solve a part of this  problem with the Password Manager feature. Can it be more helpful? ",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/password-distribution/account-password-study-thumbnail.png"
+},
+
+{
+  "name": "Accounts and Passwords Survey",
+  "id": "account_password_survey",
+  "url": "https://testpilot.mozillalabs.com/testcases/account-password.html",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
+  "summary": ""
+}
+
+],
+
 "results": [{"title": "Min and Max Tabs",
 "summary": "How many tabs do users have open at a time?",
 "id": "1_results_min_max",

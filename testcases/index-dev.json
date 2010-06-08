@@ -1,13 +1,13 @@
 {"experiment_jars": [
   {"name": "Dependencies",
    "jarfile": "base_classes.jar",
-   "hash": "09f0208f098a982293f5c1b416bee121db351dde70ef9ee15cb2f2b3e1d8c3e7"
+   "hash": "8b30783a417999ec91b0ad7bcb91c058bfa79b6c386e7b27a247d09d89b1e3c9"
   },
 
   {"name": "Toolbar Study",
    "jarfile": "toolbars/toolbar-study.jar",
    "studyfile": "toolbar-study.js",
-   "hash": "822103ac18b7a49c489aa129ee8bf0a6375d8a74c8e156b00a604dded3e02f9c"
+   "hash": "c1bf4b98ca0a779d49689071cf6b66a52e1506562410ee42ac7bbe7d34ec7b8e"
   },
 
   {"name": "Pilot Background Survey",
@@ -19,7 +19,7 @@
   {"name": "A Week in the Life of a Browser",
    "jarfile": "a-week-life/week_life.jar",
    "studyfile": "a_week_life.js",
-   "hash": "5090d703ac7716048ab66affc754307ddf26f27487f12a235ea8d5ea94532544"
+   "hash": "be2845a5d4f8e003e782edd83ec7841cd83b4f53cca28c4b568c5b5233555c4d"
   }
 ],
 

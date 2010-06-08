@@ -34,11 +34,8 @@
 {"name": "Toolbar Study",
  "id": "6",
  "url": "https://testpilot.mozillalabs.com/testcases/toolbar",
- "summary": "We would like to have a better understanding of how Firefox's \
-current toolbar is commonly used. How often do people click on the Back \
-button, how often do people switch search engines? The study data will be \
-directly used to improve the toolbar design for Firefox 4.",
-  "thumbnail": "https://testpilot.mozillalabs.com/testcases/toolbars/toolbar-study-thumbnail.png",
+ "summary": "We would like to have a better understanding of how Firefox's current toolbar is commonly used. How often do people click on the Back  button, how often do people switch search engines? The study data will be directly used to improve the toolbar design for Firefox 4.",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/toolbars/toolbar-study-thumbnail.png"
 },
 
 { "name": "Tab Open/Close Study",

@@ -4,6 +4,10 @@ exports.TYPE_DOUBLE = 1;
 exports.GenericWebContent = function(experimentInfo) {
   this.expInfo = experimentInfo;
 };
+
+// New async API requires that web content implement the following:
+// 1. getWebContent(callback)
+
 exports.GenericWebContent.prototype = {
   get rawDataLink() {
     return '<p><a onclick="showRawData(' + this.expInfo.testId + ');">'

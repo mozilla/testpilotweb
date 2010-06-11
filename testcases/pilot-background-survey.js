@@ -6,14 +6,14 @@ const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
   surveyId: "basic_panel_survey_2",
-  surveyName: "Beta User Background Survey",
+  surveyName: "Firefox 4 Beta User Background Survey",
   summary: "This survey will help us build a better picture of the majority "
-    + "of Firefox 4 Beta user. The data will only be viewed in aggregate, "
-    + "and your answers are not associated with any of your personal data."
+    + "of Firefox 4 Beta user. This survey doesn't contain any personally "
+    + "identifiable questions."
     + "Thank you for your time!",
   thumbnail: "",
   surveyExplanation: "<p>Thank you for joining the Firefox 4 Beta Program!</p> \
-<p>Please help us understand our beta users better by filling out this survey. \
+<p>Please help us build a better picture of our Beta users by completing this survey!  \
 This survey doesn't contain any personally identifiable questions. \
 It will be uploaded along with any user study data that you choose to submit. \
 You can always use the button below to review or change your answers.</p>",
@@ -23,8 +23,8 @@ You can always use the button below to review or change your answers.</p>",
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
      type: MULTIPLE_CHOICE,
-     choices: ["less than 3 months","3 to 6 months","6 months to a year", "1 to 2 years",
-                "2 to 3 years","3 to 5 years","more than 5 years"]},
+     choices: ["Less than 3 months","3 to 6 months","6 months to a year", "1 to 2 years",
+                "2 to 3 years","3 to 5 years","More than 5 years"]},
   { question: "Do you use more than one browser in your daily life?",
     type: MULTIPLE_CHOICE,
     choices: ["No. I only use Firefox.",
@@ -36,18 +36,18 @@ You can always use the button below to review or change your answers.</p>",
   { question: "If you use multiple browsers, what do you consider to be your primary browser?",
     type: MULTIPLE_CHOICE,
     choices: ["I don't user other browsers, only use Firefox"," Firefox","Chrome","Safari","Opera","Internet Explore (all versions)"],
-    free_entry: "Other:" },
+    free_entry: "Other" },
   { question: "What is your gender?",
     type: MULTIPLE_CHOICE,
     choices: ["Male", "Female"]},
   {question: "How old are you?",
    type: MULTIPLE_CHOICE,
-   choices: ["under 18",
+   choices: ["Under 18",
              "18-25",
              "26-35",
              "36-45",
              "46-55",
-             "older than 55"]},
+             "Older than 55"]},
   { question: "How much time do you spend on the Web each day?",
     type: MULTIPLE_CHOICE,
     choices: ["Less than 1 hour",
@@ -63,7 +63,7 @@ You can always use the button below to review or change your answers.</p>",
     scale_maximum: 10,
     min_label: "Not technical at all",
     max_label: "Highly technical"},
-  { question: "Where do you usualy access the Internet?",
+  { question: "Where do you usually access the Internet?",
     type: CHECK_BOXES_WITH_FREE_ENTRY,
     choices: ["Home", "Work", "School","Mobile"],
     free_entry: "Other" },

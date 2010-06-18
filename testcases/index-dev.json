@@ -20,6 +20,12 @@
    "jarfile": "a-week-life/week_life.jar",
    "studyfile": "a_week_life.js",
    "hash": "be2845a5d4f8e003e782edd83ec7841cd83b4f53cca28c4b568c5b5233555c4d"
+  },
+
+  {"name": "Menu Usage Study v2",
+   "jarfile": "menu-item-usage/menu-item-usage.jar",
+   "studyfile": "menu-item-usage-2.js",
+   "hash": "9687caee29398286cc2453868f96df69ade812c0d235a9b39d0ff1323bec1016"
   }
 ],
 

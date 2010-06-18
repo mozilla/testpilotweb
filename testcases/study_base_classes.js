@@ -1,5 +1,6 @@
 exports.TYPE_INT_32 = 0;
 exports.TYPE_DOUBLE = 1;
+exports.TYPE_STRING = 2;
 
 exports.GenericWebContent = function(experimentInfo) {
   this.expInfo = experimentInfo;

@@ -213,8 +213,10 @@ MenuWindowObserver.prototype.install = function() {
   let window = this.window;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
   let mainMenuBar = window.document.getElementById("main-menubar");
-  this._listen(mainMenuBar, "command", exports.handlers.onCmdMenuBar, true);
-  this._listen(mainCommandSet, "command", exports.handlers.onCmdMainSet, true);
+  this._listen(mainMenuBar, "command", function(evt) {
+                 exports.handlers.onCmdMenuBar(evt); }, true);
+  this._listen(mainCommandSet, "command", function(evt) {
+                 exports.handlers.onCmdMainSet(evt); }, true);
 
   for (let item in CMD_ID_STRINGS_BY_MENU) {
     // Currently trying: just attach it to toplevel menupopups, not
@@ -224,8 +226,10 @@ MenuWindowObserver.prototype.install = function() {
     let popupId = CMD_ID_STRINGS_BY_MENU[item].popupId;
     let popup = window.document.getElementById(popupId);
     if (popup) {
-      this._listen(popup, "popuphidden", exports.handlers.onPopupHidden, true);
-      this._listen(popup, "popupshown", exports.handlers.onPopupShown, true);
+      this._listen(popup, "popuphidden", function(evt) {
+                     exports.handlers.onPopupHidden(evt); }, true);
+      this._listen(popup, "popupshown", function(evt) {
+                     exports.handlers.onPopupShown(evt); }, true);
     }
     // TODO include Mac's Firefox menu, if we can figure out what its
     // popup id is.
@@ -431,12 +435,16 @@ function MenuStudyWebContent() {
 BaseClasses.extend(MenuStudyWebContent, BaseClasses.GenericWebContent);
 MenuStudyWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
-    return '<h3>Your Most Often Used Menu Items Are:</h3>\
+      return '<div class="dataBox"><h3>View Your Data:</h3>' +
+      this.dataViewExplanation +
+      this.rawDataLink +
+'<h3>Your Most Often Used Menu Items Are:</h3>\
 <p><table class="callout" id="most-used-table"><tr><th>Menu</th><th>Item</th>\
 <th>Selected with mouse</th><th>Used keyboard shortcut</th></tr></table></p>\
 <h3>The Menu Items You Spent The Longest Time Hunting For Are:</h3>\
 <p><table class="callout" id="longest-hunt-table"><tr><th>Menu</th><th>Item</th>\
-<th>Average Time to Find</th></tr></table></p>';
+<th>Average Time to Find</th></tr></table></p>' +
+      this.saveButtons + '</div>';
   });
 MenuStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
@@ -546,3 +554,9 @@ MenuStudyWebContent.prototype.onPageLoad = function(experiment,
 };
 
 exports.webContent = new MenuStudyWebContent();
+
+require("unload").when(
+  function myDestructor() {
+    console.info("Menu item study destructor called.");
+    exports.handlers.uninstallAll();
+  });

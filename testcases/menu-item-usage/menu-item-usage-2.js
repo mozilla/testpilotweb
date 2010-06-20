@@ -213,10 +213,18 @@ MenuWindowObserver.prototype.install = function() {
   let window = this.window;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
   let mainMenuBar = window.document.getElementById("main-menubar");
-  this._listen(mainMenuBar, "command", function(evt) {
-                 exports.handlers.onCmdMenuBar(evt); }, true);
-  this._listen(mainCommandSet, "command", function(evt) {
+  if (mainMenuBar) {
+    this._listen(mainMenuBar, "command", function(evt) {
+                   exports.handlers.onCmdMenuBar(evt); }, true);
+  } else {
+    dump("No such item as id main-menubar.\n");
+  }
+  if (mainCommandSet) {
+    this._listen(mainCommandSet, "command", function(evt) {
                  exports.handlers.onCmdMainSet(evt); }, true);
+  } else {
+    dump("No such item as id mainCommandSet.\n");
+  }
 
   for (let item in CMD_ID_STRINGS_BY_MENU) {
     // Currently trying: just attach it to toplevel menupopups, not
@@ -321,6 +329,7 @@ GlobalMenuObserver.prototype.storeMenuChoice = function( isKeyboard, idString ) 
 GlobalMenuObserver.prototype.onCmdMainSet = function(evt) {
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
+      // Bugging out right here, claiming this.storeMenuChoice is not a function
       this.storeMenuChoice(false, tag.command);
     } else if (tag.tagName == "key") {
       this.storeMenuChoice(true, tag.command?tag.command:tag.id );

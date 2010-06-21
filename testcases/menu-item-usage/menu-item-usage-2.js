@@ -451,6 +451,12 @@ MenuStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
     return "This study gathers information on which menu items are most"
       + " frequently used, either with the mouse or by keyboard shortcut.";
   });
+MenuStudyWebContent.prototype.__defineGetter__("saveButtons",
+  function() {
+    return '<div><button type="button"\
+    onclick="exportData();">Export Data</button></div>';
+  });
+
 
 MenuStudyWebContent.prototype.onPageLoad = function(experiment,
                                                     document,

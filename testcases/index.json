@@ -11,22 +11,16 @@
    "hash": "f7abeb1300c604f5ff37aae58fbb26608e238c590facdb4f03f82ff557d97646"
   },
 
-  {"name": "Toolbar Study",
-   "jarfile": "toolbars/toolbar-study.jar",
-   "studyfile": "toolbar-study.js",
-   "hash": "c1bf4b98ca0a779d49689071cf6b66a52e1506562410ee42ac7bbe7d34ec7b8e"
-  },
-
   {"name": "Pilot Background Survey",
    "jarfile": "basic-survey.jar",
    "studyfile": "pilot-background-survey.js",
    "hash": "29a686d9deca825de58109e2d3486bd1d42d9b8f40b78b61d2bc882b93c9be6b"
   },
 
-  {"name": "A Week in the Life of a Browser",
-   "jarfile": "a-week-life/week_life.jar",
-   "studyfile": "a_week_life.js",
-   "hash": "be2845a5d4f8e003e782edd83ec7841cd83b4f53cca28c4b568c5b5233555c4d"
+  {"name": "Menu Usage Study v2",
+   "jarfile": "menu-item-usage/menu-item-usage.jar",
+   "studyfile": "menu-item-usage-2.js",
+   "hash": "744dd1a395abc7c1b78f3dc6d2dc0a71774e2148c98354d6d86e5dcff0fcb430"
   }
 ],
 

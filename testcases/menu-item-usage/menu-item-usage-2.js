@@ -213,18 +213,10 @@ MenuWindowObserver.prototype.install = function() {
   let window = this.window;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
   let mainMenuBar = window.document.getElementById("main-menubar");
-  if (mainMenuBar) {
-    this._listen(mainMenuBar, "command", function(evt) {
-                   exports.handlers.onCmdMenuBar(evt); }, true);
-  } else {
-    dump("No such item as id main-menubar.\n");
-  }
-  if (mainCommandSet) {
-    this._listen(mainCommandSet, "command", function(evt) {
+  this._listen(mainMenuBar, "command", function(evt) {
+                 exports.handlers.onCmdMenuBar(evt); }, true);
+  this._listen(mainCommandSet, "command", function(evt) {
                  exports.handlers.onCmdMainSet(evt); }, true);
-  } else {
-    dump("No such item as id mainCommandSet.\n");
-  }
 
   for (let item in CMD_ID_STRINGS_BY_MENU) {
     // Currently trying: just attach it to toplevel menupopups, not
@@ -291,7 +283,7 @@ GlobalMenuObserver.prototype.storeMenuChoice = function( isKeyboard, idString ) 
 
   // If we found no match, we record MENU_UNKNOWN_ITEM, and also record
   // the raw id string that we couldn't identify, for later analysis.
-  if ((itemId == MENU_UNKNOWN_ITEM) || (menuId = MENU_UNKNOWN_ITEM)) {
+  if ((itemId == MENU_UNKNOWN_ITEM) || (menuId == MENU_UNKNOWN_ITEM)) {
     unknownId = idString;
   }
 
@@ -329,7 +321,6 @@ GlobalMenuObserver.prototype.storeMenuChoice = function( isKeyboard, idString ) 
 GlobalMenuObserver.prototype.onCmdMainSet = function(evt) {
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
-      // Bugging out right here, claiming this.storeMenuChoice is not a function
       this.storeMenuChoice(false, tag.command);
     } else if (tag.tagName == "key") {
       this.storeMenuChoice(true, tag.command?tag.command:tag.id );
@@ -464,19 +455,13 @@ MenuStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
 MenuStudyWebContent.prototype.onPageLoad = function(experiment,
                                                     document,
                                                     graphUtils) {
-    // Process raw data: Combine all events on the same menu item
-    // into a single object
+  // Process raw data: Combine all events on the same menu item
+  // into a single object
 
-    // TODO: If there's no data, say "no data"!!
-    let rawData = experiment.dataStoreAsJSON;
+  // TODO: If there's no data, say "no data"!!
+  experiment.getDataStoreAsJSON( function(rawData) {
     let stats = [];
     let item;
-
-    // TODO this is just debug here:
-    for (let q = 0; q < CMD_ID_STRINGS.length; q++) {
-      console.info( q + " : " + CMD_ID_STRINGS[q].name );
-    }
-    // end debug
 
     for (let row in rawData) {
       let id = rawData[row].item_id;
@@ -560,6 +545,7 @@ MenuStudyWebContent.prototype.onPageLoad = function(experiment,
       newCell.innerHTML = Math.round(avgSearchTime / 1000) + " seconds";
       newRow.appendChild( newCell);
     }
+  });
 };
 
 exports.webContent = new MenuStudyWebContent();

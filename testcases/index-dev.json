@@ -4,12 +4,6 @@
    "hash": "f7abeb1300c604f5ff37aae58fbb26608e238c590facdb4f03f82ff557d97646"
   },
 
-  {"name": "Toolbar Study",
-   "jarfile": "toolbars/toolbar-study.jar",
-   "studyfile": "toolbar-study.js",
-   "hash": "c1bf4b98ca0a779d49689071cf6b66a52e1506562410ee42ac7bbe7d34ec7b8e"
-  },
-
   {"name": "Pilot Background Survey",
    "jarfile": "basic-survey.jar",
    "studyfile": "pilot-background-survey.js",
@@ -26,6 +20,12 @@
    "jarfile": "menu-item-usage/menu-item-usage.jar",
    "studyfile": "menu-item-usage-2.js",
    "hash": "744dd1a395abc7c1b78f3dc6d2dc0a71774e2148c98354d6d86e5dcff0fcb430"
+  },
+
+  {"name": "Search Bar",
+   "jarfile": "search/searchbar-study.jar",
+   "studyfile": "searchbar-study.js",
+   "hash": "efa803194a8a9ce2f915a446b38d95520a4d5bdccc389c675d5d6c832a658bd6"
   }
 ],
 

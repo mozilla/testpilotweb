@@ -138,6 +138,63 @@ exports.GenericWebContent.prototype = {
   deletedRemainDataPrivacyHtml: "",
 
   onPageLoad: function(experiment, document, graphUtils) {
+    // Override me!
+  },
+
+  drawPieChart: function(canvas, dataSet) {
+    // dataSet should be a series of {name: "name", frequency: 55}
+    let origin  = { x: 110, y: 125 };
+    let radius = 100;
+
+    if (dataSet.length == 0) {
+      return;
+    }
+    if (!canvas) {
+      return;
+    }
+    let ctx = canvas.getContext("2d");
+
+    let i, total = 0;
+    for (i = 0; i < dataSet.length; i++) {
+      total += dataSet[i].frequency;
+    }
+
+    let colors = ["red", "blue", "green", "yellow", "black", "orange",
+                  "purple", "white", "pink", "grey"];
+    // TODO algorithmically generate colors so we have an infinite number
+    // with high contrast!
+    ctx.mozTextStyle = "12pt sans serif";
+    let sumAngle = 0;
+    for (i = 0; i < dataSet.length; i++) {
+      let angle = 2*Math.PI * dataSet[i].frequency / total;
+      ctx.fillStyle = colors[i % (colors.length)];
+
+      ctx.beginPath();
+      ctx.moveTo( origin.x, origin.y);
+      ctx.lineTo( origin.x + radius * Math.cos( sumAngle ),
+                  origin.y + radius * Math.sin( sumAngle ) );
+      ctx.arc( origin.x, origin.y, radius, sumAngle, sumAngle + angle, false);
+      ctx.lineTo( origin.x, origin.y );
+      ctx.fill();
+      ctx.stroke();
+
+      sumAngle += angle;
+
+      if (i < 6) {
+        ctx.mozTextStyle = "10pt sans serif";
+        ctx.fillStyle = colors[i];
+        ctx.fillRect( 220, 10 + 30 * i, 20, 20);
+        ctx.strokeRect( 220, 10 + 30 * i, 20, 20);
+        ctx.fillStyle = "black";
+        ctx.save();
+        ctx.translate( 245, 25 + 30 * i );
+        let percent = Math.round( 100 * dataSet[i].frequency /total);
+        let line1 = dataSet[i].name + ": " + dataSet[i].frequency
+            + " (" + percent + "%)";
+        ctx.mozDrawText( line1 );
+        ctx.restore();
+      }
+    }
   }
 };
 

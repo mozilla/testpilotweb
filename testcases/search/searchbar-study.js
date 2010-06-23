@@ -1,20 +1,7 @@
 BaseClasses = require("study_base_classes.js");
 
-const SearchEngine = {
-  CUSTOM: -1,
-  GOOGLE: 1,
-  YAHOO: 2,
-  AMAZON: 3,
-  ANSWERS: 4,
-  CREATIVE_COMMONS: 5,
-  EBAY: 6,
-  WIKIPEDIA: 7
-};
-
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
-  {property: "engine_id", type: BaseClasses.TYPE_INT_32, displayName: "Search Engine",
-   displayValue: ["", "Google", "Yahoo", "Amazon", "Answers", "Creative Commons",
-                  "EBay", "Wikipedia"]},
+  {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
   {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Position"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
@@ -41,7 +28,6 @@ exports.dataStoreInfo = {
   columns: SEARCHBAR_EXPERIMENT_COLUMNS
 };
 
-// The per-window observer class:
 function SearchbarWindowObserver(window) {
   SearchbarWindowObserver.baseConstructor.call(this, window);
 };
@@ -49,20 +35,25 @@ BaseClasses.extend(SearchbarWindowObserver, BaseClasses.GenericWindowObserver);
 SearchbarWindowObserver.prototype.install = function() {
 
   let searchBar = this.window.document.getElementById("searchbar");
+  let recordSearch = function() {
+    let currEngine = searchBar.searchService.currentEngine;
+    let name = currEngine.name;
+    let index = searchBar.searchService.getEngines().indexOf(currEngine);
+    dump("Recording use of " + name + " at index " + index + "\n");
+    exports.handlers.record(name, index);
+  };
+
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
-                   dump(searchBar.searchService.currentEngine.name + "\n");
+                   recordSearch();
                  }
                }, false);
-
-
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
-                   dump(searchBar.searchService.currentEngine.name + "\n");
+                   recordSearch();
                  }
                }, false);
 };
-
 
 function GlobalSearchbarObserver()  {
   GlobalSearchbarObserver.baseConstructor.call(this, SearchbarWindowObserver);
@@ -71,11 +62,11 @@ BaseClasses.extend(GlobalSearchbarObserver, BaseClasses.GenericGlobalObserver);
 GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   GlobalSearchbarObserver.superClass.onExperimentStartup.call(this, store);
 };
-GlobalToolbarObserver.prototype.record = function(searchEngine) {
+GlobalSearchbarObserver.prototype.record = function(searchEngine, index) {
   if (!this.privateMode) {
     this._store.storeEvent({
-      engine_id: event,
-      engine_pos: 0, // how do we get this?
+      engine_name: searchEngine,
+      engine_pos: index,
       timestamp: Date.now()
     });
   }
@@ -100,11 +91,27 @@ SearchbarStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
     return "The pie chart shows how much you used each search engine "
     + "in the search bar.";
   });
-
 SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
-                                                       document,
-                                                       graphUtils) {
-  // TODO draw a pie chart
+                                                         document,
+                                                         graphUtils) {
+  let canvas = document.getElementById("data-plot-div");
+  let dataSet = [];
+  experiment.dataStoreAsJSON(function(rawData) {
+    for each (let row in rawData) {
+      let foundMatch = false;
+      for (let i = 0; i < dataSet.length; i++) {
+        if (dataSet[i].name == row.engine_name) {
+          dataSet[i].frequency += 1;
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) {
+        dataSet.push({ name: row.engine_name, frequency: 1 });
+      }
+    }
+    this.drawPieChart(canvas, dataSet);
+  });
 };
 
 exports.webContent = new SearchbarStudyWebContent();

@@ -1,0 +1,197 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" media="all" href="https://testpilot.mozillalabs.com/css/screen-standalone.css" />
+  <title>Test Pilot: Firefox Main Window Usage Study</title>
+	<base href="https://testpilot.mozillalabs.com/" />
+	<base target="_blank" />	
+</head>
+<body>
+
+<div id="container">
+  <div id="content-standalone">
+    <p>
+		<a href="../../index.html">Home</a> &gt; 
+		<a href="https://testpilot.mozillalabs.com/testcases">Test Cases</a> &gt; 
+		<a href="../toolbar">Firefox Main Window Usage Study</a> &gt; 
+		Aggregated Data Samples
+	</p>	
+    
+	<div id="intro">
+		<h1>Firefox Main Window Usage Study: Aggregated Data Samples</h1>
+		<h2>Test Description </h2>
+			
+    <ul>
+			<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/toolbar">Firefox Main Window Usage Study</a>.</li>
+			<li>Test duration: 5 days</li>
+			<li>Test type: Global</li>
+			<li>Firefox versions covered: 3.5 and above</li>
+			<li>Data submission: 9667 users, May 2010</li>
+		</ul>
+	</div>
+		
+  <div id="data"> 
+
+
+
+   	<h2> Test Data </h2>
+	    <p>Anyone is welcome to download and use the aggregated data files below.</p>
+
+	   	<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">Lines</span></td><td><span class="headers">N (Number of users)</span></td><td><span class="headers">Description</span></td></tr>
+
+						<tr><td><a href="outfiles/tab_100_users.csv.zip">toolbar_100_users.csv.zip</a></td><td>696 KB</td><td>115992</td><td>100</td><td>100 user sample</td></tr>
+						<tr><td><a href="outfiles/tab_2000_users.csv.zip">toolbar_800_users.csv.zip</a></td><td>6.0 MB</td><td>1021532</td><td>800</td><td>800 user sample</td></tr>	
+						<tr><td><a href="outfiles/tab_2000_users.csv.zip">toolbar_3000_users.csv.zip</a></td><td>23.4 MB</td><td>3923163</td><td>3000</td><td>3000 user sample</td></tr>			
+						</table>
+		
+
+				<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+
+
+				<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+
+
+				<h3>How to read the data</h3>
+
+
+							The data is in CSV (comma-separated value) format.  The first line of the file contains the column names.  A chunk of sample data might look like this:
+
+							<pre>
+							"user","event","item.id","interaction","timestamp","fx.version","os.version"
+							90,"Customize","Personal Bookmarks","Present","1274501127988",3.6,"Windows"
+							90,"Customize","Status Bar","Present","1274501128030",3.6,"Windows"
+							90,"Action","Search","Enter Key","1274501131581",3.6,"Windows"
+							90,"Action","Vertical Scrollbar","Scroll Slider","1274659275869",3.6,"Windows"
+							90,"Action","Back","Click","1274659287177",3.6,"Windows"
+							90,"Action","Back","Click","1274659312812",3.6,"Windows"
+							90,"Action","Back","Click","1274659318378",3.6,"Windows"			
+							</pre>
+
+							Each row represents a single event.  Here's what the columns mean:
+
+							<ol>
+								<li><strong>user:</strong> All rows that have the same user number came from the same submission. Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.) These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</li>
+								<li><strong>event:</strong> One of three major categories:
+									<ol>
+										<li><strong>Study:</strong> Gets recorded every time the browser starts up AND when the experiment is first installed. 'item.id' and 'interaction' values for these rows have no meaning.</li>
+										<li><strong>Customize:</strong> Also gets recorded every time the browser starts up AND when the experiment is first installed. Records the state of all UI elements in the user's main window, including any customizations to the various toolbars (interaction column provides further detail).</li>
+										<li><strong>Action:</strong> Represents a user interaction with the Firefox main window (interaction column provides further detail)</li>
+									</ol>
+							 <li><strong>item.id:</strong> Name of UI element that the row applies to; see below for a full list of the items.</li>
+							 <li><strong>interaction:</strong> For 'Customization' and 'Action' events, the interaction column is a sub-category that describes the event in more detail; see below for a full outline of these interactions.</li>
+								<li><strong>timestamp:</strong> The time at which the event occurred, given in milliseconds since epoch.</li>
+								<li><strong>fx.version:</strong> User's Firefox version.</li>
+								<li><strong>os.version:</strong> User's operating system.</li>
+							</ol>
+								
+
+				<h3>Item ID Codes</h3>
+				
+				<table class="callout" style='float: left; width: 32%; margin-right: 2%; height: 540px; padding-bottom: 200px;'>
+				<tr><td><b><span class="headers">Items that can be individually customized</tr></span></td></b>
+
+				<tr><td>Unknown</tr></td>
+				<tr><td>Unified Back Fwd</tr></td>
+				<tr><td>Reload</tr></td>
+				<tr><td>Stop</tr></td>
+				<tr><td>Home</tr></td>
+				<tr><td>URL Bar</tr></td>
+				<tr><td>Spacer</tr></td>
+				<tr><td>Search</tr></td>
+				<tr><td>Personal Bookmarks</tr></td>
+				<tr><td>Menu Bar</tr></td>
+				</table>
+				
+				<table class="callout" style='float: left; width: 32%; margin-right: 2%; height: 540px; padding-bottom: 200px;'>
+				<tr><td><span class="headers"><b>Items that are not in the main window by default, but can be added</tr></span></td></b>
+				<tr><td>Throbber</tr></td>
+				<tr><td>Downloads Button</tr></td>
+				<tr><td>Print Button</tr></td>
+				<tr><td>History Button</tr></td>
+				<tr><td>New Tab Button (not to be confused with 'Tab Bar New Button' below)</tr></td>
+				<tr><td>New Window Button</tr></td>
+				<tr><td>Cut Button</tr></td>
+				<tr><td>Copy Button</tr></td>
+				<tr><td>Paste Button</tr></td>
+				<tr><td>Fullscreen Button</tr></td>
+				</table>
+				
+				<table class="callout" style='float: left; width: 32%; height: 540px;'>
+				<tr><td><span class="headers"><b>Items that cannot be individually customized</tr></span></td></b>
+				<tr><td>Back</tr></td>
+				<tr><td>Forward</tr></td>
+				<tr><td>Drop Down Recent Page</tr></td>
+				<tr><td>Site ID Button</tr></td>
+				<tr><td>Site ID More Info</tr></td>
+				<tr><td>RSS Icon</tr></td>
+				<tr><td>Bookmark Star</tr></td>
+				<tr><td>Go Button</tr></td>
+				<tr><td>Drop Down Most Visited</tr></td>
+				<tr><td>Search Engine Drop Down</tr></td>
+				<tr><td>Search Go Button</tr></td>
+				<tr><td>Edit Bookmark Panel</tr></td>
+				<tr><td>Tab Bar Scroll</tr></td>
+				<tr><td>Tab Bar New Button (not to be confused with 'New Tab Button' above)</tr></td>
+				<tr><td>Tab Bar Drop Down</tr></td>
+				<tr><td>Vertical Scrollbar</tr></td>
+				<tr><td>Horizontal Scrollbar</tr></td>
+				<tr><td>Status Bar</tr></td>
+				<tr><td>Status Bar Lock</tr></td>
+				</table>
+
+				<h3>Interaction Codes: Action Events</h3>
+				
+				<table class="callout" style='float: left; width: 60%;'>
+				<tr><td><b><span class="headers">General 'Action' event interactions: What did the user do to the item?</tr></span></td></b>
+				<tr><td>Click</tr></td>
+				<tr><td>Menu Pick</tr></td>
+				<tr><td>Enter Key</tr></td>
+				<tr><td><b><span class="headers">Interactions specific to 'Search Bar'</tr></span></td></b>
+				<tr><td>Repeated Search Same Engine</tr></td>
+				<tr><td>Repeated Search Different Engine</tr></td>
+				<tr><td><b><span class="headers">Interactions specific 'Site ID Button' (describes type of certificate shown)</tr></span></td></b>
+				<tr><td>Site ID SSL</tr></td>
+				<tr><td>Site ID EV</tr></td>
+				<tr><td>Site ID None </tr></td>
+				<tr><td><b><span class="headers">Interaction specific to 'Vertical Scrollbar' and 'Horizontal Scrollbar</tr></span></td></b>
+				<tr><td>Scroll Button Up (Left)</tr></td>
+				<tr><td>Scroll Button Down (Right)</tr></td>
+				<tr><td>Scroll Slider</tr></td>
+				<tr><td><b><span class="headers">Interactions specific to 'URL Bar'</tr></span></td></b>
+				<tr><td>Mouse Down</tr></td>
+				<tr><td>Mouse Up</tr></td>
+				<tr><td>Mouse Drag</tr></td>
+				<tr><td>URL Select</tr></td>
+				<tr><td>URL Change</tr></td>
+				<tr><td>Search Term in URL Bar</tr></td>
+				<tr><td><b><span class="headers">Interactions specific to'Edit Bookmark Panel'</tr></span></td></b>
+				<tr><td>Panel Open</tr></td>
+				<tr><td>Remove Bookmark</tr></td>
+				<tr><td><b><span class="headers">Interaction specific to 'Reload''</tr></span></td></b>
+				<tr><td>Reload While Loading</tr></td>
+				</table>
+				
+				<div style='height: 0px; clear: both;'></div>
+					
+				<h3>Interaction Codes: Customization Events</h3>
+				<table class="callout" style='float: left; width: 60%;'>
+				<tr><td><b><span class="headers">General 'Customize' event interactions: What toolbar is the item in?</tr></span></td></b>
+				<tr><td>Customization in Navbar</tr></td>
+				<tr><td>Customization in Custom Toolbar</tr></td>
+				<tr><td>Customization in Personal</tr></td>
+				<tr><td>Customization in Menu Bar</tr></td>
+				<tr><td><b><span class="headers">For 'Status Bar' and 'Personal Bookmarks'</tr></span></td></b>
+				<tr><td>Present</tr></td>
+				<tr><td>Absent</tr></td>
+				</table>
+
+			
+				<div style='height: 0; clear: both;'></div>
+				<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
+
+				
+
+	
+
+
+

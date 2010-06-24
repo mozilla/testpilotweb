@@ -28,12 +28,16 @@
    "hash": "3994c0321496253a4e018a7adf1bc17c2ee6819eaeb27f394ac81861fab79da8"
   },
 
-  {
-   "name": "Search Bar Survey",
+  {"name": "Search Bar Survey",
    "jarfile": "search/searchbar-survey.jar",
    "studyfile": "searchbar-survey.js",
    "hash": "a71bc5849dd0f5ffb6471532cb85a507f1f1282f247d72c6176cda39071d9191"
-  }
+  },
+
+  {"name": "Web Test Survey",
+   "jarfile": "webSurveyTest.jar",
+   "studyfile": "webSurveyTest.js",
+   "hash": "0774c40aa4e9badda2e989376904fe5f9ed42081b282c8dc9f7bb6a0a9fae689"
 ],
 
 "legacy": [

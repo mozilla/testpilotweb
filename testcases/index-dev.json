@@ -22,10 +22,17 @@
    "hash": "744dd1a395abc7c1b78f3dc6d2dc0a71774e2148c98354d6d86e5dcff0fcb430"
   },
 
-  {"name": "Search Bar",
+  {"name": "Search Bar Study",
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
-   "hash": "efa803194a8a9ce2f915a446b38d95520a4d5bdccc389c675d5d6c832a658bd6"
+   "hash": "3994c0321496253a4e018a7adf1bc17c2ee6819eaeb27f394ac81861fab79da8"
+  },
+
+  {
+   "name": "Search Bar Survey",
+   "jarfile": "search/searchbar-survey.jar",
+   "studyfile": "searchbar-survey.js",
+   "hash": "a71bc5849dd0f5ffb6471532cb85a507f1f1282f247d72c6176cda39071d9191"
   }
 ],
 

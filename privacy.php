@@ -7,30 +7,24 @@
 	<title>Mozilla Labs Test Pilot</title>
 	<link rel="stylesheet" type="text/css" media="all" href="css/screen.css" />
 	<link rel="stylesheet" type="text/css" media="all" href="css/subpage.css" />
-        <link rel="icon" href="images/favicon.ico"> 
-        <script type="text/javascript">
+	<link rel="stylesheet" type="text/css" media="all" href="universal/univ-mozlab-style.css">
+	<link rel="icon" href="images/favicon.ico"> 
+    
+    	<script type="text/javascript">
           var s_account="mozillatestpilotmozillalabscom";
         </script>
+        
         <script type="text/javascript" src="/s_code.js"></script>
+
 </head>
+
 <body>
 
-		<div id="container">
+		<?php include("universal/header.php"); ?>
 		
-			<div id="logo"><a href="http://labs.mozilla.com"><img src="images/logo.png" border="0"></a></div>
-			
+		<div id="container">
+							
 			<div id="content">
-			
-				<div class="button">
-			
-					<span class="menuItem"><a href="/index.html">Home</a></span>
-					<span class="menuItem"><a href="/testcases/index.html">Test Cases</a></span>
-					<span class="menuItem"><a href="/principles.html">Guiding Principles</a></span>
-                    <span class="menuItem"><a href="/faq.html">FAQ</a></span>
-					<span class="menuOn"><a href="/privacy.html">Privacy Policy</a></span>
-
-				
-				</div>
 				
 				<div id="sidebar">
 				
@@ -125,9 +119,9 @@
 					
 			</div>
 			
-			<div id="footer"><img class="mozLogo" src="images/mozilla-logo.png">Copyright &copy; 2005-2009 Mozilla. All rights reserved. &nbsp; &nbsp; <a href="http://labs.mozilla.com/">Mozilla Labs</a> &nbsp; &nbsp; <a href="http://www.mozilla.com/en-US/privacy-policy.html">Privacy Policy</a> &nbsp; &nbsp; <a href="http://www.mozilla.com/en-US/about/legal.html">Legal Notices</a></div>
-		
 		</div>
+		
+		<?php include("universal/footer.php"); ?>
 
 </body>
 </html>

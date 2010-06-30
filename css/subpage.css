@@ -1,19 +1,9 @@
-body { 
-	background: #fff url('../images/bg2.jpg') repeat-x top center;
-
-}
-
-#content {
-	margin-top: 60px;
-
-}
-
 #subContentPrinciples {
-	margin-top: 60px;
+	margin-top: 20px;
 }
 
 #subContentPrivacy {
-	margin-top: 60px;
+	margin-top: 20px;
 	margin-right: 240px;
 }
 
@@ -30,13 +20,14 @@ body {
 	padding: 4px 24px 24px 24px;
 	margin: 24px auto;
 	margin-top: 40px;
-	color: rgba(0, 0, 0, 0.8);
-	-moz-border-radius: 0.5em;
-	-webkit-border-radius: 0.5em;
-	background: rgba(220, 240, 247, 0.8) url('../images/callout.png') no-repeat top center;
-	-moz-box-shadow: 
-		inset rgba(185, 221, 234, 0.2) 0 -10px 12px,
-		inset rgba(185, 221, 234, 1) 0 0px 1px,
-		inset rgba(255, 255, 255, 0.2) 0 10px 12px;
+	
+	border-radius: 0.25em;
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+	
+	background-color: rgba(255,255,255,0.4);
+	border-top: 1px solid rgba(255,255,255,0.8);
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+	
 	//display: inline;
 }

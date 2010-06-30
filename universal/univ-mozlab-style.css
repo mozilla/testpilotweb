@@ -1,0 +1,503 @@
+/*
+--------------------------------------------------------------------------
+DESCRIPTION: Mozilla Labs Universal Header/Footer Styles
+AUTHOR: Mozilla Labs
+
+PROJECT CUSTOM SETTINGS 
+--------------------------------------------------------------------------
+*/
+
+body  {
+	background: url('bg.png') no-repeat center 60px !important;  /*  PROJECT BACKGROUND IMAGE */
+	background-color: rgba(209,229,234,1) !important; /*  PROJECT BACKGROUND COLOR */
+}
+
+	a:link, a:active, a:focus, a:visited {color: rgba(42,123,161,0.8); text-decoration: none;}
+	a:hover {color: rgba(42,123,161,1); text-decoration: none;}
+
+#uni-subheader { 
+	background-color: rgba(42,123,161,0.4) !important; /*  PROJECT BACKGROUND COLOR */
+	
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(0,0,0,0.7)', endColorstr='rgba(42,123,161,0.5)'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.7)), to(rgba(42,123,161,0.5))); /* for webkit browsers */
+	background:  -moz-linear-gradient(top, rgba(0,0,0,0.7) 0%, rgba(42,123,161,0.5) 100%) !important; /*  PROJECT BACKGROUND GRADIENT */
+	
+}
+
+.uni-download-button{
+	background-color: #6BC246;
+	
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6BC246', endColorstr='#5CA33E'); /* for IE */
+	background: url(http://mozillalabs.com/wp-content/themes/labs2.0/img/lines.png) no-repeat top right, -webkit-gradient(linear, left top, left bottom, from(#6BC246), to(#5CA33E)); /* for webkit browsers */
+	background: url(http://mozillalabs.com/wp-content/themes/labs2.0/img/lines.png) no-repeat top right, -moz-linear-gradient(center top , #6BC246 0%, #5CA33E 100%);
+}
+
+
+
+
+/*
+--------------------------------------------------------------------------
+UNIVERSAL STYLES BELOW SHOULD NOT BE ALTERED
+--------------------------------------------------------------------------
+*/
+
+html {
+margin: 0px;
+padding: 0px;
+}
+
+body  {
+margin: 0px;
+padding: 0px;
+}
+
+.content950 {
+	width: 950px;
+	margin: 0px auto;
+}
+
+@font-face {
+	font-family: "MuseoSans";
+	src: url(MuseoSans_500.otf) format("opentype");
+}
+
+#uni-content { 
+margin-top: 280px !important;
+margin-bottom: 40px !important;
+}
+
+/*
+--------------------------------------------------------------------------
+HEADER
+--------------------------------------------------------------------------
+*/
+
+#uni-header {
+	z-index: 1;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	background: url(http://mozillalabs.com/wp-content/themes/labs2.0/img/menu-bg.jpg) repeat-x center top;
+}
+
+#logo a img {
+	border: 0px;
+}
+
+#topnav {
+	height: 60px;
+	position: relative;
+	margin: 0px auto;
+	width: 950px;
+}
+
+#topnav h1 {
+	margin: 5px 0 0 10px;
+	float: left;
+}
+
+#topnav ul#mainnav {
+	float: right;
+	display: inline;
+	margin: 20px 0 0 28px;
+	line-height: 20px;
+	font-size: 12px;
+}
+
+#topnav ul#mainnav li {
+	font-family: "MuseoSans";
+	float: left;
+	margin:  0 28px 0 0;
+	list-style: none;
+}
+
+#topnav ul#mainnav li a {
+	text-transform: uppercase; 
+	font-size: 14px; 
+	text-decoration: none; 
+	color: rgba(255,255,255,0.8);
+	text-shadow: black 0 1px;
+}
+
+#topnav ul#mainnav li a:hover {
+	color: rgba(255,255,255,1); 
+}
+
+#uni-subheader {
+	z-index: 2;
+	position: absolute;
+	top: 60px;
+	left: 0px;
+	width: 100%;
+}
+
+#uni-subheader-title {
+	font-family: "MuseoSans";
+	float: left;
+	font-size: 64px;
+	letter-spacing: -1.5px;
+	color: rgba(255,255,255,1);
+	text-shadow: rgba(0,0,0,0.3) 0 1px;
+	margin-top:  20px;
+	margin-left: 240px;
+	line-height: 64px;
+}
+
+.sideLogo  {
+margin: -15px 0px -280px -20px;
+float: left;
+}
+
+#subnav {
+	height: 130px;
+	position: relative;
+	margin: 0px auto;
+	width: 950px;
+}
+
+#subnav ul#pagenav {
+	float: left;
+	display: inline;
+	margin: 10px 0 0 200px;
+}
+
+#subnav ul#pagenav li {
+	font-family: "MuseoSans";
+	float: left;
+	margin: 0 28px 0 0;
+	list-style: none;
+}
+
+#subnav ul#pagenav li a {
+	text-transform: uppercase; 
+	font-size: 14px; 
+	line-height: 20px;
+	text-decoration: none; 
+	color: rgba(255,255,255,0.8);
+	text-shadow: rgba(0,0,0,0.3) 0 1px;
+}
+
+#subnav ul#pagenav li a:hover {
+	color: rgba(255,255,255,1); 
+}
+
+.menu-highlight {
+	background-color: rgba(0,0,0,0);
+	
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(0,0,0,0)', endColorstr='rgba(0,0,0,0.2)'); /* for IE */
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0)), to(rgba(0,0,0,0.2))); /* for webkit browsers */
+	background: -moz-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%) !important; /*  PROJECT BACKGROUND GRADIENT */
+	padding: 17px 12px;
+}
+
+
+/*
+--------------------------------------------------------------------------
+FOOTER
+--------------------------------------------------------------------------
+*/
+
+#uni-footer {
+	position: relative;
+	bottom: 0px;
+	left: 0px;
+	font-size: 12px;
+	line-height: 18px;
+	clear: both;
+	width: 100%;
+	margin: 0 auto;
+	background: url(http://mozillalabs.com/wp-content/themes/labs2.0/img/footer-bg.jpg) repeat-x center top;
+}
+
+#uni-footer-content {
+	clear: left;
+	color: rgba(255,255,255,0.6)
+	background-color: rgba(0,0,0,0.8);
+	text-shadow: black 0 1px;
+	margin: 0 auto;
+	width: 950px;
+	margin-bottom: 0px;
+}
+
+#uni-footer #productlist {
+	height: 128px;
+	margin-top: 9px;
+	text-transform: uppercase;
+	padding: 2px 2px 0 2px;
+	margin: -2px 0 0 6px;
+}
+
+#uni-footer #productlist ul { 
+	background: none; 
+	padding: 0px; 
+	height: 128px;
+}
+
+#uni-footer #productlist ul li {
+	font-family: "MuseoSans";
+	list-style: none; 
+	float: left; 
+	width:  95px; 
+	text-align: center; 
+	font-size: 9px;
+	margin: 0;
+	padding: 0 35px 0 0;
+}
+
+#uni-footer  #productlist a img{
+   color: rgba(0,0,0,0.6);
+    text-decoration: none;
+    border: 0px;
+}
+
+#uni-footer  #productlist a:hover img { 
+	text-decoration: none;
+	border: 0px;
+}
+
+#uni-footer a{
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    border: 0px;
+}
+
+#uni-footer a:hover{
+    color: rgba(255,255,255,1);
+    text-decoration: none;
+    border: 0px;
+}
+
+#uni-footer a img { 
+	text-decoration: none;
+	border: 0px;
+}
+
+#uni-footer a:hover img { 
+	text-decoration: none;
+	border: 0px;
+}
+
+#uni-footer #productlist .viewall { 
+	padding-top: 40px;
+	margin-left: 10px;
+	white-space: nowrap;
+}
+
+.footercontent {
+	clear: left;
+	padding-bottom: 30px;
+}
+
+.footercontent h3{
+	font-family: "MuseoSans";
+	color: rgba(255,255,255,1);
+	font-size:18px;
+	font-weight:normal;
+	letter-spacing:-1px;
+	line-height:18px;
+}
+
+.footercontent p{
+	color: rgba(255,255,255,0.5);
+}
+
+.item {
+	width: 450px;
+	float: left;
+	margin-right: 20px;
+}
+
+#uni-footer .item ul li { 
+	font-family: "MuseoSans";
+	list-style: none;
+	margin-top: 6px;
+	margin-bottom: 3px;
+	margin-left: -35px;
+	margin-right: 50px;
+	padding-left: 15px;
+	padding-bottom: 3px;
+	font-size: 0.9em;
+	border-bottom: 1px dotted rgba(255,255,255,0.2);
+}
+
+#uni-footer li a{ 
+	text-transform: uppercase; 
+}
+
+.legal { 
+	padding-top: 20px;
+	padding-bottom: 40px;
+}
+
+#copyright { 
+	float: left;
+	font-size: 9px;
+}
+
+#copyright img { 
+	float: left;
+	margin-top: 4px;
+	margin-right: 8px;
+}
+
+#copyright p { 
+	font-family: "MuseoSans";
+	display: block;
+	width: 400px;
+}
+
+.legal ul { 
+	float: right;
+	margin: 10px 45px 0 10px;
+}
+
+.legal ul li { 
+	font-family: "MuseoSans";
+	list-style: none;
+	float: left;
+	margin-left: 20px;
+}
+
+/*
+--------------------------------------------------------------------------
+DOWNLOAD BAR
+--------------------------------------------------------------------------
+*/
+
+.uni-download {
+	z-index: 1;
+	clear: both;
+	width: 100%;
+	min-height: 80px;
+	margin: 0 auto;
+	background-color: rgba(255,255,255,0.4);
+	border-top: 1px solid rgba(255,255,255,0.8);
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.uni-top-bar {
+	position: absolute;
+	top: 190px;
+	left: 0px;
+	margin-bottom: -120px;
+}
+
+.uni-bottom-bar {
+	position: relative;
+	bottom: 0px;
+	left: 0px;
+	clear: both;
+	margin-bottom: -40px;
+	margin-top: 40px;
+}
+
+.uni-top-bar h1 {
+	float: left;
+	font-family: "MuseoSans";
+	margin: 2px 25px 0px 240px;
+	color: rgba(0,0,0,0.6); 
+	font-size: 22px; 
+	font-weight: normal; 
+	letter-spacing: -1px;
+	padding: 0px;
+}
+
+.uni-top-bar p {
+	margin-left: 360px;
+	margin-right: 260px;
+	color: rgba(0,0,0,0.4); 
+	font-size: 12px; 
+	font-weight: normal; 
+	display: block;
+}
+
+.uni-bottom-bar h1 {
+	float: left;
+	font-family: "MuseoSans";
+	margin: 2px 25px 0px 20px;
+	color: rgba(0,0,0,0.6); 
+	font-size: 22px; 
+	font-weight: normal; 
+	letter-spacing: -1px;
+	padding: 0px;
+}
+
+.uni-bottom-bar p {
+	margin-left: 140px;
+	color: rgba(0,0,0,0.4); 
+	font-size: 12px; 
+	font-weight: normal; 
+	display: block;
+}
+
+.uni-download-button{
+	float: right;
+	position: relative;
+	width: 240px;
+	height: 50px;
+	
+	border-radius: 0.25em;
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+		
+	box-shadow: 0 1px 0 rgba(0,0,0,0.1), inset 0 0 1px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.2);
+ 	-webkit-box-shadow: 0 1px 0 rgba(0,0,0,0.1), inset 0 0 1px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.2);
+	-moz-box-shadow: 0 1px 0 rgba(0,0,0,0.1), inset 0 0 1px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.2);
+	
+	color: rgba(255,255,255,1); 
+	text-shadow: rgba(0,0,0,0.3) 0 1px;
+	font-size: 18px; 
+	font-weight: normal; 
+	letter-spacing: -1px;
+	text-align: center;
+	margin-left: 20px;
+	margin-right: 0px;
+	display: block;
+}
+
+.uni-download-button a{
+	position: absolute;
+	font-family: "MuseoSans";
+	color: rgba(255,255,255,1); 
+	width: 240px;
+	height: 50px;
+	line-height: 50px;
+	top: 0px;
+	left: 0px;
+	text-decoration: none;
+	display: block;
+}
+
+.uni-download-button a:hover{
+	color: rgba(255,255,255,1); 
+	text-decoration: none;
+}
+
+input {
+	border: 0px;
+	padding: 4px;
+	width: 600px;
+	margin-right: 10px;
+	background: #fff;
+	font-size: 16px; 
+    
+    border: 1px solid rgba(0,0,0,0.2);
+    box-shadow: inset 0 4px 0 rgba(0,0,0,0.1);
+ 	-webkit-box-shadow: inset 0 4px 0 rgba(0,0,0,0.1);
+	-moz-box-shadow: inset 0 4px 0 rgba(0,0,0,0.1);
+    
+    border-radius: 0.25em;
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+}
+
+input:focus {
+
+}
+
+.search {
+	width: 440px;
+	height: 16px;
+	padding: 10px;
+}

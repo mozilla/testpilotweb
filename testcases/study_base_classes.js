@@ -59,7 +59,8 @@ exports.GenericWebContent.prototype = {
 
   get inProgressHtml () {
     return '<h2>Thank you, Test Pilot!</h2>' +
-    '<p><b>' + this.expInfo.summary + '</b></p>' +
+      '<p>The ' + titleLink + ' study is currently in progress.</p>' +
+    '<p>' + this.expInfo.summary + '</p>' +
     '<p> The study will end in ' + this.expInfo.duration + ' days. Read more details for this ' + this.titleLink + ' study.\</p>\
     <ul><li>You can save your test graph or export the raw data now, or after you \
     submit your data.</li>' + this.thinkThereIsAnError +
@@ -81,7 +82,15 @@ exports.GenericWebContent.prototype = {
     '.</li>' + this.uploadData + this.dataCanvas;
   },
 
-  upcomingHtml: "",
+  get upcomingHtml() {
+    return '<h2>The ' + this.titleLink + ' study will begin soon.</h2>' +
+        '<p>' + this.expInfo.summary + '</p>' +
+        '<p>The study will start collecting data on <span id="startdate"></span>' +
+        ' and finish on <span id="enddate"></span>.</p>' +
+        this.inProgressDataPrivacyHtml +
+        '<p>If you don\'t wish to participate, you can '+ this.optOutLink +
+        '</p>';
+  },
 
   get canceledHtml() {
     return'<h2>You canceled the ' + this.titleLink + 'study.</h2> \

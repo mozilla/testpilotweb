@@ -4,6 +4,7 @@ BaseClasses = require("study_base_classes.js");
  * break when changes are made to the UI from one beta to the next.
  */
 
+const ORIGINAL_TEST_ID = "combined_beta_study_0";
 const MY_TEST_ID = "combined_beta_study_0";
 
 /* Need a schema that can hold both menu and toolbar events.
@@ -84,12 +85,20 @@ BaseClasses.extend(GlobalCombinedObserver, BaseClasses.GenericGlobalObserver);
 GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   GlobalCombinedObserver.superClass.onExperimentStartup.call(this, store);
 
-  // TODO read study GUID and record it as part of study startup status event.
-  // Actually no, better yet!  Copy the GUID from the first run's pref to
-  // my pref -- so if this is a later run (with new ID?) it will still have
-  // same GUID as first run pref.
+  // Longitudinal study:  If there are multiple runs of the study, copy the
+  // GUID from the ORIGINAL one into my GUID -- (it's all just prefs).
+  // Now we can associate the different uploads with each other and with
+  // the survey upload.  TODO: What if user misses the first round?  Survey
+  // will be lost and forlorn.  Can we fill it in retroactively or something?
+  // TODO: this works if each study is a new id; does it work if it's one
+  // recurring study? is it unneeded in that case?
+  let prefs = require("preferences-service");
+  let prefName = "extensions.testpilot.taskGUID." + ORIGINAL_TEST_ID;
+  let originalStudyGuid = prefs.get(prefName, "");
+  prefName = "extensions.testpilot.taskGUID." + MY_TEST_ID;
+  prefs.set(prefName, originalStudyGuid);
 
-  // Record customizations?
+  // Record customizations!  (Such as whether tabs are on top!)
 };
 
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,

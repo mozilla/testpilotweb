@@ -50,7 +50,9 @@
 
 <p>If you are a user of Firefox version 3.5 or above, you just need to download and install the Test Pilot add-on. Once you've installed the add-on, you will automatically become a Test Pilot.  The add-on will then present you with any surveys or studies that we are running.</p>
 
-<p>You can also uninstall the add-on at anytime if you don't want to continue flying with us. <a href="#top">Back to top of page</a></p>
+<p>If you are interested in helping Firefox 4, you will automatically become a Test Pilot by downloading the Firefox 4 Beta, no need to download the Test Pilot add-on again. </p>
+
+<p>You can disable or uninstall the add-on at anytime if you don't want to continue flying with us. <a href="#top">Back to top of page</a></p>
 
 <h3 id="whatdo">What do I need to do after I become a Test Pilot?</h3>
 

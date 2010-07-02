@@ -41,7 +41,7 @@
 				  
 				    <p>As a Test pilot, not only will you try before anyone else the newest features and coolest user-interface ideas, you could also learn how those study results may contribute to future designs. The goal for this platform is to encourage everyone from all skill levels to improve the Web experience by conducting and participating in these studies.</p>
 
-					<p>Once you <a href="https://addons.mozilla.org/services/install.php?addon_id=testpilot"> install the Test Pilot add-on</a>, you will automatically  receive notifications on upcoming and finished studies. You have the full control on your participation: </a>
+					<p>Once you <a href="https://addons.mozilla.org/services/install.php?addon_id=testpilot"> install the Test Pilot add-on</a>, you will automatically receive notifications on studies that are about to start and just finish. You have the full control on your participation: </a>
 						 
 						 <ul>
 						    <li>You choose if you want to participate in a particular study</li>

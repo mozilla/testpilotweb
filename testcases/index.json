@@ -15,12 +15,6 @@
    "jarfile": "basic-survey.jar",
    "studyfile": "pilot-background-survey.js",
    "hash": "29a686d9deca825de58109e2d3486bd1d42d9b8f40b78b61d2bc882b93c9be6b"
-  },
-
-  {"name": "Menu Usage Study v2",
-   "jarfile": "menu-item-usage/menu-item-usage.jar",
-   "studyfile": "menu-item-usage-2.js",
-   "hash": "744dd1a395abc7c1b78f3dc6d2dc0a71774e2148c98354d6d86e5dcff0fcb430"
   }
 ],
 

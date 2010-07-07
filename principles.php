@@ -28,18 +28,15 @@
 				
 				<div id="subContentPrinciples">
 					<h1>Guiding Principles</h1>
-				
-					<div class="callout"><h2>You Opt-In.</h2><p>The Test Pilot Program will run as a standalone opt-in program 
-and not as part of Firefox.</p></div>
 
-					<div class="callout"><h2>You Grant Permission.</h2><p>The Test Pilot Program will never collect user information 
+					<div class="callout"><h2>You Grant Permission.</h2><p>The Test Pilot add-on will never transfer user information 
 without first having the participant’s explicit permission.</p></div>
 
 					<div class="callout"><h2>You're Anonymous.</h2><p>The Test Pilot Program will only transmit and store anonymous and 
 sanitized information in order to protect individual privacy.*</p></div>
 
 					<div class="callout"><h2>You're in Control.</h2><p>The Test Pilot Program will respect participants and their 
-privacy by making test data knowable, manageable and safe for individuals.</p></div>
+privacy by making test data knowable, manageable and anonymous for individuals.</p></div>
 					
 					
 					</div>

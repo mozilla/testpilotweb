@@ -19,7 +19,8 @@ It will be uploaded along with any user study data that you choose to submit. \
 You can always use the button below to review or change your answers.</p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   minTPVersion: "1.0a1",
-  versionNumber: 2,
+  minFXVersion: "4.0b1",
+  versionNumber: 3,
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
      type: MULTIPLE_CHOICE,

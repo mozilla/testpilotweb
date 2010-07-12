@@ -37,9 +37,9 @@
 					
 					<h1>Welcome to Test Pilot!</h1>
 					
-					<h2 class="featured">Test Pilot is a platform collecting structured user feedback through Firefox. Test Pilot studies explore how people use their web browser and the Internet - and help us build better products. </h2>
+					<p>Test Pilot is a platform collecting structured user feedback through Firefox. Test Pilot studies explore how people use their web browser and the Internet - and help us build better products.</p>
 
-				  <p><strong>If you are interested in helping Firefox 4, you will automatically become a Test Pilot by downloading the Firefox 4 Beta, no need to download the Test Pilot add-on again.</p></strong> 
+				  <h2 class="featured">If you are running Firefox 4 beta, you are already a Test Pilot and don't need to download the add-on.</h2>
 				  
 				    <p>As a Test pilot, not only will you try before anyone else the newest features and coolest user-interface ideas, you could also learn how those study results may contribute to future designs. The goal for this platform is to encourage everyone from all skill levels to improve the Web experience by conducting and participating in these studies.</p>
 
@@ -57,7 +57,7 @@
 
 					<p>When a product is not easy to use, don't just wonder why it's designed that way. Make your mark on the design and help us improve it! <a href="https://addons.mozilla.org/services/install.php?addon_id=testpilot""> Join the forces, we want you! </a></p>
 
- <div class="home_button"><a href="https://testpilot.mozillalabs.com/faq.html">Learn more about Test Pilot &raquo;</a></div>
+ <div class="home_button"><a href="https://testpilot.mozillalabs.com/faq.php">Learn more about Test Pilot &raquo;</a></div>
 				</div>
 				
 				<div id="links" class="videoLinks">

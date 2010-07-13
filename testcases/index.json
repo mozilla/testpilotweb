@@ -8,7 +8,7 @@
 "experiment_jars": [
   {"name": "Dependencies",
    "jarfile": "base_classes.jar",
-   "hash": "f7abeb1300c604f5ff37aae58fbb26608e238c590facdb4f03f82ff557d97646"
+   "hash": "6314d9139d7115010c5bb2220f1e3a048bab56b9c2c33469f03202b0a7744c06"
   },
 
   {"name": "Pilot Background Survey",

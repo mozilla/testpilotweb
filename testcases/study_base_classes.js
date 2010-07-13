@@ -59,7 +59,7 @@ exports.GenericWebContent.prototype = {
 
   get inProgressHtml () {
     return '<h2>Thank you, Test Pilot!</h2>' +
-      '<p>The ' + titleLink + ' study is currently in progress.</p>' +
+      '<p>The ' + this.titleLink + ' study is currently in progress.</p>' +
     '<p>' + this.expInfo.summary + '</p>' +
     '<p> The study will end in ' + this.expInfo.duration + ' days. Read more details for this ' + this.titleLink + ' study.\</p>\
     <ul><li>You can save your test graph or export the raw data now, or after you \

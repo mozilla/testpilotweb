@@ -4,8 +4,10 @@ BaseClasses = require("study_base_classes.js");
  * break when changes are made to the UI from one beta to the next.
  */
 
-const ORIGINAL_TEST_ID = "combined_beta_study_0";
-const MY_TEST_ID = "combined_beta_study_0";
+const ORIGINAL_TEST_ID = 100;
+const MY_TEST_ID = 100;
+// Note that non-numeric ids will break experiment-page.js because it's doing
+// parseInt to get the eid.  So these must be numeric; sigh.
 
 /* Need a schema that can hold both menu and toolbar events.
  * String columns may be better than a gigantic brittle ever-growing table of
@@ -107,7 +109,7 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   let frontWindow = wm.getMostRecentWindow("navigator:browser");
   // Look for the "tabsontop" attribute on #navigator-toolbox.
   let toolbox = frontWindow.document.getElementById("navigator-toolbox");
-  let tabPosition = toolbox.getAttribute("tabsontop");
+  let tabPosition = (toolbox.getAttribute("tabsontop") == "true")?true:false;
   dump("State of tabs-on-top is " + tabPosition);
   this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top", tabPosition);
 };

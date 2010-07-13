@@ -43,7 +43,7 @@ var COMBINED_EXPERIMENT_COLUMNS =  [
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 5, // Days
-  testName: "Menu/Toolbar",
+  testName: "Firefox 4 Beta Interface",
   testId: MY_TEST_ID,
   testInfoUrl: "https://testpilot.mozillalabs.com",
   summary: "We are studying how the changes to the toolbar and menu bar in the"
@@ -115,6 +115,25 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,
                                                   interactionType) {
   if (!this.privateMode) {
+    // Make sure columns are strings
+    if (!item) {
+      item = "";
+    }
+    if (!subItem) {
+      subItem = "";
+    }
+    if (!interactionType) {
+      interactionType = "";
+    }
+    if (typeof item != "string") {
+      item = item.toString();
+    }
+    if (typeof subItem != "string") {
+      subItem = subItem.toString();
+    }
+    if (typeof interactionType != "string") {
+      interactionType = interactionType.toString();
+    }
     this._store.storeEvent({
       event: event,
       item: item,

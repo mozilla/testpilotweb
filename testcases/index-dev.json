@@ -22,16 +22,10 @@
    "hash": "744dd1a395abc7c1b78f3dc6d2dc0a71774e2148c98354d6d86e5dcff0fcb430"
   },
 
-  {"name": "Search Bar Study",
-   "jarfile": "search/searchbar-study.jar",
-   "studyfile": "searchbar-study.js",
-   "hash": "3994c0321496253a4e018a7adf1bc17c2ee6819eaeb27f394ac81861fab79da8"
-  },
-
-  {"name": "Search Bar Survey",
-   "jarfile": "search/searchbar-survey.jar",
-   "studyfile": "searchbar-survey.js",
-   "hash": "a71bc5849dd0f5ffb6471532cb85a507f1f1282f247d72c6176cda39071d9191"
+  {"name": "Firefox 4 Beta Interface",
+   "jarfile": "beta/combined.jar",
+   "studyfile": "combined.js",
+   "hash": "b1b73afb881b6f8ccdb80c05d821dd9d5b19bbb62d7a3cd91cfb4450691c90bd"
   },
 
   {"name": "Web Test Survey",

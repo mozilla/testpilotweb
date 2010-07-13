@@ -33,9 +33,9 @@ const EVENT_CODES = {
 var COMBINED_EXPERIMENT_COLUMNS =  [
   {property: "event", type: BaseClasses.TYPE_INT_32, displayName: "Event",
    displayValue: ["Study Metadata", "Action", "Menu Hunt", "Customization"]},
-  {property: "item", type: BaseClasses.TYPE_INT_32, displayName: "Element"},
-  {property: "sub_item", type: BaseClasses.TYPE_INT_32, displayName: "Sub-Element"},
-  {property: "interaction_type", type: BaseClasses.TYPE_INT_32, displayName: "Interaction"},
+  {property: "item", type: BaseClasses.TYPE_STRING, displayName: "Element"},
+  {property: "sub_item", type: BaseClasses.TYPE_STRING, displayName: "Sub-Element"},
+  {property: "interaction_type", type: BaseClasses.TYPE_STRING, displayName: "Interaction"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
@@ -85,6 +85,9 @@ BaseClasses.extend(GlobalCombinedObserver, BaseClasses.GenericGlobalObserver);
 GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   GlobalCombinedObserver.superClass.onExperimentStartup.call(this, store);
 
+  this.record(EVENT_CODES.METADATA, "startup", "study version",
+              exports.experimentInfo.versionNumber);
+
   // Longitudinal study:  If there are multiple runs of the study, copy the
   // GUID from the ORIGINAL one into my GUID -- (it's all just prefs).
   // Now we can associate the different uploads with each other and with
@@ -99,6 +102,14 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   prefs.set(prefName, originalStudyGuid);
 
   // Record customizations!  (Such as whether tabs are on top!)
+  let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                        .getService(Ci.nsIWindowMediator);
+  let frontWindow = wm.getMostRecentWindow("navigator:browser");
+  // Look for the "tabsontop" attribute on #navigator-toolbox.
+  let toolbox = frontWindow.document.getElementById("navigator-toolbox");
+  let tabPosition = toolbox.getAttribute("tabsontop");
+  dump("State of tabs-on-top is " + tabPosition);
+  this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top", tabPosition);
 };
 
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,

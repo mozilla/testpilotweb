@@ -55,8 +55,8 @@ exports.experimentInfo = {
   recursAutomatically: false,
   recurrenceInterval: 0,
   versionNumber: 1,
-  minTPVersion: "1.0rc1",
-  minFXVersion: "4.0b1" // Only run this study for Firefox 4 users!
+  minTPVersion: "1.0rc1"
+  //minFXVersion: "4.0b1" // Can't use due to bug 578830
 };
 
 exports.dataStoreInfo = {

@@ -69,15 +69,23 @@ function CombinedWindowObserver(window) {
   CombinedWindowObserver.baseConstructor.call(this, window);
 };
 BaseClasses.extend(CombinedWindowObserver, BaseClasses.GenericWindowObserver);
+CombinedWindowObserver.prototype.compareSearchTerms = function(searchTerm, searchEngine) {
+  if (searchTerm == this._lastSearchTerm) {
+    if (searchEngine == this._lastSearchEngine) {
+      exports.handlers.record(EVENT_CODES.ACTION, "search bar", "", "same search same engine");
+    } else {
+      exports.handlers.record(ToolbarEvent.ACTION, "search bar", "", "same search different engine");
+    }
+  }
+  this._lastSearchTerm = searchTerm;
+  this._lastSearchEngine = searchEngine;
+};
+
 CombinedWindowObserver.prototype.install = function() {
 
   console.info("Starting to install listeners for combined window observer.");
   let record = function( item, subItem, interaction ) {
-    try {
     exports.handlers.record(EVENT_CODES.ACTION, item, subItem, interaction);
-    } catch(e) {
-      dump(e);
-    }
   };
 
   // Register menu listeners:
@@ -86,7 +94,6 @@ CombinedWindowObserver.prototype.install = function() {
   let mainMenuBar = window.document.getElementById("main-menubar");
   this._listen(mainMenuBar, "command", function(evt) {
     if (evt.target.id) {
-      dump("Bar command - " + evt.target.id + "\n");
       record("menus", evt.target.id, "mouse");
     } else {
       // If the item doesn't have an ID, keep going up through its parents
@@ -99,7 +106,6 @@ CombinedWindowObserver.prototype.install = function() {
           return;
         }
       }
-      dump("Bar command - " + node.id + "\n");
       record("menus", node.id, "mouse");
     }},
     true);
@@ -107,14 +113,13 @@ CombinedWindowObserver.prototype.install = function() {
   this._listen(mainCommandSet, "command", function(evt) {
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
-      dump("Set command - " + tag.command + "\n");
       record("menus", tag.command, "mouse");
     } else if (tag.tagName == "key") {
-      dump("Set command - " + tag.command?tag.comman:tag.id + "\n");
       record("menus", tag.command?tag.command:tag.id, "key shortcut");
     }},
     true);
-  // Monitor
+
+  // Monitor Time Spent Hunting In Menus:
   /*for (let item in CMD_ID_STRINGS_BY_MENU) {
     // Currently trying: just attach it to toplevel menupopups, not
     // taskbar menus, context menus, or other
@@ -134,6 +139,181 @@ CombinedWindowObserver.prototype.install = function() {
     // TODO include context menu as separate entry
   }*/
 
+  try {
+  let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
+                   "home-button", "feed-button", "star-button",
+                   "identity-popup-more-info-button",
+                   "back-forward-dropmarker", "security-button",
+                   "downloads-button", "print-button", "bookmarks-button",
+                   "history-button", "new-tab-button", "new-window-button",
+                   "cut-button", "copy-button", "paste-button", "fullscreen-button"];
+
+  for (let i = 0; i < buttonIds.length; i++) {
+    let id = buttonIds[i];
+    let elem = this.window.document.getElementById(id);
+    if (!elem) {
+      console.warn("Can't install listener: no element with id " + id);
+      continue;
+    }
+    this._listen(elem, "mouseup",
+                 function(evt) {
+                   // only count left button clicks and only on the element itself:
+                     // (evt.button = 2 for right-click)
+                   if (evt.target == elem && evt.button == 0) {
+                     let tagName = evt.target.tagName;
+                     if (tagName == "toolbarspacer" || tagName == "toolbarspring"
+                        || tagName == "toolbarseparator" || tagName == "splitter" ||
+                         tagName == "hbox") {
+                       id = "spacer";
+                     } else {
+                       id = evt.target.id;
+                     }
+                     record(id, "", "click");
+                   }
+                 }, false);
+    // Problem with just listening for "mouseup" is that it triggers even
+    // if you clicked a greyed-out button... we really want something more
+    // like "button clicked".  Try listening for "command"?
+  }
+
+  // Listen on site ID button, see if page is SSL, or extended validation,
+  // or nothing.  (TODO this is getting double-counted because it triggers again
+  // if you click to close; should trigger on popupshown or something.)
+  let idBox = this.window.document.getElementById("identity-box");
+  this._listen(idBox, "mouseup", function(evt) {
+                 let idBoxClass = idBox.getAttribute("class");
+                 if (idBoxClass.indexOf("verifiedIdentity") > -1) {
+                   record("site-id-button", "", "extended validation");
+                 } else if (idBoxClass.indexOf("verifiedDomain") > -1) {
+                   record("site-id-button", "", "SSL");
+                 } else {
+                   record("site-id-button", "", "none");
+                 }
+               }, false);
+
+  let self = this;
+  let register = function(elemId, event, item, subItem, interactionName) {
+    if (!self.window.document.getElementById(elemId)) {
+      dump("No such element as " + elemId + "\n");
+      return;
+    }
+    self._listen( self.window.document.getElementById(elemId), event, function() {
+                    record(item, subItem, interactionName);}, false);
+  };
+
+  register( "feed-menu", "command", "rss icon", "menu item", "mouse pick");
+  // TODO there is no back-forward-dropmarker in Firefox 4.
+  register( "back-forward-dropmarker", "command", "recent page dropdown", "menu item", "mouse pick");
+  register( "search-container", "popupshown", "search engine dropdown", "menu item", "click");
+  register( "search-container", "command", "search engine dropdown", "menu item", "menu pick");
+
+  // Back and forward button drop-down picks:
+  this._listen(this.window.document.getElementById("back-button"),
+               "mouseup", function(evt) {
+                 if (evt.originalTarget.tagName == "menuitem") {
+                   record("back-button", "dropdown menu", "mouse pick");
+                 }
+               }, false);
+  this._listen(this.window.document.getElementById("forward-button"),
+               "mouseup", function(evt) {
+                 if (evt.originalTarget.tagName == "menuitem") {
+                   record("forward-button", "dropdown menu", "mouse pick");
+                 }
+               }, false);
+
+    // TODO there is no bookmarksBarContent in Firefox 4.  (Even when bookmarks bar
+    // is shown.
+  let bkmkToolbar = this.window.document.getElementById("bookmarksBarContent");
+  /*this._listen(bkmkToolbar, "mouseup", function(evt) {
+                 if (evt.button == 0 && evt.target.tagName == "toolbarbutton") {
+                   record("bookmark toolbar", "personal bookmark", "click");
+                 }}, false);*/
+
+    // Listen on search bar ues by mouse and keyboard, including repeated
+    // searches (same engine or different engine?)
+  let searchBar = this.window.document.getElementById("searchbar");
+  this._listen(searchBar, "keydown", function(evt) {
+                 if (evt.keyCode == 13) { // Enter key
+                   record("searchbar", "", "enter key");
+                   self.compareSearchTerms(searchBar.value,
+                                          searchBar.searchService.currentEngine.name);
+                 }
+               }, false);
+  this._listen(searchBar, "mouseup", function(evt) {
+                 if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
+                   record("searchbar", "go button", "click");
+                   self.compareSearchTerms(searchBar.value,
+                                          searchBar.searchService.currentEngine.name);
+                 }
+               }, false);
+
+    // Listen on URL bar for enter key, go button, and select/edit events
+    let urlBar = this.window.document.getElementById("urlbar");
+  this._listen(urlBar, "keydown", function(evt) {
+                 if (evt.keyCode == 13) { // Enter key
+                   if (self.urlLooksMoreLikeSearch(evt.originalTarget.value)) {
+                     record("urlbar", "search term", "enter key");
+                   } else {
+                     record("urlbar", "url", "enter key");
+                   }
+                 }
+               }, false);
+
+  let urlGoButton = this.window.document.getElementById("go-button");
+  this._listen(urlGoButton, "mouseup", function(evt) {
+                 if (self.urlLooksMoreLikeSearch(urlBar.value)) {
+                   record("urlbar", "search term", "go button click");
+                 } else {
+                   record("urlbar", "url", "go button click");
+                 }
+               }, false);
+
+    // Listen for URL edit events.  TODO: This is super verbose, especially
+    // the "mousemove" one.  Could we change it to record just ONE mouse move
+    // event?
+  self._urlBarMouseState = false;
+  this._listen(urlBar, "mouseup", function(evt) {
+                 if (self._urlBarMouseState) {
+                   record("urlbar", "text selection", "mouseup");
+                   self._urlBarMouseState = false;
+                 }
+               }, false);
+  this._listen(urlBar, "mousedown", function(evt) {
+                 if (evt.originalTarget.tagName == "div") {
+                   record("urlbar", "text selection", "mousedown");
+                   self._urlBarMouseState = true;
+                 }
+               }, false);
+  this._listen(urlBar, "mousemove", function(evt) {
+                 if (self._urlBarMouseState) {
+                   record("urlbar", "text selection", "mousemove");
+                   record(ToolbarWidget.URLBAR, ToolbarAction.MOUSE_DRAG);
+                 }
+               }, false);
+
+  this._listen(urlBar, "change", function(evt) {
+                 record(ToolbarWidget.URLBAR, ToolbarAction.URL_CHANGE);
+               }, false);
+  this._listen(urlBar, "select", function(evt) {
+                 record(ToolbarWidget.URLBAR, ToolbarAction.URL_SELECT);
+               }, false);
+  // A single click (select all) followed by edit will look like:
+  // mouse down, mouse up, selected, changed.
+  //
+  // Click twice to insert and then edit looks like:
+  // mouse down mouse up select, mouse down mouse up change.
+  //
+  // Click drag and to select and then edit looks like:
+  // mouse down mouse move move move move move mouse up select changed.
+
+
+  // TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
+  // suggestion was hilighted when you hit enter?)
+
+    dump("Registering listeners complete.\n");
+  } catch(e) {
+    dump(e);
+  }
 };
 
 function GlobalCombinedObserver()  {
@@ -166,7 +346,6 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   // Look for the "tabsontop" attribute on #navigator-toolbox.
   let toolbox = frontWindow.document.getElementById("navigator-toolbox");
   let tabPosition = (toolbox.getAttribute("tabsontop") == "true")?true:false;
-  dump("State of tabs-on-top is " + tabPosition);
   this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top", tabPosition);
 };
 
@@ -199,6 +378,7 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
       interaction_type: interactionType,
       timestamp: Date.now()
     });
+    dump("Recorded " + event + ", " + item + ", " + subItem + ", " + interactionType + "\n");
     // storeEvent can also take a callback, which we're not using here.
   }
 };

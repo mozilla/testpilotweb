@@ -73,10 +73,66 @@ CombinedWindowObserver.prototype.install = function() {
 
   console.info("Starting to install listeners for combined window observer.");
   let record = function( item, subItem, interaction ) {
-    exports.handlers.record(EventCodes.ACTION, item, subItem, interaction);
+    try {
+    exports.handlers.record(EVENT_CODES.ACTION, item, subItem, interaction);
+    } catch(e) {
+      dump(e);
+    }
   };
 
-  // TODO all the good stuff goes here!!
+  // Register menu listeners:
+  let window = this.window;
+  let mainCommandSet = window.document.getElementById("mainCommandSet");
+  let mainMenuBar = window.document.getElementById("main-menubar");
+  this._listen(mainMenuBar, "command", function(evt) {
+    if (evt.target.id) {
+      dump("Bar command - " + evt.target.id + "\n");
+      record("menus", evt.target.id, "mouse");
+    } else {
+      // If the item doesn't have an ID, keep going up through its parents
+      // until you find one that does.
+      let node = evt.target;
+      while (! node.id) {
+        node = node.parentNode;
+        if (!node) {
+          record("menus", "unknown", "mouse");
+          return;
+        }
+      }
+      dump("Bar command - " + node.id + "\n");
+      record("menus", node.id, "mouse");
+    }},
+    true);
+
+  this._listen(mainCommandSet, "command", function(evt) {
+    let tag = evt.sourceEvent.target;
+    if (tag.tagName == "menuitem") {
+      dump("Set command - " + tag.command + "\n");
+      record("menus", tag.command, "mouse");
+    } else if (tag.tagName == "key") {
+      dump("Set command - " + tag.command?tag.comman:tag.id + "\n");
+      record("menus", tag.command?tag.command:tag.id, "key shortcut");
+    }},
+    true);
+  // Monitor
+  /*for (let item in CMD_ID_STRINGS_BY_MENU) {
+    // Currently trying: just attach it to toplevel menupopups, not
+    // taskbar menus, context menus, or other
+    // weird things like that.
+
+    let popupId = CMD_ID_STRINGS_BY_MENU[item].popupId;
+    let popup = window.document.getElementById(popupId);
+    if (popup) {
+      this._listen(popup, "popuphidden", function(evt) {
+                     exports.handlers.onPopupHidden(evt); }, true);
+      this._listen(popup, "popupshown", function(evt) {
+                     exports.handlers.onPopupShown(evt); }, true);
+    }
+
+    // TODO include Mac's Firefox menu, if we can figure out what its
+    // popup id is.
+    // TODO include context menu as separate entry
+  }*/
 
 };
 

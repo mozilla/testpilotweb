@@ -28,7 +28,7 @@
 				</div>
 				
 				<div id="subContentPrivacy">
-					<h1>Frequently Asked Questions</h1>
+					<h1 id="top">Frequently Asked Questions</h1>
 
 <ol>
 <li><a href="#whatis">What is Test Pilot?</a></li>

@@ -74,11 +74,16 @@ CombinedWindowObserver.prototype.compareSearchTerms = function(searchTerm, searc
     if (searchEngine == this._lastSearchEngine) {
       exports.handlers.record(EVENT_CODES.ACTION, "search bar", "", "same search same engine");
     } else {
-      exports.handlers.record(ToolbarEvent.ACTION, "search bar", "", "same search different engine");
+      exports.handlers.record(EVENT_CODES.ACTION, "search bar", "", "same search different engine");
     }
   }
   this._lastSearchTerm = searchTerm;
   this._lastSearchEngine = searchEngine;
+};
+CombinedWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
+  // How to tell when a URL looks more like a search?  First approximation:
+  // if there are spaces in it.  Second approximation: No periods.
+  return ( (url.indexOf(" ") > -1) || (url.indexOf(".") == -1) );
 };
 
 CombinedWindowObserver.prototype.install = function() {
@@ -89,9 +94,12 @@ CombinedWindowObserver.prototype.install = function() {
   };
 
   // Register menu listeners:
+  // TODO record the menu name!!!!
   let window = this.window;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
+  dump("Main command set is " + mainCommandSet + "\n");
   let mainMenuBar = window.document.getElementById("main-menubar");
+  dump("Main menu bar is " + mainMenuBar + "\n");
   this._listen(mainMenuBar, "command", function(evt) {
     if (evt.target.id) {
       record("menus", evt.target.id, "mouse");
@@ -202,7 +210,8 @@ CombinedWindowObserver.prototype.install = function() {
   };
 
   register( "feed-menu", "command", "rss icon", "menu item", "mouse pick");
-  // TODO there is no back-forward-dropmarker in Firefox 4.
+    // There is no back-forward-dropmarker in Firefox 4 on Mac -- but
+    // there is on Windows
   register( "back-forward-dropmarker", "command", "recent page dropdown", "menu item", "mouse pick");
   register( "search-container", "popupshown", "search engine dropdown", "menu item", "click");
   register( "search-container", "command", "search engine dropdown", "menu item", "menu pick");
@@ -221,13 +230,15 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-    // TODO there is no bookmarksBarContent in Firefox 4.  (Even when bookmarks bar
-    // is shown.
-  let bkmkToolbar = this.window.document.getElementById("bookmarksBarContent");
-  /*this._listen(bkmkToolbar, "mouseup", function(evt) {
+  let bkmkToolbar = this.window.document.getElementById("personal-bookmarks");
+  this._listen(bkmkToolbar, "mouseup", function(evt) {
                  if (evt.button == 0 && evt.target.tagName == "toolbarbutton") {
-                   record("bookmark toolbar", "personal bookmark", "click");
-                 }}, false);*/
+                   if (evt.target.id == "bookmarks-menu-button") {
+                     record("bookmarks-menu-button", "", "click");
+                   } else {
+                     record("bookmark toolbar", "personal bookmark", "click");
+                   }
+                 }}, false);
 
     // Listen on search bar ues by mouse and keyboard, including repeated
     // searches (same engine or different engine?)
@@ -287,15 +298,14 @@ CombinedWindowObserver.prototype.install = function() {
   this._listen(urlBar, "mousemove", function(evt) {
                  if (self._urlBarMouseState) {
                    record("urlbar", "text selection", "mousemove");
-                   record(ToolbarWidget.URLBAR, ToolbarAction.MOUSE_DRAG);
                  }
                }, false);
 
   this._listen(urlBar, "change", function(evt) {
-                 record(ToolbarWidget.URLBAR, ToolbarAction.URL_CHANGE);
+                 record("urlbar", "text selection", "change");
                }, false);
   this._listen(urlBar, "select", function(evt) {
-                 record(ToolbarWidget.URLBAR, ToolbarAction.URL_SELECT);
+                 record("urlbar", "text selection", "select");
                }, false);
   // A single click (select all) followed by edit will look like:
   // mouse down, mouse up, selected, changed.
@@ -309,6 +319,103 @@ CombinedWindowObserver.prototype.install = function() {
 
   // TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
   // suggestion was hilighted when you hit enter?)
+
+    this._listen(urlBar, "popupshown", function(evt) {
+                   // TODO this doesn't seem to work.
+                 dump("A popup was shown from the url bar...\n");
+                 dump("tagname " + evt.originalTarget.tagName + "\n");
+                 dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
+               }, false);
+  this._listen(urlBar, "command", function(evt) {
+                 if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
+                   record("urlbar", "most frequently used menu", "menu pick");
+                 } else {
+                   // TODO how do we get the clicks on the actual items in it though?
+                   dump("A command came from the url bar...\n");
+                   dump("tagname " + evt.originalTarget.tagName + "\n");
+                   dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
+                 }
+               }, false);
+
+      // tabbrowser id="content" contains XBL children anonid="scrollbutton-up"
+  // and "scrollbutton-down-stack" and anonid="newtab-button"
+
+    // Record Clicks on Tab Bar and Scroll Buttons
+  let tabBar = this.window.document.getElementById("content");
+  this._listen(tabBar, "mouseup", function(evt) {
+                 if (evt.button == 0) {
+                   switch (evt.originalTarget.getAttribute("anonid")) {
+                   case "scrollbutton-up":
+                     record("tabbar", "left scroll button", "click");
+                     break;
+                   case "scrollbutton-down":
+                     record("tabbar", "right scroll button", "click");
+                     break;
+                   case "newtab-button":
+                     record("tabbar", "new tab button", "click");
+                     break;
+                   default:
+                     let parent = evt.originalTarget.parentNode;
+                     if (parent.tagName == "scrollbar") {
+                       if (parent.parentNode.tagName == "HTML") {
+                         let orientation = parent.getAttribute("orient");
+                         let widgetName = orientation + " scrollbar";
+                         let part = evt.originalTarget.tagName;
+                         if (part == "xul:slider") {
+                           // TODO can't distinguish slider from track...
+                           record(widgetName, "slider", "drag");
+                         } else if (part == "xul:scrollbarbutton") {
+                           let upOrDown = evt.originalTarget.getAttribute("type");
+                           if (upOrDown == "increment") { // vs. "decrement"
+                             record(widget, "up scroll button", "click");
+                           } else {
+                             record(widget, "down scroll button", "click");
+                           }
+                         }
+                       }
+                     }
+                   }
+                 }
+               }, false);
+
+   this._listen(tabBar, "popupshown", function(evt) {
+                 if (evt.originalTarget.getAttribute("anonid") =="alltabs-popup") {
+                   record("tabbar", "drop down menu", "click");
+                 }
+               }, false);
+    this._listen(tabBar, "command", function(evt) {
+                   if (evt.originalTarget.tagName == "menuitem") {
+                     record("tabbar", "drop down menu", "menu pick");
+                   }
+               }, false);
+  /* Note we also get command events when you hit the tab scroll bars and
+   * they actually scroll (the tagName will be "xul:toolbarbutton") -- as
+   * opposed to moseup which triggers even if there's nowhere to scroll, this
+   * might be a more precise way to get that event.  In fact look at using
+   * more command events on all the toolbar buttons...*/
+
+
+  let bkmkPanel = this.window.document.getElementById("editBookmarkPanel");
+  this._listen(bkmkPanel, "popupshown", function(evt) {
+                 record( "star-button", "edit bookmark panel", "panel open");
+               }, false);
+
+  this._listen(bkmkPanel, "command", function(evt) {
+                 switch (evt.originalTarget.getAttribute("id")) {
+                 case "editBookmarkPanelRemoveButton":
+                   record( "star-button", "remove bookmark button", "click");
+                   break;
+                 }
+                 // Other buttons we can get here:
+                 //editBMPanel_foldersExpander
+                 //editBMPanel_tagsSelectorExpander
+                 //editBookmarkPanelDeleteButton
+                 //editBookmarkPanelDoneButton
+               }, false);
+
+    // TODO F4 try listening on toolbar-context-menu,
+    // contentAreaContextMenu, and tabContextMenu.  As well as
+    // autocomplete-richlistbox
 
     dump("Registering listeners complete.\n");
   } catch(e) {

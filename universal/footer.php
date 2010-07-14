@@ -11,7 +11,7 @@ Author URI: http://mozillalabs.com/
 	<div class="uni-download uni-bottom-bar">
 		<div class="content950">
 			<h1>Try it now!</h1>
-			<div class="uni-download-button"><a href="aaa.html">Download Test Pilot</a></div>
+			<div class="uni-download-button"><a href="https://addons.mozilla.org/services/install.php?addon_id=testpilot">Download Test Pilot</a></div>
 			<p>Become a Test Pilot and help us make Firefox better! As a non-profit organization, we rely upon the support of volunteers to help us understand how people are using the Web, and to test the usefulness of new and existing browser features. </p>
 		</div>
 	</div>

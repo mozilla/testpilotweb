@@ -89,36 +89,49 @@ CombinedWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
 CombinedWindowObserver.prototype.install = function() {
 
   console.info("Starting to install listeners for combined window observer.");
+  try {
   let record = function( item, subItem, interaction ) {
     exports.handlers.record(EVENT_CODES.ACTION, item, subItem, interaction);
   };
 
+  let allPopups = this.window.document.getElementsByTagName("menupopup");
+  dump("ALL MENU POPUPS: " + allPopups.length + "\n");
+  for each( let p in allPopups) {
+    dump(p.id + ", ");
+  }
+
   // Register menu listeners:
-  // TODO record the menu name!!!!
   let window = this.window;
+  this._lastMenuPopup = null;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
   dump("Main command set is " + mainCommandSet + "\n");
   let mainMenuBar = window.document.getElementById("main-menubar");
   dump("Main menu bar is " + mainMenuBar + "\n");
   this._listen(mainMenuBar, "command", function(evt) {
+    dump("Got hit on mainMenuBar\n");
+    let menuItemId = "unknown";
+    let menuId = "unknown";
     if (evt.target.id) {
-      record("menus", evt.target.id, "mouse");
-    } else {
-      // If the item doesn't have an ID, keep going up through its parents
-      // until you find one that does.
-      let node = evt.target;
-      while (! node.id) {
-        node = node.parentNode;
-        if (!node) {
-          record("menus", "unknown", "mouse");
-          return;
-        }
+      menuItemId = evt.target.id;
+    }
+    let node = evt.target;
+    while(node) {
+      if (node.parentNode && node.parentNode.id == "main-menubar") {
+        menuId = node.id;
+        break;
       }
-      record("menus", node.id, "mouse");
-    }},
+      if (node.id && menuItemId == "unknown") {
+        menuItemId = node.id;
+      }
+      node = node.parentNode;
+    }
+    record(menuId, menuItemId, "mouse");
+    },
     true);
 
   this._listen(mainCommandSet, "command", function(evt) {
+    dump("Got hit on mainCommandSet\n");
+    // TODO Is there any way of recording the menu name in this case??
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
       record("menus", tag.command, "mouse");
@@ -126,6 +139,44 @@ CombinedWindowObserver.prototype.install = function() {
       record("menus", tag.command?tag.command:tag.id, "key shortcut");
     }},
     true);
+
+    /* All popups with ids:
+     * tabContextMenu, backForwardMenu, toolbar-context-menu,
+     * blockedPopupOptions, autohide-context, contentAreaContextMenu,
+     * spell-dictionaries-menu, placesContext, menu_FilePopup, menu_EditPopup,
+     * menu_viewPopup, viewSidebarMenu, goPopup, historyUndoPopup,
+     * historyUndoWindowPopup, bookmarksMenuPopup,
+     * subscribeToPageSubmenuMenupopup, bookmarksToolbarFolderPopup,
+     * menu_ToolsPopup, pilot-menu-popup, windowPopup, menu_HelpPopup,
+     * feed-menu, PlacesChevronPopup, BMB_bookmarksPopup,
+     * BMB_bookmarksToolbarFolderPopup, BMB_unsortedBookmarksFolderPopup,
+     * alltabs-popup
+     */
+
+  // Register menu popup listeners:
+  for each (let popupId in ["toolbar-context-menu", "contentAreaContextMenu",
+                           "tabContextMenu", "appmenu-popup",
+                            "BMB_bookmarksPopup", "main-menubar"]) {
+    let popup = window.document.getElementById(popupId);
+    if (popup) {
+      let name = popupId;
+      dump("Registered popup listeners on " + name + "\n");
+      this._listen(popup, "popuphidden", function(evt) {
+                     if (evt.target.id) {
+                       dump("Hid popup " + evt.target.id + "\n");
+                     }}, true);
+      this._listen(popup, "popupshown", function(evt) {
+                     if (evt.target.id) {
+                       dump("Showd popup " + name + "\n");
+                     }}, true);
+    }
+    // this os working for goPopup, windowPopup, and context menus, but not for
+    // app, file, edit, view, bookmark, or help menus.  The elements are there,
+    // they just apparently don't get the messages we expect.
+    // It also doesn't work if we register the listener on main-menubar!
+  }
+
+
 
   // Monitor Time Spent Hunting In Menus:
   /*for (let item in CMD_ID_STRINGS_BY_MENU) {
@@ -147,7 +198,6 @@ CombinedWindowObserver.prototype.install = function() {
     // TODO include context menu as separate entry
   }*/
 
-  try {
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
                    "home-button", "feed-button", "star-button",
                    "identity-popup-more-info-button",
@@ -413,9 +463,7 @@ CombinedWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDoneButton
                }, false);
 
-    // TODO F4 try listening on toolbar-context-menu,
-    // contentAreaContextMenu, and tabContextMenu.  As well as
-    // autocomplete-richlistbox
+     // TODO try listening on autocomplete-richlistbox
 
     dump("Registering listeners complete.\n");
   } catch(e) {
@@ -452,8 +500,8 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   let frontWindow = wm.getMostRecentWindow("navigator:browser");
   // Look for the "tabsontop" attribute on #navigator-toolbox.
   let toolbox = frontWindow.document.getElementById("navigator-toolbox");
-  let tabPosition = (toolbox.getAttribute("tabsontop") == "true")?true:false;
-  this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top", tabPosition);
+  let tabPosition = (toolbox.getAttribute("tabsontop") == "true")?"true":"false";
+  this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top?", tabPosition);
 };
 
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,

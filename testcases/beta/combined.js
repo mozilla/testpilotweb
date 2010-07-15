@@ -94,19 +94,11 @@ CombinedWindowObserver.prototype.install = function() {
     exports.handlers.record(EVENT_CODES.ACTION, item, subItem, interaction);
   };
 
-  let allPopups = this.window.document.getElementsByTagName("menupopup");
-  dump("ALL MENU POPUPS: " + allPopups.length + "\n");
-  for each( let p in allPopups) {
-    dump(p.id + ", ");
-  }
-
   // Register menu listeners:
   let window = this.window;
   this._lastMenuPopup = null;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
-  dump("Main command set is " + mainCommandSet + "\n");
   let mainMenuBar = window.document.getElementById("main-menubar");
-  dump("Main menu bar is " + mainMenuBar + "\n");
   this._listen(mainMenuBar, "command", function(evt) {
     let menuItemId = "unknown";
     let menuId = "unknown";
@@ -441,6 +433,8 @@ CombinedWindowObserver.prototype.install = function() {
                }, false);
     this._listen(tabBar, "command", function(evt) {
                    if (evt.originalTarget.tagName == "menuitem") {
+                     // TODO this seems to get triggered when you edit something
+                     // in about:config and click OK or cancel -- weirdly enuf.
                      record("tabbar", "drop down menu", "menu pick");
                    }
                }, false);
@@ -500,14 +494,26 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   prefName = "extensions.testpilot.taskGUID." + MY_TEST_ID;
   prefs.set(prefName, originalStudyGuid);
 
-  // Record customizations!  (Such as whether tabs are on top!)
+  // Record customizations!
   let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
                         .getService(Ci.nsIWindowMediator);
   let frontWindow = wm.getMostRecentWindow("navigator:browser");
-  // Look for the "tabsontop" attribute on #navigator-toolbox.
+
+  // Are tabs on top?
   let toolbox = frontWindow.document.getElementById("navigator-toolbox");
   let tabPosition = (toolbox.getAttribute("tabsontop") == "true")?"true":"false";
   this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top?", tabPosition);
+
+  // Is the main menu bar hidden?
+  let toolbarMenubar = frontWindow.document.getElementById("toolbar-menubar");
+  let autohide = toolbarMenubar.getAttribute("autohide")?"true":"false";
+  this.record(EVENT_CODES.CUSTOMIZE, "menu bar", "hidden?", autohide);
+  // Other customizations:
+  // Is menubar shown?
+  // Is bookmark bar shown?
+  // How many bookmarks?
+  // Is status bar shown?
+  // Any change to toolbar buttons?
 };
 
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,

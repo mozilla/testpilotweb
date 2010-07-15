@@ -108,7 +108,6 @@ CombinedWindowObserver.prototype.install = function() {
   let mainMenuBar = window.document.getElementById("main-menubar");
   dump("Main menu bar is " + mainMenuBar + "\n");
   this._listen(mainMenuBar, "command", function(evt) {
-    dump("Got hit on mainMenuBar\n");
     let menuItemId = "unknown";
     let menuId = "unknown";
     if (evt.target.id) {
@@ -116,7 +115,7 @@ CombinedWindowObserver.prototype.install = function() {
     }
     let node = evt.target;
     while(node) {
-      if (node.parentNode && node.parentNode.id == "main-menubar") {
+      if (node.tagName == "menupopup") {
         menuId = node.id;
         break;
       }
@@ -130,11 +129,19 @@ CombinedWindowObserver.prototype.install = function() {
     true);
 
   this._listen(mainCommandSet, "command", function(evt) {
-    dump("Got hit on mainCommandSet\n");
-    // TODO Is there any way of recording the menu name in this case??
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
-      record("menus", tag.command, "mouse");
+      let menuItemId = tag.id?tag.id:tag.command;
+      let menuId = "unknown";
+      let node = evt.sourceEvent.target;
+      while(node) {
+        if (node.tagName == "menupopup") {
+          menuId = node.id;
+          break;
+        }
+        node = node.parentNode;
+      }
+      record(menuId, menuItemId, "mouse");
     } else if (tag.tagName == "key") {
       record("menus", tag.command?tag.command:tag.id, "key shortcut");
     }},
@@ -160,14 +167,13 @@ CombinedWindowObserver.prototype.install = function() {
     let popup = window.document.getElementById(popupId);
     if (popup) {
       let name = popupId;
-      dump("Registered popup listeners on " + name + "\n");
       this._listen(popup, "popuphidden", function(evt) {
                      if (evt.target.id) {
-                       dump("Hid popup " + evt.target.id + "\n");
+                       // Do something
                      }}, true);
       this._listen(popup, "popupshown", function(evt) {
                      if (evt.target.id) {
-                       dump("Showd popup " + name + "\n");
+                       // Do something
                      }}, true);
     }
     // this os working for goPopup, windowPopup, and context menus, but not for

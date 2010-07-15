@@ -139,6 +139,11 @@ CombinedWindowObserver.prototype.install = function() {
     }},
     true);
 
+    // TODO Mac "Firefox" menu items:
+    // for keys, register on keyset id="baseMenuKeyset"
+    // for mouse, register on menupopup id="menu_ToolsPopup"
+    // (Wait, what? That's the same as the tools menu?
+
     /* All popups with ids:
      * tabContextMenu, backForwardMenu, toolbar-context-menu,
      * blockedPopupOptions, autohide-context, contentAreaContextMenu,
@@ -191,9 +196,6 @@ CombinedWindowObserver.prototype.install = function() {
                      exports.handlers.onPopupShown(evt); }, true);
     }
 
-    // TODO include Mac's Firefox menu, if we can figure out what its
-    // popup id is.
-    // TODO include context menu as separate entry
   }*/
 
   let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
@@ -508,12 +510,24 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   let toolbarMenubar = frontWindow.document.getElementById("toolbar-menubar");
   let autohide = toolbarMenubar.getAttribute("autohide")?"true":"false";
   this.record(EVENT_CODES.CUSTOMIZE, "menu bar", "hidden?", autohide);
-  // Other customizations:
-  // Is menubar shown?
-  // Is bookmark bar shown?
-  // How many bookmarks?
+
+  // How many bookmarks in bookmark toolbar?
+  let bkmkToolbar = frontWindow.document.getElementById("personal-bookmarks");
+  let bkmks = bkmkToolbar.getElementsByClassName("bookmark-item");
+  this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "num. bookmarks",
+              bkmks.length);
+  // TODO how do we get whether bookmark toolbar is hidden or shown?
+  dump("bkmkToolbar.hidden = " + bkmkToolbar.getAttribute("hidden") + "\n");
+
   // Is status bar shown?
-  // Any change to toolbar buttons?
+  let statusBar = frontWindow.document.getElementById("status-bar");
+  if (statusBar.getAttribute("hidden") == "true") {
+    this.record(EVENT_CODES.CUSTOMIZE, "status bar", "hidden?", "true");
+  } else {
+    this.record(EVENT_CODES.CUSTOMIZE, "status bar", "hidden?", "false");
+  }
+
+  // TODO Any change to toolbar buttons?
 };
 
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,

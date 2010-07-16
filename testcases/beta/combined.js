@@ -374,6 +374,11 @@ CombinedWindowObserver.prototype.install = function() {
                  dump("tagname " + evt.originalTarget.tagName + "\n");
                  dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
                }, false);
+
+    let autocomplete = this.window.document.getElementById("autocomplete-richlistbox");
+    this._listen(autocomplete, "mouseup", function(evt) {
+                   dump("Mouseup on automcomplete richlistbox\n");
+                 }, false);
   this._listen(urlBar, "command", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
                    // TODO This gets recorded on OPEN of the menu.  That's wrong.
@@ -470,7 +475,6 @@ CombinedWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDoneButton
                }, false);
 
-     // TODO try listening on autocomplete-richlistbox
 
     dump("Registering listeners complete.\n");
   } catch(e) {

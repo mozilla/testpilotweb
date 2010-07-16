@@ -390,20 +390,12 @@ CombinedWindowObserver.prototype.install = function() {
       // tabbrowser id="content" contains XBL children anonid="scrollbutton-up"
   // and "scrollbutton-down-stack" and anonid="newtab-button"
 
-    // Record Clicks on Tab Bar and Scroll Buttons
-  let tabBar = this.window.document.getElementById("content");
-  this._listen(tabBar, "mouseup", function(evt) {
+    // Record Clicks on Scroll Buttons
+  let content = this.window.document.getElementById("content");
+  this._listen(content, "mouseup", function(evt) {
                  if (evt.button == 0) {
+                   dump("Content mouseup anonid: " + evt.originalTarget.getAttribute("anonid") + "\n");
                    switch (evt.originalTarget.getAttribute("anonid")) {
-                   case "scrollbutton-up":
-                     record("tabbar", "left scroll button", "click");
-                     break;
-                   case "scrollbutton-down":
-                     record("tabbar", "right scroll button", "click");
-                     break;
-                   case "newtab-button":
-                     record("tabbar", "new tab button", "click");
-                     break;
                    default:
                      let parent = evt.originalTarget.parentNode;
                      if (parent.tagName == "scrollbar") {
@@ -417,9 +409,9 @@ CombinedWindowObserver.prototype.install = function() {
                          } else if (part == "xul:scrollbarbutton") {
                            let upOrDown = evt.originalTarget.getAttribute("type");
                            if (upOrDown == "increment") { // vs. "decrement"
-                             record(widget, "up scroll button", "click");
+                             record(widgetName, "up scroll button", "click");
                            } else {
-                             record(widget, "down scroll button", "click");
+                             record(widgetName, "down scroll button", "click");
                            }
                          }
                        }
@@ -428,11 +420,29 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-   this._listen(tabBar, "popupshown", function(evt) {
-                 if (evt.originalTarget.getAttribute("anonid") =="alltabs-popup") {
-                   record("tabbar", "drop down menu", "click");
-                 }
-               }, false);
+    // Record tab bar interactions
+    let tabBar = this.window.document.getElementById("TabsToolbar");
+    this._listen(tabBar, "mouseup", function(evt) {
+                   if (evt.button == 0) {
+                     // TODO it only seems to record new tab button when there's
+                     // enough tabs for the tabbar to scroll, weirdly enuf.
+                     dump("Click on tab bar..." + evt.originalTarget.id + "\n");
+                     if (evt.originalTarget.id == "new-tab-button") {
+                       record("tabbar", "new tab button", "click");
+                     } else if (evt.originalTarget.id == "alltabs-button") {
+                       record("tabbar", "drop down menu", "click");
+                     } else {
+                       switch (evt.originalTarget.getAttribute("anonid")) {
+                       case "scrollbutton-up":
+                         record("tabbar", "left scroll button", "click");
+                         break;
+                       case "scrollbutton-down":
+                         record("tabbar", "right scroll button", "click");
+                         break;
+                       }
+                     }
+                   }
+                 }, false);
     this._listen(tabBar, "command", function(evt) {
                    if (evt.originalTarget.tagName == "menuitem") {
                      // TODO this seems to get triggered when you edit something

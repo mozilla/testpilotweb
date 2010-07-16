@@ -29,9 +29,9 @@
   },
 
   {"name": "Beta Perception Survey",
-   "jarfile": "beta_perception.jar",
+   "jarfile": "beta/beta_perception.jar",
    "studyfile": "beta_perception_survey.js",
-   "hash": "703d490f1206eaea92ec1c50d3532afc68f31758797b791b030ddec29e10dc32"
+   "hash": "1d648a307e783888815ad989e9de41e95533d851ccb529e416513298c1cb551f"
   }
 ],
 

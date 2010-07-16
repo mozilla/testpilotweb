@@ -12,6 +12,7 @@ exports.surveyInfo = {
     + "the current Firefox version after using it for a while."
     + "Thank you for your time!",
   thumbnail: null,
+  uploadWithExperiment: 100,
   surveyExplanation: "<p>Thank you for using Firefox!</p>\
 <p>Through this survey, we would like to know what you think about \
 the current Firefox version after using it for a while. \

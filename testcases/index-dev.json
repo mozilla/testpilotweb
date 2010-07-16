@@ -28,10 +28,10 @@
    "hash": "99e92eaab3e1910ac0d889cca2275e3924007046d0e70dae9f8d4d3095f8cb7b"
   },
 
-  {"name": "Web Test Survey",
-   "jarfile": "webSurveyTest.jar",
-   "studyfile": "webSurveyTest.js",
-   "hash": "51b7ef23115c7f6226453ebbb780f746f02149a5da0f4f9876cc721992ba2771"
+  {"name": "Beta Perception Survey",
+   "jarfile": "beta_perception.jar",
+   "studyfile": "beta_perception_survey.js",
+   "hash": "703d490f1206eaea92ec1c50d3532afc68f31758797b791b030ddec29e10dc32"
   }
 ],
 

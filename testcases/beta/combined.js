@@ -173,13 +173,11 @@ CombinedWindowObserver.prototype.install = function() {
                        // Do something
                      }}, true);
     }
-    // this os working for goPopup, windowPopup, and context menus, but not for
+    // this is working for goPopup, windowPopup, and context menus, but not for
     // app, file, edit, view, bookmark, or help menus.  The elements are there,
     // they just apparently don't get the messages we expect.
     // It also doesn't work if we register the listener on main-menubar!
   }
-
-
 
   // Monitor Time Spent Hunting In Menus:
   /*for (let item in CMD_ID_STRINGS_BY_MENU) {
@@ -203,7 +201,7 @@ CombinedWindowObserver.prototype.install = function() {
                    "identity-popup-more-info-button",
                    "back-forward-dropmarker", "security-button",
                    "downloads-button", "print-button", "bookmarks-button",
-                   "history-button", "new-tab-button", "new-window-button",
+                   "history-button", "new-window-button",
                    "cut-button", "copy-button", "paste-button", "fullscreen-button"];
 
   for (let i = 0; i < buttonIds.length; i++) {
@@ -371,13 +369,14 @@ CombinedWindowObserver.prototype.install = function() {
   // suggestion was hilighted when you hit enter?)
 
     this._listen(urlBar, "popupshown", function(evt) {
-                   // TODO this doesn't seem to work.
+                   // TODO this is never called.
                  dump("A popup was shown from the url bar...\n");
                  dump("tagname " + evt.originalTarget.tagName + "\n");
                  dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
                }, false);
   this._listen(urlBar, "command", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
+                   // TODO This gets recorded on OPEN of the menu.  That's wrong.
                    record("urlbar", "most frequently used menu", "menu pick");
                  } else {
                    // TODO how do we get the clicks on the actual items in it though?

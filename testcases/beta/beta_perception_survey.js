@@ -11,7 +11,7 @@ exports.surveyInfo = {
     + "Through this survey, we would like to know what you think about "
     + "the current Firefox version after using it for a while."
     + "Thank you for your time!",
-  thumbnail: "",
+  thumbnail: null,
   surveyExplanation: "<p>Thank you for using Firefox!</p>\
 <p>Through this survey, we would like to know what you think about \
 the current Firefox version after using it for a while. \
@@ -19,8 +19,7 @@ This survey doesn't contain any personally identifiable questions. \
 It will be uploaded along with any user study data that you choose to submit. \
 You can always use the button below to review or change your answers.</p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
-  minTPVersion: "1.0a1",
-  minFXVersion: "4.0b1",
+  minTPVersion: "1.0rc1",
   versionNumber: 1,
   surveyQuestions:  [
    { question: "When did you download this current Firefox browser?",
@@ -59,15 +58,15 @@ You can always use the button below to review or change your answers.</p>",
     max_label: "strongly like"},
   { question: "Did you regularly use Firefox prior to downloading your current version of Firefox?",
     type: MULTIPLE_CHOICE,
-    choices: ["Yes", "No"]
+    choices: ["Yes", "No"],
     free_entry: "If you know your previous Firefox version, please write it here"},
   {question:"If you are using Firefox 4 beta, which tasks were easier to do compared to the previous Firefox version?",
-   type: FREE_ENTRY}
+   type: FREE_ENTRY},
   {question:"Which tasks were HARDER to do compared to your previous Firefox version?",
-   type: FREE_ENTRY}
+   type: FREE_ENTRY},
   { question: "Do you know which version of Firefox you are using?",
     type: MULTIPLE_CHOICE,
     choices: ["I don't know.  Do I need to know?", "I have a vague idea on which version of Firefox I am using.", "I know exactly which Firefox version I am using."],
-    free_entry: "If you know your Firefox version, please write it here" },
+    free_entry: "If you know your Firefox version, please write it here" }
   ]
 };

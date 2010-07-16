@@ -485,7 +485,7 @@ BaseClasses.extend(GlobalCombinedObserver, BaseClasses.GenericGlobalObserver);
 GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   GlobalCombinedObserver.superClass.onExperimentStartup.call(this, store);
 
-  this.record(EVENT_CODES.METADATA, "startup", "study version",
+  this.record(EVENT_CODES.METADATA, "exp startup", "study version",
               exports.experimentInfo.versionNumber);
 
   // Longitudinal study:  If there are multiple runs of the study, copy the
@@ -535,7 +535,16 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   // TODO Any change to toolbar buttons?
 };
 
-// TODO record on shutdown too
+// Record app startup and shutdown events:
+GlobalCombinedObserver.prototype.onAppStartup = function() {
+  GlobalCombinedObserver.superClass.onAppStartup.call(this);
+  this.record(EVENT_CODES.METADATA, "app", "", "startup");
+};
+
+GlobalCombinedObserver.prototype.onAppShutdown = function() {
+  GlobalCombinedObserver.superClass.onAppShutdown.call(this);
+  this.record(EVENT_CODES.METADATA, "app", "", "shutdown");
+};
 
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,
                                                   interactionType) {

@@ -535,6 +535,8 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   // TODO Any change to toolbar buttons?
 };
 
+// TODO record on shutdown too
+
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,
                                                   interactionType) {
   if (!this.privateMode) {

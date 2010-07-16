@@ -66,8 +66,8 @@ You can always use the button below to review or change your answers.</p>",
    type: FREE_ENTRY},
   { question: "Do you know which version of Firefox you are using?",
     type: MULTIPLE_CHOICE,
-    choices: ["I don't know.  Do I need to know?", "I have a vague idea on which version of Firefox I am using.", "I know exactly which Firefox version I am using."]}
+    choices: ["I don't know.  Do I need to know?", "I have a vague idea on which version of Firefox I am using.", "I know exactly which Firefox version I am using."]},
   {question:"If you know the current Firefox version, please write it here:",
-   type: FREE_ENTRY},
+   type: FREE_ENTRY}
   ]
 };

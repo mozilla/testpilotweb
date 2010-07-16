@@ -47,7 +47,7 @@ exports.experimentInfo = {
   duration: 5, // Days
   testName: "Firefox 4 Beta Interface",
   testId: MY_TEST_ID,
-  testInfoUrl: "https://testpilot.mozillalabs.com",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/betaui.html",
   summary: "We are studying how the changes to the toolbar and menu bar in the"
            + " Firefox 4 beta affect usage of the interface.",
   thumbnail: null,
@@ -332,6 +332,8 @@ CombinedWindowObserver.prototype.install = function() {
     // event?
   self._urlBarMouseState = false;
   this._listen(urlBar, "mouseup", function(evt) {
+                 dump("Mouseup on urlbar: anonid = ");
+                 dump(evt.originalTarget.getAttribute("anonid"));
                  if (self._urlBarMouseState) {
                    record("urlbar", "text selection", "mouseup");
                    self._urlBarMouseState = false;
@@ -375,10 +377,20 @@ CombinedWindowObserver.prototype.install = function() {
                  dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
                }, false);
 
-    let autocomplete = this.window.document.getElementById("autocomplete-richlistbox");
-    this._listen(autocomplete, "mouseup", function(evt) {
-                   dump("Mouseup on automcomplete richlistbox\n");
+   //let autocomplete = this.window.document.getElementById("autocomplete-richlistbox");
+   //autocomplete-richlistbox is null? wut?
+    let urlbarContainer = this.window.document.getElementById("urlbar-container");
+    this._listen(urlbarContainer, "mouseup", function(evt) {
+                   dump("Mouseup on urlbar container\n");
                  }, false);
+    this._listen(urlbarContainer, "command", function(evt) {
+                   dump("Command on urlbar container\n");
+                 }, false);
+    this._listen(urlbarContainer, "popupshown", function(evt) {
+                   dump("Popup shown on urlbar container\n");
+                 }, false);
+
+
   this._listen(urlBar, "command", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
                    // TODO This gets recorded on OPEN of the menu.  That's wrong.

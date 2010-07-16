@@ -394,25 +394,21 @@ CombinedWindowObserver.prototype.install = function() {
   let content = this.window.document.getElementById("content");
   this._listen(content, "mouseup", function(evt) {
                  if (evt.button == 0) {
-                   dump("Content mouseup anonid: " + evt.originalTarget.getAttribute("anonid") + "\n");
-                   switch (evt.originalTarget.getAttribute("anonid")) {
-                   default:
-                     let parent = evt.originalTarget.parentNode;
-                     if (parent.tagName == "scrollbar") {
-                       if (parent.parentNode.tagName == "HTML") {
-                         let orientation = parent.getAttribute("orient");
-                         let widgetName = orientation + " scrollbar";
-                         let part = evt.originalTarget.tagName;
-                         if (part == "xul:slider") {
-                           // TODO can't distinguish slider from track...
-                           record(widgetName, "slider", "drag");
-                         } else if (part == "xul:scrollbarbutton") {
-                           let upOrDown = evt.originalTarget.getAttribute("type");
-                           if (upOrDown == "increment") { // vs. "decrement"
-                             record(widgetName, "up scroll button", "click");
-                           } else {
-                             record(widgetName, "down scroll button", "click");
-                           }
+                   let parent = evt.originalTarget.parentNode;
+                   if (parent.tagName == "scrollbar") {
+                     if (parent.parentNode.tagName == "HTML") {
+                       let orientation = parent.getAttribute("orient");
+                       let widgetName = orientation + " scrollbar";
+                       let part = evt.originalTarget.tagName;
+                       if (part == "xul:slider") {
+                         // TODO can't distinguish slider from track...
+                         record(widgetName, "slider", "drag");
+                       } else if (part == "xul:scrollbarbutton") {
+                         let upOrDown = evt.originalTarget.getAttribute("type");
+                         if (upOrDown == "increment") { // vs. "decrement"
+                           record(widgetName, "up scroll button", "click");
+                         } else {
+                           record(widgetName, "down scroll button", "click");
                          }
                        }
                      }
@@ -583,12 +579,73 @@ function CombinedStudyWebContent()  {
 BaseClasses.extend(CombinedStudyWebContent, BaseClasses.GenericWebContent);
 CombinedStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "There's going to be some kind of graph here, time permitting.";
+    return "This bar chart shows how often you used your 15 most frequently"
+           + " used Firefox interface items.";
   });
+CombinedStudyWebContent.prototype.__defineGetter__("dataCanvas",
+  function() {
+      return '<div class="dataBox"><h3>View Your Data:</h3>' +
+      this.dataViewExplanation +
+      this.rawDataLink +
+      '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
+      this.saveButtons + '</div>';
+  });
+
 CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {
-  // TODO graphics
+  let plotDiv = document.getElementById("data-plot-div");
+    experiment.getDataStoreAsJSON(function(rawData) {
+    if (rawData.length == 0) {
+      return;
+    }
+
+    let stats = [];
+    let item;
+    let lastActionId;
+    for each( let row in rawData) {
+      if (row.event != EVENT_CODES.ACTION) {
+        continue;
+      }
+      // Skip the text selection events
+      if (row.item == "urlbar" && row.sub_item == "text selection") {
+        continue;
+      }
+      let match = false;
+      for (x in stats) {
+        if (stats[x].item == row.item && stats[x].sub_item == row.sub_item) {
+          match = true;
+          stats[x].quantity ++;
+          break;
+        }
+      }
+      if (!match) {
+        stats.push( {item: row.item, sub_item: row.sub_item, quantity: 1} );
+      }
+    }
+
+
+    stats.sort(function(a, b) {
+      return b.quantity - a.quantity;
+    });
+
+    let numItems = stats.length<15?stats.length:15;
+    let d1 = [];
+    let yAxisLabels = [];
+    for (let i = 0; i < numItems; i++) {
+      let item = stats[i];
+      d1.push([item.quantity, i - 0.5]);
+      let labelText = (item.item + ": " + item.sub_item).toLowerCase();
+      yAxisLabels.push([i, labelText]);
+    }
+    try {
+      graphUtils.plot(plotDiv, [{data: d1}],
+                      {series: {bars: {show: true, horizontal: true}},
+                       yaxis: {ticks: yAxisLabels}});
+    } catch(e) {
+      console.warn("Problem with graphutils: " + e + "\n");
+    }
+  });
 };
 exports.webContent = new CombinedStudyWebContent();
 

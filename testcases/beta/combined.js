@@ -208,7 +208,7 @@ CombinedWindowObserver.prototype.install = function() {
     let id = buttonIds[i];
     let elem = this.window.document.getElementById(id);
     if (!elem) {
-      console.warn("Can't install listener: no element with id " + id);
+      console.info("Can't install listener: no element with id " + id);
       continue;
     }
     this._listen(elem, "mouseup",
@@ -250,7 +250,7 @@ CombinedWindowObserver.prototype.install = function() {
   let self = this;
   let register = function(elemId, event, item, subItem, interactionName) {
     if (!self.window.document.getElementById(elemId)) {
-      dump("No such element as " + elemId + "\n");
+      console.info("Can't register " + elemId + ", no such element.");
       return;
     }
     self._listen( self.window.document.getElementById(elemId), event, function() {
@@ -332,8 +332,6 @@ CombinedWindowObserver.prototype.install = function() {
     // event?
   self._urlBarMouseState = false;
   this._listen(urlBar, "mouseup", function(evt) {
-                 dump("Mouseup on urlbar: anonid = ");
-                 dump(evt.originalTarget.getAttribute("anonid"));
                  if (self._urlBarMouseState) {
                    record("urlbar", "text selection", "mouseup");
                    self._urlBarMouseState = false;
@@ -369,37 +367,14 @@ CombinedWindowObserver.prototype.install = function() {
 
   // TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
   // suggestion was hilighted when you hit enter?)
-
-    this._listen(urlBar, "popupshown", function(evt) {
-                   // TODO this is never called.
-                 dump("A popup was shown from the url bar...\n");
-                 dump("tagname " + evt.originalTarget.tagName + "\n");
-                 dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
-               }, false);
-
-   //let autocomplete = this.window.document.getElementById("autocomplete-richlistbox");
-   //autocomplete-richlistbox is null? wut?
-    let urlbarContainer = this.window.document.getElementById("urlbar-container");
-    this._listen(urlbarContainer, "mouseup", function(evt) {
-                   dump("Mouseup on urlbar container\n");
-                 }, false);
-    this._listen(urlbarContainer, "command", function(evt) {
-                   dump("Command on urlbar container\n");
-                 }, false);
-    this._listen(urlbarContainer, "popupshown", function(evt) {
-                   dump("Popup shown on urlbar container\n");
-                 }, false);
-
-
+    // Things that DONT work:  Popupshown on urlbar never called;
+    // #autocomplete-richlistbox doesn't exist;
+    // urlbar-container does not get mouseup or command when you click an item
+    // in the url bar drop down.
+    // command on urlbar only triggers when the history drop down opens.
   this._listen(urlBar, "command", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
-                   // TODO This gets recorded on OPEN of the menu.  That's wrong.
-                   record("urlbar", "most frequently used menu", "menu pick");
-                 } else {
-                   // TODO how do we get the clicks on the actual items in it though?
-                   dump("A command came from the url bar...\n");
-                   dump("tagname " + evt.originalTarget.tagName + "\n");
-                   dump("anonid " + evt.originalTarget.getAttribute("anonid") + "\n");
+                   record("urlbar", "most frequently used menu", "open");
                  }
                }, false);
 
@@ -438,7 +413,6 @@ CombinedWindowObserver.prototype.install = function() {
                    if (evt.button == 0) {
                      // TODO it only seems to record new tab button when there's
                      // enough tabs for the tabbar to scroll, weirdly enuf.
-                     dump("Click on tab bar..." + evt.originalTarget.id + "\n");
                      if (evt.originalTarget.id == "new-tab-button") {
                        record("tabbar", "new tab button", "click");
                      } else if (evt.originalTarget.id == "alltabs-button") {
@@ -487,10 +461,9 @@ CombinedWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDoneButton
                }, false);
 
-
-    dump("Registering listeners complete.\n");
+    console.trace("Registering listeners complete.\n");
   } catch(e) {
-    dump(e);
+    console.warn("Error in registering listeners: " + e);
   }
 };
 
@@ -538,7 +511,8 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "num. bookmarks",
               bkmks.length);
   // TODO how do we get whether bookmark toolbar is hidden or shown?
-  dump("bkmkToolbar.hidden = " + bkmkToolbar.getAttribute("hidden") + "\n");
+  // This is not it:
+  //dump("bkmkToolbar.hidden = " + bkmkToolbar.getAttribute("hidden") + "\n");
 
   // Is status bar shown?
   let statusBar = frontWindow.document.getElementById("status-bar");
@@ -591,7 +565,7 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
       interaction_type: interactionType,
       timestamp: Date.now()
     });
-    dump("Recorded " + event + ", " + item + ", " + subItem + ", " + interactionType + "\n");
+    //dump("Recorded " + event + ", " + item + ", " + subItem + ", " + interactionType + "\n");
     // storeEvent can also take a callback, which we're not using here.
   }
 };
@@ -616,6 +590,24 @@ CombinedStudyWebContent.prototype.__defineGetter__("dataCanvas",
       '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
       this.saveButtons + '</div>';
   });
+CombinedStudyWebContent.prototype.__defineGetter__("betaWarning",
+  function() {
+    return '<p>This study is intended for Firefox 4 Beta users.  If you are '
+           + 'not using <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">the Firefox 4 Beta</a>'
+      + ' maybe you shouldn\'t run it.</p>';
+  });
+CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
+  function() {
+    return '<h2>Thank you, Test Pilot!</h2>' +
+      '<p>The ' + this.titleLink + ' study is currently in progress.</p>' +
+    '<p>' + this.expInfo.summary + '</p>' +
+    '<p> The study will end in ' + this.expInfo.duration + ' days. Read more details for this ' + this.titleLink + ' study.\</p>\
+    <ul><li>You can save your test graph or export the raw data now, or after you \
+    submit your data.</li>' + this.thinkThereIsAnError +
+      '<li>If you don\'t want to submit your data this time, ' +
+      this.optOutLink + '.</li></ul>' + this.dataCanvas;
+  });
+
 
 CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,

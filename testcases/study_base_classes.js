@@ -30,7 +30,7 @@ exports.GenericWebContent.prototype = {
   get thinkThereIsAnError() {
       return '<li>If you think there is an error in this data, \
     <a onclick="openLink(\'http://groups.google.com/group/mozilla-labs-testpilot\');">\
-    click here to post</a> a message to notify the Test Pilot team about it.</li>';
+    click here to post a message</a> to notify the Test Pilot team about it.</li>';
   },
 
   get dataViewExplanation() {

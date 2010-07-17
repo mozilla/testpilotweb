@@ -1,7 +1,7 @@
 {"experiment_jars": [
   {"name": "Dependencies",
    "jarfile": "base_classes.jar",
-   "hash": "6314d9139d7115010c5bb2220f1e3a048bab56b9c2c33469f03202b0a7744c06"
+   "hash": "aea1be5cc06238baab973c7a303fb36d3ba1e3988466fbd9b6d2a91c3ab66cd2"
   },
 
   {"name": "Pilot Background Survey",
@@ -25,7 +25,7 @@
   {"name": "Firefox 4 Beta Interface",
    "jarfile": "beta/combined.jar",
    "studyfile": "combined.js",
-   "hash": "99e92eaab3e1910ac0d889cca2275e3924007046d0e70dae9f8d4d3095f8cb7b"
+   "hash": "ac8af3fc5e8ac564588d0074db36190bbf12558f1021bb854eea7161e490f819"
   },
 
   {"name": "Beta Perception Survey",

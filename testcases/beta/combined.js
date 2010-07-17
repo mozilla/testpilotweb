@@ -592,17 +592,18 @@ CombinedStudyWebContent.prototype.__defineGetter__("dataCanvas",
   });
 CombinedStudyWebContent.prototype.__defineGetter__("betaWarning",
   function() {
-    return '<p>This study is intended for Firefox 4 Beta users.  If you are '
-           + 'not using <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">the Firefox 4 Beta</a>'
-      + ' maybe you shouldn\'t run it.</p>';
+    return '<p>This study is intended for Firefox 4 Beta users.  If you are'
+           + ' not using <a onclick="openLink(\'http://www.mozilla.com/en-US/firefox/all-beta.html\');">the Firefox 4 Beta</a>,'
+           + ' it may not function correctly. (' + this.optOutLink + ')</p>';
   });
 CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
   function() {
     return '<h2>Thank you, Test Pilot!</h2>' +
       '<p>The ' + this.titleLink + ' study is currently in progress.</p>' +
     '<p>' + this.expInfo.summary + '</p>' +
-    '<p> The study will end in ' + this.expInfo.duration + ' days. Read more details for this ' + this.titleLink + ' study.\</p>\
-    <ul><li>You can save your test graph or export the raw data now, or after you \
+      this.betaWarning +
+    '<p> The study will end in ' + this.expInfo.duration + ' days. ' +
+    '<ul><li>You can save your test graph or export the raw data now, or after you \
     submit your data.</li>' + this.thinkThereIsAnError +
       '<li>If you don\'t want to submit your data this time, ' +
       this.optOutLink + '.</li></ul>' + this.dataCanvas;

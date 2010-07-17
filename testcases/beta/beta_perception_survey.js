@@ -6,16 +6,16 @@ const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
   surveyId: "beta_perception_survey_1",
-  surveyName: "How do you think about your Firefox?",
+  surveyName: "How do you like your Firefox?",
   summary: "Thank you for using Firefox! "
-    + "Through this survey, we would like to know what you think about "
-    + "the current Firefox version after using it for a while."
+    + "Through this survey, we would like to learn what you think about"
+    + "the current Firefox version."
     + "Thank you for your time!",
   thumbnail: null,
   uploadWithExperiment: 100,
   surveyExplanation: "<p>Thank you for using Firefox!</p>\
-<p>Through this survey, we would like to know what you think about \
-the current Firefox version after using it for a while. \
+<p>Through this survey, we would like to learn what you think about \
+the current Firefox version. \
 This survey doesn't contain any personally identifiable questions. \
 It will be uploaded along with any user study data that you choose to submit. \
 You can always use the button below to review or change your answers.</p>",
@@ -44,7 +44,7 @@ You can always use the button below to review or change your answers.</p>",
   { question: "How do you feel about the speed and performance when launching a webpage or a web application?",
     type: MULTIPLE_CHOICE,
     choices: ["It is pretty fast and smooth in general","I notice a delay with certain sites; but it is fast enough for me in general",
-"it is not as fast and smooth as I would expect.","I didn't notice any particular issue when launching a page or application"]},
+"It is not as fast and smooth as I would expect.","I didn't notice any particular issue when launching a page or application"]},
  { question: "In general, how do you feel about the Firefox Browser's responsiveness?",
     type: SCALE,
     scale_minimum: 1,
@@ -66,8 +66,8 @@ You can always use the button below to review or change your answers.</p>",
    type: FREE_ENTRY},
   { question: "Do you know which version of Firefox you are using?",
     type: MULTIPLE_CHOICE,
-    choices: ["I don't know.  Do I need to know?", "I have a vague idea on which version of Firefox I am using.", "I know exactly which Firefox version I am using."]},
-  {question:"If you know the current Firefox version, please write it here:",
+    choices: ["I don't know. Do I need to know?", "I have a vague idea on which version of Firefox I am using.", "I know exactly which Firefox version I am using."]},
+  {question:"If you know which version of Firefox you are using, please list it here:",
    type: FREE_ENTRY}
   ]
 };

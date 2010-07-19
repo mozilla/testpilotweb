@@ -288,11 +288,6 @@ CombinedWindowObserver.prototype.install = function() {
                    }
                  }}, false);
 
-  let feedbackToolbar = this.window.document.getElementById("feedback-menu-button");
-  this._listen(feedbackToolbar, "mouseup", function(evt) {
-    record("feedback-toolbar", evt.target.id, "click");
-  }, false);
-
     // Listen on search bar ues by mouse and keyboard, including repeated
     // searches (same engine or different engine?)
   let searchBar = this.window.document.getElementById("searchbar");

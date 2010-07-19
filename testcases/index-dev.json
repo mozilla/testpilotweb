@@ -35,6 +35,53 @@
   }
 ],
 
+"new_experiments": [
+  {"default":
+    {"name": "Dependencies",
+     "jarfile": "base_classes.jar",
+     "hash": "aea1be5cc06238baab973c7a303fb36d3ba1e3988466fbd9b6d2a91c3ab66cd2"
+    }
+  },
+
+  {"default":
+    {"name": "Pilot Background Survey",
+     "jarfile": "basic-survey.jar",
+     "studyfile": "pilot-background-survey.js",
+     "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
+    },
+
+   "pt-BR": {
+     "name": "Brazilian Portugese Pilot Background Survey",
+     "jarfile": "basic-survey-pt-br.jar",
+     "studyfile": "pilot-background-survey.js",
+     "hash": "82a6063f716ef92a211646ea38bedefc229db8406b3d0d13aa9cd032a9ccb094"
+    },
+
+   "pt": {
+     "name": "Portugese Pilot Background Survey",
+     "jarfile": "basic-survey-pt.jar",
+     "studyfile": "pilot-background-survey.js",
+     "hash": "957ce4aad20f6a7227c5d04f7cd0b2a43bf0815a102a2e0f95e4cf21ff51d4fd"
+    }
+  },
+
+  {"default":
+    {"name": "Firefox 4 Beta Interface",
+     "jarfile": "beta/combined.jar",
+     "studyfile": "combined.js",
+     "hash": "ac8af3fc5e8ac564588d0074db36190bbf12558f1021bb854eea7161e490f819"
+    }
+  },
+
+  {"default":
+    {"name": "Beta Perception Survey",
+     "jarfile": "beta/beta_perception.jar",
+     "studyfile": "beta_perception_survey.js",
+     "hash": "eef269f30ed4a8efada9d8a99e51b8041457aea65d096b9b44091a8ad115fc0e"
+    }
+  }
+],
+
 "legacy": [
 
 { "name": "Tab Open/Close Study",

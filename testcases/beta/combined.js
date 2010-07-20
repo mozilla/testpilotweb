@@ -293,6 +293,11 @@ CombinedWindowObserver.prototype.install = function() {
     record("feedback-toolbar", evt.target.id, "click");
   }, false);
 
+  let bmkButton = this.window.document.getElementById("bookmarks-menu-button");
+  this._listen(bmkButton, "mouseup", function(evt) {
+    record("bookmarks-menu-button", evt.target.id || "personal bookmark", "click");
+  }, false);
+
     // Listen on search bar ues by mouse and keyboard, including repeated
     // searches (same engine or different engine?)
   let searchBar = this.window.document.getElementById("searchbar");

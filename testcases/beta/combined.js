@@ -515,9 +515,8 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   let bkmks = bkmkToolbar.getElementsByClassName("bookmark-item");
   this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "num. bookmarks",
               bkmks.length);
-  // TODO how do we get whether bookmark toolbar is hidden or shown?
-  // This is not it:
-  //dump("bkmkToolbar.hidden = " + bkmkToolbar.getAttribute("hidden") + "\n");
+  this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "hidden?",
+              "" + !!bkmkToolbar.parentNode.collapsed)
 
   // Is status bar shown?
   let statusBar = frontWindow.document.getElementById("status-bar");

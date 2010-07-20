@@ -607,7 +607,7 @@ CombinedStudyWebContent.prototype.__defineGetter__("dataCanvas",
 CombinedStudyWebContent.prototype.__defineGetter__("betaWarning",
   function() {
     return '<p>This study is intended for Firefox 4 Beta users.  If you are'
-           + ' not using <a onclick="openLink(\'http://www.mozilla.com/en-US/firefox/all-beta.html\');">the Firefox 4 Beta</a>,'
+           + ' not using <a onclick="openLink(\'http://www.mozilla.com/firefox/beta/\');">the Firefox 4 Beta</a>,'
            + ' it may not function correctly. (' + this.optOutLink + ')</p>';
   });
 CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",

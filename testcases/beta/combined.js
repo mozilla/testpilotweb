@@ -288,6 +288,11 @@ CombinedWindowObserver.prototype.install = function() {
                    }
                  }}, false);
 
+  let firefoxButton = this.window.document.getElementById("appmenu-button");
+  this._listen(firefoxButton, "mouseup", function(evt) {
+    record("appmenu-button", evt.target.id, "click");
+  }, false);
+
   let feedbackToolbar = this.window.document.getElementById("feedback-menu-button");
   this._listen(feedbackToolbar, "mouseup", function(evt) {
     record("feedback-toolbar", evt.target.id, "click");

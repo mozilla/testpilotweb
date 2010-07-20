@@ -304,6 +304,8 @@ exports.GenericWindowObserver.prototype = {
                                                   eventName,
                                                   method,
                                                   catchCap) {
+    try {
+
     // Keep a record of this so that we can automatically unregister during
     // uninstall:
     let self = this;
@@ -315,6 +317,12 @@ exports.GenericWindowObserver.prototype = {
     this._registeredListeners.push(
       {container: container, eventName: eventName, handler: handler,
        catchCap: catchCap});
+
+    }
+    catch(ex) {
+      console.warn("Failed to attach listener: " + [ex, container,
+        eventName, method, catchCap, Error().stack]);
+    }
   },
 
   install: function GenericWindowObserver_install() {

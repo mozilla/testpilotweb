@@ -31,7 +31,7 @@
   {"name": "Beta Perception Survey",
    "jarfile": "beta/beta_perception.jar",
    "studyfile": "beta_perception_survey.js",
-   "hash": "eef269f30ed4a8efada9d8a99e51b8041457aea65d096b9b44091a8ad115fc0e"
+   "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
   }
 ],
 
@@ -77,7 +77,7 @@
     {"name": "Beta Perception Survey",
      "jarfile": "beta/beta_perception.jar",
      "studyfile": "beta_perception_survey.js",
-     "hash": "eef269f30ed4a8efada9d8a99e51b8041457aea65d096b9b44091a8ad115fc0e"
+     "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
     }
   }
 ],

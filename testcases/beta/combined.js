@@ -345,28 +345,6 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-    // Listen for URL edit events.  TODO: This is super verbose, especially
-    // the "mousemove" one.  Could we change it to record just ONE mouse move
-    // event?
-  self._urlBarMouseState = false;
-  this._listen(urlBar, "mouseup", function(evt) {
-                 if (self._urlBarMouseState) {
-                   record("urlbar", "text selection", "mouseup");
-                   self._urlBarMouseState = false;
-                 }
-               }, false);
-  this._listen(urlBar, "mousedown", function(evt) {
-                 if (evt.originalTarget.tagName == "div") {
-                   record("urlbar", "text selection", "mousedown");
-                   self._urlBarMouseState = true;
-                 }
-               }, false);
-  this._listen(urlBar, "mousemove", function(evt) {
-                 if (self._urlBarMouseState) {
-                   record("urlbar", "text selection", "mousemove");
-                 }
-               }, false);
-
   this._listen(urlBar, "change", function(evt) {
                  record("urlbar", "text selection", "change");
                }, false);

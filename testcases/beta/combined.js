@@ -290,7 +290,10 @@ CombinedWindowObserver.prototype.install = function() {
 
   let firefoxButton = this.window.document.getElementById("appmenu-button");
   this._listen(firefoxButton, "mouseup", function(evt) {
-    record("appmenu-button", evt.target.id, "click");
+    let id = evt.target.id;
+    if (id == "" && evt.target.parentNode.id == "appmenu_history_popup")
+      id = "personal history";
+    record("appmenu-button", id, "click");
   }, false);
 
   let feedbackToolbar = this.window.document.getElementById("feedback-menu-button");

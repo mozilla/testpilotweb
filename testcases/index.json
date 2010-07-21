@@ -8,7 +8,7 @@
 "experiment_jars": [
   {"name": "Dependencies",
    "jarfile": "base_classes.jar",
-   "hash": "6314d9139d7115010c5bb2220f1e3a048bab56b9c2c33469f03202b0a7744c06"
+   "hash": "7b92a534ed81bbf2530e632213ec546cb8bfc5ef25baf44c25f6a34927068a47"
   },
 
   {"name": "Pilot Background Survey",
@@ -25,6 +25,21 @@
 ],
 
 "new_experiments": [
+  {"default":
+    {"name": "Dependencies",
+     "jarfile": "base_classes.jar",
+     "hash": "7b92a534ed81bbf2530e632213ec546cb8bfc5ef25baf44c25f6a34927068a47"
+    }
+  },
+
+  {"default":
+    {"name": "Pilot Background Survey",
+     "jarfile": "basic-survey.jar",
+     "studyfile": "pilot-background-survey.js",
+     "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
+    }
+  },
+
   {"default":
     {"name": "Beta Perception Survey",
      "jarfile": "beta/beta_perception.jar",

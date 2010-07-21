@@ -409,7 +409,7 @@ CombinedWindowObserver.prototype.install = function() {
                    if (evt.button == 0) {
                      // TODO it only seems to record new tab button when there's
                      // enough tabs for the tabbar to scroll, weirdly enuf.
-                     if (evt.originalTarget.id == "new-tab-button") {
+                     if (evt.originalTarget.className == "tabs-newtab-button") {
                        record("tabbar", "new tab button", "click");
                      } else if (evt.originalTarget.id == "alltabs-button") {
                        record("tabbar", "drop down menu", "click");

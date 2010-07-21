@@ -25,13 +25,7 @@
   {"name": "Firefox 4 Beta Interface",
    "jarfile": "beta/combined.jar",
    "studyfile": "combined.js",
-   "hash": "b6a7b7e848ea6572af420a6dfcd75879de26d4ba71b951e4dbe3aeaaae62c741"
-  },
-
-  {"name": "Firefox 4 Beta Interface 9000!",
-   "jarfile": "beta/combined-opt.jar",
-   "studyfile": "combined-opt.js",
-   "hash": "9e3ca224f1384c644ef05feceb3c46401d824b4d377f7ba816c6d3300ad73f7d"
+   "hash": "3bdf2a68d388bf35f1fbb7698fdf325db6389065eb13724f77c58d8d6ca26d3d"
   },
 
   {"name": "Beta Perception Survey",
@@ -75,15 +69,7 @@
     {"name": "Firefox 4 Beta Interface",
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
-     "hash": "b6a7b7e848ea6572af420a6dfcd75879de26d4ba71b951e4dbe3aeaaae62c741"
-    }
-  },
-
-  {"default":
-    {"name": "Firefox 4 Beta Interface 9000!",
-     "jarfile": "beta/combined-opt.jar",
-     "studyfile": "combined-opt.js",
-     "hash": "9e3ca224f1384c644ef05feceb3c46401d824b4d377f7ba816c6d3300ad73f7d"
+     "hash": "3bdf2a68d388bf35f1fbb7698fdf325db6389065eb13724f77c58d8d6ca26d3d"
     }
   },
 

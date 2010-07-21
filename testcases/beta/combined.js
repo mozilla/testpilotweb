@@ -51,7 +51,7 @@ exports.experimentInfo = {
   summary: "We are studying how the changes to the toolbar and menu bar in the"
            + " Firefox 4 beta affect usage of the interface.",
   thumbnail: null,
-  optInRequired: false,
+  optInRequired: true,
   recursAutomatically: false,
   recurrenceInterval: 0,
   versionNumber: 1,

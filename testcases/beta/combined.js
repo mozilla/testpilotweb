@@ -608,9 +608,6 @@ CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
 CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {
-  if (!document.getElementById("data-plot-div")) {
-    return;
-  }
   experiment.getDataStoreAsJSON(function(rawData) {
     if (rawData.length == 0) {
       return;
@@ -656,6 +653,8 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
     }
     try {
       let plotDiv = document.getElementById("data-plot-div");
+      if (plotDiv == null)
+        return;
       graphUtils.plot(plotDiv, [{data: d1}],
                       {series: {bars: {show: true, horizontal: true}},
                        yaxis: {ticks: yAxisLabels}});

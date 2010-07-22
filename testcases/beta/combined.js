@@ -407,9 +407,9 @@ CombinedWindowObserver.prototype.install = function() {
     let tabBar = this.window.document.getElementById("TabsToolbar");
     this._listen(tabBar, "mouseup", function(evt) {
                    if (evt.button == 0) {
-                     // TODO it only seems to record new tab button when there's
-                     // enough tabs for the tabbar to scroll, weirdly enuf.
-                     if (evt.originalTarget.className == "tabs-newtab-button") {
+                     if (evt.originalTarget.id == "new-tab-button") {
+                       record("tabbar", "new tab button", "click");
+                     } else if (evt.originalTarget.className == "tabs-newtab-button") {
                        record("tabbar", "new tab button", "click");
                      } else if (evt.originalTarget.id == "alltabs-button") {
                        record("tabbar", "drop down menu", "click");
@@ -498,7 +498,7 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
 
   // Is the main menu bar hidden?
   let toolbarMenubar = frontWindow.document.getElementById("toolbar-menubar");
-  let autohide = toolbarMenubar.getAttribute("autohide")?"true":"false";
+  let autohide = toolbarMenubar.getAttribute("autohide");
   this.record(EVENT_CODES.CUSTOMIZE, "menu bar", "hidden?", autohide);
 
   // How many bookmarks in bookmark toolbar?

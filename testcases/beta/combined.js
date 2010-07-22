@@ -44,7 +44,7 @@ var COMBINED_EXPERIMENT_COLUMNS =  [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 5, // Days
+  duration: 7, // Days
   testName: "Firefox 4 Beta Interface",
   testId: MY_TEST_ID,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/betaui.html",

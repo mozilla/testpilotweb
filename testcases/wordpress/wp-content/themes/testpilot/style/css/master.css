@@ -18,9 +18,9 @@ Author: 	neilio@mozilla.com
 }
 
 #testcases-content {
-	width: 590px;
+	width: 550px;
 	float: left;
-	margin: 0;
+	margin: 0 0 0 50px;
 }
 
 #sidebar {
@@ -152,3 +152,17 @@ dd.gallery-caption {margin-left:180px!important; padding:6px 0 0 0; text-align:l
     margin: 15px 0;
     text-align: center;
 }
+
+#sidebar {
+    padding-bottom: 24px;
+}
+
+a.button {
+    color: #fff;
+}
+
+.uni-download-button a {
+    color: #fff;
+}
+
+

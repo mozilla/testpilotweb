@@ -507,7 +507,7 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "num. bookmarks",
               bkmks.length);
   this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "hidden?",
-              "" + !!bkmkToolbar.parentNode.collapsed)
+              "" + !!bkmkToolbar.parentNode.collapsed);
 
   // Is status bar shown?
   let statusBar = frontWindow.document.getElementById("status-bar");
@@ -608,7 +608,10 @@ CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
 CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {
-    experiment.getDataStoreAsJSON(function(rawData) {
+  if (!document.getElementById("data-plot-div")) {
+    return;
+  }
+  experiment.getDataStoreAsJSON(function(rawData) {
     if (rawData.length == 0) {
       return;
     }

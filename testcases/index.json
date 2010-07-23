@@ -17,6 +17,12 @@
    "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
   },
 
+  {"name": "Firefox 4 Beta Interface",
+   "jarfile": "beta/combined.jar",
+   "studyfile": "combined.js",
+   "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
+  },
+
   {"name": "Beta Perception Survey",
    "jarfile": "beta/beta_perception.jar",
    "studyfile": "beta_perception_survey.js",
@@ -37,6 +43,14 @@
      "jarfile": "basic-survey.jar",
      "studyfile": "pilot-background-survey.js",
      "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
+    }
+  },
+
+  {"default":
+    {"name": "Firefox 4 Beta Interface",
+     "jarfile": "beta/combined.jar",
+     "studyfile": "combined.js",
+     "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
     }
   },
 

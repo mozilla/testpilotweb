@@ -6,7 +6,7 @@
 
 get_header(); ?>
 
-<div id="content">
+<div id="testcases-content">
 
 		<?php if (have_posts()) : while (have_posts()) : the_post(); ?>
 		<div class="post" id="post-<?php the_ID(); ?>">

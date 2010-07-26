@@ -44,7 +44,7 @@ var COMBINED_EXPERIMENT_COLUMNS =  [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 5, // Days
+  duration: 7, // Days
   testName: "Firefox 4 Beta Interface",
   testId: MY_TEST_ID,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/betaui.html",
@@ -407,9 +407,9 @@ CombinedWindowObserver.prototype.install = function() {
     let tabBar = this.window.document.getElementById("TabsToolbar");
     this._listen(tabBar, "mouseup", function(evt) {
                    if (evt.button == 0) {
-                     // TODO it only seems to record new tab button when there's
-                     // enough tabs for the tabbar to scroll, weirdly enuf.
-                     if (evt.originalTarget.className == "tabs-newtab-button") {
+                     if (evt.originalTarget.id == "new-tab-button") {
+                       record("tabbar", "new tab button", "click");
+                     } else if (evt.originalTarget.className == "tabs-newtab-button") {
                        record("tabbar", "new tab button", "click");
                      } else if (evt.originalTarget.id == "alltabs-button") {
                        record("tabbar", "drop down menu", "click");
@@ -498,7 +498,7 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
 
   // Is the main menu bar hidden?
   let toolbarMenubar = frontWindow.document.getElementById("toolbar-menubar");
-  let autohide = toolbarMenubar.getAttribute("autohide")?"true":"false";
+  let autohide = toolbarMenubar.getAttribute("autohide");
   this.record(EVENT_CODES.CUSTOMIZE, "menu bar", "hidden?", autohide);
 
   // How many bookmarks in bookmark toolbar?
@@ -608,9 +608,6 @@ CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
 CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {
-  if (!document.getElementById("data-plot-div")) {
-    return;
-  }
   experiment.getDataStoreAsJSON(function(rawData) {
     if (rawData.length == 0) {
       return;
@@ -656,6 +653,8 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
     }
     try {
       let plotDiv = document.getElementById("data-plot-div");
+      if (plotDiv == null)
+        return;
       graphUtils.plot(plotDiv, [{data: d1}],
                       {series: {bars: {show: true, horizontal: true}},
                        yaxis: {ticks: yAxisLabels}});

@@ -2,7 +2,8 @@ BaseClasses = require("study_base_classes.js");
 
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
-  {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Position"},
+  {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Position",
+   displayValue: function(val) {return (val==-1)?"In Page":val;}},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];

@@ -7,11 +7,22 @@ var SEARCHBAR_EXPERIMENT_COLUMNS =  [
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
 
+var SEARCH_RESULTS_PAGES = [
+  {pattern: /www\.google\.com.+q=/, name: "Google"},
+  {pattern: /search\.yahoo\.com\/search.+p=/, name: "Yahoo"},
+  {pattern: /www\.amazon\.com\/s\?/, name: "Amazon"},
+  {pattern: /www\.answers\.com\/main\/ntquery\?s=/, name: "Answers"},
+  {pattern: /search\.creativecommons\.org\/\?q=/, name: "Creative Commons"},
+  {pattern: /shop\.ebay\.com\/i.html\?_nkw=/, name: "Ebay"},
+  {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia"},
+  {pattern: /www\.bing\.com\/search\?q=/, name: "Bing"}
+];
+
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 7, // Days
   testName: "Search Bar",
-  testId: 8,
+  testId: 8, // TODO ensure this does not conflict with anything.
   testInfoUrl: "",
   summary: "Which search engines are used most in the search bar?",
   thumbnail: null,
@@ -39,7 +50,6 @@ SearchbarWindowObserver.prototype.install = function() {
     let currEngine = searchBar.searchService.currentEngine;
     let name = currEngine.name;
     let index = searchBar.searchService.getEngines().indexOf(currEngine);
-    dump("Recording use of " + name + " at index " + index + "\n");
     exports.handlers.record(name, index);
   };
 
@@ -53,6 +63,20 @@ SearchbarWindowObserver.prototype.install = function() {
                    recordSearch();
                  }
                }, false);
+
+  let appcontent = this.window.document.getElementById("appcontent");
+  if (appcontent) {
+    this._listen(appcontent, "DOMContentLoaded", function(evt) {
+                   let url = evt.originalTarget.URL;
+                   for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
+                     let srp = SEARCH_RESULTS_PAGES[i];
+                     if (srp.pattern.test(url)) {
+                       exports.handlers.record(srp.name, -1);
+                     }
+                   }
+                 }, true);
+  }
+
 };
 
 function GlobalSearchbarObserver()  {
@@ -63,6 +87,7 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   GlobalSearchbarObserver.superClass.onExperimentStartup.call(this, store);
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, index) {
+  dump("Recording use of " + searchEngine + " at index " + index + "\n");
   if (!this.privateMode) {
     this._store.storeEvent({
       engine_name: searchEngine,

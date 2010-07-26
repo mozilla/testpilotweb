@@ -32,6 +32,12 @@
    "jarfile": "beta/beta_perception.jar",
    "studyfile": "beta_perception_survey.js",
    "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
+  },
+
+  {"name": "Search",
+   "jarfile": "search/searchbar-study.jar",
+   "studyfile": "searchbar-study.js",
+   "hash": "89d3df927599402112fe5672180b080d508a1eff98624d8968c67a3ab4ba667e"
   }
 ],
 
@@ -85,7 +91,7 @@
     {"name": "Search",
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
-     "hash": "c4ae4249d35866da85c653faa2c30a085c1550e5ea0d226a492e61cfda82a15e"
+     "hash": "89d3df927599402112fe5672180b080d508a1eff98624d8968c67a3ab4ba667e"
     }
   }
 ],

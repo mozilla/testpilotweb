@@ -3,13 +3,14 @@ BaseClasses = require("study_base_classes.js");
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
   {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Position",
-   displayValue: function(val) {return (val==-1)?"In Page":val;}},
+   displayValue: function(val) {return (val==-1)?"In Page":"Searchbar pos. " + val;}},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
 
 var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.google\.com.+q=/, name: "Google"},
+  {pattern: /www\.google\.co\..+q=/, name: "Google"},  // international google
   {pattern: /search\.yahoo\.com\/search.+p=/, name: "Yahoo"},
   {pattern: /www\.amazon\.com\/s\?/, name: "Amazon"},
   {pattern: /www\.answers\.com\/main\/ntquery\?s=/, name: "Answers"},
@@ -21,7 +22,7 @@ var SEARCH_RESULTS_PAGES = [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 7, // Days
+  duration: 5, // Days
   testName: "Search Bar",
   testId: 8, // TODO ensure this does not conflict with anything.
   testInfoUrl: "",
@@ -109,7 +110,7 @@ SearchbarStudyWebContent.prototype.__defineGetter__("dataCanvas",
       return '<div class="dataBox"><h3>View Your Data:</h3>' +
       this.dataViewExplanation +
       this.rawDataLink +
-      '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
+      '<canvas id="data-canvas" width="480" height="400"></canvas>' +
       this.saveButtons + '</div>';
   });
 SearchbarStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
@@ -120,9 +121,10 @@ SearchbarStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
 SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
                                                          document,
                                                          graphUtils) {
-  let canvas = document.getElementById("data-plot-div");
+  let canvas = document.getElementById("data-canvas");
   let dataSet = [];
-  experiment.dataStoreAsJSON(function(rawData) {
+  let self = this;
+  experiment.getDataStoreAsJSON(function(rawData) {
     for each (let row in rawData) {
       let foundMatch = false;
       for (let i = 0; i < dataSet.length; i++) {
@@ -136,7 +138,7 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
         dataSet.push({ name: row.engine_name, frequency: 1 });
       }
     }
-    this.drawPieChart(canvas, dataSet);
+    self.drawPieChart(canvas, dataSet);
   });
 };
 

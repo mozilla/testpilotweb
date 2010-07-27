@@ -97,6 +97,12 @@
 ],
 
 "legacy": [
+{ "name": "Toolbar Study",
+  "id": "7",
+  "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close.html",
+  "summary": "I'm really just testing that the index file is updating here.",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/tab-open-close/tab-study-thumbnail.png"
+},
 
 { "name": "Tab Open/Close Study",
   "id": "1",

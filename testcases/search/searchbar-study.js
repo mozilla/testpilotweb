@@ -1,9 +1,26 @@
 BaseClasses = require("study_base_classes.js");
 
+var UI_METHOD_CODES = {
+  SEARCH_BOX: 0,
+  WEBSITE: 1,
+  MOZ_HOME_PAGE: 2,
+  URL_BAR: 3
+};
+
+var EXP_GROUP_CODES = {
+  CONTROL: 0,
+  RANDOMIZED: 1,
+  BING_2: 2,
+  BING_LAST: 3,
+  TWITTER_LAST: 4
+};
+
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
-  {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Position",
-   displayValue: function(val) {return (val==-1)?"In Page":"Searchbar pos. " + val;}},
+  {property: "ui_method", type: BaseClasses.TYPE_INT_32, displayName: "UI method",
+   displayValue: ["Search Box", "Website", "Firefox home page", "URL bar"]},
+  {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Menu Position"},
+  {property: "experiment_group", type: BaseClasses.TYPE_INT_32, displayName: "Experiment Group"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
@@ -17,14 +34,17 @@ var SEARCH_RESULTS_PAGES = [
   {pattern: /search\.creativecommons\.org\/\?q=/, name: "Creative Commons"},
   {pattern: /shop\.ebay\.com\/i.html\?_nkw=/, name: "Ebay"},
   {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia"},
-  {pattern: /www\.bing\.com\/search\?q=/, name: "Bing"}
+  {pattern: /www\.bing\.com\/search\?q=/, name: "Bing"},
+  {pattern: /twitter\.com\/#search\?q=/, name: "Twitter"},
+  {pattern: /www\.facebook\.com\/search\/\?/, name: "Facebook"}
 ];
+// TODO more international versions of search engine URLs??
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 5, // Days
   testName: "Search Bar",
-  testId: 8, // TODO ensure this does not conflict with anything.
+  testId: 8,
   testInfoUrl: "",
   summary: "Which search engines are used most in the search bar?",
   thumbnail: null,
@@ -52,9 +72,10 @@ SearchbarWindowObserver.prototype.install = function() {
     let currEngine = searchBar.searchService.currentEngine;
     let name = currEngine.name;
     let index = searchBar.searchService.getEngines().indexOf(currEngine);
-    exports.handlers.record(name, index);
+    exports.handlers.record(name, UI_METHOD_CODES.SEARCH_BOX, index);
   };
 
+  // Listen for searches from search bar
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
                    recordSearch();
@@ -66,19 +87,40 @@ SearchbarWindowObserver.prototype.install = function() {
                  }
                }, false);
 
+  // Watch content space for search results pages loading
   let appcontent = this.window.document.getElementById("appcontent");
   if (appcontent) {
     this._listen(appcontent, "DOMContentLoaded", function(evt) {
                    let url = evt.originalTarget.URL;
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
+                     let uiMethod = url.indexOf("client=firefox")>-1 ?
+                                      UI_METHOD_CODES.MOZ_HOME_PAGE :
+                                        UI_METHOD_CODES.WEBSITE;
                      let srp = SEARCH_RESULTS_PAGES[i];
                      if (srp.pattern.test(url)) {
-                       exports.handlers.record(srp.name, -1);
+                       exports.handlers.record(srp.name, uiMethod, 0);
                      }
                    }
                  }, true);
   }
 
+  // Watch URL bar for search terms being entered there
+  let urlBar = this.window.document.getElementById("urlbar");
+  let recordUrlBarSearch = function() {
+    let text = urlBar.value;
+    // Assume it's a search if there's a space and/or no period
+    if ((text.indexOf(" ") > -1) || (text.indexOf(".") == -1)) {
+      exports.handlers.record("Google", UI_METHOD_CODES.URL_BAR, 0);
+    }
+  };
+  this._listen(urlBar, "keydown", function(evt) {
+                 if (evt.keyCode == 13) { // Enter key
+                   recordUrlBarSearch();
+                 }}, false);
+  let urlGoButton = this.window.document.getElementById("go-button");
+  this._listen(urlGoButton, "mouseup", function(evt) {
+                 recordUrlBarSearch();
+               }, false);
 };
 
 function GlobalSearchbarObserver()  {
@@ -87,13 +129,71 @@ function GlobalSearchbarObserver()  {
 BaseClasses.extend(GlobalSearchbarObserver, BaseClasses.GenericGlobalObserver);
 GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   GlobalSearchbarObserver.superClass.onExperimentStartup.call(this, store);
+
+  let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                        .getService(Ci.nsIWindowMediator);
+  let frontWindow = wm.getMostRecentWindow("navigator:browser");
+  let searchSvc =  frontWindow.document.getElementById("searchbar").searchService;
+  // See http://doxygen.db48x.net/mozilla/html/interfacensIBrowserSearchService.html
+
+  // Don't want to change user's current selected engine, so store that...
+  let currEng = searchSvc.currentEngine;
+
+  // If this is the first run we need to assign you to an experiment group randomly
+  // and change your search engine menu accordingly.
+  let prefs = require("preferences-service");
+  let prefName = "extensions.testpilot.searchbar_study.expGroupId";
+  this._expGroupId = prefs.get(prefName, "");
+  if (this._expGroupId == "") {
+    this._expGroupId = Math.floor(Math.random()*5);
+    prefs.set(prefName, this._expGroupId);
+    switch (this._expGroupId) {
+    case EXP_GROUP_CODES.CONTROL:
+      // Control group - no change
+      break;
+    case EXP_GROUP_CODES.RANDOMIZED:
+      // Randomize the order of your search engines
+      let sortedEngines = searchSvc.getEngines();
+      let newIndex = 0;
+      while(sortedEngines.length > 0) {
+        let index = Math.floor(Math.random()*sortedEngines.length);
+        searchSvc.moveEngine(sortedEngines[index], newIndex);
+        newIndex++;
+        sortedEngines.splice(index, 1);
+      }
+
+      break;
+    case EXP_GROUP_CODES.BING_2:
+      searchSvc.addEngineWithDetails("Bing", "http://www.bing.com/favicon.ico",
+                                     "Bing", "Bing Search", "get",
+                                     "http://www.bing.com/search?q={searchTerms}");
+      // Put Bing 2nd
+      let bing = searchSvc.getEngineByName("Bing");
+      searchSvc.moveEngine(bing, 1);
+      break;
+    case EXP_GROUP_CODES.BING_LAST:
+      searchSvc.addEngineWithDetails("Bing", "http://www.bing.com/favicon.ico",
+                                 "Bing", "Bing Search", "get",
+                                 "http://www.bing.com/search?q={searchTerms}");
+      break;
+    case EXP_GROUP_CODES.TWITTER_LAST:
+      searchSvc.addEngineWithDetails("Twitter", "http://search.twitter.com/favicon.png",
+                                 "Twitter", "Twitter Search", "get",
+                                 "http://search.twitter.com/search?q={searchTerms}");
+      break;
+    }
+  }
+  // restore selected engine in case it was messed up
+  searchSvc.currentEngine = currEng;
 };
-GlobalSearchbarObserver.prototype.record = function(searchEngine, index) {
-  dump("Recording use of " + searchEngine + " at index " + index + "\n");
+GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
+  let expGroup = this._expGroupId;
   if (!this.privateMode) {
     this._store.storeEvent({
       engine_name: searchEngine,
+      ui_method: uiMethod,
       engine_pos: index,
+      experiment_group: expGroup,
       timestamp: Date.now()
     });
   }

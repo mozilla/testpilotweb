@@ -2,8 +2,6 @@ BaseClasses = require("study_base_classes.js");
 
 /* TODO
  *
- * Record startup event with study version and ordered list of search engines
- *
  * From firefox homepage, clicking "Images" incorrectly records as a search although
  * no search was done.  (Same with video link, news link, etc)
  *
@@ -43,19 +41,31 @@ var SEARCHBAR_EXPERIMENT_COLUMNS =  [
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
 
+// The order of this list is important because we accept the first match that we come to.
+// So make sure the more specific regexps come before more general ones!
+
 var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.google\.com.+q=/, name: "Google"},
-  {pattern: /www\.google\.co\..+q=/, name: "Google"},  // international google
+  {pattern: /www\.google\.com.+tbs=vid.+q=/, name: "Google Video"},
+  {pattern: /maps\.google\.com.+q=/, name: "Google Maps"},
+  {pattern: /news\.google\.com.+q=/, name: "Google News"},
+  {pattern: /www\.google\.co\..+q=/, name: "Google (international)"},
+  {pattern: /images\.search\.yahoo\.com\/search\/images.+p=/, name: "Yahoo Images"},
+  {pattern: /video\.search\.yahoo\.com\/search\/video.+p=/, name: "Yahoo Video"},
   {pattern: /search\.yahoo\.com\/search.+p=/, name: "Yahoo"},
   {pattern: /www\.amazon\.com\/s\?/, name: "Amazon"},
   {pattern: /www\.answers\.com\/main\/ntquery\?s=/, name: "Answers"},
   {pattern: /search\.creativecommons\.org\/\?q=/, name: "Creative Commons"},
-  {pattern: /shop\.ebay\.com\/i.html\?_nkw=/, name: "Ebay"},
-  {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia"},
+  {pattern: /creativecommons\.org\/\?s=/, name: "Creative Commons"},
+  {pattern: /shop\.ebay\.com.+_nkw=/, name: "Ebay"},
+  {pattern: /en\.wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (en)"},
+  {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (international)"},
   {pattern: /www\.bing\.com\/search\?q=/, name: "Bing"},
-  {pattern: /twitter\.com\/#search\?q=/, name: "Twitter"},
+  {pattern: /twitter\.com\/\#search\?q=/, name: "Twitter"},
   {pattern: /www\.facebook\.com\/search\/\?/, name: "Facebook"}
 ];
+//http://en.wikipedia.org/wiki/Test
+//http://twitter.com/#search?q=test
 // TODO more international versions of search engine URLs??
 
 exports.experimentInfo = {

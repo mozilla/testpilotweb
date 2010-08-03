@@ -1,10 +1,28 @@
 BaseClasses = require("study_base_classes.js");
 
+/* TODO
+ *
+ * Record startup event with study version and ordered list of search engines
+ *
+ * From firefox homepage, clicking "Images" incorrectly records as a search although
+ * no search was done.  (Same with video link, news link, etc)
+ *
+ * Google, Yahoo, Bing have different search types (image, video, etc) - record which one
+ * was used.
+ *
+ * Limit to just English locales OR ensure that international versions are recorded
+ * separetely
+ *
+ * See spreadsheet
+ *
+ */
+
 var UI_METHOD_CODES = {
   SEARCH_BOX: 0,
   WEBSITE: 1,
   MOZ_HOME_PAGE: 2,
-  URL_BAR: 3
+  URL_BAR: 3,
+  MENU_CONTENTS: 4
 };
 
 var EXP_GROUP_CODES = {
@@ -18,7 +36,7 @@ var EXP_GROUP_CODES = {
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
   {property: "ui_method", type: BaseClasses.TYPE_INT_32, displayName: "UI method",
-   displayValue: ["Search Box", "Website", "Firefox home page", "URL bar"]},
+   displayValue: ["Search Box", "Website", "Firefox home page", "URL bar", "Menu Contents"]},
   {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Menu Position"},
   {property: "experiment_group", type: BaseClasses.TYPE_INT_32, displayName: "Experiment Group"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
@@ -185,6 +203,11 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   }
   // restore selected engine in case it was messed up
   searchSvc.currentEngine = currEng;
+  // Record what engines are installed and in what order:
+  let sortedEngines = searchSvc.getEngines();
+  for (let x = 0; x < sortedEngines.length; x++) {
+    this.record(sortedEngines[x].name, UI_METHOD_CODES.MENU_CONTENTS, x);
+  }
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
   let expGroup = this._expGroupId;
@@ -226,6 +249,9 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
   let self = this;
   experiment.getDataStoreAsJSON(function(rawData) {
     for each (let row in rawData) {
+      if (row.ui_method == UI_METHOD_CODES.MENU_CONTENTS) {
+        continue;
+      }
       let foundMatch = false;
       for (let i = 0; i < dataSet.length; i++) {
         if (dataSet[i].name == row.engine_name) {

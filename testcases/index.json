@@ -97,7 +97,7 @@
 {
   "name": "How Do You Feel About Your Firefox Browser",
   "id": "beta_perception_survey_1",
-  "url": "https://testpilot.mozillalabs.com/testcases/user-perception.html",
+  "url": "https://testpilot.mozillalabs.com/testcases/perception",
   "thumbnail": "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   "summary": "The aim of this survey is to understand users' perception on their Firefox browser in general over time. We will follow up a similar survey in a month to understand the change of user perception."
 }

@@ -28,12 +28,6 @@
    "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
   },
 
-  {"name": "Beta Perception Survey",
-   "jarfile": "beta/beta_perception.jar",
-   "studyfile": "beta_perception_survey.js",
-   "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
-  },
-
   {"name": "Search",
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
@@ -248,6 +242,14 @@
 "url": "https://testpilot.mozillalabs.com/testcases/menu-item-usage/results.html#Q3",
 "studyId": "4",
 "thumbnail":"https://testpilot.mozillalabs.com/testcases/menu-item-usage/graphs/itemid_all_mouse_ordered.png",
-"date": "Thu Mar 11 2010"}
+"date": "Thu Mar 11 2010"},
+
+{"title": "How Do You Feel About Your Firefox Browser",
+"summary": "The aim of this survey is to understand users’ perception on their Firefox browser in general over time. We will follow up a similar survey in a month to understand the change of user perception.",
+"id": "5_beta_perception_survey",
+"url": "https://testpilot.mozillalabs.com/testcases/user-perception.html",
+"studyId": "5",
+"thumbnail":"https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
+"date": "Mon Aug 9 2010"}
 ]
 }

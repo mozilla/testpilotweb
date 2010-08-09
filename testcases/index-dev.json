@@ -74,14 +74,6 @@
   },
 
   {"default":
-    {"name": "Beta Perception Survey",
-     "jarfile": "beta/beta_perception.jar",
-     "studyfile": "beta_perception_survey.js",
-     "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
-    }
-  },
-
-  {"default":
     {"name": "Search",
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",

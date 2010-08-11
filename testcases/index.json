@@ -21,12 +21,6 @@
    "jarfile": "beta/combined.jar",
    "studyfile": "combined.js",
    "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
-  },
-
-  {"name": "Beta Perception Survey",
-   "jarfile": "beta/beta_perception.jar",
-   "studyfile": "beta_perception_survey.js",
-   "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
   }
 ],
 
@@ -51,14 +45,6 @@
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
      "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
-    }
-  },
-
-  {"default":
-    {"name": "Beta Perception Survey",
-     "jarfile": "beta/beta_perception.jar",
-     "studyfile": "beta_perception_survey.js",
-     "hash": "13277f0f3c1d11a43e6de758080e580bf5e8d393b4720e4a3df599049e9b4786"
     }
   }
 ],
@@ -106,6 +92,14 @@
   "url": "https://testpilot.mozillalabs.com/testcases/account-password.html",
   "thumbnail": "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   "summary": ""
+},
+
+{
+  "name": "How Do You Feel About Your Firefox Browser",
+  "id": "beta_perception_survey_1",
+  "url": "https://testpilot.mozillalabs.com/testcases/perception",
+  "thumbnail": "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
+  "summary": "The aim of this survey is to understand users' perception on their Firefox browser in general over time. We will follow up a similar survey in a month to understand the change of user perception."
 }
 
 ],

@@ -49,9 +49,16 @@ var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.google\.com.+tbs=vid.+q=/, name: "Google Video"},
   {pattern: /maps\.google\.com.+q=/, name: "Google Maps"},
   {pattern: /news\.google\.com.+q=/, name: "Google News"},
-  {pattern: /www\.google\.co\..+q=/, name: "Google (international)"},
+  {pattern: /www\.google\.co\.\w\w.+q=/, name: "Google (International)"},
+  {pattern: /www\.google\.\w\w.+q=/, name: "Google (International)"},
+  {pattern: /news\.search\.yahoo\.com\/search\/news.+p=/, name: "Yahoo News"},
+  {pattern: /shopping\.yahoo\.com\/search.+p=/, name: "Yahoo Shopping"},
   {pattern: /images\.search\.yahoo\.com\/search\/images.+p=/, name: "Yahoo Images"},
   {pattern: /video\.search\.yahoo\.com\/search\/video.+p=/, name: "Yahoo Video"},
+  {pattern: /search\.yahoo\.co\.\w\w\/search.+p=/, name: "Yahoo (International)"},
+  {pattern: /search\.yahoo\.\w\w\/search.+p=/, name: "Yahoo (International)"},
+  {pattern: /\w\w\.search\.yahoo\.com\/search.+p=/, name: "Yahoo (International)"},
+  {pattern: /search\.\w\w\.yahoo\.com\/search.+p=/, name: "Yahoo (International)"},
   {pattern: /search\.yahoo\.com\/search.+p=/, name: "Yahoo"},
   {pattern: /www\.amazon\.com\/s\?/, name: "Amazon"},
   {pattern: /www\.answers\.com\/main\/ntquery\?s=/, name: "Answers"},
@@ -59,14 +66,22 @@ var SEARCH_RESULTS_PAGES = [
   {pattern: /creativecommons\.org\/\?s=/, name: "Creative Commons"},
   {pattern: /shop\.ebay\.com.+_nkw=/, name: "Ebay"},
   {pattern: /en\.wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (en)"},
-  {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (international)"},
+  {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (International)"},
   {pattern: /www\.bing\.com\/search\?q=/, name: "Bing"},
-  {pattern: /twitter\.com\/\#search\?q=/, name: "Twitter"},
+  {pattern: /twitter\.com.+search.+q=/, name: "Twitter"},
   {pattern: /www\.facebook\.com\/search\/\?/, name: "Facebook"}
 ];
+// international Bing has param e.g. setmkt=ja-JP
+
 //http://en.wikipedia.org/wiki/Test
 //http://twitter.com/#search?q=test
 // TODO more international versions of search engine URLs??
+
+// Some Twitter seraches not detected b/c Twitter doesn't cause a page load event when
+// you click the search button - it links to a # on the same URL using magic
+
+// Some Wikipedia searches not detected because if your serach term is exact match for
+// a page title Wikipedia takes you straight there.
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
@@ -126,7 +141,11 @@ SearchbarWindowObserver.prototype.install = function() {
                                         UI_METHOD_CODES.WEBSITE;
                      let srp = SEARCH_RESULTS_PAGES[i];
                      if (srp.pattern.test(url)) {
+                       //dump("Url " + url + " mathces pattern " + srp.pattern + "\n");
                        exports.handlers.record(srp.name, uiMethod, 0);
+                       break;
+                     } else {
+                       //dump("Url " + url + " no match pattern " + srp.pattern + "\n");
                      }
                    }
                  }, true);
@@ -149,6 +168,10 @@ SearchbarWindowObserver.prototype.install = function() {
   this._listen(urlGoButton, "mouseup", function(evt) {
                  recordUrlBarSearch();
                }, false);
+
+  // TODO Watch context menu for the "search for selection" command
+  // It doesn't generate a command event on the mainc ommand set or
+  // main menu bar however.
 };
 
 function GlobalSearchbarObserver()  {

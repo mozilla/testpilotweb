@@ -77,9 +77,6 @@ var SEARCH_RESULTS_PAGES = [
 //http://twitter.com/#search?q=test
 // TODO more international versions of search engine URLs??
 
-// Some Twitter seraches not detected b/c Twitter doesn't cause a page load event when
-// you click the search button - it links to a # on the same URL using magic
-
 // Some Wikipedia searches not detected because if your serach term is exact match for
 // a page title Wikipedia takes you straight there.
 
@@ -89,8 +86,9 @@ exports.experimentInfo = {
   testName: "Search Bar",
   testId: 8,
   testInfoUrl: "",
-  summary: "Which search engines are used most in the search bar?",
-  thumbnail: null,
+  summary: "Which search engines are used most often, whether through the "
+           + "Firefox search bar or through web content?",
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/search/searchbar-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
@@ -141,12 +139,20 @@ SearchbarWindowObserver.prototype.install = function() {
                                         UI_METHOD_CODES.WEBSITE;
                      let srp = SEARCH_RESULTS_PAGES[i];
                      if (srp.pattern.test(url)) {
-                       //dump("Url " + url + " mathces pattern " + srp.pattern + "\n");
                        exports.handlers.record(srp.name, uiMethod, 0);
                        break;
-                     } else {
-                       //dump("Url " + url + " no match pattern " + srp.pattern + "\n");
                      }
+                   }
+                 }, true);
+    /* Twitter searches don't reload the page but go to a magic in page
+     * anchor (i.e. twitter.com/#search?q=string) so we won't catch them
+     * with DOMContentLoaded events... watch for the hashchange instead. */
+    let win = this.window;
+    this._listen(this.window, "hashchange", function(evt) {
+                   let url = win.content.document.location;
+                   if (/twitter\.com.+search.+q=/.test(url)) {
+                     exports.handlers.record("Twitter", UI_METHOD_CODES.WEBSITE,
+                                             0);
                    }
                  }, true);
   }
@@ -243,6 +249,7 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   }
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
+  dump("Recording " + searchEngine + " " + uiMethod + " " + index + "\n");
   let expGroup = this._expGroupId;
   if (!this.privateMode) {
     this._store.storeEvent({

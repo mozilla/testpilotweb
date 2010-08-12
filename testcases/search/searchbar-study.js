@@ -20,7 +20,8 @@ var UI_METHOD_CODES = {
   WEBSITE: 1,
   MOZ_HOME_PAGE: 2,
   URL_BAR: 3,
-  MENU_CONTENTS: 4
+  MENU_CONTENTS: 4,
+  CONTEXT_MENU: 5
 };
 
 var EXP_GROUP_CODES = {
@@ -72,9 +73,7 @@ var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.facebook\.com\/search\/\?/, name: "Facebook"}
 ];
 // international Bing has param e.g. setmkt=ja-JP
-
 //http://en.wikipedia.org/wiki/Test
-//http://twitter.com/#search?q=test
 // TODO more international versions of search engine URLs??
 
 // Some Wikipedia searches not detected because if your serach term is exact match for
@@ -175,9 +174,13 @@ SearchbarWindowObserver.prototype.install = function() {
                  recordUrlBarSearch();
                }, false);
 
-  // TODO Watch context menu for the "search for selection" command
-  // It doesn't generate a command event on the mainc ommand set or
-  // main menu bar however.
+  // Watch context menu for the "search for selection" command
+  let popup = this.window.document.getElementById("contentAreaContextMenu");
+  this._listen(popup, "command", function(evt) {
+                 if (evt.originalTarget.id == "context-searchselect") {
+                   exports.handlers.record("", UI_METHOD_CODES.CONTEXT_MENU, 0);
+                 }
+               }, false);
 };
 
 function GlobalSearchbarObserver()  {
@@ -249,7 +252,7 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   }
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
-  dump("Recording " + searchEngine + " " + uiMethod + " " + index + "\n");
+  //dump("Recording " + searchEngine + " " + uiMethod + " " + index + "\n");
   let expGroup = this._expGroupId;
   if (!this.privateMode) {
     this._store.storeEvent({

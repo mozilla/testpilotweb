@@ -138,12 +138,13 @@ SearchbarWindowObserver.prototype.install = function() {
     this._listen(appcontent, "DOMContentLoaded", function(evt) {
                    let url = evt.originalTarget.URL;
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
-                     // TODO this is too broad:  client=firefox can show up in
-                     // Google searches that are not from the Firefox homepage,
-                     // as well.
-                     let uiMethod = url.indexOf("client=firefox")>-1 ?
-                                      UI_METHOD_CODES.MOZ_HOME_PAGE :
-                                        UI_METHOD_CODES.WEBSITE;
+                     let uiMethod;
+                     if (url.indexOf("client=firefox") > -1  &&
+                         url.indexOf("source=hp") > -1) {
+                       uiMethod = UI_METHOD_CODES.MOZ_HOME_PAGE;
+                     } else {
+                       uiMethod = UI_METHOD_CODES.WEBSITE;
+                     }
                      let srp = SEARCH_RESULTS_PAGES[i];
                      if (srp.pattern.test(url)) {
                        exports.handlers.record(srp.name, uiMethod, 0);
@@ -346,20 +347,22 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
     return SEARCHBAR_EXPERIMENT_COLUMNS[1].displayValue[row.ui_method];
   };
   experiment.getDataStoreAsJSON(function(rawData) {
+    let counts = [0, 0, 0, 0, 0, 0];
     for each (let row in rawData) {
       if (row.ui_method == UI_METHOD_CODES.MENU_CONTENTS) {
         continue;
       }
-      let foundMatch = false;
-      for (let i = 0; i < dataSet.length; i++) {
-        if (dataSet[i].name == getName(row)) {
-          dataSet[i].frequency += 1;
-          foundMatch = true;
-          break;
-        }
+      if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX ||
+          row.ui_method == UI_METHOD_CODES.URL_BAR ||
+          row.ui_method == UI_METHOD_CODES.CONTEXT_MENU) {
+        counts[UI_METHOD_CODES.WEBSITE] -= 1;
       }
-      if (!foundMatch) {
-        dataSet.push({ name: getName(row), frequency: 1 });
+      counts[row.ui_method] += 1;
+    }
+    for (let i = 0; i < counts.length; i++) {
+      if (counts[i] > 0) {
+        dataSet.push({ name: SEARCHBAR_EXPERIMENT_COLUMNS[1].displayValue[i],
+        frequency: counts[i] });
       }
     }
     self.drawPieChart(canvas, dataSet);

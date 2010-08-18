@@ -31,7 +31,7 @@
   {"name": "Search",
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
-   "hash": "493ef14687ac8aaa416cf52a7ee63f21cc067ecda067d717e557c8e779ecab91"
+   "hash": "291d82d5d505111ea0a370f5cbb4c01696e2414d98138cd988e3ac832301dbcc"
   }
 ],
 
@@ -77,7 +77,7 @@
     {"name": "Search",
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
-     "hash": "493ef14687ac8aaa416cf52a7ee63f21cc067ecda067d717e557c8e779ecab91"
+     "hash": "291d82d5d505111ea0a370f5cbb4c01696e2414d98138cd988e3ac832301dbcc"
     }
   }
 ],

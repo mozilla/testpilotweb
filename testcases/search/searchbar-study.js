@@ -13,10 +13,6 @@ BaseClasses = require("study_base_classes.js");
  *
  * See spreadsheet
  *
- * Don't change the position of Google when randomizing the menu
- * Restore the menu to its original contents when the study is done!
- * (Do we get any notificiation when the study is finished that we can act on
- * here?)
  *
  */
 
@@ -79,7 +75,7 @@ var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.facebook\.com\/search\/\?/, name: "Facebook"}
 ];
 // international Bing has param e.g. setmkt=ja-JP
-//http://en.wikipedia.org/wiki/Test
+// http://en.wikipedia.org/wiki/Test
 // TODO more international versions of search engine URLs??
 
 // Some Wikipedia searches not detected because if your serach term is exact match for
@@ -229,11 +225,17 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
       break;
     case EXP_GROUP_CODES.RANDOMIZED:
       // Randomize the order of your search engines
-      // TODO always leave Google in first position
       let sortedEngines = searchSvc.getEngines();
       let newIndex = 0;
       while(sortedEngines.length > 0) {
-        let index = Math.floor(Math.random()*sortedEngines.length);
+        let index;
+        if (newIndex == 0) {
+          // Whatever engine was in first position (hint: Google), leave it
+          // in first position when shuffling.
+          index = 0;
+        } else {
+          index = Math.floor(Math.random()*sortedEngines.length);
+        }
         searchSvc.moveEngine(sortedEngines[index], newIndex);
         newIndex++;
         sortedEngines.splice(index, 1);

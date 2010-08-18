@@ -332,16 +332,19 @@ SearchbarStudyWebContent.prototype.__defineGetter__("dataCanvas",
   });
 SearchbarStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "The pie chart shows how much you used each search engine "
-    + "in the search bar.";
+    return "Searches can be done in Firefox via several different interfaces -"
+      + " the search bar, the URL bar, the context menu, the Firefox home page"
+      + ", etc.  The pie chart below shows how often you used each interface.";
   });
 SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
                                                          document,
                                                          graphUtils) {
-  // TODO show pie chart of UI method instead of pie chart of search engine
   let canvas = document.getElementById("data-canvas");
   let dataSet = [];
   let self = this;
+  let getName = function(row) {
+    return SEARCHBAR_EXPERIMENT_COLUMNS[1].displayValue[row.ui_method];
+  };
   experiment.getDataStoreAsJSON(function(rawData) {
     for each (let row in rawData) {
       if (row.ui_method == UI_METHOD_CODES.MENU_CONTENTS) {
@@ -349,14 +352,14 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
       }
       let foundMatch = false;
       for (let i = 0; i < dataSet.length; i++) {
-        if (dataSet[i].name == row.engine_name) {
+        if (dataSet[i].name == getName(row)) {
           dataSet[i].frequency += 1;
           foundMatch = true;
           break;
         }
       }
       if (!foundMatch) {
-        dataSet.push({ name: row.engine_name, frequency: 1 });
+        dataSet.push({ name: getName(row), frequency: 1 });
       }
     }
     self.drawPieChart(canvas, dataSet);

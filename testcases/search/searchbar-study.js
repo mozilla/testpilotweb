@@ -13,6 +13,11 @@ BaseClasses = require("study_base_classes.js");
  *
  * See spreadsheet
  *
+ * Don't change the position of Google when randomizing the menu
+ * Restore the menu to its original contents when the study is done!
+ * (Do we get any notificiation when the study is finished that we can act on
+ * here?)
+ *
  */
 
 var UI_METHOD_CODES = {
@@ -35,7 +40,8 @@ var EXP_GROUP_CODES = {
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
   {property: "ui_method", type: BaseClasses.TYPE_INT_32, displayName: "UI method",
-   displayValue: ["Search Box", "Website", "Firefox home page", "URL bar", "Menu Contents"]},
+   displayValue: ["Search Box", "Website", "Firefox home page", "URL bar", "Menu Contents",
+                 "Context Menu"]},
   {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Menu Position"},
   {property: "experiment_group", type: BaseClasses.TYPE_INT_32, displayName: "Experiment Group"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
@@ -46,10 +52,10 @@ var SEARCHBAR_EXPERIMENT_COLUMNS =  [
 // So make sure the more specific regexps come before more general ones!
 
 var SEARCH_RESULTS_PAGES = [
-  {pattern: /www\.google\.com.+q=/, name: "Google"},
   {pattern: /www\.google\.com.+tbs=vid.+q=/, name: "Google Video"},
   {pattern: /maps\.google\.com.+q=/, name: "Google Maps"},
   {pattern: /news\.google\.com.+q=/, name: "Google News"},
+  {pattern: /www\.google\.com.+q=/, name: "Google"},
   {pattern: /www\.google\.co\.\w\w.+q=/, name: "Google (International)"},
   {pattern: /www\.google\.\w\w.+q=/, name: "Google (International)"},
   {pattern: /news\.search\.yahoo\.com\/search\/news.+p=/, name: "Yahoo News"},
@@ -106,7 +112,6 @@ function SearchbarWindowObserver(window) {
 };
 BaseClasses.extend(SearchbarWindowObserver, BaseClasses.GenericWindowObserver);
 SearchbarWindowObserver.prototype.install = function() {
-
   let searchBar = this.window.document.getElementById("searchbar");
   let recordSearch = function() {
     let currEngine = searchBar.searchService.currentEngine;
@@ -133,6 +138,9 @@ SearchbarWindowObserver.prototype.install = function() {
     this._listen(appcontent, "DOMContentLoaded", function(evt) {
                    let url = evt.originalTarget.URL;
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
+                     // TODO this is too broad:  client=firefox can show up in
+                     // Google searches that are not from the Firefox homepage,
+                     // as well.
                      let uiMethod = url.indexOf("client=firefox")>-1 ?
                                       UI_METHOD_CODES.MOZ_HOME_PAGE :
                                         UI_METHOD_CODES.WEBSITE;
@@ -187,15 +195,17 @@ function GlobalSearchbarObserver()  {
   GlobalSearchbarObserver.baseConstructor.call(this, SearchbarWindowObserver);
 }
 BaseClasses.extend(GlobalSearchbarObserver, BaseClasses.GenericGlobalObserver);
-GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
-  GlobalSearchbarObserver.superClass.onExperimentStartup.call(this, store);
-
+GlobalSearchbarObserver.prototype.getSearchSvc = function() {
+  // See http://doxygen.db48x.net/mozilla/html/interfacensIBrowserSearchService.html
   let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
                         .getService(Ci.nsIWindowMediator);
   let frontWindow = wm.getMostRecentWindow("navigator:browser");
-  let searchSvc =  frontWindow.document.getElementById("searchbar").searchService;
-  // See http://doxygen.db48x.net/mozilla/html/interfacensIBrowserSearchService.html
+  return frontWindow.document.getElementById("searchbar").searchService;
+}
+GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
+  GlobalSearchbarObserver.superClass.onExperimentStartup.call(this, store);
 
+  let searchSvc = this.getSearchSvc();
   // Don't want to change user's current selected engine, so store that...
   let currEng = searchSvc.currentEngine;
 
@@ -206,6 +216,11 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   this._expGroupId = prefs.get(prefName, "");
   if (this._expGroupId == "") {
     this._expGroupId = Math.floor(Math.random()*5);
+    if (this._expGroupId != EXP_GROUP_CODES.CONTROL) {
+      // before changing the search engine menu, record the old order in
+      // a preference so we can put it back.
+      this.rememberMenu();
+    }
     prefs.set(prefName, this._expGroupId);
     switch (this._expGroupId) {
     case EXP_GROUP_CODES.CONTROL:
@@ -213,6 +228,7 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
       break;
     case EXP_GROUP_CODES.RANDOMIZED:
       // Randomize the order of your search engines
+      // TODO always leave Google in first position
       let sortedEngines = searchSvc.getEngines();
       let newIndex = 0;
       while(sortedEngines.length > 0) {
@@ -251,8 +267,19 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
     this.record(sortedEngines[x].name, UI_METHOD_CODES.MENU_CONTENTS, x);
   }
 };
+GlobalSearchbarObserver.prototype.rememberMenu = function() {
+  let searchSvc = this.getSearchSvc();
+  let prefs = require("preferences-service");
+  let prefName = "extensions.testpilot.searchbar_study.originalMenu";
+  let sortedEngines = searchSvc.getEngines();
+  let originalMenu = [];
+  for (let x = 0; x < sortedEngines.length; x++) {
+    originalMenu.push(sortedEngines[x].name);
+  }
+  let string = JSON.stringify(originalMenu);
+  prefs.set(prefName, string);
+};
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
-  //dump("Recording " + searchEngine + " " + uiMethod + " " + index + "\n");
   let expGroup = this._expGroupId;
   if (!this.privateMode) {
     this._store.storeEvent({
@@ -263,6 +290,30 @@ GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, inde
       timestamp: Date.now()
     });
   }
+};
+GlobalSearchbarObserver.prototype.doExperimentCleanup = function() {
+  // Restore user's search engine menu to its original state
+  // TODO don't restore if they modified search engine menu during the study
+  let searchSvc = this.getSearchSvc();
+  let prefs = require("preferences-service");
+  let prefName = "extensions.testpilot.searchbar_study.originalMenu";
+  let originalMenu = JSON.parse(prefs.get(prefName, "[]"));
+  let messedUpEngines = searchSvc.getEngines();
+  for (let x = 0; x < messedUpEngines.length; x++) {
+    let engName = messedUpEngines[x].name;
+    let rightIndex = originalMenu.indexOf(engName);
+    if (rightIndex == -1) {
+      // engine was not in original menu: remove
+      searchSvc.removeEngine(messedUpEngines[x]);
+    } else {
+      // Engine was in original menu: put it in the right place
+      searchSvc.moveEngine(messedUpEngines[x], rightIndex);
+    }
+  }
+
+  // More cleanup: remove prefs
+  prefs.reset(prefName);
+  prefs.reset("extensions.testpilot.searchbar_study.expGroupId");
 };
 
 exports.handlers = new GlobalSearchbarObserver();
@@ -287,6 +338,7 @@ SearchbarStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
 SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
                                                          document,
                                                          graphUtils) {
+  // TODO show pie chart of UI method instead of pie chart of search engine
   let canvas = document.getElementById("data-canvas");
   let dataSet = [];
   let self = this;

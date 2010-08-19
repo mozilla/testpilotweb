@@ -83,7 +83,7 @@ var SEARCH_RESULTS_PAGES = [
 
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
-  duration: 5, // Days
+  duration: 7, // Days
   testName: "Search Interfaces",
   testId: 8,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/searchui",

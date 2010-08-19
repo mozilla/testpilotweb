@@ -11,8 +11,8 @@ BaseClasses = require("study_base_classes.js");
  * Limit to just English locales OR ensure that international versions are recorded
  * separetely
  *
- * See spreadsheet
- *
+ * "Searches performed from google.com by enter key do not record" -- really?
+ * "Records two events when performing search by clicking Maps header"
  *
  */
 
@@ -84,17 +84,17 @@ var SEARCH_RESULTS_PAGES = [
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 5, // Days
-  testName: "Search Bar",
+  testName: "Search Interfaces",
   testId: 8,
-  testInfoUrl: "",
-  summary: "Which search engines are used most often, whether through the "
-           + "Firefox search bar or through web content?",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/searchui",
+  summary: "What are the most used interfaces to access search engines through Firefox?",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/search/searchbar-thumbnail.png",
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
   versionNumber: 1,
-  minTPVersion: "1.0b4"
+  minTPVersion: "1.0b4",
+  minFXVersion: "4.0b4pre"
 };
 
 exports.dataStoreInfo = {

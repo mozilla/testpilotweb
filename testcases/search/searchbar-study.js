@@ -14,6 +14,7 @@ BaseClasses = require("study_base_classes.js");
  * "Searches performed from google.com by enter key do not record" -- really?
  * "Records two events when performing search by clicking Maps header"
  *
+ *  Test Pilot extension not work at all on b5??
  */
 
 var UI_METHOD_CODES = {
@@ -47,13 +48,15 @@ var SEARCHBAR_EXPERIMENT_COLUMNS =  [
 // The order of this list is important because we accept the first match that we come to.
 // So make sure the more specific regexps come before more general ones!
 
+// TODO google maps (by click on link) double-counted?
 var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.google\.com.+tbs=vid.+q=/, name: "Google Video"},
   {pattern: /maps\.google\.com.+q=/, name: "Google Maps"},
   {pattern: /news\.google\.com.+q=/, name: "Google News"},
-  {pattern: /www\.google\.com.+q=/, name: "Google"},
-  {pattern: /www\.google\.co\.\w\w.+q=/, name: "Google (International)"},
-  {pattern: /www\.google\.\w\w.+q=/, name: "Google (International)"},
+  {pattern: /www\.google\.com\/.+q=/, name: "Google"},
+  {pattern: /www\.google\.co\.\w\w\/.+q=/, name: "Google (International)"},
+  {pattern: /www\.google\.com\.\w\w\/.+q=/, name: "Google (International)"},
+  {pattern: /www\.google\.\w\w\/.+q=/, name: "Google (International)"},
   {pattern: /news\.search\.yahoo\.com\/search\/news.+p=/, name: "Yahoo News"},
   {pattern: /shopping\.yahoo\.com\/search.+p=/, name: "Yahoo Shopping"},
   {pattern: /images\.search\.yahoo\.com\/search\/images.+p=/, name: "Yahoo Images"},
@@ -70,6 +73,10 @@ var SEARCH_RESULTS_PAGES = [
   {pattern: /shop\.ebay\.com.+_nkw=/, name: "Ebay"},
   {pattern: /en\.wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (en)"},
   {pattern: /wikipedia\.org\/wiki.+\?search=/, name: "Wikipedia (International)"},
+  {pattern: /www\.bing\.com\/images\/search\?q=/, name: "Bing Images"},
+  {pattern: /www\.bing\.com\/videos\/search\?q=/, name: "Bing Video"},
+  {pattern: /www\.bing\.com\/news\/search\?q=/, name: "Bing News"},
+  {pattern: /www\.bing\.com\/recipe\/search\?q=/, name: "Bing Recipes"},
   {pattern: /www\.bing\.com\/search\?q=/, name: "Bing"},
   {pattern: /twitter\.com.+search.+q=/, name: "Twitter"},
   {pattern: /www\.facebook\.com\/search\/\?/, name: "Facebook"}

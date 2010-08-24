@@ -21,7 +21,14 @@
    "jarfile": "beta/combined.jar",
    "studyfile": "combined.js",
    "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
+  },
+
+  {"name": "Search",
+   "jarfile": "search/searchbar-study.jar",
+   "studyfile": "searchbar-study.js",
+   "hash": "5c7ce6a20e17e208693042f3db8da3ac7e8f421903ae1af694b71da0d2af1a07"
   }
+
 ],
 
 "new_experiments": [
@@ -45,6 +52,14 @@
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
      "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
+    }
+  },
+
+  {"default":
+    {"name": "Search",
+     "jarfile": "search/searchbar-study.jar",
+     "studyfile": "searchbar-study.js",
+     "hash": "5c7ce6a20e17e208693042f3db8da3ac7e8f421903ae1af694b71da0d2af1a07"
     }
   }
 ],

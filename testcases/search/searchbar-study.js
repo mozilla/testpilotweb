@@ -1,20 +1,10 @@
 BaseClasses = require("study_base_classes.js");
 
 /* TODO
- *
- * From firefox homepage, clicking "Images" incorrectly records as a search although
- * no search was done.  (Same with video link, news link, etc)
- *
- * Google, Yahoo, Bing have different search types (image, video, etc) - record which one
- * was used.
- *
  * Limit to just English locales OR ensure that international versions are recorded
  * separetely
  *
- * "Searches performed from google.com by enter key do not record" -- really?
  * "Records two events when performing search by clicking Maps header"
- *
- *  Test Pilot extension not work at all on b5??
  */
 
 var UI_METHOD_CODES = {
@@ -143,7 +133,7 @@ SearchbarWindowObserver.prototype.install = function() {
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
                      let uiMethod;
                      if (url.indexOf("client=firefox") > -1  &&
-                         url.indexOf("source=hp") > -1) {
+                         url.indexOf("rls=org.mozilla") > -1) {
                        uiMethod = UI_METHOD_CODES.MOZ_HOME_PAGE;
                      } else {
                        uiMethod = UI_METHOD_CODES.WEBSITE;

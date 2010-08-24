@@ -351,11 +351,21 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
       if (row.ui_method == UI_METHOD_CODES.MENU_CONTENTS) {
         continue;
       }
-      if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX ||
-          row.ui_method == UI_METHOD_CODES.URL_BAR ||
+      /* Correction - urlbar, context menu, and search box searches produce
+       * an additional website/homepage event that we don't want to count.
+       * Subtract from the total to keep the chart accurate. */
+      if (row.ui_method == UI_METHOD_CODES.URL_BAR ||
           row.ui_method == UI_METHOD_CODES.CONTEXT_MENU) {
         counts[UI_METHOD_CODES.MOZ_HOME_PAGE] -= 1;
       }
+      if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX) {
+        if (row.engine_name.indexOf("Google") > -1) {
+          counts[UI_METHOD_CODES.MOZ_HOME_PAGE] -= 1;
+        } else {
+          counts[UI_METHOD_CODES.WEBSITE] -= 1;
+        }
+      }
+
       counts[row.ui_method] += 1;
     }
     for (let i = 0; i < counts.length; i++) {

@@ -354,7 +354,7 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
       if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX ||
           row.ui_method == UI_METHOD_CODES.URL_BAR ||
           row.ui_method == UI_METHOD_CODES.CONTEXT_MENU) {
-        counts[UI_METHOD_CODES.WEBSITE] -= 1;
+        counts[UI_METHOD_CODES.MOZ_HOME_PAGE] -= 1;
       }
       counts[row.ui_method] += 1;
     }

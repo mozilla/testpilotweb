@@ -27,8 +27,13 @@
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
    "hash": "5c7ce6a20e17e208693042f3db8da3ac7e8f421903ae1af694b71da0d2af1a07"
-  }
+  },
 
+  {"name": "Addons Marketplace",
+   "jarfile": "addon_marketplace_survey.jar",
+   "studyfile": "addon_marketplace_survey.js",
+   "hash": "45f8a05c8edc0ff0fe576c243d26312c55a588339cff2d9642517e0edcff69c3"
+  }
 ],
 
 "new_experiments": [

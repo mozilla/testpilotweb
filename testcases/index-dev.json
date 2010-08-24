@@ -1,40 +1,4 @@
-{"experiment_jars": [
-  {"name": "Dependencies",
-   "jarfile": "base_classes.jar",
-   "hash": "7b92a534ed81bbf2530e632213ec546cb8bfc5ef25baf44c25f6a34927068a47"
-  },
-
-  {"name": "Pilot Background Survey",
-   "jarfile": "basic-survey.jar",
-   "studyfile": "pilot-background-survey.js",
-   "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
-  },
-
-  {"name": "A Week in the Life of a Browser",
-   "jarfile": "a-week-life/week_life.jar",
-   "studyfile": "a_week_life.js",
-   "hash": "be2845a5d4f8e003e782edd83ec7841cd83b4f53cca28c4b568c5b5233555c4d"
-  },
-
-  {"name": "Menu Usage Study v2",
-   "jarfile": "menu-item-usage/menu-item-usage.jar",
-   "studyfile": "menu-item-usage-2.js",
-   "hash": "744dd1a395abc7c1b78f3dc6d2dc0a71774e2148c98354d6d86e5dcff0fcb430"
-  },
-
-  {"name": "Firefox 4 Beta Interface",
-   "jarfile": "beta/combined.jar",
-   "studyfile": "combined.js",
-   "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
-  },
-
-  {"name": "Search",
-   "jarfile": "search/searchbar-study.jar",
-   "studyfile": "searchbar-study.js",
-   "hash": "5c7ce6a20e17e208693042f3db8da3ac7e8f421903ae1af694b71da0d2af1a07"
-  }
-],
-
+{
 "new_experiments": [
   {"default":
     {"name": "Dependencies",
@@ -48,20 +12,6 @@
      "jarfile": "basic-survey.jar",
      "studyfile": "pilot-background-survey.js",
      "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
-    },
-
-   "pt-BR": {
-     "name": "Brazilian Portugese Pilot Background Survey",
-     "jarfile": "basic-survey-pt-br.jar",
-     "studyfile": "pilot-background-survey.js",
-     "hash": "82a6063f716ef92a211646ea38bedefc229db8406b3d0d13aa9cd032a9ccb094"
-    },
-
-   "pt": {
-     "name": "Portugese Pilot Background Survey",
-     "jarfile": "basic-survey-pt.jar",
-     "studyfile": "pilot-background-survey.js",
-     "hash": "957ce4aad20f6a7227c5d04f7cd0b2a43bf0815a102a2e0f95e4cf21ff51d4fd"
     }
   },
 
@@ -78,6 +28,30 @@
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
      "hash": "5c7ce6a20e17e208693042f3db8da3ac7e8f421903ae1af694b71da0d2af1a07"
+    }
+  },
+
+  {"default":
+    {"name": "A Week in the Life of a Browser",
+     "jarfile": "a-week-life/week_life.jar",
+     "studyfile": "a_week_life.js",
+     "hash": "be2845a5d4f8e003e782edd83ec7841cd83b4f53cca28c4b568c5b5233555c4d"
+    }
+  },
+
+  {"default":
+    {"name": "Graphic Card",
+     "jarfile": "hardware/graphic_hardware_study.jar",
+     "studyfile": "graphic_hardware_study.js",
+     "hash": "4a272f86577b309e44e0e4cd235257142a7286629d692fc3fb682d494d2c4544"
+    }
+  },
+
+  {"default":
+    {"name": "Example Study",
+     "jarfile": "example/example_study.jar",
+     "studyfile": "example_study.js",
+     "hash": "d93478b470b759feecfe6e802ed0d635f2a66708e44ffad757d44af4d6284a8e"
     }
   }
 ],

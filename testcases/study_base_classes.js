@@ -267,6 +267,10 @@ exports.GenericGlobalObserver.prototype = {
     this.uninstallAll();
   },
 
+  doExperimentCleanup: function() {
+    dump("Base classes. doExperimentCleanup() called.\n");
+  },
+
   onEnterPrivateBrowsing: function() {
     // Don't record any events when in private mode
     this.privateMode = true;
@@ -351,3 +355,12 @@ exports.extend = function(subClass, baseClass) {
   subClass.baseConstructor = baseClass;
   subClass.superClass = baseClass.prototype;
 };
+
+// Cleanup code that is always run on first load of remote code
+function globalCleanup() {
+  // Delete global site hash pref
+  // Truncate error log file if too long
+  // Delete no longer needed files in test pilot directory
+  dump("Running global cleanup code from study base classes.\n");
+}
+globalCleanup();

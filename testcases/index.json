@@ -17,12 +17,6 @@
    "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
   },
 
-  {"name": "Firefox 4 Beta Interface",
-   "jarfile": "beta/combined.jar",
-   "studyfile": "combined.js",
-   "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
-  },
-
   {"name": "Search",
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
@@ -53,14 +47,6 @@
   },
 
   {"default":
-    {"name": "Firefox 4 Beta Interface",
-     "jarfile": "beta/combined.jar",
-     "studyfile": "combined.js",
-     "hash": "428d46fdb4c2e6f03662d8251aad2ba4067233f6f5f51515a742ec8006e95c97"
-    }
-  },
-
-  {"default":
     {"name": "Search",
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
@@ -78,6 +64,13 @@
 ],
 
 "legacy": [
+{"name": "Firefox 4 Beta Interface",
+ "id": "100",
+ "url": "https://testpilot.mozillalabs.com/testcases/betaui.html",
+ "summary": "We are studying how the changes to the toolbar and menu bar in the Firefox 4 beta affect usage of the interface.",
+ "thumbnail": "http://hg.mozilla.org/labs/testpilot/raw-file/269edaf8034d/extension/skin/all/badge-default.png"
+},
+
 {"name": "Toolbar Study",
  "id": "6",
  "url": "https://testpilot.mozillalabs.com/testcases/toolbar",

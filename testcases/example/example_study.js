@@ -29,7 +29,8 @@ exports.experimentInfo = {
   duration: 5, // a number of days - fractions OK.
   minTPVersion: "1.0a1", // Test Pilot versions older than this
     // will not run the study.
-  minFXVersion: "4.0",
+  minFXVersion: "4.0", // Firefox versions older than this will
+    // not run the study.
 
   // For studies that automatically recur:
   recursAutomatically: false,
@@ -171,15 +172,16 @@ ExampleStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
 exports.handlers = new ExampleStudyGlobalObserver();
 
 
-// Finally, we make the web content, which defines what will show up on the study
-// detail view page.
+// Finally, we make the web content, which defines what will show up on the
+// study detail view page.
 function ExampleWebContent()  {
   ExampleWebContent.baseConstructor.call(this, exports.experimentInfo);
 }
 // Again, we're extending a generic web content class.
 BaseClasses.extend(ExampleWebContent, BaseClasses.GenericWebContent);
-// it's all implemented as getters, and unfortunately the syntax for
-// overriding getters is way ugly -- thinking of changing this.
+/* it's all implemented as getters, and unfortunately the syntax for
+ * overriding getters is way ugly -- I'm thinking of changing this, but for
+ * now, you have to use __defineGetter__. */
 ExampleWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
       return '<div class="dataBox"><h3>View Your Data:</h3>' +
@@ -193,17 +195,28 @@ ExampleWebContent.prototype.__defineGetter__("dataViewExplanation",
     return "This is a totally made up example study that means nothing.";
   });
 
+// This function is called when the experiment page load is done
 ExampleWebContent.prototype.onPageLoad = function(experiment,
-                                                       document,
-                                                       graphUtils) {
-
-}
+                                                  document,
+                                                  graphUtils) {
+  /* experiment is a reference to the live experiment Task object.
+   * document is a reference to the experiment page document
+   * graphUtils is a rerence to the Flot JS chart plotting library:
+   * see http://code.google.com/p/flot/
+   *
+   * The basic idea here is to plot some kind of chart inside the div tag
+   * that we defined in the dataCanvas getter in order to display the
+   * experiment data to the user in an easily understood form.
+   */
+};
 
 // Instantiate and export the web content (required!)
 exports.webContent = new ExampleWebContent();
 
-
+// Register any code we want called when the study is unloaded:
 require("unload").when(
   function destructor() {
     // Do any module cleanup here.
   });
+
+// We're done!

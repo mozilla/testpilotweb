@@ -45,6 +45,14 @@
      "studyfile": "example_study.js",
      "hash": "d93478b470b759feecfe6e802ed0d635f2a66708e44ffad757d44af4d6284a8e"
     }
+  },
+
+  {"default":
+    {"name": "About Firefox",
+     "jarfile": "a-week-life/about_firefox.jar",
+     "studyfile": "about_firefox.js",
+     "hash": "54cc3e58275d931b12f5ba536984333c84669ac871216ec2909973a82d66180e"
+    }
   }
 ],
 

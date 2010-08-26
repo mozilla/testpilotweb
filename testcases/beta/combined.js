@@ -70,7 +70,7 @@ function CombinedWindowObserver(window) {
 };
 BaseClasses.extend(CombinedWindowObserver, BaseClasses.GenericWindowObserver);
 CombinedWindowObserver.prototype.compareSearchTerms = function(searchTerm, searchEngine) {
-  if (searchTerm == this._lastSearchTerm) {
+  if (searchTerm == this._lastSearchTerm) {c
     if (searchEngine == this._lastSearchEngine) {
       exports.handlers.record(EVENT_CODES.ACTION, "search bar", "", "same search same engine");
     } else {

@@ -27,9 +27,9 @@ exports.experimentInfo = {
     // so you can identify results submitted from different versions
 
   duration: 5, // a number of days - fractions OK.
-  minTPVersion: "1.0a1", // Test Pilot versions older than this
+  minTPVersion: "1.0", // Test Pilot versions older than this
     // will not run the study.
-  minFXVersion: "4.0", // Firefox versions older than this will
+  minFXVersion: "4.0b1", // Firefox versions older than this will
     // not run the study.
 
   // For studies that automatically recur:

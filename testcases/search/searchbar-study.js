@@ -13,7 +13,8 @@ var UI_METHOD_CODES = {
   MOZ_HOME_PAGE: 2,
   URL_BAR: 3,
   MENU_CONTENTS: 4,
-  CONTEXT_MENU: 5
+  CONTEXT_MENU: 5,
+  STUDY_VERSION: 6
 };
 
 var EXP_GROUP_CODES = {
@@ -28,7 +29,7 @@ var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
   {property: "ui_method", type: BaseClasses.TYPE_INT_32, displayName: "UI method",
    displayValue: ["Search Box", "Website", "Firefox home page", "URL bar", "Menu Contents",
-                 "Context Menu"]},
+                  "Context Menu", "Study Version"]},
   {property: "engine_pos", type: BaseClasses.TYPE_INT_32, displayName: "Menu Position"},
   {property: "experiment_group", type: BaseClasses.TYPE_INT_32, displayName: "Experiment Group"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
@@ -89,7 +90,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 1,
+  versionNumber: 2,
   minTPVersion: "1.0b4",
   minFXVersion: "4.0b4pre"
 };
@@ -105,7 +106,8 @@ function SearchbarWindowObserver(window) {
 };
 BaseClasses.extend(SearchbarWindowObserver, BaseClasses.GenericWindowObserver);
 SearchbarWindowObserver.prototype.install = function() {
-  let searchBar = this.window.document.getElementById("searchbar");
+  let window = this.window;
+  let searchBar = window.document.getElementById("searchbar");
   let recordSearch = function() {
     let currEngine = searchBar.searchService.currentEngine;
     let name = currEngine.name;
@@ -126,20 +128,28 @@ SearchbarWindowObserver.prototype.install = function() {
                }, false);
 
   // Watch content space for search results pages loading
-  let appcontent = this.window.document.getElementById("appcontent");
+  let appcontent = window.document.getElementById("appcontent");
   if (appcontent) {
     this._listen(appcontent, "DOMContentLoaded", function(evt) {
-                   let url = evt.originalTarget.URL;
+                   let win = evt.originalTarget.defaultView;
+                   let url = win.history.current;
+                   dump("URL is " + url + "\n");
+
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
-                     let uiMethod;
-                     if (url.indexOf("client=firefox") > -1  &&
-                         url.indexOf("rls=org.mozilla") > -1) {
-                       uiMethod = UI_METHOD_CODES.MOZ_HOME_PAGE;
-                     } else {
-                       uiMethod = UI_METHOD_CODES.WEBSITE;
-                     }
                      let srp = SEARCH_RESULTS_PAGES[i];
                      if (srp.pattern.test(url)) {
+                       let uiMethod = UI_METHOD_CODES.WEBSITE;
+                       // use MOZ_HOME_PAGE only if previous page was mozilla page
+                       try {
+                         let prev = win.history.previous;
+                         dump("Previous is " + prev + "\n");
+                         if (prev.indexOf(".google.") > -1 &&
+                             prev.indexOf("/firefox") > -1) {
+                           dump("I think this is search from moz homepage.\n");
+                           uiMethod = UI_METHOD_CODES.MOZ_HOME_PAGE;
+                         }
+                       } catch(e) {}
+                       dump("Recording a search engine result page.\n");
                        exports.handlers.record(srp.name, uiMethod, 0);
                        break;
                      }
@@ -148,9 +158,8 @@ SearchbarWindowObserver.prototype.install = function() {
     /* Twitter searches don't reload the page but go to a magic in page
      * anchor (i.e. twitter.com/#search?q=string) so we won't catch them
      * with DOMContentLoaded events... watch for the hashchange instead. */
-    let win = this.window;
-    this._listen(this.window, "hashchange", function(evt) {
-                   let url = win.content.document.location;
+    this._listen(window, "hashchange", function(evt) {
+                   let url = window.content.document.location;
                    if (/twitter\.com.+search.+q=/.test(url)) {
                      exports.handlers.record("Twitter", UI_METHOD_CODES.WEBSITE,
                                              0);
@@ -159,7 +168,7 @@ SearchbarWindowObserver.prototype.install = function() {
   }
 
   // Watch URL bar for search terms being entered there
-  let urlBar = this.window.document.getElementById("urlbar");
+  let urlBar = window.document.getElementById("urlbar");
   let recordUrlBarSearch = function() {
     let text = urlBar.value;
     // Assume it's a search if there's a space and/or no period
@@ -171,13 +180,13 @@ SearchbarWindowObserver.prototype.install = function() {
                  if (evt.keyCode == 13) { // Enter key
                    recordUrlBarSearch();
                  }}, false);
-  let urlGoButton = this.window.document.getElementById("go-button");
+  let urlGoButton = window.document.getElementById("go-button");
   this._listen(urlGoButton, "mouseup", function(evt) {
                  recordUrlBarSearch();
                }, false);
 
   // Watch context menu for the "search for selection" command
-  let popup = this.window.document.getElementById("contentAreaContextMenu");
+  let popup = window.document.getElementById("contentAreaContextMenu");
   this._listen(popup, "command", function(evt) {
                  if (evt.originalTarget.id == "context-searchselect") {
                    exports.handlers.record("", UI_METHOD_CODES.CONTEXT_MENU, 0);
@@ -261,7 +270,9 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   }
   // restore selected engine in case it was messed up
   searchSvc.currentEngine = currEng;
+
   // Record what engines are installed and in what order:
+  this.record("", UI_METHOD_CODES.STUDY_VERSION, exports.experimentInfo.versionNumber);
   let sortedEngines = searchSvc.getEngines();
   for (let x = 0; x < sortedEngines.length; x++) {
     this.record(sortedEngines[x].name, UI_METHOD_CODES.MENU_CONTENTS, x);
@@ -342,30 +353,35 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
   let canvas = document.getElementById("data-canvas");
   let dataSet = [];
   let self = this;
+  let version = 1;
   let getName = function(row) {
     return SEARCHBAR_EXPERIMENT_COLUMNS[1].displayValue[row.ui_method];
   };
   experiment.getDataStoreAsJSON(function(rawData) {
     let counts = [0, 0, 0, 0, 0, 0];
     for each (let row in rawData) {
-      if (row.ui_method == UI_METHOD_CODES.MENU_CONTENTS) {
+      switch (row.ui_method) {
+      case UI_METHOD_CODES.MENU_CONTENTS:
         continue;
-      }
+      case UI_METHOD_CODES.STUDY_VERSION:
+        version = parseInt(row.engine_pos);
+        continue;
       /* Correction - urlbar, context menu, and search box searches produce
        * an additional website/homepage event that we don't want to count.
        * Subtract from the total to keep the chart accurate. */
-      if (row.ui_method == UI_METHOD_CODES.URL_BAR ||
-          row.ui_method == UI_METHOD_CODES.CONTEXT_MENU) {
-        counts[UI_METHOD_CODES.MOZ_HOME_PAGE] -= 1;
-      }
-      if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX) {
-        if (row.engine_name.indexOf("Google") > -1) {
-          counts[UI_METHOD_CODES.MOZ_HOME_PAGE] -= 1;
-        } else {
-          counts[UI_METHOD_CODES.WEBSITE] -= 1;
+      case UI_METHOD_CODES.URL_BAR:
+      case UI_METHOD_CODES.CONTEXT_MENU:
+      case UI_METHOD_CODES.SEARCH_BOX:
+        let countToCorrect = UI_METHOD_CODES.WEBSITE;
+        if (version == 1) {
+          countToCorrect = UI_METHOD_CODES.MOZ_HOME_PAGE;
+          if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX &&
+              row.engine_name.indexOf("Google") == -1) {
+            countToCorrect = UI_METHOD_CODES.WEBSITE;
+          }
         }
+        counts[countToCorrect] -= 1;
       }
-
       counts[row.ui_method] += 1;
     }
     for (let i = 0; i < counts.length; i++) {

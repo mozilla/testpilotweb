@@ -20,7 +20,7 @@
   {"name": "Search",
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
-   "hash": "62935616df5cbb52743493fc361b23d00023cb4df2007a6428f5b8d4e54c9a64"
+   "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
   },
 
   {"name": "Addons Marketplace",
@@ -50,7 +50,7 @@
     {"name": "Search",
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
-     "hash": "62935616df5cbb52743493fc361b23d00023cb4df2007a6428f5b8d4e54c9a64"
+     "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
     }
   },
 

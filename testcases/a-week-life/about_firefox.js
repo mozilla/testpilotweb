@@ -51,13 +51,15 @@ const PREFS_WHITELIST = [
   "places.",
   "print.",
   "privacy.",
-  "security."
+  "security.",
+  "ui."
 ];
 
 // The blacklist, unlike the whitelist, is a list of regular expressions.
 const PREFS_BLACKLIST = [
   /^network[.]proxy[.]/,
-  /[.]print_to_filename$/
+  /[.]print_to_filename$/,
+  /browser.startup.homepage/
 ];
 
 let gPrefService = Cc["@mozilla.org/preferences-service;1"]
@@ -73,10 +75,18 @@ function getModifiedPrefs() {
   // much, much slower.  Application.prefs.all also gets slower each
   // time it's called.  See bug 517312.
   let prefNames = getWhitelistedPrefNames();
-  let prefs = [Application.prefs.get(prefName)
-                      for each (prefName in prefNames)
-                          if (gPrefService.prefHasUserValue(prefName)
-                            && !isBlacklisted(prefName))];
+  let prefs = [];
+  for each (prefName in prefNames) {
+    if (gPrefService.prefHasUserValue(prefName)) {
+      let aPref = Application.prefs.get(prefName);
+      // For blacklisted prefs, don't record actual value - only the
+      // fact that it has been set.
+      if (isBlacklisted(prefName)) {
+        aPref.value = "Custom Value";
+      }
+      prefs.push(aPref);
+    }
+  }
   return prefs;
 }
 
@@ -146,6 +156,71 @@ AboutFxStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
 
     // Could also include:  about:buildconfig if required;
     // detailed extension data.
+
+
+
+    // nsIGfxInfo is currently only implemented on Windows and only on nightlies
+    //let gfxInfo = Cc["@mozilla.org/gfx/info;1"].getService(Ci.nsIGfxInfo);
+    // see source in about:support
+
+    // If we're on windows, use jsctypes to get graphics card info:
+    let oscpu = Cc["@mozilla.org/network/protocol;1?name=http"].getService(Ci.nsIHttpProtocolHandler).oscpu;
+    let os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
+    dump("Your OS is " + os + "\n");
+    if (os.indexOf("Win") > -1) {
+      Cu.import("resource://gre/modules/ctypes.jsm");
+
+      // Copied from http://mxr.mozilla.org/mozilla-central/source/widget/src/windows/GfxInfo.cpp#171
+      let user32 = ctypes.open("C:\\WINDOWS\\system32\\user32.dll");
+      let DWORD = ctype.uint32_t;
+      let TCHAR_ARRAY =  new ctypes.ArrayType(ctypes.tchar, 32);
+      let TCHAR_ARRAY_L = new ctypes.ArrayType(ctypes.tchar, 128);
+      let DISPLAY_DEVICE = new ctypes.StructType("_DISPLAY_DEVICE",
+        [ {"cb": DWORD},
+          {"DeviceName": TCHAR_ARRAY},
+          {"DeviceString": TCHAR_ARRAY_L},
+          {"StateFlags": DWORD},
+          {"DeviceID": TCHAR_ARRAY_L},
+          {"DeviceKey": TCHAR_ARRAY_L}]);
+
+      //DISPLAY_DEVICEW displayDevice; // Does the W-ness matter?
+      // PDISPLAY_DEVICE is a pointer to one of these.
+      let LPCTSTR = ctypes.wchar_t.ptr;// either char* or wchar_t* if unicode
+      let enumFunction = user32.declare("EnumDisplayDevicesW",
+                                        LPCTSTR,
+                                        DWORD,
+                                        DISPLAY_DEVICE.ptr,
+                                        DWORD);
+      let displayDevice = new DISPLAY_DEVICE;
+      displayDevice.cb = sizeof(displayDevice);
+      let deviceIndex = 0;
+
+      while (enumFunction(null, deviceIndex, displayDevice, 0)) {
+         if (displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)
+           break;
+         deviceIndex++;
+      }
+
+   /* DeviceKey is "reserved" according to MSDN so we'll be careful with it */
+   /* check that DeviceKey begins with DEVICE_KEY_PREFIX */
+   /*if (wcsncmp(displayDevice.DeviceKey, DEVICE_KEY_PREFIX, NS_ARRAY_LENGTH(DEVICE_KEY_PREFIX)-1) != 0)
+     return;*/
+
+   // make sure the string is NULL terminated
+   /*if (wcsnlen(displayDevice.DeviceKey, NS_ARRAY_LENGTH(displayDevice.DeviceKey))
+       == NS_ARRAY_LENGTH(displayDevice.DeviceKey)) {
+     // we did not find a NULL
+     return;
+   }*/
+
+   // chop off DEVICE_KEY_PREFIX
+   /*mDeviceKey = displayDevice.DeviceKey + NS_ARRAY_LENGTH(DEVICE_KEY_PREFIX)-1;
+   mDeviceID = displayDevice.DeviceID;*/
+      let mDeviceString = displayDevice.DeviceString.readString(); //what we want
+      dump("mDeviceString is " + mDeviceString + "\n");
+
+      user32.close();
+    }
   });
 };
 exports.handlers = new AboutFxStudyGlobalObserver();
@@ -171,6 +246,9 @@ AboutFxWebContent.prototype.onPageLoad = function(experiment,
                                                   document,
                                                   graphUtils) {
   // TODO
+  // Here are your plugin versions?
+  // Here is your total memory use?
+  // Here are the preferences you've modified?
 };
 exports.webContent = new AboutFxWebContent();
 

@@ -155,12 +155,10 @@ AboutFxStudyGlobalObserver.prototype.getGraphxInfo = function() {
     // If we're on windows, use jsctypes to get graphics card info:
     let oscpu = Cc["@mozilla.org/network/protocol;1?name=http"].getService(Ci.nsIHttpProtocolHandler).oscpu;
     let os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
-    dump("Your OS is " + os + "\n");
     if (os.toLowerCase().indexOf("win") > -1) {
       try {
       let ns = {};
       Cu.import("resource://gre/modules/ctypes.jsm", ns);
-      dump("ns.ctypes is " + ns.ctypes + "\n");
       let ctypes = ns.ctypes;
 
       // Copied from http://mxr.mozilla.org/mozilla-central/source/widget/src/windows/GfxInfo.cpp#171
@@ -168,7 +166,6 @@ AboutFxStudyGlobalObserver.prototype.getGraphxInfo = function() {
       let DWORD = ctypes.uint32_t;
       let TCHAR_ARRAY =  new ctypes.ArrayType(ctypes.jschar, 32);
       let TCHAR_ARRAY_L = new ctypes.ArrayType(ctypes.jschar, 128);
-      dump("Let's define a struct\n");
       let DISPLAY_DEVICE = new ctypes.StructType("_DISPLAY_DEVICE",
         [ {"cb": DWORD},
           {"DeviceName": TCHAR_ARRAY},
@@ -180,7 +177,6 @@ AboutFxStudyGlobalObserver.prototype.getGraphxInfo = function() {
       //DISPLAY_DEVICEW displayDevice; // Does the W-ness matter?
       // PDISPLAY_DEVICE is a pointer to one of these.
       let LPCTSTR = ctypes.jschar.array();// either char* or wchar_t* if unicode
-      dump("Let's define a function.\n");
       let enumFunction = user32.declare("EnumDisplayDevicesW",
                                         ctypes.winapi_abi,
                                         ctypes.bool,
@@ -188,7 +184,6 @@ AboutFxStudyGlobalObserver.prototype.getGraphxInfo = function() {
                                         DWORD,
                                         DISPLAY_DEVICE.ptr,
                                         DWORD);
-      dump("let's instantiate display device...\n");
       let displayDevice = new DISPLAY_DEVICE();
       displayDevice.cb = DISPLAY_DEVICE.size;
       let deviceIndex = 0;
@@ -209,7 +204,8 @@ AboutFxStudyGlobalObserver.prototype.getGraphxInfo = function() {
                     value: displayDevice.DeviceKey.readString()});
       user32.close();
       } catch(e) {
-        dump("Error: " + e + "\n");
+        console.warn("Error getting graphics data: " + e + "\n");
+        user32.close();
       }
     }
     return gfxInfo;
@@ -267,7 +263,7 @@ AboutFxWebContent.prototype.onPageLoad = function(experiment,
                                                   document,
                                                   graphUtils) {
     let insertDoc = function(parentElem, string) {
-      let elem = document.getElementById(parentElem);      
+      let elem = document.getElementById(parentElem);
       let child = document.createElement("li");
       child.innerHTML = string;
       elem.appendChild(child);

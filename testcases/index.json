@@ -27,6 +27,12 @@
    "jarfile": "addon_marketplace_survey.jar",
    "studyfile": "addon_marketplace_survey.js",
    "hash": "45f8a05c8edc0ff0fe576c243d26312c55a588339cff2d9642517e0edcff69c3"
+  },
+
+  {"name": "About Firefox",
+   "jarfile": "a-week-life/about_firefox.jar",
+   "studyfile": "about_firefox.js",
+   "hash": "3e4a2e45c763c43a74e0a68d30f33d8a0563d868a0b2e46e49cdd526de19605e"
   }
 ],
 
@@ -59,6 +65,14 @@
      "jarfile": "addon_marketplace_survey.jar",
      "studyfile": "addon_marketplace_survey.js",
      "hash": "45f8a05c8edc0ff0fe576c243d26312c55a588339cff2d9642517e0edcff69c3"
+    }
+  },
+
+  {"default":
+    {"name": "About Firefox",
+     "jarfile": "a-week-life/about_firefox.jar",
+     "studyfile": "about_firefox.js",
+     "hash": "3e4a2e45c763c43a74e0a68d30f33d8a0563d868a0b2e46e49cdd526de19605e"
     }
   }
 ],

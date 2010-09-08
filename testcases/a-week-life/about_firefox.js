@@ -114,7 +114,7 @@ AboutFxStudyGlobalObserver.prototype.getPrefInfo = function() {
   let isBlacklisted = function(prefName) {
     return PREFS_BLACKLIST.some(function (re) {
                                   return re.test(prefName);});
-  }
+  };
 
   // We use the low-level prefs API to identify prefs that have been
   // modified, rather that Application.prefs.all since the latter is
@@ -123,7 +123,8 @@ AboutFxStudyGlobalObserver.prototype.getPrefInfo = function() {
   let prefs = [];
   for each (prefName in whitelist) {
     if (prefService.prefHasUserValue(prefName)) {
-      let aPref = Application.prefs.get(prefName);
+      let aPref = {name: prefName,
+                   value: Application.prefs.get(prefName).value};
       // For blacklisted prefs, don't record actual value - only the
       // fact that it has been set.
       if (isBlacklisted(prefName)) {

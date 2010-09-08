@@ -124,10 +124,14 @@ AboutFxStudyGlobalObserver.prototype.getPrefInfo = function() {
   for each (prefName in whitelist) {
     if (prefService.prefHasUserValue(prefName)) {
       let aPref = {name: prefName,
-                   value: Application.prefs.get(prefName).value};
+                   value: Application.prefs.getValue(prefName, "")};
       // For blacklisted prefs, don't record actual value - only the
       // fact that it has been set.
       if (isBlacklisted(prefName)) {
+        if (Application.prefs.getValue(prefName, "") == "Custom Value") {
+          // Correct our previous screwup - reset pref to default value
+          Application.prefs.get(prefName).reset();
+        }
         aPref.value = "Custom Value";
       }
       prefs.push(aPref);
@@ -270,10 +274,14 @@ AboutFxWebContent.prototype.onPageLoad = function(experiment,
       elem.appendChild(child);
     };
 
+    // show the largest memory total
+    let maxMem = 0;
     for each (let mr in exports.handlers.getMemoryInfo()) {
-      document.getElementById("mem-info").innerHTML = mr.memoryUsed + "";
-      break;
+      if (mr.memoryUsed > maxMem) {
+        maxMem = mr.memoryUsed;
+      }
     }
+    document.getElementById("mem-info").innerHTML = maxMem + "";
 
     for each (let plugin in exports.handlers.getPluginInfo()) {
       insertDoc("plugins-list",

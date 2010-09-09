@@ -361,6 +361,7 @@ function globalCleanup() {
   // Delete global site hash pref
   // Truncate error log file if too long
   // Delete no longer needed files in test pilot directory
+  // Restore preferences that are "Custom Value" to default value
   dump("Running global cleanup code from study base classes.\n");
 }
 globalCleanup();

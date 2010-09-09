@@ -21,12 +21,6 @@
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
    "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
-  },
-
-  {"name": "About Firefox",
-   "jarfile": "a-week-life/about_firefox.jar",
-   "studyfile": "about_firefox.js",
-   "hash": "ae1b18a23c890319a83c41698d3a34efb9682617a0eaa5a11edd5110137d31f7"
   }
 ],
 
@@ -51,14 +45,6 @@
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
      "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
-    }
-  },
-
-  {"default":
-    {"name": "About Firefox",
-     "jarfile": "a-week-life/about_firefox.jar",
-     "studyfile": "about_firefox.js",
-     "hash": "ae1b18a23c890319a83c41698d3a34efb9682617a0eaa5a11edd5110137d31f7"
     }
   }
 ],

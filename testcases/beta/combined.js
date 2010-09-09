@@ -5,7 +5,7 @@ BaseClasses = require("study_base_classes.js");
  */
 
 const ORIGINAL_TEST_ID = 100;
-const MY_TEST_ID = 100;
+const MY_TEST_ID = 101; // We are on second run
 // Note that non-numeric ids will break experiment-page.js because it's doing
 // parseInt to get the eid.  So these must be numeric; sigh.
 
@@ -45,18 +45,18 @@ var COMBINED_EXPERIMENT_COLUMNS =  [
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 7, // Days
-  testName: "Firefox 4 Beta Interface",
+  testName: "Firefox 4 Beta Interface (part 2)",
   testId: MY_TEST_ID,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/betaui.html",
   summary: "We are studying how the changes to the toolbar and menu bar in the"
            + " Firefox 4 beta affect usage of the interface.",
   thumbnail: null,
-  optInRequired: true,
+  optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 1,
-  minTPVersion: "1.0rc1"
-  //minFXVersion: "4.0b1" // Can't use due to bug 578830
+  versionNumber: 2,
+  minTPVersion: "1.0rc1",
+  minFXVersion: "4.0b1"
 };
 
 exports.dataStoreInfo = {

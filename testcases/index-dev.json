@@ -53,14 +53,6 @@
      "studyfile": "combined.js",
      "hash": "f8b1c594092a304cd80eae7f1dbd3190a5f26c91fce006920929f210824895e3"
     }
-  },
-
-  {"default":
-    {"name": "Tab Switch Study",
-    "jarfile": "tab-open-close/tab_switch.jar",
-    "studyfile": "tab_switch_study.js",
-    "hash":"bea58144761f0c5cca227a77712428c8a6f91df32b443e727e9be2e369e8843e"
-    }
   }
 ],
 

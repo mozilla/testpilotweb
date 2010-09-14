@@ -657,7 +657,8 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
         return;
       graphUtils.plot(plotDiv, [{data: d1}],
                       {series: {bars: {show: true, horizontal: true}},
-                       yaxis: {ticks: yAxisLabels}});
+                       yaxis: {ticks: yAxisLabels},
+                       xaxis: {tickDecimals: 0}});
     } catch(e) {
       console.warn("Problem with graphutils: " + e + "\n");
     }

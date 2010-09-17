@@ -1,6 +1,6 @@
 /* Basic panel experiment */
-const TYPE_INT_32 = 0;
-const TYPE_DOUBLE = 1;
+BaseClasses = require("study_base_classes.js");
+
 
 exports.experimentInfo = {
   startDate: null,
@@ -39,7 +39,13 @@ const WeekEventCodes = {
   ADDON_INSTALL: 15,
   ADDON_UNINSTALL: 16,
   PRIVATE_ON: 17,
-  PRIVATE_OFF: 18
+  PRIVATE_OFF: 18,
+  MEMORY_USAGE:19,
+  SESSION_ON_RESTORE:20,
+  SESSION_RESTORE: 21,
+  PLUGIN_VERSION:22,
+  HISTORY_STATUS: 23,
+  PROFILE_AGE: 24
 };
 
 var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown",
@@ -49,7 +55,10 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
                             "Bookmark Modified", "Download",
                             "Download Settings Changed", "Add-ons Count",
                             "Add-on Installed", "Add-on Uninstalled",
-                            "Private Mode On", "Private Mode Off"];
+                            "Private Mode On", "Private Mode Off", "Memory Usage",
+                            "Total Windows/Tabs in about:sessionrestore",
+                            "Actual Restored Windows/Tabs", "Plugin Version",
+                            "History Count", "Profile Age"];
 
 // subcodes for BOOKMARK_MODIFY:
 const BMK_MOD_CHANGED = 0;
@@ -59,12 +68,12 @@ const BMK_MOD_MOVED = 2;
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_results.sqlite",
   tableName: "week_in_the_life",
-  columns: [{property: "event_code", type: TYPE_INT_32, displayName: "Event",
+  columns: [{property: "event_code", type: BaseClasses.TYPE_INT_32, displayName: "Event",
              displayValue: eventCodeToEventName},
-            {property: "data1", type: TYPE_INT_32, displayName: "Data 1"},
-            {property: "data2", type: TYPE_INT_32, displayName: "Data 2"},
-            {property: "data3", type: TYPE_INT_32, displayName: "Data 2"},
-            {property: "timestamp", type: TYPE_DOUBLE, displayName: "Time",
+            {property: "data1", type: BaseClasses.TYPE_STRING, displayName: "Data 1"},
+            {property: "data2", type: BaseClasses.TYPE_STRING, displayName: "Data 2"},
+            {property: "data3", type: BaseClasses.TYPE_STRING, displayName: "Data 3"},
+            {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
              displayValue: function(value) {return new Date(value).toLocaleString();}}]
 };
 
@@ -253,7 +262,7 @@ var IdlenessObserver = {
         let estimatedStop = self.lastSelfPing + self.selfPingInterval;
         // backdate my own timestamp:
         self.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
-                                data1: 1, data2: 0, data3: 0,
+                                data1: "1", data2: "0", data3: "0",
                                 timestamp: estimatedStop});
         self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [1]);
       }
@@ -268,7 +277,7 @@ var IdlenessObserver = {
       console.info("User has gone idle for " + data + " milliseconds.");
       let idleTime = Date.now() - parseInt(data);
       this.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
-                              data1: 2, data2: 0, data3: 0,
+                              data1: "2", data2: "0", data3: "0",
                               timestamp: idleTime});
       if (this.selfPingTimer) {
         this.selfPingTimer.cancel();
@@ -328,6 +337,7 @@ var ExtensionObserver = {
 
   runGlobalAddonsQuery: function () {
     // TODO record number of active and inactive extensions.
+/*
     let extManager = Cc["@mozilla.org/extensions/manager;1"]
                        .getService(Ci.nsIExtensionManager);
     let nsIUpdateItem = Ci.nsIUpdateItem;
@@ -343,6 +353,7 @@ var ExtensionObserver = {
     numberInactive = 0;
     console.info("Recording extensions: " + numberActive);
     this.store.rec(WeekEventCodes.ADDON_STATUS, [numberActive, numberInactive]);
+*/
   }
 };
 
@@ -392,25 +403,209 @@ var DownloadsObserver = {
   }*/
 };
 
+var MemoryObserver = {
+  /* Uses nsIMemoryReporterManager, see about:memory
+   * It retrieves memory information periodically according to the timerInterval
+   */
+  alreadyInstalled: false,
+  store: null,
+  memoryManager: null,
+  memoryInfoTimer: null,
+  timerInterval: 600000, // Ten minutes
+  
+   install: function(store) {
+    if (!this.alreadyInstalled) {
+      console.info("Adding memory observer.");
+ 
+      this.memoryManager = Cc["@mozilla.org/memory-reporter-manager;1"]
+        .getService(Components.interfaces.nsIMemoryReporterManager);
+
+      this.memoryInfoTimer = Components.classes["@mozilla.org/timer;1"]
+        .createInstance(Components.interfaces.nsITimer);
+        
+      this.store = store;
+      //Get Memory info on startup
+      this.getMemoryInfo();
+      let self = this;
+      this.memoryInfoTimer.initWithCallback(function(){self.getMemoryInfo()}
+        ,this.timerInterval, this.memoryInfoTimer.TYPE_REPEATING_SLACK);
+      this.alreadyInstalled = true;
+    }
+  },
+ 
+  uninstall: function() {
+    if (this.alreadyInstalled) {
+      this.alreadyInstalled = false;
+      if (this.memoryInfoTimer) {
+        this.memoryInfoTimer.cancel();
+      }
+    }
+  },
+
+  getMemoryInfo: function() {
+    let enumRep = this.memoryManager.enumerateReporters();
+    let now = Date.now();
+    while (enumRep.hasMoreElements()) {
+      let mr = enumRep.getNext().QueryInterface(Ci.nsIMemoryReporter);
+      console.info("memory path: "+ mr.path + " memory used: " + mr.memoryUsed);
+      this.store.storeEvent({ event_code: WeekEventCodes.MEMORY_USAGE,
+                        data1: "" + mr.path, data2: "" + mr.memoryUsed,
+                        data3: "", timestamp: now});
+      
+    }
+  }
+};
+
+//Global variable to keep track of all restored tabs
+let totalRestoringTabs = 0;
+//let sessionRestoredTabs = 0;
+var SessionRestoreObserver = {
+  //TODO: Check if it is better to add a listener to Restore btn (id:errorTryAgain)
+  //Add total restored windows.
+  
+  install: function(aWindow) {
+      aWindow.document.addEventListener("SSTabRestoring",
+      SessionRestoreObserver.increaseTabCounter, false);
+    
+    //aWindow.document.addEventListener("SSTabRestored",
+    //  function(){
+    //    sessionRestoredTabs = sessionRestoredTabs + 1;
+    //    console.info("Tabs RESTORED: " + sessionRestoredTabs);
+    //  }, false);
+  },
+
+  uninstall: function(aWindow) {
+    aWindow.document.removeEventListener("SSTabRestoring",
+      SessionRestoreObserver.increaseTabCounter, false);
+  },
+  
+  increaseTabCounter: function() {
+    totalRestoringTabs = totalRestoringTabs + 1;
+    console.info("Current Total Restoring Tabs: " + totalRestoringTabs);
+  }
+};
 
 exports.handlers = {
   _dataStore: null,
   obsService: null,
+  _sessionStartup: null,
+  
+  _recordPluginInfo: function() {
+    // Copied from about:plugins
+    let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+      .getService(Ci.nsIWindowMediator);
+    
+    let frontWindow = wm.getMostRecentWindow("navigator:browser");
+    let plugins = frontWindow.navigator.plugins;
+    plugins.refresh(false);
+    let now = Date.now();
+    for (let i = 0; i < plugins.length; i++) {
+      let plugin = plugins[i];
+      if (plugin) {
+        console.info("Plugin Name: "+ plugin.filename + " Version: " + plugin.version);
+        this._dataStore.storeEvent({ event_code: WeekEventCodes.PLUGIN_VERSION,
+          data1: plugin.filename, data2: plugin.version, data3: "",
+          timestamp: now});
+      }
+    }
+  },
+  
+  _recordNavHistory: function() {
+    //Record the number of places in the history
+    let historyService = Cc["@mozilla.org/browser/nav-history-service;1"]
+      .getService(Ci.nsINavHistoryService);
+   
+    let options = historyService.getNewQueryOptions();
+    let query = historyService.getNewQuery();
+    let result = historyService.executeQuery(query, options);
+    let rootNode = result.root;
+    rootNode.containerOpen = true;
+    let totalPlaces = rootNode.childCount;
+    rootNode.containerOpen = false;
+    
+    console.info("Total History Places: "+ totalPlaces);
+    this._dataStore.storeEvent({ event_code: WeekEventCodes.HISTORY_STATUS,
+                        data1: "" + totalPlaces, data2: "", data3: "",
+                        timestamp: Date.now()});
+  },
+  
+  _recordProfileAge: function() {
+     //oldest file in the profile directory
+    let file = Components.classes["@mozilla.org/file/directory_service;1"].  
+                     getService(Components.interfaces.nsIProperties).  
+                     get("ProfD", Components.interfaces.nsIFile);
+    let entries = file.directoryEntries;  
+    let oldestCreationTime = Date.now();
+    
+    while(entries.hasMoreElements()) {  
+      let entry = entries.getNext();
+      try{
+        entry.QueryInterface(Components.interfaces.nsIFile);
+        //nsIFile doesn't have an attribute for file creation time
+        if(oldestCreationTime > entry.lastModifiedTime) {
+          oldestCreationTime = entry.lastModifiedTime;
+        }
+      }
+      catch(e){ 
+       //If it couldn't access file info
+      }
+     }
+     console.info("Profile Age: "+ oldestCreationTime + " milliseconds");
+     this._dataStore.storeEvent({ event_code: WeekEventCodes.PROFILE_AGE,
+                        data1: "" + oldestCreationTime, data2: "", data3: "",
+                        timestamp: Date.now()});
+  },
+
   // for handlers API:
   onNewWindow: function(window) {
-    // Don't care
+    SessionRestoreObserver.install(window);
   },
 
   onWindowClosed: function(window) {
-    // Don't care
+    SessionRestoreObserver.uninstall(window);
   },
 
   onAppStartup: function() {
-    // TODO right here we need to get number of restored tabs/windows.
-    // ... which I can do by iterating through
     // TODO how can we tell if something has gone wrong with session restore?
     this._dataStore.rec(WeekEventCodes.BROWSER_START, []);
     console.info("Week in the life study got app startup message.");
+
+    //RESTORE SESSION information, number of tabs and windows restored
+    let stateObject = null;
+    let sessionData;
+     if (!this._sessionStartup) {
+      this._sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"]
+                    .getService(Ci.nsISessionStartup);
+    }
+    sessionData = this._sessionStartup.state;
+    if (sessionData) {
+      stateObject = JSON.parse(sessionData);
+      let countWindows = 0;
+      let countTabs = 0;
+      stateObject.windows.forEach(function(aWinData, aIx) {
+        countWindows = countWindows + 1;
+        let winState = {
+          ix: aIx
+        };
+        winState.tabs = aWinData.tabs.map(function(aTabData) {
+          let entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
+          return {
+            parent: winState
+          };
+        });
+        
+        for each (var tab in winState.tabs){
+          countTabs = countTabs + 1;
+        }
+      }, this);
+      
+      console.info("Session Restored: total windows: "+ countWindows
+        + " total tabs: " +  countTabs);
+      this._dataStore.storeEvent({ event_code: WeekEventCodes.SESSION_ON_RESTORE,
+                        data1: "Windows " + countWindows,
+                        data2: "Tabs " + countTabs, data3: "",
+                        timestamp: Date.now()});
+    }
   },
 
   onAppShutdown: function() {
@@ -421,9 +616,9 @@ exports.handlers = {
     // Attatch a convenience method to the data store object:
     store.rec = function(eventCode, data) {
       store.storeEvent({ event_code: eventCode,
-                         data1: data[0] || 0,
-                         data2: data[1] || 0,
-                         data3: data[2] || 0,
+                         data1: (data[0]) ? ("" + data[0]) : "",
+                         data2: (data[1]) ? ("" + data[1]) : "",
+                         data3: (data[2]) ? ("" + data[2]) : "",
                          timestamp: Date.now()});
     };
     this._dataStore = store;
@@ -432,6 +627,12 @@ exports.handlers = {
     // know whether any given data included a given bug-fix or not.
     store.rec(WeekEventCodes.STUDY_STATUS,
               [exports.experimentInfo.versionNumber]);
+    
+    this._recordPluginInfo();
+    //Record navigation history
+    this._recordNavHistory();
+    //Record oldest file in profile
+    this._recordProfileAge();
 
     console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();
@@ -443,6 +644,15 @@ exports.handlers = {
   },
 
   onExperimentShutdown: function() {
+    if(totalRestoringTabs > 0) {
+      //TODO: Check if it can be recorded before onExperimentShutdown
+      console.info("Recording total restored tabs (SSTabRestoring): "
+        + totalRestoringTabs);
+      this._dataStore.storeEvent({ event_code: WeekEventCodes.SESSION_RESTORE,
+        data1: "Windows" , data2: "Tabs " + totalRestoringTabs, data3: "",
+        timestamp: Date.now()});
+      totalRestoringTabs = 0;
+    }
     console.info("Week in the life: Shutting down subobservers.");
     this._stopAllObservers();
     // This check is to make sure nothing weird will happen if
@@ -470,6 +680,7 @@ exports.handlers = {
     IdlenessObserver.install(this._dataStore);
     ExtensionObserver.install(this._dataStore);
     DownloadsObserver.install(this._dataStore);
+    MemoryObserver.install(this._dataStore);
   },
 
   _stopAllObservers: function() {
@@ -477,6 +688,7 @@ exports.handlers = {
     IdlenessObserver.uninstall();
     ExtensionObserver.uninstall();
     DownloadsObserver.uninstall();
+    MemoryObserver.uninstall();
   },
 
   observe: function(subject, topic, data) {

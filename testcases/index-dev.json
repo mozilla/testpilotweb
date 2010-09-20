@@ -19,7 +19,7 @@
     {"name": "Search",
      "jarfile": "search/searchbar-study.jar",
      "studyfile": "searchbar-study.js",
-     "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
+     "hash": "1163ea75dc52601dd7605cac39c4bd226a6afc84c99e3789b2f42f333cba15bc"
     }
   },
 
@@ -43,7 +43,7 @@
     {"name": "About Firefox",
      "jarfile": "a-week-life/about_firefox.jar",
      "studyfile": "about_firefox.js",
-     "hash": "d282872b0081e918ec857f751d6c654bf544041a7dcf491c9da5f1e66c2a7795"
+     "hash": "ae1b18a23c890319a83c41698d3a34efb9682617a0eaa5a11edd5110137d31f7"
     }
   },
 

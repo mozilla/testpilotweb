@@ -161,6 +161,8 @@ CombinedWindowObserver.prototype.install = function() {
   for each (let popupId in ["toolbar-context-menu", "contentAreaContextMenu",
                            "tabContextMenu", "appmenu-popup",
                             "BMB_bookmarksPopup", "main-menubar"]) {
+    // TODO can we get user menu item selections from context menus this
+    // way? And why aren't we?  Listen for command event maybe?
     let popup = window.document.getElementById(popupId);
     if (popup) {
       let name = popupId;
@@ -178,6 +180,25 @@ CombinedWindowObserver.prototype.install = function() {
     // they just apparently don't get the messages we expect.
     // It also doesn't work if we register the listener on main-menubar!
   }
+
+  // Record clicks in tab bar right-click context menu:
+  let tabContext = window.document.getElementById("tabContextMenu");
+  this._listen(tabContext, "command", function(evt) {
+                     if (evt.target && evt.target.id) {
+                       record("tab context menu", evt.target.id, "click");
+                       if (evt.target.id == "context_pinTab" ||
+                           evt.target.id == "context_unpinTab") {
+                         /* When you pin or unpin an app tab, record
+                          * number of pinned tabs (number recorded is number
+                          * BEFORE the change)*/
+                         let numAppTabs = window.gBrowser._numPinnedTabs;
+                         exports.handlers.record(EVENT_CODES.CUSTOMIZE,
+                                                 "Tab Bar", "Num App Tabs",
+                                                 numAppTabs);
+                       }
+                     }
+                   }, true);
+
 
   // Monitor Time Spent Hunting In Menus:
   /*for (let item in CMD_ID_STRINGS_BY_MENU) {
@@ -518,6 +539,12 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   }
 
   // TODO Any change to toolbar buttons?
+
+  // Record number of app tabs:
+  this.record(EVENT_CODES.CUSTOMIZE, "Tab Bar", "Num App Tabs",
+                          frontWindow.gBrowser._numPinnedTabs);
+
+  // Still TODO: panorama tab groups, sync info
 };
 
 // Record app startup and shutdown events:
@@ -535,7 +562,7 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
                                                   interactionType) {
   if (!this.privateMode) {
     // Make sure columns are strings
-    if (!item) {
+    /*if (!item) {
       item = "";
     }
     if (!subItem) {
@@ -543,7 +570,7 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
     }
     if (!interactionType) {
       interactionType = "";
-    }
+    }*/
     if (typeof item != "string") {
       item = item.toString();
     }
@@ -560,7 +587,7 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
       interaction_type: interactionType,
       timestamp: Date.now()
     });
-    //dump("Recorded " + event + ", " + item + ", " + subItem + ", " + interactionType + "\n");
+    dump("Recorded " + event + ", " + item + ", " + subItem + ", " + interactionType + "\n");
     // storeEvent can also take a callback, which we're not using here.
   }
 };
@@ -585,18 +612,11 @@ CombinedStudyWebContent.prototype.__defineGetter__("dataCanvas",
       '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
       this.saveButtons + '</div>';
   });
-CombinedStudyWebContent.prototype.__defineGetter__("betaWarning",
-  function() {
-    return '<p>This study is intended for Firefox 4 Beta users.  If you are'
-           + ' not using <a onclick="openLink(\'http://www.mozilla.com/firefox/beta/\');">the Firefox 4 Beta</a>,'
-           + ' it may not function correctly. (' + this.optOutLink + ')</p>';
-  });
 CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
   function() {
     return '<h2>Thank you, Test Pilot!</h2>' +
       '<p>The ' + this.titleLink + ' study is currently in progress.</p>' +
     '<p>' + this.expInfo.summary + '</p>' +
-      this.betaWarning +
     '<p> The study will end in ' + this.expInfo.duration + ' days. ' +
     '<ul><li>You can save your test graph or export the raw data now, or after you \
     submit your data.</li>' + this.thinkThereIsAnError +

@@ -45,7 +45,8 @@ const WeekEventCodes = {
   SESSION_RESTORE: 21,
   PLUGIN_VERSION:22,
   HISTORY_STATUS: 23,
-  PROFILE_AGE: 24
+  PROFILE_AGE: 24,
+  SESSION_RESTORE_PREFERENCES: 25
 };
 
 var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown",
@@ -58,7 +59,8 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
                             "Private Mode On", "Private Mode Off", "Memory Usage",
                             "Total Windows/Tabs in about:sessionrestore",
                             "Actual Restored Windows/Tabs", "Plugin Version",
-                            "History Count", "Profile Age"];
+                            "History Count", "Profile Age",
+                            "Session Restore Preferences"];
 
 // subcodes for BOOKMARK_MODIFY:
 const BMK_MOD_CHANGED = 0;
@@ -555,6 +557,43 @@ exports.handlers = {
                         data1: "" + oldestCreationTime, data2: "", data3: "",
                         timestamp: Date.now()});
   },
+  
+  _recordSessionStorePrefs : function () {
+    let prefs = Cc["@mozilla.org/preferences-service;1"]
+      .getService(Ci.nsIPrefService);
+
+    let prefBranch = prefs.getBranch("browser.startup.");
+    let prefValue = prefBranch.getIntPref("page");
+    //browser.startup.page 0: blank page, 1: homepage, 3: previous session
+    this._dataStore.storeEvent({
+      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+      data1: "browser.startup.page", data2: "" + prefValue,
+      data3: "", timestamp: Date.now()});
+    console.info("browser.startup.page: " + prefValue);
+
+    prefBranch = prefs.getBranch("browser.sessionstore.");
+ 
+    prefValue = prefBranch.getBoolPref("resume_from_crash");
+    this._dataStore.storeEvent({
+      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+      data1: "browser.sessionstore.resume_from_crash", data2: "" + prefValue,
+      data3: "", timestamp: Date.now()});
+    console.info("browser.sessionstore.resume_from_crash: " + prefValue);
+
+    prefValue = prefBranch.getBoolPref("resume_session_once");
+    this._dataStore.storeEvent({
+      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+      data1: "browser.sessionstore.resume_session_once", data2: "" + prefValue,
+      data3: "", timestamp: Date.now()});
+    console.info("browser.sessionstore.resume_session_once: "+ prefValue);
+
+    prefValue = prefBranch.getIntPref("max_resumed_crashes");
+    this._dataStore.storeEvent({
+      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+      data1: "browser.sessionstore.max_resumed_crashes", data2: "" + prefValue,
+      data3: "", timestamp: Date.now()});
+    console.info("browser.sessionstore.max_resumed_crashes: "+ prefValue);
+  },
 
   // for handlers API:
   onNewWindow: function(window) {
@@ -573,7 +612,7 @@ exports.handlers = {
     //RESTORE SESSION information, number of tabs and windows restored
     let stateObject = null;
     let sessionData;
-     if (!this._sessionStartup) {
+    if (!this._sessionStartup) {
       this._sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"]
                     .getService(Ci.nsISessionStartup);
     }
@@ -633,6 +672,8 @@ exports.handlers = {
     this._recordNavHistory();
     //Record oldest file in profile
     this._recordProfileAge();
+    //Record session store main preferences
+    this._recordSessionStorePrefs();
 
     console.info("Week in the life: Starting subobservers.");
     this._startAllObservers();

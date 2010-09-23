@@ -53,7 +53,7 @@ exports.experimentInfo = {
   thumbnail: null,
   optInRequired: false,
   recursAutomatically: false,
-  recurrenceInterval: 0,
+recurrenceInterval: 0,
   versionNumber: 2,
   minTPVersion: "1.0rc1",
   minFXVersion: "4.0b1"
@@ -544,7 +544,29 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   this.record(EVENT_CODES.CUSTOMIZE, "Tab Bar", "Num App Tabs",
                           frontWindow.gBrowser._numPinnedTabs);
 
-  // Still TODO: panorama tab groups, sync info
+  // Sync info:
+  let syncName = prefs.get("services.sync.username", "");
+  this.record(EVENT_CODES.CUSTOMIZE, "Sync", "Configured?",
+              (syncName == "")?"False":"True");
+  let lastSync = prefs.get("services.sync.lastSync", 0);
+  this.record(EVENT_CODES.CUSTOMIZE, "Sync", "Last Sync Time", lastSync);
+
+  // Panorama info - how many groups do you have right now, and how many
+  // tabs in each group?
+  let gi = frontWindow.TabView._window.GroupItems;
+  this.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Groups:",
+              gi.groupItems.length);
+  for each (let g in gi.groupItems) {
+    this.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Tabs In Group:",
+              g._children.length);
+  }
+
+  // TODO: Instrument sync menu?
+
+  // TODO: Instrument panorama UI
+  // It seems to fire events when shown and hidden... a "tabviewhide"
+  // and "tabviewshow" events.  What would we need to listen on to catch
+  // them?
 };
 
 // Record app startup and shutdown events:
@@ -562,15 +584,6 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
                                                   interactionType) {
   if (!this.privateMode) {
     // Make sure columns are strings
-    /*if (!item) {
-      item = "";
-    }
-    if (!subItem) {
-      subItem = "";
-    }
-    if (!interactionType) {
-      interactionType = "";
-    }*/
     if (typeof item != "string") {
       item = item.toString();
     }

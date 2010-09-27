@@ -1,28 +1,23 @@
 BaseClasses = require("study_base_classes.js");
 
-/* This study must be implemented with enough flexibility that it doesn't
- * break when changes are made to the UI from one beta to the next.
- */
-
 const ORIGINAL_TEST_ID = 100;
 const MY_TEST_ID = 101; // We are on second run
-// Note that non-numeric ids will break experiment-page.js because it's doing
-// parseInt to get the eid.  So these must be numeric; sigh.
+/* Non-numeric IDs would be nicer but this is not supported in the extension
+ * yet. */
 
-/* Need a schema that can hold both menu and toolbar events.
- * String columns may be better than a gigantic brittle ever-growing table of
- * id codes.  But the trade-off is that the uploads will be larger.
- */
-
-
-/* Something like:
- * Top-level-item     =     Menu name, or meta-element like "url bar".
- * Sub-item           =     Menu item name, or like "right scroll button".
- * Interaction        =     Click, menu-pick, right-click, click-and-hold,
- *                          keyboard shortcut, etc.
- * Meta               =     Event vs. metadata vs. customization vs. hunt time
+/* Explanation of the schema:
+ * Schema is highly generic so that it can handle everything from toolbar
+ * customizations to mouse events to menu selections.
  *
- * Explore ms/explore num/start-menu-id  = 3 columns for one very specific case.
+ * Column name        Meaning
+ * Event        =     study metadata, customization, or action? (Int code)
+ * Item         =     Top-level element: "File menu", "Url bar", "tab bar",
+ *                    etc.  (String)
+ * Sub-item     =     Menu item name, or like "right scroll button", etc.
+ *                    (String)
+ * Interaction  =     Click, menu-pick, right-click, click-and-hold,
+ *                          keyboard shortcut, etc. (String)
+ * Timestamp    =     Milliseconds since epoch. (Long int)
  */
 
 const EVENT_CODES = {
@@ -36,8 +31,10 @@ var COMBINED_EXPERIMENT_COLUMNS =  [
   {property: "event", type: BaseClasses.TYPE_INT_32, displayName: "Event",
    displayValue: ["Study Metadata", "Action", "Menu Hunt", "Customization"]},
   {property: "item", type: BaseClasses.TYPE_STRING, displayName: "Element"},
-  {property: "sub_item", type: BaseClasses.TYPE_STRING, displayName: "Sub-Element"},
-  {property: "interaction_type", type: BaseClasses.TYPE_STRING, displayName: "Interaction"},
+  {property: "sub_item", type: BaseClasses.TYPE_STRING,
+   displayName: "Sub-Element"},
+  {property: "interaction_type", type: BaseClasses.TYPE_STRING,
+   displayName: "Interaction"},
   {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
    displayValue: function(value) {return new Date(value).toLocaleString();}}
 ];
@@ -53,7 +50,7 @@ exports.experimentInfo = {
   thumbnail: null,
   optInRequired: false,
   recursAutomatically: false,
-recurrenceInterval: 0,
+  recurrenceInterval: 0,
   versionNumber: 2,
   minTPVersion: "1.0rc1",
   minFXVersion: "4.0b1"
@@ -65,37 +62,52 @@ exports.dataStoreInfo = {
   columns: COMBINED_EXPERIMENT_COLUMNS
 };
 
+/* Window observer class - one is instantiated per window; most of what
+ * we observe in this study is per-window, so this class registers a LOT
+ * of listeners.
+ */
 function CombinedWindowObserver(window) {
   CombinedWindowObserver.baseConstructor.call(this, window);
 };
-BaseClasses.extend(CombinedWindowObserver, BaseClasses.GenericWindowObserver);
-CombinedWindowObserver.prototype.compareSearchTerms = function(searchTerm, searchEngine) {
-  if (searchTerm == this._lastSearchTerm) {c
+BaseClasses.extend(CombinedWindowObserver,
+                   BaseClasses.GenericWindowObserver);
+// Window observer class, helper functions:
+CombinedWindowObserver.prototype.compareSearchTerms = function(searchTerm,
+                                                               searchEngine) {
+  /* Are two successive searches done with the same search term?
+   * Are they with the same search engine or not?
+   * Don't record the search term or the search engine, just whether it's the
+   * same or not. */
+  if (searchTerm == this._lastSearchTerm) {
     if (searchEngine == this._lastSearchEngine) {
-      exports.handlers.record(EVENT_CODES.ACTION, "search bar", "", "same search same engine");
+      exports.handlers.record(EVENT_CODES.ACTION, "search bar", "",
+                              "same search same engine");
     } else {
-      exports.handlers.record(EVENT_CODES.ACTION, "search bar", "", "same search different engine");
+      exports.handlers.record(EVENT_CODES.ACTION, "search bar", "",
+                              "same search different engine");
     }
   }
   this._lastSearchTerm = searchTerm;
   this._lastSearchEngine = searchEngine;
 };
 CombinedWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
-  // How to tell when a URL looks more like a search?  First approximation:
-  // if there are spaces in it.  Second approximation: No periods.
+  /* Trying to tell whether user is inputting searches in the URL bar.
+   * Heuristic to tell whether a "url" is reall a search term:
+   * If there are spaces in it, and/or it has no periods in it.
+   */
   return ( (url.indexOf(" ") > -1) || (url.indexOf(".") == -1) );
 };
-
+// Window observer class, main listener registration
 CombinedWindowObserver.prototype.install = function() {
 
   console.info("Starting to install listeners for combined window observer.");
-  try {
   let record = function( item, subItem, interaction ) {
     exports.handlers.record(EVENT_CODES.ACTION, item, subItem, interaction);
   };
 
   // Register menu listeners:
   let window = this.window;
+
   this._lastMenuPopup = null;
   let mainCommandSet = window.document.getElementById("mainCommandSet");
   let mainMenuBar = window.document.getElementById("main-menubar");
@@ -222,7 +234,7 @@ CombinedWindowObserver.prototype.install = function() {
                    "identity-popup-more-info-button",
                    "back-forward-dropmarker", "security-button",
                    "downloads-button", "print-button", "bookmarks-button",
-                   "history-button", "new-window-button",
+                   "history-button", "new-window-button", "tabview-button",
                    "cut-button", "copy-button", "paste-button", "fullscreen-button"];
 
   for (let i = 0; i < buttonIds.length; i++) {
@@ -437,12 +449,25 @@ CombinedWindowObserver.prototype.install = function() {
                      } else {
                        switch (evt.originalTarget.getAttribute("anonid")) {
                        case "scrollbutton-up":
-                         record("tabbar", "left scroll button", "click");
+                         record("tabbar", "left scroll button", "mouseup");
                          break;
                        case "scrollbutton-down":
-                         record("tabbar", "right scroll button", "click");
+                         record("tabbar", "right scroll button", "mouseup");
                          break;
                        }
+                     }
+                   }
+                 }, false);
+    this._listen(tabBar, "mousedown", function(evt) {
+                   // Record mouse-up and mouse-down on tab scroll buttons separately
+                   // so that we can tell the difference between click vs click-and-hold
+                   if (evt.button == 0) {
+                     let anonid = evt.originalTarget.getAttribute("anonid");
+                     if (anonid == "scrollbutton-up") {
+                         record("tabbar", "left scroll button", "mouseup");
+                     }
+                     if (anonid == "scrollbutton-down") {
+                         record("tabbar", "right scroll button", "mouseup");
                      }
                    }
                  }, false);
@@ -478,12 +503,23 @@ CombinedWindowObserver.prototype.install = function() {
                  //editBookmarkPanelDoneButton
                }, false);
 
+    // Record Tab view / panorama being shown/hidden:
+    this._listen(window, "tabviewshow", function(evt) {
+                   dump("Tab view shown.\n");
+                 }, false);
+    // TODO show works but hide doesn't? what gives?
+    this._listen(window, "tabviewhide", function(evt) {
+                   dump("Tab view hidden.\n");
+                 }, false);
+
     console.trace("Registering listeners complete.\n");
-  } catch(e) {
-    console.warn("Error in registering listeners: " + e);
-  }
 };
 
+
+/* The global observer class, for things that we only want to observe once,
+ * rather than once-per-window.  That mostly means observing toolbar
+ * customizations and other customizations and prefs.
+ */
 function GlobalCombinedObserver()  {
   GlobalCombinedObserver.baseConstructor.call(this, CombinedWindowObserver);
 }
@@ -491,23 +527,26 @@ BaseClasses.extend(GlobalCombinedObserver, BaseClasses.GenericGlobalObserver);
 GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   GlobalCombinedObserver.superClass.onExperimentStartup.call(this, store);
 
+  // Record study version number.
   this.record(EVENT_CODES.METADATA, "exp startup", "study version",
               exports.experimentInfo.versionNumber);
 
-  // Longitudinal study:  If there are multiple runs of the study, copy the
-  // GUID from the ORIGINAL one into my GUID -- (it's all just prefs).
-  // Now we can associate the different uploads with each other and with
-  // the survey upload.  TODO: What if user misses the first round?  Survey
-  // will be lost and forlorn.  Can we fill it in retroactively or something?
-  // TODO: this works if each study is a new id; does it work if it's one
-  // recurring study? is it unneeded in that case?
+  /* The multiple Firefox Beta 4 Interface Studies are longitudial.
+   * The uploads need a shared GUID so we can match them up on the server.
+   * This is not supported by the extension yet so we do a hack right here.
+   * If there are multiple runs of the study, copy the
+   * GUID from the ORIGINAL run into my GUID -- (it's all just prefs).
+   * Now we can associate the different uploads with each other and with
+   * the survey upload.*/
   let prefs = require("preferences-service");
   let prefName = "extensions.testpilot.taskGUID." + ORIGINAL_TEST_ID;
   let originalStudyGuid = prefs.get(prefName, "");
-  prefName = "extensions.testpilot.taskGUID." + MY_TEST_ID;
-  prefs.set(prefName, originalStudyGuid);
+  if (originalStudyGuid != "") {
+    prefName = "extensions.testpilot.taskGUID." + MY_TEST_ID;
+    prefs.set(prefName, originalStudyGuid);
+  }
 
-  // Record customizations!
+  // Get the front browser window, use it to record customizations!
   let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
                         .getService(Ci.nsIWindowMediator);
   let frontWindow = wm.getMostRecentWindow("navigator:browser");
@@ -517,12 +556,12 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   let tabPosition = (toolbox.getAttribute("tabsontop") == "true")?"true":"false";
   this.record(EVENT_CODES.CUSTOMIZE, "tab bar", "tabs on top?", tabPosition);
 
-  // Is the main menu bar hidden?
+  // Is the main menu bar hidden? (for unified Firefox Menu Bar on Windows)
   let toolbarMenubar = frontWindow.document.getElementById("toolbar-menubar");
   let autohide = toolbarMenubar.getAttribute("autohide");
   this.record(EVENT_CODES.CUSTOMIZE, "menu bar", "hidden?", autohide);
 
-  // How many bookmarks in bookmark toolbar?
+  // How many bookmarks in bookmark toolbar?  Is bookmark toolbar shown?
   let bkmkToolbar = frontWindow.document.getElementById("personal-bookmarks");
   let bkmks = bkmkToolbar.getElementsByClassName("bookmark-item");
   this.record(EVENT_CODES.CUSTOMIZE, "bookmark bar", "num. bookmarks",
@@ -538,13 +577,14 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
     this.record(EVENT_CODES.CUSTOMIZE, "status bar", "hidden?", "false");
   }
 
-  // TODO Any change to toolbar buttons?
+  // TODO Any change to toolbar buttons?  (Copy code from toolbar study
+  // and see if user has added/removed/reoredered)
 
   // Record number of app tabs:
   this.record(EVENT_CODES.CUSTOMIZE, "Tab Bar", "Num App Tabs",
                           frontWindow.gBrowser._numPinnedTabs);
 
-  // Sync info:
+  // Is Sync set up?  What's the last time it synced?
   let syncName = prefs.get("services.sync.username", "");
   this.record(EVENT_CODES.CUSTOMIZE, "Sync", "Configured?",
               (syncName == "")?"False":"True");
@@ -552,7 +592,7 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   this.record(EVENT_CODES.CUSTOMIZE, "Sync", "Last Sync Time", lastSync);
 
   // Panorama info - how many groups do you have right now, and how many
-  // tabs in each group?
+  // tabs in each group?  TODO this should be per-window!!!
   let gi = frontWindow.TabView._window.GroupItems;
   this.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Groups:",
               gi.groupItems.length);
@@ -560,13 +600,6 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
     this.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Tabs In Group:",
               g._children.length);
   }
-
-  // TODO: Instrument sync menu?
-
-  // TODO: Instrument panorama UI
-  // It seems to fire events when shown and hidden... a "tabviewhide"
-  // and "tabviewshow" events.  What would we need to listen on to catch
-  // them?
 };
 
 // Record app startup and shutdown events:
@@ -580,10 +613,11 @@ GlobalCombinedObserver.prototype.onAppShutdown = function() {
   this.record(EVENT_CODES.METADATA, "app", "", "shutdown");
 };
 
+// Utility function for recording events:
 GlobalCombinedObserver.prototype.record = function(event, item, subItem,
                                                   interactionType) {
   if (!this.privateMode) {
-    // Make sure columns are strings
+    // Make sure string columns are strings
     if (typeof item != "string") {
       item = item.toString();
     }
@@ -600,14 +634,17 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
       interaction_type: interactionType,
       timestamp: Date.now()
     });
-    dump("Recorded " + event + ", " + item + ", " + subItem + ", " + interactionType + "\n");
+    /* This dump statement is for debugging and will be removed before
+     * the study is released. */
+    dump("Recorded " + event + ", " + item + ", " + subItem + ", "
+         + interactionType + "\n");
     // storeEvent can also take a callback, which we're not using here.
   }
 };
 
 exports.handlers = new GlobalCombinedObserver();
 
-
+// Web content
 function CombinedStudyWebContent()  {
   CombinedStudyWebContent.baseConstructor.call(this, exports.experimentInfo);
 }
@@ -637,7 +674,8 @@ CombinedStudyWebContent.prototype.__defineGetter__("inProgressHtml",
       this.optOutLink + '.</li></ul>' + this.dataCanvas;
   });
 
-
+/* Produce bar chart using flot lobrary; show 15 most frequently used items,
+ * sorted, in a bar chart. */
 CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {
@@ -653,7 +691,7 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
       if (row.event != EVENT_CODES.ACTION) {
         continue;
       }
-      // Skip the text selection events
+      // Skip the text selection events, they're not interesting
       if (row.item == "urlbar" && row.sub_item == "text selection") {
         continue;
       }
@@ -669,7 +707,6 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
         stats.push( {item: row.item, sub_item: row.sub_item, quantity: 1} );
       }
     }
-
 
     stats.sort(function(a, b) {
       return b.quantity - a.quantity;
@@ -699,6 +736,7 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
 };
 exports.webContent = new CombinedStudyWebContent();
 
+// Cleanup
 require("unload").when(
   function myDestructor() {
     console.info("Combined study destructor called.");

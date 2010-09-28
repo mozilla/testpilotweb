@@ -99,17 +99,16 @@ CombinedWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
 };
 // Window observer class, main listener registration
 CombinedWindowObserver.prototype.install = function() {
-
   console.info("Starting to install listeners for combined window observer.");
+  let window = this.window;
+
+  // Helper function for recording actions
   let record = function( item, subItem, interaction ) {
     exports.handlers.record(EVENT_CODES.ACTION, item, subItem, interaction);
   };
 
-  // Register menu listeners:
-  let window = this.window;
-
-  this._lastMenuPopup = null;
-  let mainCommandSet = window.document.getElementById("mainCommandSet");
+  /* Register menu listeners:
+   * 1. listen for mouse-driven command events on the main menu bar: */
   let mainMenuBar = window.document.getElementById("main-menubar");
   this._listen(mainMenuBar, "command", function(evt) {
     let menuItemId = "unknown";
@@ -132,6 +131,9 @@ CombinedWindowObserver.prototype.install = function() {
     },
     true);
 
+  /* 2. Listen for keyboard shortcuts and mouse command events on the
+   * main command set: */
+  let mainCommandSet = window.document.getElementById("mainCommandSet");
   this._listen(mainCommandSet, "command", function(evt) {
     let tag = evt.sourceEvent.target;
     if (tag.tagName == "menuitem") {
@@ -150,48 +152,8 @@ CombinedWindowObserver.prototype.install = function() {
       record("menus", tag.command?tag.command:tag.id, "key shortcut");
     }},
     true);
-
-    // TODO Mac "Firefox" menu items:
-    // for keys, register on keyset id="baseMenuKeyset"
-    // for mouse, register on menupopup id="menu_ToolsPopup"
-    // (Wait, what? That's the same as the tools menu?
-
-    /* All popups with ids:
-     * tabContextMenu, backForwardMenu, toolbar-context-menu,
-     * blockedPopupOptions, autohide-context, contentAreaContextMenu,
-     * spell-dictionaries-menu, placesContext, menu_FilePopup, menu_EditPopup,
-     * menu_viewPopup, viewSidebarMenu, goPopup, historyUndoPopup,
-     * historyUndoWindowPopup, bookmarksMenuPopup,
-     * subscribeToPageSubmenuMenupopup, bookmarksToolbarFolderPopup,
-     * menu_ToolsPopup, pilot-menu-popup, windowPopup, menu_HelpPopup,
-     * feed-menu, PlacesChevronPopup, BMB_bookmarksPopup,
-     * BMB_bookmarksToolbarFolderPopup, BMB_unsortedBookmarksFolderPopup,
-     * alltabs-popup
-     */
-
-  // Register menu popup listeners:
-  for each (let popupId in ["toolbar-context-menu", "contentAreaContextMenu",
-                           "tabContextMenu", "appmenu-popup",
-                            "BMB_bookmarksPopup", "main-menubar"]) {
-    // TODO can we get user menu item selections from context menus this
-    // way? And why aren't we?  Listen for command event maybe?
-    let popup = window.document.getElementById(popupId);
-    if (popup) {
-      let name = popupId;
-      this._listen(popup, "popuphidden", function(evt) {
-                     if (evt.target.id) {
-                       // Do something
-                     }}, true);
-      this._listen(popup, "popupshown", function(evt) {
-                     if (evt.target.id) {
-                       // Do something
-                     }}, true);
-    }
-    // this is working for goPopup, windowPopup, and context menus, but not for
-    // app, file, edit, view, bookmark, or help menus.  The elements are there,
-    // they just apparently don't get the messages we expect.
-    // It also doesn't work if we register the listener on main-menubar!
-  }
+  /* Intentionally omitted the code from the menu study that tracks
+   * number of menus hunted through and time spent hunting */
 
   // Record clicks in tab bar right-click context menu:
   let tabContext = window.document.getElementById("tabContextMenu");
@@ -210,48 +172,37 @@ CombinedWindowObserver.prototype.install = function() {
                        }
                      }
                    }, true);
+  // TODO: Other context menus?
 
-
-  // Monitor Time Spent Hunting In Menus:
-  /*for (let item in CMD_ID_STRINGS_BY_MENU) {
-    // Currently trying: just attach it to toplevel menupopups, not
-    // taskbar menus, context menus, or other
-    // weird things like that.
-
-    let popupId = CMD_ID_STRINGS_BY_MENU[item].popupId;
-    let popup = window.document.getElementById(popupId);
-    if (popup) {
-      this._listen(popup, "popuphidden", function(evt) {
-                     exports.handlers.onPopupHidden(evt); }, true);
-      this._listen(popup, "popupshown", function(evt) {
-                     exports.handlers.onPopupShown(evt); }, true);
-    }
-
-  }*/
-
-  let buttonIds = ["back-button", "forward-button", "reload-button", "stop-button",
-                   "home-button", "feed-button", "star-button",
+  // Register listeners on all the main toolbar buttons we care about:
+  let buttonIds = ["back-button", "forward-button", "reload-button",
+                   "stop-button", "home-button", "feed-button", "star-button",
                    "identity-popup-more-info-button",
                    "back-forward-dropmarker", "security-button",
                    "downloads-button", "print-button", "bookmarks-button",
                    "history-button", "new-window-button", "tabview-button",
-                   "cut-button", "copy-button", "paste-button", "fullscreen-button"];
-
+                   "cut-button", "copy-button", "paste-button",
+                   "fullscreen-button"];
   for (let i = 0; i < buttonIds.length; i++) {
     let id = buttonIds[i];
-    let elem = this.window.document.getElementById(id);
+    let elem = window.document.getElementById(id);
     if (!elem) {
+      // The element might not be there, if user customized it out
       console.info("Can't install listener: no element with id " + id);
       continue;
     }
     this._listen(elem, "mouseup",
                  function(evt) {
-                   // only count left button clicks and only on the element itself:
-                     // (evt.button = 2 for right-click)
+                   /* only count left button clicks and only on
+                    * the element itself: */
                    if (evt.target == elem && evt.button == 0) {
                      let tagName = evt.target.tagName;
-                     if (tagName == "toolbarspacer" || tagName == "toolbarspring"
-                        || tagName == "toolbarseparator" || tagName == "splitter" ||
+                     /* There are a lot of spacer elements in the toolbar
+                      * that we don't care about tracking individually: */
+                     if (tagName == "toolbarspacer" ||
+                         tagName == "toolbarspring" ||
+                         tagName == "toolbarseparator" ||
+                         tagName == "splitter" ||
                          tagName == "hbox") {
                        id = "spacer";
                      } else {
@@ -260,15 +211,16 @@ CombinedWindowObserver.prototype.install = function() {
                      record(id, "", "click");
                    }
                  }, false);
-    // Problem with just listening for "mouseup" is that it triggers even
-    // if you clicked a greyed-out button... we really want something more
-    // like "button clicked".  Try listening for "command"?
+    /* LONGTERM TODO:
+     * Problem with just listening for "mouseup" is that it triggers even
+     * if you clicked a greyed-out button... we really want something more
+     * like "button clicked".  Try listening for "command"? */
   }
 
-  // Listen on site ID button, see if page is SSL, or extended validation,
-  // or nothing.  (TODO this is getting double-counted because it triggers again
-  // if you click to close; should trigger on popupshown or something.)
-  let idBox = this.window.document.getElementById("identity-box");
+  /* Listen on site ID button, see if page is SSL, or extended validation,
+   * or nothing.  (TODO this is getting double-counted because it triggers
+   * again if you click to close; should trigger on popupshown or something.)*/
+  let idBox = window.document.getElementById("identity-box");
   this._listen(idBox, "mouseup", function(evt) {
                  let idBoxClass = idBox.getAttribute("class");
                  if (idBoxClass.indexOf("verifiedIdentity") > -1) {
@@ -280,38 +232,48 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
+  // Helper function for listening miscellaneous toolbar interactions
   let self = this;
   let register = function(elemId, event, item, subItem, interactionName) {
     if (!self.window.document.getElementById(elemId)) {
       console.info("Can't register " + elemId + ", no such element.");
       return;
     }
-    self._listen( self.window.document.getElementById(elemId), event, function() {
-                    record(item, subItem, interactionName);}, false);
+    self._listen( self.window.document.getElementById(elemId), event,
+                  function() {
+                    record(item, subItem, interactionName);
+                  }, false);
   };
 
+  // Observe item selection in the RSS feed drop down menu:
   register( "feed-menu", "command", "rss icon", "menu item", "mouse pick");
-    // There is no back-forward-dropmarker in Firefox 4 on Mac -- but
-    // there is on Windows
-  register( "back-forward-dropmarker", "command", "recent page dropdown", "menu item", "mouse pick");
-  register( "search-container", "popupshown", "search engine dropdown", "menu item", "click");
-  register( "search-container", "command", "search engine dropdown", "menu item", "menu pick");
 
-  // Back and forward button drop-down picks:
-  this._listen(this.window.document.getElementById("back-button"),
+  // Observe item selection in the search engine drop down menu:
+  register( "search-container", "popupshown", "search engine dropdown",
+            "menu item", "click");
+  register( "search-container", "command", "search engine dropdown",
+            "menu item", "menu pick");
+
+  /* Observe item selection in recent history menu - which you can get by
+   * clicking on the back button, forward button, and also (on Windows but
+   * not on Mac) the back-forward-dropmarker. */
+  register( "back-forward-dropmarker", "command", "recent page dropdown",
+            "menu item", "mouse pick");
+  this._listen(window.document.getElementById("back-button"),
                "mouseup", function(evt) {
                  if (evt.originalTarget.tagName == "menuitem") {
                    record("back-button", "dropdown menu", "mouse pick");
                  }
                }, false);
-  this._listen(this.window.document.getElementById("forward-button"),
+  this._listen(window.document.getElementById("forward-button"),
                "mouseup", function(evt) {
                  if (evt.originalTarget.tagName == "menuitem") {
                    record("forward-button", "dropdown menu", "mouse pick");
                  }
                }, false);
 
-  let bkmkToolbar = this.window.document.getElementById("personal-bookmarks");
+  // Observe clicks on bookmarks in the bookmarks toolbar
+  let bkmkToolbar = window.document.getElementById("personal-bookmarks");
   this._listen(bkmkToolbar, "mouseup", function(evt) {
                  if (evt.button == 0 && evt.target.tagName == "toolbarbutton") {
                    if (evt.target.id == "bookmarks-menu-button") {
@@ -321,7 +283,10 @@ CombinedWindowObserver.prototype.install = function() {
                    }
                  }}, false);
 
-  let firefoxButton = this.window.document.getElementById("appmenu-button");
+  // Observe clicks on the new unified Firefox menu button in the Windows beta
+  // TODO test that this still works with the latest modifications to the
+  // Firefox menu button!
+  let firefoxButton = window.document.getElementById("appmenu-button");
   this._listen(firefoxButton, "mouseup", function(evt) {
     let id = evt.target.id;
     if (id == "" && evt.target.parentNode.id == "appmenu_history_popup")
@@ -329,19 +294,23 @@ CombinedWindowObserver.prototype.install = function() {
     record("appmenu-button", id, "click");
   }, false);
 
-  let feedbackToolbar = this.window.document.getElementById("feedback-menu-button");
+  // Observe clicks on Feedback button
+  // TODO can we fold this into the generic button observer?
+  let feedbackToolbar = window.document.getElementById("feedback-menu-button");
   this._listen(feedbackToolbar, "mouseup", function(evt) {
     record("feedback-toolbar", evt.target.id, "click");
   }, false);
 
-  let bmkButton = this.window.document.getElementById("bookmarks-menu-button");
+  /* Record clicks on new bookmark menu button; record "personal bookmark"
+   * rather than the name of the item picked */
+  let bmkButton = window.document.getElementById("bookmarks-menu-button");
   this._listen(bmkButton, "mouseup", function(evt) {
     record("bookmarks-menu-button", evt.target.id || "personal bookmark", "click");
   }, false);
 
-    // Listen on search bar ues by mouse and keyboard, including repeated
-    // searches (same engine or different engine?)
-  let searchBar = this.window.document.getElementById("searchbar");
+  // Listen on search bar ues by mouse and keyboard, including repeated
+  // searches (same engine or different engine?)
+  let searchBar = window.document.getElementById("searchbar");
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
                    record("searchbar", "", "enter key");
@@ -357,8 +326,8 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-    // Listen on URL bar for enter key, go button, and select/edit events
-    let urlBar = this.window.document.getElementById("urlbar");
+  // Listen on URL bar:
+  let urlBar = window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
                    if (self.urlLooksMoreLikeSearch(evt.originalTarget.value)) {
@@ -369,7 +338,7 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-  let urlGoButton = this.window.document.getElementById("go-button");
+  let urlGoButton = window.document.getElementById("go-button");
   this._listen(urlGoButton, "mouseup", function(evt) {
                  if (self.urlLooksMoreLikeSearch(urlBar.value)) {
                    record("urlbar", "search term", "go button click");
@@ -378,40 +347,22 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-  this._listen(urlBar, "change", function(evt) {
-                 record("urlbar", "text selection", "change");
-               }, false);
-  this._listen(urlBar, "select", function(evt) {
-                 record("urlbar", "text selection", "select");
-               }, false);
-  // A single click (select all) followed by edit will look like:
-  // mouse down, mouse up, selected, changed.
-  //
-  // Click twice to insert and then edit looks like:
-  // mouse down mouse up select, mouse down mouse up change.
-  //
-  // Click drag and to select and then edit looks like:
-  // mouse down mouse move move move move move mouse up select changed.
+  /* Intentionally omitted: Code for observing individual mouseup/mousedown
+   * /change/select events in URL bar to distinguish click-and-insert,
+   * select-and-replace, or replace-all URL editing actions. */
 
-
-  // TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
-  // suggestion was hilighted when you hit enter?)
-    // Things that DONT work:  Popupshown on urlbar never called;
-    // #autocomplete-richlistbox doesn't exist;
-    // urlbar-container does not get mouseup or command when you click an item
-    // in the url bar drop down.
-    // command on urlbar only triggers when the history drop down opens.
+  // Observe when the most-frequently-used menu in the URL bar is opened
   this._listen(urlBar, "command", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
                    record("urlbar", "most frequently used menu", "open");
                  }
                }, false);
+  /* TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
+   * suggestion was hilighted when you hit enter?)  */
 
-      // tabbrowser id="content" contains XBL children anonid="scrollbutton-up"
-  // and "scrollbutton-down-stack" and anonid="newtab-button"
 
-    // Record Clicks on Scroll Buttons
-  let content = this.window.document.getElementById("content");
+  // Record Clicks on Scroll Buttons
+  let content = window.document.getElementById("content");
   this._listen(content, "mouseup", function(evt) {
                  if (evt.button == 0) {
                    let parent = evt.originalTarget.parentNode;
@@ -424,8 +375,8 @@ CombinedWindowObserver.prototype.install = function() {
                          // TODO can't distinguish slider from track...
                          record(widgetName, "slider", "drag");
                        } else if (part == "xul:scrollbarbutton") {
-                         let upOrDown = evt.originalTarget.getAttribute("type");
-                         if (upOrDown == "increment") { // vs. "decrement"
+                         let type = evt.originalTarget.getAttribute("type");
+                         if (type == "increment") { // vs. "decrement"
                            record(widgetName, "up scroll button", "click");
                          } else {
                            record(widgetName, "down scroll button", "click");
@@ -437,17 +388,18 @@ CombinedWindowObserver.prototype.install = function() {
                }, false);
 
     // Record tab bar interactions
-    let tabBar = this.window.document.getElementById("TabsToolbar");
+    let tabBar = window.document.getElementById("TabsToolbar");
     this._listen(tabBar, "mouseup", function(evt) {
                    if (evt.button == 0) {
-                     if (evt.originalTarget.id == "new-tab-button") {
+                     let targ = evt.originalTarget;
+                     if (targ.id == "new-tab-button") {
                        record("tabbar", "new tab button", "click");
-                     } else if (evt.originalTarget.className == "tabs-newtab-button") {
+                     } else if (targ.className == "tabs-newtab-button") {
                        record("tabbar", "new tab button", "click");
-                     } else if (evt.originalTarget.id == "alltabs-button") {
+                     } else if (targ.id == "alltabs-button") {
                        record("tabbar", "drop down menu", "click");
                      } else {
-                       switch (evt.originalTarget.getAttribute("anonid")) {
+                       switch (targ.getAttribute("anonid")) {
                        case "scrollbutton-up":
                          record("tabbar", "left scroll button", "mouseup");
                          break;
@@ -458,9 +410,9 @@ CombinedWindowObserver.prototype.install = function() {
                      }
                    }
                  }, false);
+  // Record mouse-up and mouse-down on tab scroll buttons separately
+  // so that we can tell the difference between click vs click-and-hold
     this._listen(tabBar, "mousedown", function(evt) {
-                   // Record mouse-up and mouse-down on tab scroll buttons separately
-                   // so that we can tell the difference between click vs click-and-hold
                    if (evt.button == 0) {
                      let anonid = evt.originalTarget.getAttribute("anonid");
                      if (anonid == "scrollbutton-up") {
@@ -471,43 +423,42 @@ CombinedWindowObserver.prototype.install = function() {
                      }
                    }
                  }, false);
+    // Record picking an item from the tab drop down menu
     this._listen(tabBar, "command", function(evt) {
                    if (evt.originalTarget.tagName == "menuitem") {
-                     // TODO this seems to get triggered when you edit something
-                     // in about:config and click OK or cancel -- weirdly enuf.
+                     /* TODO this seems to get triggered when you edit
+                      * something in about:config and click OK or cancel
+                      * -- weird. */
                      record("tabbar", "drop down menu", "menu pick");
                    }
                }, false);
-  /* Note we also get command events when you hit the tab scroll bars and
+  /* LONGTERM TODO:
+   * Note we also get command events when you hit the tab scroll bars and
    * they actually scroll (the tagName will be "xul:toolbarbutton") -- as
    * opposed to moseup which triggers even if there's nowhere to scroll, this
    * might be a more precise way to get that event.  In fact look at using
    * more command events on all the toolbar buttons...*/
 
-
-  let bkmkPanel = this.window.document.getElementById("editBookmarkPanel");
+  // Record opening of bookmark panel
+  let bkmkPanel = window.document.getElementById("editBookmarkPanel");
   this._listen(bkmkPanel, "popupshown", function(evt) {
                  record( "star-button", "edit bookmark panel", "panel open");
                }, false);
 
+  // Record clicks on "remove bookmark" button in bookmark panel:
   this._listen(bkmkPanel, "command", function(evt) {
                  switch (evt.originalTarget.getAttribute("id")) {
                  case "editBookmarkPanelRemoveButton":
                    record( "star-button", "remove bookmark button", "click");
                    break;
                  }
-                 // Other buttons we can get here:
-                 //editBMPanel_foldersExpander
-                 //editBMPanel_tagsSelectorExpander
-                 //editBookmarkPanelDeleteButton
-                 //editBookmarkPanelDoneButton
                }, false);
 
     // Record Tab view / panorama being shown/hidden:
     this._listen(window, "tabviewshow", function(evt) {
                    dump("Tab view shown.\n");
                  }, false);
-    // TODO show works but hide doesn't? what gives?
+    // TODO bug here -- show works but hide doesn't?
     this._listen(window, "tabviewhide", function(evt) {
                    dump("Tab view hidden.\n");
                  }, false);

@@ -18,6 +18,7 @@ Thank you for your time!</p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   minTPVersion: "1.0a1",
   versionNumber: 1,
+  uploadWithExperiment: 101,
   surveyQuestions:  [
    { question: "Have you used the new Firefox feature, Panorama (formerly known as Tab Candy)?",
      type: MULTIPLE_CHOICE,

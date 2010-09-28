@@ -3,7 +3,7 @@
   {"default":
     {"name": "Dependencies",
      "jarfile": "base_classes.jar",
-     "hash": "7b92a534ed81bbf2530e632213ec546cb8bfc5ef25baf44c25f6a34927068a47"
+     "hash": "214bf47ac032d95e9266779f572ad1343522f33ec553b1a606989cef6fe6aaec"
     }
   },
 
@@ -51,7 +51,7 @@
     {"name": "Firefox 4 Beta Interface 2",
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
-     "hash": "1d9d0a4b19c9a75a1ec21bfe7830d9b36e72708f6e07f50d4b47285173f0f722"
+     "hash": "7c4963209d40ec27491062bebbfbedb261391aab32023a6ecdb3ae56405dc827"
     }
   },
 

@@ -454,16 +454,38 @@ CombinedWindowObserver.prototype.install = function() {
                  }
                }, false);
 
-    // Record Tab view / panorama being shown/hidden:
-    this._listen(window, "tabviewshow", function(evt) {
-                   dump("Tab view shown.\n");
-                 }, false);
-    // TODO bug here -- show works but hide doesn't?
-    this._listen(window, "tabviewhide", function(evt) {
-                   dump("Tab view hidden.\n");
-                 }, false);
+  // Record Tab view / panorama being shown/hidden:
+  this._listen(window, "tabviewshow", function(evt) {
+                 dump("Tab view shown.\n");
+               }, false);
+  // TODO bug here -- show works but hide doesn't?
+  this._listen(window, "tabviewhide", function(evt) {
+                 dump("Tab view hidden.\n");
+               }, false);
 
-    console.trace("Registering listeners complete.\n");
+  // Record per-window customizations (tab-related):
+  record("window", "", "new window opened");
+  // Record number of app tabs:
+  exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Tab Bar", "Num App Tabs",
+                          window.gBrowser._numPinnedTabs);
+
+  // Panorama info - how many groups do you have right now, and how many
+  // tabs in each group?
+  if (window.TabView._window) {
+    let gi = window.TabView._window.GroupItems;
+    exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Groups:",
+                gi.groupItems.length);
+    for each (let g in gi.groupItems) {
+      exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Panorama",
+                              "Num Tabs In Group:", g._children.length);
+    }
+  }
+
+  console.trace("Registering listeners complete.\n");
+};
+CombinedWindowObserver.prototype.uninstall = function() {
+  CombinedWindowObserver.superClass.uninstall.call(this);
+  exports.handlers.record(EVENT_CODES.ACTION, "window", "", "window closed");
 };
 
 
@@ -531,9 +553,6 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
   // TODO Any change to toolbar buttons?  (Copy code from toolbar study
   // and see if user has added/removed/reoredered)
 
-  // Record number of app tabs:
-  this.record(EVENT_CODES.CUSTOMIZE, "Tab Bar", "Num App Tabs",
-                          frontWindow.gBrowser._numPinnedTabs);
 
   // Is Sync set up?  What's the last time it synced?
   let syncName = prefs.get("services.sync.username", "");
@@ -541,16 +560,6 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
               (syncName == "")?"False":"True");
   let lastSync = prefs.get("services.sync.lastSync", 0);
   this.record(EVENT_CODES.CUSTOMIZE, "Sync", "Last Sync Time", lastSync);
-
-  // Panorama info - how many groups do you have right now, and how many
-  // tabs in each group?  TODO this should be per-window!!!
-  let gi = frontWindow.TabView._window.GroupItems;
-  this.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Groups:",
-              gi.groupItems.length);
-  for each (let g in gi.groupItems) {
-    this.record(EVENT_CODES.CUSTOMIZE, "Panorama", "Num Tabs In Group:",
-              g._children.length);
-  }
 };
 
 // Record app startup and shutdown events:

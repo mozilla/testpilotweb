@@ -308,19 +308,22 @@ exports.GenericWindowObserver.prototype = {
                                                   eventName,
                                                   method,
                                                   catchCap) {
+    if (!container) {
+      console.warn("Can't attach listener: container is null.");
+      return;
+    }
     try {
+      // Keep a record of this so that we can automatically unregister during
+      // uninstall:
+      let self = this;
+      let handler = function(event) {
+        method.call(self, event);
+      };
+      container.addEventListener(eventName, handler, catchCap);
 
-    // Keep a record of this so that we can automatically unregister during
-    // uninstall:
-    let self = this;
-    let handler = function(event) {
-      method.call(self, event);
-    };
-    container.addEventListener(eventName, handler, catchCap);
-
-    this._registeredListeners.push(
-      {container: container, eventName: eventName, handler: handler,
-       catchCap: catchCap});
+      this._registeredListeners.push(
+        {container: container, eventName: eventName, handler: handler,
+         catchCap: catchCap});
 
     }
     catch(ex) {

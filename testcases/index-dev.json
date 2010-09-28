@@ -53,6 +53,14 @@
      "studyfile": "combined.js",
      "hash": "017fffb614685c8cc8e4b1be2e8fe26b1f07b90458eff689ad3b81f9153af0ed"
     }
+  },
+
+  {"default":
+    {"name": "Beta UI Survey 2",
+    "jarfile": "beta/beta-ui2-survey.jar",
+    "studyfile": "beta-ui2-survey.js",
+    "hash": "10b5a78ad5fb7b5dcfa1ee4cc1472afc5ee6c283372abc9a59646f305e278858"
+    }
   }
 ],
 

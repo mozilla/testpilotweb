@@ -92,7 +92,7 @@ CombinedWindowObserver.prototype.compareSearchTerms = function(searchTerm,
 };
 CombinedWindowObserver.prototype.urlLooksMoreLikeSearch = function(url) {
   /* Trying to tell whether user is inputting searches in the URL bar.
-   * Heuristic to tell whether a "url" is reall a search term:
+   * Heuristic to tell whether a "url" is really a search term:
    * If there are spaces in it, and/or it has no periods in it.
    */
   return ( (url.indexOf(" ") > -1) || (url.indexOf(".") == -1) );
@@ -506,7 +506,7 @@ CombinedWindowObserver.prototype.install = function() {
                }, false);
 
   // Record per-window customizations (tab-related):
-  record("window", "", "new window opened");
+  record("window", exports.handlers.getNumWindows(), "new window opened");
   // Record number of app tabs:
   exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Tab Bar", "Num App Tabs",
                           window.gBrowser._numPinnedTabs);
@@ -519,7 +519,9 @@ CombinedWindowObserver.prototype.install = function() {
 };
 CombinedWindowObserver.prototype.uninstall = function() {
   CombinedWindowObserver.superClass.uninstall.call(this);
-  exports.handlers.record(EVENT_CODES.ACTION, "window", "", "window closed");
+  exports.handlers.record(EVENT_CODES.ACTION, "window",
+                          exports.handlers.getNumWindows(),
+                          "window closed");
 };
 
 
@@ -594,6 +596,10 @@ GlobalCombinedObserver.prototype.onExperimentStartup = function(store) {
               (syncName == "")?"False":"True");
   let lastSync = prefs.get("services.sync.lastSync", 0);
   this.record(EVENT_CODES.CUSTOMIZE, "Sync", "Last Sync Time", lastSync);
+};
+
+GlobalCombinedObserver.prototype.getNumWindows = function() {
+  return this._windowObservers.length;
 };
 
 // Record app startup and shutdown events:

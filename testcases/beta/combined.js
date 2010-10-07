@@ -108,9 +108,11 @@ CombinedWindowObserver.prototype.recordPanoramaState = function() {
       exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Panorama",
                               "Num Tabs In Group:", g._children.length);
     }
+    // some tabs not affiliated with any group (called "orphans")
+    let numOrphans = gi.getOrphanedTabs().length;
+    exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Panorama",
+                            "Num Orphaned Tabs", numOrphans);
   }
-  // TODO this doesn't catch tabs which are not affiliated with any group.
-  // Is there a way to do that?
 };
 
 // Window observer class, main listener registration
@@ -493,11 +495,11 @@ CombinedWindowObserver.prototype.install = function() {
   // Record Tab view / panorama being shown/hidden:
   // Try tabviewshown and tabviewhidden
   this._listen(window, "tabviewshown", function(evt) {
-                 dump("Tab view shown.\n");
+                 record("Panorama", "Tab View Interface", "Opened");
                }, false);
   let deck = window.document.getElementById("tab-view-deck");
   this._listen(deck, "tabviewhidden", function(evt) {
-                 dump("Tab view hidden.\n");
+                 record("Panorama", "Tab View Interface", "Closed");
                  // User has just finished interacting with Panorama,
                  // so record new number of tabs per group
                  self.recordPanoramaState();

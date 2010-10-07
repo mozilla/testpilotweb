@@ -300,13 +300,33 @@ CombinedWindowObserver.prototype.install = function() {
                  }}, false);
 
   // Observe clicks on the new unified Firefox menu button in the Windows beta
-  // TODO test that this still works with the latest modifications to the
-  // Firefox menu button!
   let firefoxButton = window.document.getElementById("appmenu-button");
   this._listen(firefoxButton, "mouseup", function(evt) {
     let id = evt.target.id;
-    if (id == "" && evt.target.parentNode.id == "appmenu_history_popup")
-      id = "personal history";
+    if (!id) {
+	switch( evt.target.parentNode.id) {
+	case "appmenu_bookmarksMenupopup":
+	    id = "User boomark item";
+	    break;
+	case "appmenu_historyMenupopup":
+	    id = "User history item";
+	    break;
+	case "appmenu_recentlyClosedTabsMenupopup":
+	    id = "Recently closed tab item";
+	    break;
+	case "appmenu_recentlyClosedWindowsMenupopup":
+	    id = "Recently closed window item";
+	    break;
+	case "appmenu_developer_popup":
+	    id = evt.target.label;
+	    break;
+	case "appmenu_customizeMenu":
+	    id = evt.target.label;
+	    break;
+	default:
+	    dump("Unrecognized parent: " + evt.target.parentNode.id + "\n");
+	}
+    }
     record("appmenu-button", id, "click");
   }, false);
 

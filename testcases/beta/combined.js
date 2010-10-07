@@ -44,7 +44,7 @@ exports.experimentInfo = {
   duration: 7, // Days
   testName: "Firefox 4 Beta Interface (part 2)",
   testId: MY_TEST_ID,
-  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/betaui.html",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/betaui2",
   summary: "We are studying how the changes to the toolbar and menu bar in the"
            + " Firefox 4 beta affect usage of the interface.",
   thumbnail: null,

@@ -112,6 +112,12 @@ CombinedWindowObserver.prototype.recordPanoramaState = function() {
     let numOrphans = gi.getOrphanedTabs().length;
     exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Panorama",
                             "Num Orphaned Tabs", numOrphans);
+  } else {
+    // If TabView is uninitialized, just record total # of tabs
+    // in the window instead.
+    let tabCount = this.window.getBrowser().tabContainer.itemCount;
+    exports.handlers.record(EVENT_CODES.CUSTOMIZE, "Window",
+                            "Total Number of Tabs", tabCount);
   }
 };
 

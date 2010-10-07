@@ -6,7 +6,7 @@ const CHECK_BOXES = 4;
 
 exports.surveyInfo = {
   surveyId: "Beta_feature_Survey",
-  surveyName: "How do you like these new features in Firefox 4 beta?",
+  surveyName: "New Features of the Firefox 4 Beta",
   summary: "This survey will help us build a better understanding of "
     + "how these new features are used and adopted. This survey doesn't "
     + "contain any personally identifiable questions.",

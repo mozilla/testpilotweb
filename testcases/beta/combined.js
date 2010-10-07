@@ -305,29 +305,44 @@ CombinedWindowObserver.prototype.install = function() {
   let firefoxButton = window.document.getElementById("appmenu-button");
   this._listen(firefoxButton, "mouseup", function(evt) {
     let id = evt.target.id;
+    /* If the target event (i.e. the menu item) has an ID, then easy; just
+     * record that.  The tricky part is all the elements with no ID... */
     if (!id) {
-	switch( evt.target.parentNode.id) {
-	case "appmenu_bookmarksMenupopup":
-	    id = "User boomark item";
-	    break;
-	case "appmenu_historyMenupopup":
-	    id = "User history item";
-	    break;
-	case "appmenu_recentlyClosedTabsMenupopup":
-	    id = "Recently closed tab item";
-	    break;
-	case "appmenu_recentlyClosedWindowsMenupopup":
-	    id = "Recently closed window item";
-	    break;
-	case "appmenu_developer_popup":
-	    id = evt.target.label;
-	    break;
-	case "appmenu_customizeMenu":
-	    id = evt.target.label;
-	    break;
-	default:
-	    dump("Unrecognized parent: " + evt.target.parentNode.id + "\n");
-	}
+      /* figure out which menu we're a child of, then decide
+       * what to record in place of the missing id.
+       * Recurse upwards (we might be in a sub-sub-sub-folder)
+       * until we hit something recognizable. */
+      let parent = evt.target.parentNode;
+      while (!parent.id) {
+          parent = parent.parentNode;
+          if (!parent) {
+            record("appmenu-button", "unrecognized", "null");
+            return;
+          }
+      }
+      switch( parent.id) {
+      case "appmenu_bookmarksMenupopup":
+          id = "User boomark item";
+          break;
+      case "appmenu_historyMenupopup":
+          id = "User history item";
+          break;
+      case "appmenu_recentlyClosedTabsMenupopup":
+          id = "Recently closed tab item";
+          break;
+      case "appmenu_recentlyClosedWindowsMenupopup":
+          id = "Recently closed window item";
+          break;
+      case "appmenu_developer_popup":
+          id = evt.target.label;
+          break;
+      case "appmenu_customizeMenu":
+          id = evt.target.label;
+          break;
+      default:
+          record("appmenu-button", "unrecognized", parent.id);
+          return;
+      }
     }
     record("appmenu-button", id, "click");
   }, false);

@@ -655,10 +655,6 @@ GlobalCombinedObserver.prototype.record = function(event, item, subItem,
       interaction_type: interactionType,
       timestamp: Date.now()
     });
-    /* This dump statement is for debugging and will be removed before
-     * the study is released. */
-    dump("Recorded " + event + ", " + item + ", " + subItem + ", "
-         + interactionType + "\n");
     // storeEvent can also take a callback, which we're not using here.
   }
 };
@@ -716,6 +712,11 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
       if (row.item == "urlbar" && row.sub_item == "text selection") {
         continue;
       }
+      // for window open/close we care about the interaction type more
+      // than the sub item.
+      if (row.item == "window") {
+        row.sub_item = row.interaction_type;
+      }
       let match = false;
       for (x in stats) {
         if (stats[x].item == row.item && stats[x].sub_item == row.sub_item) {
@@ -739,7 +740,7 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
     for (let i = 0; i < numItems; i++) {
       let item = stats[i];
       d1.push([item.quantity, i - 0.5]);
-      let labelText = (item.item + ": " + item.sub_item).toLowerCase();
+      let labelText = (item.item + ": <br/>" + item.sub_item).toLowerCase();
       yAxisLabels.push([i, labelText]);
     }
     try {

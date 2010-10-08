@@ -21,6 +21,18 @@
    "jarfile": "search/searchbar-study.jar",
    "studyfile": "searchbar-study.js",
    "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
+  },
+
+  {"name": "Firefox 4 Beta Interface 2",
+   "jarfile": "beta/combined.jar",
+   "studyfile": "combined.js",
+   "hash": "d534b22b220bf473463d0874f3f57a0d471db95a9b0d5cd40ffff2cd5b309d14"
+  },
+
+  {"name": "Beta UI Survey 2",
+   "jarfile": "beta/beta-ui2-survey.jar",
+   "studyfile": "beta-ui2-survey.js",
+   "hash": "bb8adc3806a567e1f195aa83b1dbe1e0d9d22916565871fd797c8e0e224e73a9"
   }
 ],
 
@@ -52,7 +64,7 @@
     {"name": "Firefox 4 Beta Interface 2",
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
-     "hash": "fef23c83a3861eac0283282936eb1567c0b4e8cd7824c15d688277f8c90084ae"
+     "hash": "d534b22b220bf473463d0874f3f57a0d471db95a9b0d5cd40ffff2cd5b309d14"
     }
   },
 

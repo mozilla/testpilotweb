@@ -1,6 +1,6 @@
 /* Basic panel experiment */
 BaseClasses = require("study_base_classes.js");
-
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 exports.experimentInfo = {
   startDate: null,
@@ -17,7 +17,9 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
-  versionNumber: 5
+  versionNumber: 5,
+  minTPVersion: "1.0rc1",
+  minFXVersion: "4.0b1"
 };
 
 const WeekEventCodes = {
@@ -66,6 +68,13 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
 const BMK_MOD_CHANGED = 0;
 const BMK_MOD_REMOVED = 1;
 const BMK_MOD_MOVED = 2;
+
+// subcodes for bookmark type:
+const BMK_TYPE_BOOKMARK = "0";
+const BMK_TYPE_FOLDER = "1";
+
+const UNINSTALL_DONE = "0";
+const UNINSTALL_CANCELLED = "1";
 
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_results.sqlite",
@@ -154,8 +163,8 @@ var BookmarkObserver = {
     console.info("Results: There are " + totalBookmarks + " bookmarks.");
     console.info("In " + totalFolders + " folders.");
     console.info("Greatest folder depth is " + greatestDepth);
-    this.store.rec(WeekEventCodes.BOOKMARK_STATUS,
-                   [totalBookmarks, totalFolders, greatestDepth]);
+    this.store.rec(WeekEventCodes.BOOKMARK_STATUS, totalBookmarks, totalFolders,
+                   greatestDepth);
   },
 
   uninstall: function() {
@@ -170,15 +179,23 @@ var BookmarkObserver = {
     if (!this.lmsvc.isLivemark(folderId)) {
       // Ignore livemarks -these are constantly added automatically
       // and we don't really care about them.
-      console.info("Bookmark added.");
-      this.store.rec(WeekEventCodes.BOOKMARK_CREATE, []);
+      switch (type) {
+        case this.bmsvc.TYPE_BOOKMARK:
+          console.info("Bookmark added.");
+          this.store.rec(WeekEventCodes.BOOKMARK_CREATE, BMK_TYPE_BOOKMARK, "", "");
+        break;
+        case this.bmsvc.TYPE_FOLDER:
+          console.info("Bookmark Folder added.");
+          this.store.rec(WeekEventCodes.BOOKMARK_CREATE, BMK_TYPE_FOLDER, "" , "");
+        break;
+      }
     }
   },
 
   onItemRemoved: function(itemId, parentId, index, type) {
     let folderId = this.bmsvc.getFolderIdForItem(itemId);
     if (!this.lmsvc.isLivemark(folderId)) {
-      this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_REMOVED]);
+      this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, BMK_MOD_REMOVED, "", "");
       console.info("Bookmark removed!");
     }
   },
@@ -196,13 +213,13 @@ var BookmarkObserver = {
 
   onItemVisited: function(bookmarkId, visitId, time) {
     // This works.
-    this.store.rec(WeekEventCodes.BOOKMARK_CHOOSE, []);
+    this.store.rec(WeekEventCodes.BOOKMARK_CHOOSE, "", "", "");
     console.info("Bookmark visited!");
   },
 
   onItemMoved: function(itemId, oldParentId, oldIndex, newParentId,
                         newIndex, type) {
-    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_MOVED]);
+    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, BMK_MOD_MOVED, "", "");
     console.info("Bookmark moved!");
   }
 };
@@ -266,7 +283,7 @@ var IdlenessObserver = {
         self.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
                                 data1: "1", data2: "0", data3: "0",
                                 timestamp: estimatedStop});
-        self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [1]);
+        self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, "1", "", "");
       }
       self.lastSelfPing = now;
     }, this.selfPingInterval, 1);
@@ -286,8 +303,8 @@ var IdlenessObserver = {
       }
     }
     if (topic == 'back') {
-      console.info("User is back!  Was idle for " + data + " milliseconds.");
-      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, [2]);
+      console.info("User is back! Was idle for " + data + " milliseconds.");
+      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, "2", "", "");
       this.lastSelfPing = Date.now();
       this.pingSelf();
     }
@@ -297,65 +314,83 @@ var IdlenessObserver = {
 var ExtensionObserver = {
   alreadyInstalled: false,
   store: null,
-  obsService: null,
 
   install: function(store) {
     if (!this.alreadyInstalled) {
-      console.info("Adding extension observer.");
-      this.obsService = Cc["@mozilla.org/observer-service;1"]
-                           .getService(Ci.nsIObserverService);
-      this.obsService.addObserver(this, "em-action-requested", false);
       this.store = store;
+      let self = this;
+      AddonManager.addInstallListener(self.instalListener);
+      AddonManager.addAddonListener(self.addonListener);
       this.alreadyInstalled = true;
+    }
+  },
+
+  instalListener : {
+    onInstallEnded : function (aInstall, aAddon) {
+      console.info("onInstallEnded!");
+      if ("extension" == aAddon.type){
+        ExtensionObserver.store.rec(WeekEventCodes.ADDON_INSTALL, "", "", "");
+        console.info("An extension was installed!");
+      }
+    }
+  },
+
+  addonListener : {
+    onUninstalling: function(aAddon) {
+      if ("extension" == aAddon.type){
+        ExtensionObserver.store.rec(WeekEventCodes.ADDON_UNINSTALL,
+                                  UNINSTALL_DONE, "addon name: " + aAddon.name,
+                                  "addon id: " + aAddon.id);
+        console.info(aAddon.name +
+                     " will be uninstalled after the application restarts.!");
+      }
+    },
+
+    onOperationCancelled: function(aAddon) {
+      //PENDING_NONE: 0
+      if ("extension" == aAddon.type && 0 == aAddon.pendingOperations) {
+          ExtensionObserver.store.rec(WeekEventCodes.ADDON_UNINSTALL,
+                              UNINSTALL_CANCELLED, "addon name: " + aAddon.name,
+                                  "addon id: " + aAddon.id);
+        console.info(aAddon.name +
+                   " will NOT be uninstalled after the application restarts.!");
+      }
     }
   },
 
   uninstall: function() {
     if (this.alreadyInstalled) {
-      this.obsService.removeObserver(this, "em-action-requested");
+      let self = this;
+      AddonManager.removeAddonListener(self.addonListener);
+      AddonManager.removeInstallListener(self.instalListener);
+      console.info("Removing Addon Listeners sucessfully");
       this.alreadyInstalled = false;
     }
   },
 
-  observe: function(subject, topic, data) {
-    // TODO I seem to get two disable notifications, no enable notification.. weird.
-    // I also get doubled-up uninstall notification.
-    if (data == "item-installed") {
-      this.store.rec(WeekEventCodes.ADDON_INSTALL, []);
-      console.info("An extension was installed!");
-    } else if (data == "item-upgraded") {
-      console.info("An extension was upgraded!");
-    } else if (data == "item-uninstalled") {
-      this.store.rec(WeekEventCodes.ADDON_UNINSTALL, []);
-      console.info("An extension was uninstalled!");
-    } else if (data == "item-enabled") {
-      // TODO record something here?
-      console.info("An extension was enabled!");
-    } else if (data == "item-disabled") {
-      // TODO record something here?
-      console.info("An extension was disabled!");
-    }
-  },
-
   runGlobalAddonsQuery: function () {
-    // TODO record number of active and inactive extensions.
-/*
-    let extManager = Cc["@mozilla.org/extensions/manager;1"]
-                       .getService(Ci.nsIExtensionManager);
-    let nsIUpdateItem = Ci.nsIUpdateItem;
-    let numberActive;
-    let numberInactive;
-    let items = extManager.getItemList(nsIUpdateItem.TYPE_EXTENSION,{});
-    // Note we can also pass in TYPE_THEME, TYPE_LOCALE, or TYPE_ADDON here
-    // besides TYPE_EXTENSION.
-    for (var i = 0; i < items.length; ++i) {
-      // TODO how to detect that addon is disabled???
-    }
-    numberActive = items.length;
-    numberInactive = 0;
-    console.info("Recording extensions: " + numberActive);
-    this.store.rec(WeekEventCodes.ADDON_STATUS, [numberActive, numberInactive]);
-*/
+    //Reference: https://developer.mozilla.org/en/Addons/Add-on_Manager
+    AddonManager.getAllAddons(function(aAddons) {
+      let numberActive = 0;
+      let numberInactive = 0;
+      aAddons.forEach(function(aAddon) {
+        //TODO: Should be recorded isCompatible
+        //type: "extension" "plugin" "theme"
+        if ("extension" == aAddon.type){
+          if (true == aAddon.userDisabled) {
+            console.info ("true == aAddon.userDisabled");
+            numberInactive += 1;
+          } else {
+            console.info ("else true == aAddon.userDisabled");
+            numberActive += 1;
+          }
+        }
+      });
+      console.info ("Recording extensions active: " + numberActive +
+                    " inactive: " + numberInactive);
+      ExtensionObserver.store.rec(WeekEventCodes.ADDON_STATUS, numberActive,
+                                  numberInactive, "");
+    });
   }
 };
 
@@ -390,7 +425,7 @@ var DownloadsObserver = {
   observe: function (subject, topic, state) {
     if (topic == "dl-done") {
       console.info("A download completed.");
-      this.store.rec(WeekEventCodes.DOWNLOAD, []);
+      this.store.rec(WeekEventCodes.DOWNLOAD, "", "", "");
     }
   }
 
@@ -414,17 +449,17 @@ var MemoryObserver = {
   memoryManager: null,
   memoryInfoTimer: null,
   timerInterval: 600000, // Ten minutes
-  
+
    install: function(store) {
     if (!this.alreadyInstalled) {
       console.info("Adding memory observer.");
- 
+
       this.memoryManager = Cc["@mozilla.org/memory-reporter-manager;1"]
         .getService(Components.interfaces.nsIMemoryReporterManager);
 
       this.memoryInfoTimer = Components.classes["@mozilla.org/timer;1"]
         .createInstance(Components.interfaces.nsITimer);
-        
+
       this.store = store;
       //Get Memory info on startup
       this.getMemoryInfo();
@@ -434,7 +469,7 @@ var MemoryObserver = {
       this.alreadyInstalled = true;
     }
   },
- 
+
   uninstall: function() {
     if (this.alreadyInstalled) {
       this.alreadyInstalled = false;
@@ -453,7 +488,7 @@ var MemoryObserver = {
       this.store.storeEvent({ event_code: WeekEventCodes.MEMORY_USAGE,
                         data1: "" + mr.path, data2: "" + mr.memoryUsed,
                         data3: "", timestamp: now});
-      
+
     }
   }
 };
@@ -464,11 +499,11 @@ let totalRestoringTabs = 0;
 var SessionRestoreObserver = {
   //TODO: Check if it is better to add a listener to Restore btn (id:errorTryAgain)
   //Add total restored windows.
-  
+
   install: function(aWindow) {
       aWindow.document.addEventListener("SSTabRestoring",
       SessionRestoreObserver.increaseTabCounter, false);
-    
+
     //aWindow.document.addEventListener("SSTabRestored",
     //  function(){
     //    sessionRestoredTabs = sessionRestoredTabs + 1;
@@ -480,275 +515,314 @@ var SessionRestoreObserver = {
     aWindow.document.removeEventListener("SSTabRestoring",
       SessionRestoreObserver.increaseTabCounter, false);
   },
-  
+
   increaseTabCounter: function() {
     totalRestoringTabs = totalRestoringTabs + 1;
     console.info("Current Total Restoring Tabs: " + totalRestoringTabs);
   }
 };
 
-exports.handlers = {
-  _dataStore: null,
-  obsService: null,
-  _sessionStartup: null,
-  
-  _recordPluginInfo: function() {
-    // Copied from about:plugins
-    let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-      .getService(Ci.nsIWindowMediator);
-    
-    let frontWindow = wm.getMostRecentWindow("navigator:browser");
-    let plugins = frontWindow.navigator.plugins;
-    plugins.refresh(false);
-    let now = Date.now();
-    for (let i = 0; i < plugins.length; i++) {
-      let plugin = plugins[i];
-      if (plugin) {
-        console.info("Plugin Name: "+ plugin.filename + " Version: " + plugin.version);
-        this._dataStore.storeEvent({ event_code: WeekEventCodes.PLUGIN_VERSION,
-          data1: plugin.filename, data2: plugin.version, data3: "",
-          timestamp: now});
+
+
+function WeekLifeStudyWindowObserver(window, globalInstance) {
+  // Call base class constructor (Important!)
+  WeekLifeStudyWindowObserver.baseConstructor.call(this, window, globalInstance);
+}
+// set up BackButtonWindowObserver as a subclass of GenericWindowObserver:
+BaseClasses.extend(WeekLifeStudyWindowObserver,
+                   BaseClasses.GenericWindowObserver);
+WeekLifeStudyWindowObserver.prototype.install = function() {
+}
+
+function WeekLifeStudyGlobalObserver() {
+  WeekLifeStudyGlobalObserver.baseConstructor.call(this,
+                                                   WeekLifeStudyWindowObserver);
+}
+BaseClasses.extend(WeekLifeStudyGlobalObserver,
+                   BaseClasses.GenericGlobalObserver);
+WeekLifeStudyGlobalObserver.prototype.getPluginInfo = function() {
+  // Copied from about:plugins
+  let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                        .getService(Ci.nsIWindowMediator);
+  let frontWindow = wm.getMostRecentWindow("navigator:browser");
+  let plugins = frontWindow.navigator.plugins;
+  let plugInfo = [];
+  plugins.refresh(false);
+  for (let i = 0; i < plugins.length; i++) {
+    let plugin = plugins[i];
+    if (plugin) {
+      plugInfo.push(plugin);
+    }
+  }
+  return plugInfo;
+};
+
+WeekLifeStudyGlobalObserver.prototype.getTotalPlacesNavHistory = function() {
+  //Record the number of places in the history
+  let historyService = Cc["@mozilla.org/browser/nav-history-service;1"]
+    .getService(Ci.nsINavHistoryService);
+
+  let options = historyService.getNewQueryOptions();
+  let query = historyService.getNewQuery();
+  let result = historyService.executeQuery(query, options);
+  let rootNode = result.root;
+  rootNode.containerOpen = true;
+  let totalPlaces = rootNode.childCount;
+  rootNode.containerOpen = false;
+
+  return totalPlaces;
+};
+
+WeekLifeStudyGlobalObserver.prototype.getProfileAge = function() {
+  //oldest file in the profile directory
+  let file = Components.classes["@mozilla.org/file/directory_service;1"].
+                  getService(Components.interfaces.nsIProperties).
+                  get("ProfD", Components.interfaces.nsIFile);
+  let entries = file.directoryEntries;
+  let oldestCreationTime = Date.now();
+
+  while(entries.hasMoreElements()) {
+    let entry = entries.getNext();
+    try{
+      entry.QueryInterface(Components.interfaces.nsIFile);
+      //nsIFile doesn't have an attribute for file creation time
+      if(oldestCreationTime > entry.lastModifiedTime) {
+        oldestCreationTime = entry.lastModifiedTime;
       }
     }
-  },
-  
-  _recordNavHistory: function() {
-    //Record the number of places in the history
-    let historyService = Cc["@mozilla.org/browser/nav-history-service;1"]
-      .getService(Ci.nsINavHistoryService);
-   
-    let options = historyService.getNewQueryOptions();
-    let query = historyService.getNewQuery();
-    let result = historyService.executeQuery(query, options);
-    let rootNode = result.root;
-    rootNode.containerOpen = true;
-    let totalPlaces = rootNode.childCount;
-    rootNode.containerOpen = false;
-    
-    console.info("Total History Places: "+ totalPlaces);
-    this._dataStore.storeEvent({ event_code: WeekEventCodes.HISTORY_STATUS,
-                        data1: "" + totalPlaces, data2: "", data3: "",
-                        timestamp: Date.now()});
-  },
-  
-  _recordProfileAge: function() {
-     //oldest file in the profile directory
-    let file = Components.classes["@mozilla.org/file/directory_service;1"].  
-                     getService(Components.interfaces.nsIProperties).  
-                     get("ProfD", Components.interfaces.nsIFile);
-    let entries = file.directoryEntries;  
-    let oldestCreationTime = Date.now();
-    
-    while(entries.hasMoreElements()) {  
-      let entry = entries.getNext();
-      try{
-        entry.QueryInterface(Components.interfaces.nsIFile);
-        //nsIFile doesn't have an attribute for file creation time
-        if(oldestCreationTime > entry.lastModifiedTime) {
-          oldestCreationTime = entry.lastModifiedTime;
-        }
-      }
-      catch(e){ 
-       //If it couldn't access file info
-      }
-     }
-     console.info("Profile Age: "+ oldestCreationTime + " milliseconds");
-     this._dataStore.storeEvent({ event_code: WeekEventCodes.PROFILE_AGE,
-                        data1: "" + oldestCreationTime, data2: "", data3: "",
-                        timestamp: Date.now()});
-  },
-  
-  _recordSessionStorePrefs : function () {
-    let prefs = Cc["@mozilla.org/preferences-service;1"]
-      .getService(Ci.nsIPrefService);
-
-    let prefBranch = prefs.getBranch("browser.startup.");
-    let prefValue = prefBranch.getIntPref("page");
-    //browser.startup.page 0: blank page, 1: homepage, 3: previous session
-    this._dataStore.storeEvent({
-      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-      data1: "browser.startup.page", data2: "" + prefValue,
-      data3: "", timestamp: Date.now()});
-    console.info("browser.startup.page: " + prefValue);
-
-    prefBranch = prefs.getBranch("browser.sessionstore.");
- 
-    prefValue = prefBranch.getBoolPref("resume_from_crash");
-    this._dataStore.storeEvent({
-      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-      data1: "browser.sessionstore.resume_from_crash", data2: "" + prefValue,
-      data3: "", timestamp: Date.now()});
-    console.info("browser.sessionstore.resume_from_crash: " + prefValue);
-
-    prefValue = prefBranch.getBoolPref("resume_session_once");
-    this._dataStore.storeEvent({
-      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-      data1: "browser.sessionstore.resume_session_once", data2: "" + prefValue,
-      data3: "", timestamp: Date.now()});
-    console.info("browser.sessionstore.resume_session_once: "+ prefValue);
-
-    prefValue = prefBranch.getIntPref("max_resumed_crashes");
-    this._dataStore.storeEvent({
-      event_code: WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-      data1: "browser.sessionstore.max_resumed_crashes", data2: "" + prefValue,
-      data3: "", timestamp: Date.now()});
-    console.info("browser.sessionstore.max_resumed_crashes: "+ prefValue);
-  },
-
-  // for handlers API:
-  onNewWindow: function(window) {
-    SessionRestoreObserver.install(window);
-  },
-
-  onWindowClosed: function(window) {
-    SessionRestoreObserver.uninstall(window);
-  },
-
-  onAppStartup: function() {
-    // TODO how can we tell if something has gone wrong with session restore?
-    this._dataStore.rec(WeekEventCodes.BROWSER_START, []);
-    console.info("Week in the life study got app startup message.");
-
-    //RESTORE SESSION information, number of tabs and windows restored
-    let stateObject = null;
-    let sessionData;
-    if (!this._sessionStartup) {
-      this._sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"]
-                    .getService(Ci.nsISessionStartup);
+    catch(e){
+     //If it couldn't access file info
     }
-    sessionData = this._sessionStartup.state;
-    if (sessionData) {
-      stateObject = JSON.parse(sessionData);
-      let countWindows = 0;
-      let countTabs = 0;
-      stateObject.windows.forEach(function(aWinData, aIx) {
-        countWindows = countWindows + 1;
-        let winState = {
-          ix: aIx
-        };
-        winState.tabs = aWinData.tabs.map(function(aTabData) {
-          let entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
-          return {
-            parent: winState
-          };
-        });
-        
-        for each (var tab in winState.tabs){
-          countTabs = countTabs + 1;
-        }
-      }, this);
-      
-      console.info("Session Restored: total windows: "+ countWindows
-        + " total tabs: " +  countTabs);
-      this._dataStore.storeEvent({ event_code: WeekEventCodes.SESSION_ON_RESTORE,
-                        data1: "Windows " + countWindows,
-                        data2: "Tabs " + countTabs, data3: "",
-                        timestamp: Date.now()});
-    }
-  },
+  }
+  return oldestCreationTime;
+};
 
-  onAppShutdown: function() {
-    // Nothing to do
-  },
+WeekLifeStudyGlobalObserver.prototype.recordSessionStorePrefs = function() {
+  let prefs = Cc["@mozilla.org/preferences-service;1"]
+    .getService(Ci.nsIPrefService);
 
-  onExperimentStartup: function(store) {
-    // Attatch a convenience method to the data store object:
-    store.rec = function(eventCode, data) {
-      store.storeEvent({ event_code: eventCode,
-                         data1: (data[0]) ? ("" + data[0]) : "",
-                         data2: (data[1]) ? ("" + data[1]) : "",
-                         data3: (data[2]) ? ("" + data[2]) : "",
-                         timestamp: Date.now()});
-    };
-    this._dataStore = store;
-    // Record the version of this study at startup: this lets us see
-    // what data was recorded before and after an update, which lets us
-    // know whether any given data included a given bug-fix or not.
-    store.rec(WeekEventCodes.STUDY_STATUS,
-              [exports.experimentInfo.versionNumber]);
-    
-    this._recordPluginInfo();
-    //Record navigation history
-    this._recordNavHistory();
-    //Record oldest file in profile
-    this._recordProfileAge();
-    //Record session store main preferences
-    this._recordSessionStorePrefs();
+  let prefBranch = prefs.getBranch("browser.startup.");
+  let prefValue = prefBranch.getIntPref("page");
+  //browser.startup.page 0: blank page, 1: homepage, 3: previous session
+  this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+              "browser.startup.page", prefValue, "");
+  console.info("browser.startup.page: " + prefValue);
 
-    console.info("Week in the life: Starting subobservers.");
-    this._startAllObservers();
-    BookmarkObserver.runGlobalBookmarkQuery();
-    ExtensionObserver.runGlobalAddonsQuery();
-    this.obsService = Cc["@mozilla.org/observer-service;1"]
-                           .getService(Ci.nsIObserverService);
-    this.obsService.addObserver(this, "quit-application", false);
-  },
+  prefBranch = prefs.getBranch("browser.sessionstore.");
 
-  onExperimentShutdown: function() {
-    if(totalRestoringTabs > 0) {
-      //TODO: Check if it can be recorded before onExperimentShutdown
-      console.info("Recording total restored tabs (SSTabRestoring): "
-        + totalRestoringTabs);
-      this._dataStore.storeEvent({ event_code: WeekEventCodes.SESSION_RESTORE,
-        data1: "Windows" , data2: "Tabs " + totalRestoringTabs, data3: "",
-        timestamp: Date.now()});
-      totalRestoringTabs = 0;
-    }
-    console.info("Week in the life: Shutting down subobservers.");
-    this._stopAllObservers();
-    // This check is to make sure nothing weird will happen if
-    // onExperimentShutdown gets called more than once:
-    if (this.obsService) {
-      this.obsService.removeObserver(this, "quit-application", false);
-      this.obsService = null;
-    }
-  },
+  prefValue = prefBranch.getBoolPref("resume_from_crash");
+  this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+              "browser.sessionstore.resume_from_crash", prefValue, "");
+  console.info("browser.sessionstore.resume_from_crash: " + prefValue);
 
-  onEnterPrivateBrowsing: function() {
-    console.info("Week in the Life: Got private browsing on message.");
-    this._dataStore.rec(WeekEventCodes.PRIVATE_ON, []);
-    this._stopAllObservers();
-  },
+  prefValue = prefBranch.getBoolPref("resume_session_once");
+  this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+              "browser.sessionstore.resume_session_once", prefValue, "");
+  console.info("browser.sessionstore.resume_session_once: "+ prefValue);
 
-  onExitPrivateBrowsing: function() {
-    console.info("Week in the Life: Got private browsing off message.");
-    this._dataStore.rec(WeekEventCodes.PRIVATE_OFF, []);
-    this._startAllObservers();
-  },
+  prefValue = prefBranch.getIntPref("max_resumed_crashes");
+  this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
+              "browser.sessionstore.max_resumed_crashes", prefValue, "");
+  console.info("browser.sessionstore.max_resumed_crashes: "+ prefValue);
+};
 
-  _startAllObservers: function() {
-    BookmarkObserver.install(this._dataStore);
-    IdlenessObserver.install(this._dataStore);
-    ExtensionObserver.install(this._dataStore);
-    DownloadsObserver.install(this._dataStore);
-    MemoryObserver.install(this._dataStore);
-  },
+WeekLifeStudyGlobalObserver.prototype.startAllObservers = function(store) {
+  BookmarkObserver.install(store);
+  IdlenessObserver.install(store);
+  ExtensionObserver.install(store);
+  DownloadsObserver.install(store);
+  MemoryObserver.install(store);
+};
 
-  _stopAllObservers: function() {
-    BookmarkObserver.uninstall();
-    IdlenessObserver.uninstall();
-    ExtensionObserver.uninstall();
-    DownloadsObserver.uninstall();
-    MemoryObserver.uninstall();
-  },
+WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
+  BookmarkObserver.uninstall();
+  IdlenessObserver.uninstall();
+  ExtensionObserver.uninstall();
+  DownloadsObserver.uninstall();
+  MemoryObserver.uninstall();
+};
 
-  observe: function(subject, topic, data) {
-    if (topic == "quit-application") {
-      if (data == "shutdown") {
-        this._dataStore.rec(WeekEventCodes.BROWSER_SHUTDOWN, []);
-        console.info("Week in the Life study got shutdown message.");
-      } else if (data == "restart") {
-        this._dataStore.rec(WeekEventCodes.BROWSER_RESTART, []);
-        console.info("Week in the Life study got startup message.");
-      }
+WeekLifeStudyGlobalObserver.prototype.observe = function(subject, topic, data) {
+  if (topic == "quit-application") {
+    if (data == "shutdown") {
+      this.record(WeekEventCodes.BROWSER_SHUTDOWN, "", "", "");
+      console.info("Week in the Life study got shutdown message.");
+    } else if (data == "restart") {
+      this.record(WeekEventCodes.BROWSER_RESTART,  "", "", "");
+      console.info("Week in the Life study got startup message.");
     }
   }
 };
 
-require("unload").when(
-  function myDestructor() {
-    exports.handlers.onExperimentShutdown();
-  });
+WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
+  WeekLifeStudyGlobalObserver.superClass.onExperimentStartup.call(this, store);
+  //let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+  //                      .getService(Ci.nsIWindowMediator);
+  _dataStore: null;
+  obsService: null;
+  _sessionStartup: null;
+  let self = this;
+  //Attach a convenience method to the data store object:
+  store.rec = function(eventCode, data1, data2, data3) {
+    self.record(eventCode, data1, data2, data3);
+  };
+  this._dataStore = store;
+  // Record the version of this study at startup: this lets us see
+  // what data was recorded before and after an update, which lets us
+  // know whether any given data included a given bug-fix or not.
+  this.record(WeekEventCodes.STUDY_STATUS, exports.experimentInfo.versionNumber,
+              "", "");
+
+  //Record plugin info
+  for each (let plugin in this.getPluginInfo()) {
+    console.info("plugin.name: "+ plugin.name);
+    this.record(WeekEventCodes.PLUGIN_VERSION, plugin.filename,
+                 plugin.version, plugin.name);
+  }
+
+  //Record navigation history
+  let totalPlaces = this.getTotalPlacesNavHistory();
+  console.info("Total History Places: "+ totalPlaces);
+  this.record(WeekEventCodes.HISTORY_STATUS, totalPlaces, "", "");
+
+  //Record oldest file in profile
+  let profileAge = this.getProfileAge();
+  console.info("Profile Age: "+ profileAge + " milliseconds");
+  this.record(WeekEventCodes.PROFILE_AGE, profileAge, "", "");
+
+    //Record session store main preferences
+  this.recordSessionStorePrefs();
+
+  console.info("Week in the life: Starting subobservers.");
+  this.startAllObservers(this._dataStore);
+  BookmarkObserver.runGlobalBookmarkQuery();
+  ExtensionObserver.runGlobalAddonsQuery();
+  this.obsService = Cc["@mozilla.org/observer-service;1"]
+                         .getService(Ci.nsIObserverService);
+  this.obsService.addObserver(this, "quit-application", false);
+};
+
+// Utility function for recording events:
+WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
+                                                  val3) {
+  if (!this.privateMode) {
+    // Make sure string columns are strings
+    if (typeof val1 != "string") {
+      val1 = val1.toString();
+    }
+    if (typeof val2 != "string") {
+      val2 = val2.toString();
+    }
+    if (typeof val3 != "string") {
+      val3 = val3.toString();
+    }
+    this._store.storeEvent({
+      event_code: eventCode,
+      data1: val1,
+      data2: val2,
+      data3: val3,
+      timestamp: Date.now()
+    });
+    /* This dump statement is for debugging and SHOULD be removed before
+     * the study is released. */
+    console.info("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "
+         + val3 + "\n");
+  }
+};
+
+WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
+  WeekLifeStudyGlobalObserver.superClass.onAppStartup.call(this);
+  // TODO how can we tell if something has gone wrong with session restore?
+  this.record(WeekEventCodes.BROWSER_START, "", "", "");
+  console.info("Week in the life study got app startup message.");
+
+  //RESTORE SESSION information, number of tabs and windows restored
+  let stateObject = null;
+  let sessionData;
+  if (!this._sessionStartup) {
+    this._sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"]
+                  .getService(Ci.nsISessionStartup);
+  }
+  sessionData = this._sessionStartup.state;
+  if (sessionData) {
+    stateObject = JSON.parse(sessionData);
+    let countWindows = 0;
+    let countTabs = 0;
+    stateObject.windows.forEach(function(aWinData, aIx) {
+      countWindows = countWindows + 1;
+      let winState = {
+        ix: aIx
+      };
+      winState.tabs = aWinData.tabs.map(function(aTabData) {
+        let entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
+        return {
+          parent: winState
+        };
+      });
+
+      for each (var tab in winState.tabs){
+        countTabs = countTabs + 1;
+      }
+    }, this);
+
+    console.info("Session Restored: total windows: "+ countWindows
+      + " total tabs: " +  countTabs);
+    this.record(WeekEventCodes.SESSION_ON_RESTORE, "Windows " + countWindows,
+                "Tabs " + countTabs, "");
+  }
+};
+
+//WeekLifeStudyGlobalObserver.prototype.onAppShutdown = function() {
+//  WeekLifeStudyGlobalObserver.superClass.onAppShutdown.call(this);
+//  this.record();
+//};
+
+WeekLifeStudyGlobalObserver.prototype.onExperimentShutdown = function() {
+  WeekLifeStudyGlobalObserver.superClass.onExperimentShutdown.call(this);
+  if(totalRestoringTabs > 0) {
+    //TODO: Check if it can be recorded before onExperimentShutdown
+    console.info("Recording total restored tabs (SSTabRestoring): "
+      + totalRestoringTabs);
+    this.record(WeekEventCodes.SESSION_RESTORE, "Windows",
+               "Tabs " + totalRestoringTabs, "");
+    totalRestoringTabs = 0;
+  }
+  console.info("Week in the life: Shutting down subobservers.");
+  this.stopAllObservers();
+  // This check is to make sure nothing weird will happen if
+  // onExperimentShutdown gets called more than once:
+  if (this.obsService) {
+    this.obsService.removeObserver(this, "quit-application", false);
+    this.obsService = null;
+  }
+};
+
+WeekLifeStudyGlobalObserver.prototype.onEnterPrivateBrowsing = function() {
+  WeekLifeStudyGlobalObserver.superClass.onEnterPrivateBrowsing.call(this);
+  console.info("Week in the Life: Got private browsing on message.");
+  this.record(WeekEventCodes.PRIVATE_ON, "", "", "");
+  this.stopAllObservers();
+};
+
+WeekLifeStudyGlobalObserver.prototype.onExitPrivateBrowsing = function() {
+  WeekLifeStudyGlobalObserver.superClass.onExitPrivateBrowsing.call(this);
+  console.info("Week in the Life: Got private browsing off message.");
+  this.record(WeekEventCodes.PRIVATE_OFF, "", "", "");
+  this.startAllObservers();
+};
+
+WeekLifeStudyGlobalObserver.prototype.onNewWindow = function(window) {
+  WeekLifeStudyGlobalObserver.superClass.onNewWindow.call(this, window);
+  SessionRestoreObserver.install(window);
+};
+
+WeekLifeStudyGlobalObserver.prototype.onWindowClosed = function(window) {
+  WeekLifeStudyGlobalObserver.superClass.onWindowClosed.call(this, window);
+  SessionRestoreObserver.uninstall(window);
+};
+
+// Instantiate and export the global observer (required!)
+exports.handlers = new WeekLifeStudyGlobalObserver();
 
 const FINE_PRINT = '<p><b>The Fine Print:</b> All test data you submit will be anonymized and will not be \
 personally identifiable.  We do not collect any URLs that you visit, search terms \
@@ -795,9 +869,28 @@ const COMPLETED_DATA_DISPLAY_HTML =
     At the end you had <span id="num-extensions"></span> extensions installed.</p>\
     </div>';
 
-exports.webContent = {
-  inProgressHtml:
-    '<h2>A Week in the Life of a Browser</h2>\
+// Web content
+function WeekLifeStudyWebContent()  {
+  WeekLifeStudyWebContent.baseConstructor.call(this, exports.experimentInfo);
+}
+BaseClasses.extend(WeekLifeStudyWebContent, BaseClasses.GenericWebContent);
+//TODO
+WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
+  function() {
+    return "This bar chart shows *TODO*";
+  });
+//TODO
+WeekLifeStudyWebContent.prototype.__defineGetter__("dataCanvas",
+  function() {
+      return '<div class="dataBox"><h3>View Your Data:</h3>' +
+      this.dataViewExplanation +
+      this.rawDataLink +
+      '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
+      this.saveButtons + '</div>';
+  });
+WeekLifeStudyWebContent.prototype.__defineGetter__("inProgressHtml",
+  function() {
+    return '<h2>A Week in the Life of a Browser</h2>\
      <p>Thank you for joining the Test Pilot program!  You are currently in \
      a study designed to help us understand "A Week in the Life of a Browser"!\
      By participating in this study, you will contribute to the\
@@ -813,9 +906,12 @@ exports.webContent = {
      participate, please <a href="chrome://testpilot/content/status-quit.html?eid=2">\
      click here to quit</a>.</p>\
      <p>Otherwise, buckle up and get ready for the flight!</p>'
-     + IN_PROGRESS_DATA_DISPLAY_HTML + FINE_PRINT,
-  completedHtml:
-    '<h2>A Week in the Life of a Browser</h2><p>Greetings!  The &quot;a week in the \
+     + IN_PROGRESS_DATA_DISPLAY_HTML + FINE_PRINT;
+  });
+
+WeekLifeStudyWebContent.prototype.__defineGetter__("completedHtml",
+  function() {
+    return '<h2>A Week in the Life of a Browser</h2><p>Greetings!  The &quot;a week in the \
      life of a browser&quot; study has just completed!  The last step is to submit \
      the data. \
      You can <a onclick="showRawData(2);">click here to see</a> the complete raw \
@@ -829,53 +925,64 @@ exports.webContent = {
      <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
      </span></div><p>If you don\'t want to upload your data, please \
      <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>'
-     + COMPLETED_DATA_DISPLAY_HTML + FINE_PRINT,
-  upcomingHtml: "<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>",
+     + COMPLETED_DATA_DISPLAY_HTML + FINE_PRINT;
+  });
 
-  remainDataHtml: "<h3>Collected Data:</h3>" + COMPLETED_DATA_DISPLAY_HTML,
+WeekLifeStudyWebContent.prototype.__defineGetter__("upcomingHtml",
+  function() {
+    return '<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>';
+  });
 
-  _deleteDataOlderThanAWeek: function(dataStore) {
-    /* TODO: we're breaking encapsulation here because there's no public
-     * method to do this on the data store object... this should be implemented
-     * there. */
-    let selectSql = "SELECT timestamp FROM " + dataStore._tableName +
-      " ORDER BY timestamp DESC LIMIT 1";
-    let selectStmt = dataStore._createStatement(selectSql);
-    if (selectStmt.executeStep()) {
-      let timestamp = selectStmt.row.timestamp;
-      let cutoffDate = timestamp - (7 * 24 * 60 * 60 * 1000);
-      let wipeSql = "DELETE FROM " + dataStore._tableName +
-        " WHERE timestamp < " + cutoffDate;
-      let wipeStmt = dataStore._createStatement(wipeSql);
-      wipeStmt.execute();
-      wipeStmt.finalize();
-      console.info("Executed " + wipeSql);
-    }
-    selectStmt.finalize();
-  },
+WeekLifeStudyWebContent.prototype.__defineGetter__("remainDataHtml",
+  function() {
+    return '<h3>Collected Data:</h3>' + COMPLETED_DATA_DISPLAY_HTML;
+  });
 
-  onPageLoad: function(experiment, document, graphUtils) {
-    // Get rid of old data so it doesn't pollute current submission
-    this._deleteDataOlderThanAWeek(experiment.dataStore);
+WeekLifeStudyWebContent.prototype.deleteDataOlderThanAWeek = function(store) {
+  /* TODO: we're breaking encapsulation here because there's no public
+   * method to do this on the data store object... this should be implemented
+   * there. */
+  let selectSql = "SELECT timestamp FROM " + store._tableName +
+    " ORDER BY timestamp DESC LIMIT 1";
+  let selectStmt = store._createStatement(selectSql);
+  if (selectStmt.executeStep()) {
+    let timestamp = selectStmt.row.timestamp;
+    let cutoffDate = timestamp - (7 * 24 * 60 * 60 * 1000);
+    let wipeSql = "DELETE FROM " + store._tableName +
+      " WHERE timestamp < " + cutoffDate;
+    let wipeStmt = store._createStatement(wipeSql);
+    wipeStmt.execute();
+    wipeStmt.finalize();
+    console.info("Executed " + wipeSql);
+  }
+  selectStmt.finalize();
+};
 
-    experiment.getDataStoreAsJSON(function(rawData) {
-      let bkmks, folders, depth;
-      let browserUseTimeData = [];
-      let bookmarksData = [];
-      let addonsData = [];
-      let firstTimestamp = 0;
-      let maxBkmks = 0;
-      let totalUseTime = 0;
-      let idleTime = 0;
-      let numDownloads = 0;
-      let numAddons = 0;
-      let rowNum;
+/* Produce bar chart using flot lobrary; ,
+ * sorted, in a bar chart. */
+WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
+                                                       document,
+                                                       graphUtils) {
+  // Get rid of old data so it doesn't pollute current submission
+  this.deleteDataOlderThanAWeek(experiment.dataStore);
+  experiment.getDataStoreAsJSON(function(rawData) {
+    let bkmks, folders, depth;
+    let browserUseTimeData = [];
+    let bookmarksData = [];
+    let addonsData = [];
+    let firstTimestamp = 0;
+    let maxBkmks = 0;
+    let totalUseTime = 0;
+    let idleTime = 0;
+    let numDownloads = 0;
+    let numAddons = 0;
+    let rowNum;
 
-      for each ( let row in rawData ) {
-        if (firstTimestamp == 0 ) {
-         firstTimestamp = row.timestamp;
-        }
-        switch(row.event_code) {
+    for each ( let row in rawData ) {
+      if (firstTimestamp == 0 ) {
+       firstTimestamp = row.timestamp;
+      }
+      switch(row.event_code) {
         case WeekEventCodes.BROWSER_START:
           browserUseTimeData.push( [row.timestamp, 2]);
           // TODO treat this as a crash if there was no shutdown first!
@@ -891,180 +998,205 @@ exports.webContent = {
           browserUseTimeData.push( [row.timestamp, 1]);
         break;
         case WeekEventCodes.BOOKMARK_STATUS:
-          bkmks = row.data1;
-          folders = row.data2;
-          depth = row.data3;
+          bkmks = parseInt(row.data1);
+          folders = parseInt(row.data2);
+          depth = parseInt(row.data3);
           bookmarksData.push( [row.timestamp, bkmks] );
         break;
         case WeekEventCodes.BOOKMARK_CREATE:
-          bkmks += 1;
-          bookmarksData.push( [row.timestamp, bkmks] );
+          switch (row.data1) {
+            case BMK_TYPE_BOOKMARK:
+              bkmks += 1;
+              bookmarksData.push( [row.timestamp, bkmks] );
+            break;
+            case BMK_TYPE_FOLDER:
+              folders += 1;
+            break;
+          }
         break;
           // TODO bookmark remove!
         case WeekEventCodes.DOWNLOAD:
           numDownloads += 1;
         break;
         case WeekEventCodes.ADDON_STATUS:
-          numAddons = row.data1;
+          numAddons = parseInt(row.data1);
           addonsData.push( [row.timestamp, numAddons] );
           break;
         case WeekEventCodes.ADDON_INSTALL:
           numAddons += 1;
           addonsData.push( [row.timestamp, numAddons] );
           break;
-          // TODO add-on uninstall!
-        }
-        if (bkmks > maxBkmks) {
-          maxBkmks = bkmks;
-        }
+        case WeekEventCodes.ADDON_UNINSTALL:
+          switch (row.data1) {
+            case UNINSTALL_DONE:
+              numAddons -= 1;
+            break;
+            case UNINSTALL_CANCELLED:
+              numAddons += 1;
+            break;
+          }
+          addonsData.push( [row.timestamp, numAddons] );
+          break;
       }
-      // use the end time from the last record if the status is STATUS_FINISHED or
-      // above.
-      let lastTimestamp;
-      if (rawData.length > 0 && (experiment.status >= 4)) {
-        lastTimestamp = rawData[(rawData.length - 1)].timestamp;
+      if (bkmks > maxBkmks) {
+        maxBkmks = bkmks;
+      }
+    }
+    // use the end time from the last record if the status is STATUS_FINISHED or
+    // above.
+    let lastTimestamp;
+    if (rawData.length > 0 && (experiment.status >= 4)) {
+      lastTimestamp = rawData[(rawData.length - 1)].timestamp;
+    } else {
+      lastTimestamp = (new Date()).getTime();
+    }
+    browserUseTimeData.push( [lastTimestamp, 2] );
+    bookmarksData.push([lastTimestamp, bkmks]);
+
+    let canvas = document.getElementById("browser-use-time-canvas");
+    let ctx = canvas.getContext("2d");
+
+    let boundingRect = { originX: 40,
+                         originY: 210,
+                         width: 500,
+                         height: 300 };
+    let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
+    console.log("xScale is " + xScale );
+    ctx.fillStyle = "white";
+    ctx.fillRect (0, 0, 500, 300);
+
+    //Draw colored bar - orange for using the browser, yellow for running
+    // but not being used, white for no use.
+    for (rowNum = 0; rowNum < browserUseTimeData.length - 1; rowNum++) {
+      let row = browserUseTimeData[rowNum];
+      let nextRow = browserUseTimeData[rowNum + 1];
+      let timeLength = nextRow[0] - row[0];
+      let x = xScale * ( row[0] - firstTimestamp );
+      let width = xScale * timeLength;
+      switch( row[1]) {
+      case 0:
+        continue;
+      case 1:
+        idleTime += timeLength;
+        ctx.fillStyle = "yellow";
+      break;
+      case 2:
+        totalUseTime += timeLength;
+        ctx.fillStyle = "orange";
+      break;
+      }
+      ctx.fillRect(x, 180, width, 50);
+    }
+    // Add legend to explain colored bar:
+    ctx.strokeStyle ="black";
+    ctx.fillStyle = "orange";
+    ctx.fillRect(5, 235, 15, 15);
+    ctx.strokeRect(5, 235, 15, 15);
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(5, 255, 15, 15);
+    ctx.strokeRect(5, 255, 15, 15);
+    ctx.fillStyle = "grey";
+    ctx.save();
+    ctx.translate(25, 250);
+    ctx.mozDrawText("= Firefox actively running");
+    ctx.restore();
+    ctx.save();
+    ctx.translate(25, 270);
+    ctx.mozDrawText("= Firefox running but idle");
+    ctx.restore();
+
+    // Draw line to show bookmarks over time:
+    let bkmkYScale = boundingRect.height / (maxBkmks * 2);
+    ctx.strokeStyle = "blue";
+    ctx.beginPath();
+    for (rowNum = 0; rowNum < bookmarksData.length; rowNum++) {
+      let row = bookmarksData[rowNum];
+      if (rowNum == 0) {
+        ctx.moveTo(xScale * (row[0] - firstTimestamp),
+                   (boundingRect.height/2) - bkmkYScale * row[1] + 10);
       } else {
-        lastTimestamp = (new Date()).getTime();
+        ctx.lineTo(xScale * (row[0] - firstTimestamp),
+                   (boundingRect.height/2) - bkmkYScale * row[1] + 10);
       }
-      browserUseTimeData.push( [lastTimestamp, 2] );
-      bookmarksData.push([lastTimestamp, bkmks]);
+    }
+    ctx.stroke();
+    // Label starting and finishing bookmarks:
+    ctx.mozTextStyle = "10pt sans serif";
+    ctx.fillStyle = "grey";
+    ctx.save();
+    ctx.translate(5, (boundingRect.height/2) -
+                  bkmkYScale * bookmarksData[0][1] + 25);
+    ctx.mozDrawText(bookmarksData[0][1] + " bookmarks");
+    ctx.restore();
+    ctx.save();
+    let lastNumBkmks = bookmarksData[bookmarksData.length -1][1];
+    ctx.translate(boundingRect.width - 80,
+                  (boundingRect.height/2) - bkmkYScale * lastNumBkmks + 25);
+    ctx.mozDrawText(lastNumBkmks + " bookmarks");
+    ctx.restore();
 
-      let canvas = document.getElementById("browser-use-time-canvas");
-      let ctx = canvas.getContext("2d");
-
-      let boundingRect = { originX: 40,
-                           originY: 210,
-                           width: 500,
-                           height: 300 };
-      let xScale = boundingRect.width / (lastTimestamp - firstTimestamp);
-      console.log("xScale is " + xScale );
-      ctx.fillStyle = "white";
-      ctx.fillRect (0, 0, 500, 300);
-
-      //Draw colored bar - orange for using the browser, yellow for running
-      // but not being used, white for no use.
-      for (rowNum = 0; rowNum < browserUseTimeData.length - 1; rowNum++) {
-        let row = browserUseTimeData[rowNum];
-        let nextRow = browserUseTimeData[rowNum + 1];
-        let timeLength = nextRow[0] - row[0];
-        let x = xScale * ( row[0] - firstTimestamp );
-        let width = xScale * timeLength;
-        switch( row[1]) {
-        case 0:
-          continue;
-        case 1:
-          idleTime += timeLength;
-          ctx.fillStyle = "yellow";
-        break;
-        case 2:
-          totalUseTime += timeLength;
-          ctx.fillStyle = "orange";
-        break;
-        }
-        ctx.fillRect(x, 180, width, 50);
-      }
-      // Add legend to explain colored bar:
-      ctx.strokeStyle ="black";
-      ctx.fillStyle = "orange";
-      ctx.fillRect(5, 235, 15, 15);
-      ctx.strokeRect(5, 235, 15, 15);
-      ctx.fillStyle = "yellow";
-      ctx.fillRect(5, 255, 15, 15);
-      ctx.strokeRect(5, 255, 15, 15);
-      ctx.fillStyle = "grey";
-      ctx.save();
-      ctx.translate(25, 250);
-      ctx.mozDrawText("= Firefox actively running");
-      ctx.restore();
-      ctx.save();
-      ctx.translate(25, 270);
-      ctx.mozDrawText("= Firefox running but idle");
-      ctx.restore();
-
-      // Draw line to show bookmarks over time:
-      let bkmkYScale = boundingRect.height / (maxBkmks * 2);
-      ctx.strokeStyle = "blue";
+    // Add scale with dates on it
+    let firstDay = new Date(firstTimestamp);
+    console.info("Beginning date is " + firstDay.toString());
+    console.info("Ending date is " + (new Date(lastTimestamp)).toString());
+    firstDay.setDate( firstDay.getDate() + 1 );
+    firstDay.setHours(0);
+    firstDay.setMinutes(0);
+    firstDay.setSeconds(0);
+    firstDay.setMilliseconds(0);
+    ctx.fillStyle = "grey";
+    ctx.strokeStyle = "grey";
+    let dayMarker = firstDay;
+    let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    while (dayMarker.getTime() < lastTimestamp) {
+      let x = xScale * (dayMarker.getTime() - firstTimestamp);
       ctx.beginPath();
-      for (rowNum = 0; rowNum < bookmarksData.length; rowNum++) {
-        let row = bookmarksData[rowNum];
-        if (rowNum == 0) {
-          ctx.moveTo(xScale * (row[0] - firstTimestamp),
-                     (boundingRect.height/2) - bkmkYScale * row[1] + 10);
-        } else {
-          ctx.lineTo(xScale * (row[0] - firstTimestamp),
-                     (boundingRect.height/2) - bkmkYScale * row[1] + 10);
-        }
-      }
+      ctx.moveTo(x, 5);
+      ctx.lineTo(x, boundingRect.height - 5);
       ctx.stroke();
-      // Label starting and finishing bookmarks:
-      ctx.mozTextStyle = "10pt sans serif";
-      ctx.fillStyle = "grey";
       ctx.save();
-      ctx.translate(5, (boundingRect.height/2) -
-                    bkmkYScale * bookmarksData[0][1] + 25);
-      ctx.mozDrawText(bookmarksData[0][1] + " bookmarks");
+      ctx.translate(x + 5, 295);
+      ctx.mozDrawText(days[dayMarker.getDay()] + " " + dayMarker.getDate());
       ctx.restore();
-      ctx.save();
-      let lastNumBkmks = bookmarksData[bookmarksData.length -1][1];
-      ctx.translate(boundingRect.width - 80,
-                    (boundingRect.height/2) - bkmkYScale * lastNumBkmks + 25);
-      ctx.mozDrawText(lastNumBkmks + " bookmarks");
-      ctx.restore();
+      dayMarker.setDate( dayMarker.getDate() + 1 );
+    }
 
-      // Add scale with dates on it
-      let firstDay = new Date(firstTimestamp);
-      console.info("Beginning date is " + firstDay.toString());
-      console.info("Ending date is " + (new Date(lastTimestamp)).toString());
-      firstDay.setDate( firstDay.getDate() + 1 );
-      firstDay.setHours(0);
-      firstDay.setMinutes(0);
-      firstDay.setSeconds(0);
-      firstDay.setMilliseconds(0);
-      ctx.fillStyle = "grey";
-      ctx.strokeStyle = "grey";
-      let dayMarker = firstDay;
-      let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      while (dayMarker.getTime() < lastTimestamp) {
-        let x = xScale * (dayMarker.getTime() - firstTimestamp);
-        ctx.beginPath();
-        ctx.moveTo(x, 5);
-        ctx.lineTo(x, boundingRect.height - 5);
-        ctx.stroke();
-        ctx.save();
-        ctx.translate(x + 5, 295);
-        ctx.mozDrawText(days[dayMarker.getDay()] + " " + dayMarker.getDate());
-        ctx.restore();
-        dayMarker.setDate( dayMarker.getDate() + 1 );
-      }
-
-      // Fill in missing values from html paragraphs:
-      let getHours = function(x) {
-        return Math.round( x / 36000 ) / 100;
-      };
-      let getFormattedDateString = function(timestamp) {
-        let date = new Date(timestamp);
-        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
-                    "Sep", "Oct", "Nov", "Dec"];
-        return months[date.getMonth()] + " " + date.getDate() + ", "
-          + date.getFullYear();
-      };
-      let startSpan = document.getElementById("usage-period-start-span");
-      let endSpan = document.getElementById("usage-period-end-span");
-      if (startSpan) {
-        startSpan.innerHTML = getFormattedDateString(firstTimestamp);
-      }
-      if (endSpan) {
-        endSpan.innerHTML = getFormattedDateString(lastTimestamp);
-      }
-      document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
-      document.getElementById("num-bkmks-span").innerHTML = bkmks;
-      document.getElementById("num-folders-span").innerHTML = folders;
-      document.getElementById("max-depth-span").innerHTML = depth;
-      document.getElementById("num-downloads").innerHTML = numDownloads;
-      document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
-      document.getElementById("num-extensions").innerHTML = numAddons;
-      document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
-      document.getElementById("idle-time-span").innerHTML = getHours(idleTime);
-    });
-  }
+    // Fill in missing values from html paragraphs:
+    let getHours = function(x) {
+      return Math.round( x / 36000 ) / 100;
+    };
+    let getFormattedDateString = function(timestamp) {
+      let date = new Date(timestamp);
+      let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+                  "Sep", "Oct", "Nov", "Dec"];
+      return months[date.getMonth()] + " " + date.getDate() + ", "
+        + date.getFullYear();
+    };
+    let startSpan = document.getElementById("usage-period-start-span");
+    let endSpan = document.getElementById("usage-period-end-span");
+    if (startSpan) {
+      startSpan.innerHTML = getFormattedDateString(firstTimestamp);
+    }
+    if (endSpan) {
+      endSpan.innerHTML = getFormattedDateString(lastTimestamp);
+    }
+    document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
+    document.getElementById("num-bkmks-span").innerHTML = bkmks;
+    document.getElementById("num-folders-span").innerHTML = folders;
+    document.getElementById("max-depth-span").innerHTML = depth;
+    document.getElementById("num-downloads").innerHTML = numDownloads;
+    document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
+    document.getElementById("num-extensions").innerHTML = numAddons;
+    document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
+    document.getElementById("idle-time-span").innerHTML = getHours(idleTime);
+  });
 };
+
+exports.webContent = new WeekLifeStudyWebContent();
+
+// Cleanup
+require("unload").when(
+  function myDestructor() {
+    console.info("WeekLife study destructor called.");
+    exports.handlers.onExperimentShutdown();
+  });

@@ -827,40 +827,8 @@ WeekLifeStudyGlobalObserver.prototype.onWindowClosed = function(window) {
 // Instantiate and export the global observer (required!)
 exports.handlers = new WeekLifeStudyGlobalObserver();
 
-// TODO a lot of this text is defined in the base classes and doesn't need to be
-// reproduced here.
-const FINE_PRINT = '<p><b>The Fine Print:</b> All test data you submit will be anonymized and will not be \
-personally identifiable.  We do not collect any URLs that you visit, search terms \
-that you enter, or sites that you bookmark.  The uploaded test data is annotated \
-with your locale settings, Firefox version, Test Pilot version, operating system \
-version, and any survey answers you have provided.';
-
-// TODO when upcoming, all it says is "Upcoming...".  Put some better text there.
-
-const IN_PROGRESS_DATA_DISPLAY_HTML =
-   '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
-    <button type="button" onclick="saveCanvas(document.getElementById(\'browser-use-time-canvas\'))">Save Graph</button>\
-    <div class="dataBox">\
-    <h4>Facts About Your Browser Use This Week</h4>\
-    <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
-     hours actively using Firefox this week. Firefox was running but \
-    idle for a total of <span id="idle-time-span"></span> hours.</p>\
-    <p><b>Bookmarks:</b> At the beginning of the week you had <span id="first-num-bkmks-span"></span>\
-    bookmarks. Now you have <span id="num-bkmks-span"></span> bookmarks in \
-    <span id="num-folders-span"></span> folders, to a max folder depth of \
-    <span id="max-depth-span"></span>.</p>\
-    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> files\
-    during this week.</p>\
-    <p><b>Extensions:</b> At the beginning of the week you had \
-    <span id="first-num-extensions"></span> Firefox extensions installed.  Now \
-    you have <span id="num-extensions"></span> extensions installed.</p>\
-    </div>';
-
-const COMPLETED_DATA_DISPLAY_HTML =
-   '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
-    <button type="button" onclick="saveCanvas(document.getElementById(\'browser-use-time-canvas\'))">Save Graph</button>\
-    <div class="dataBox">\
-    <h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
+const COMPLETED_DATA_DISPLAY_HTML =   /* Note this is in past tense*/
+    '<h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
     To <span id="usage-period-end-span"></span></h4>\
     <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
     hours actively using Firefox on that week. Firefox was running but \
@@ -881,42 +849,32 @@ function WeekLifeStudyWebContent()  {
   WeekLifeStudyWebContent.baseConstructor.call(this, exports.experimentInfo);
 }
 BaseClasses.extend(WeekLifeStudyWebContent, BaseClasses.GenericWebContent);
-//TODO What is this?  There's no bar chart!
 WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "This bar chart shows *TODO*";
-  });
-// TODO dataCanvas is supposed to be here to factor out the common text from the
-// stuff above
-WeekLifeStudyWebContent.prototype.__defineGetter__("dataCanvas",
-  function() {
-      return '<div class="dataBox"><h3>View Your Data:</h3>' +
-      this.dataViewExplanation +
-      this.rawDataLink +
-      '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
-      this.saveButtons + '</div>';
-  });
-WeekLifeStudyWebContent.prototype.__defineGetter__("inProgressHtml",
-  function() {
-    return '<h2>A Week in the Life of a Browser</h2>\
-     <p>Thank you for joining the Test Pilot program!  You are currently in \
-     a study designed to help us understand "A Week in the Life of a Browser"!\
-     By participating in this study, you will contribute to the\
-     design of a group of key features of Firefox, including bookmarks,\
-     search, and downloads. You will help us understand what features are used \
-     often and how trends in their use are changing over time.</p>\
-     <p>There is no need to do anything differently; just browse normally, and Test \
-     Pilot will record certain key events.  Don\'t worry: we never record any \
-     URLs that are loaded or restored, or any words typed in the search bar.\
-     You can <a onclick="showRawData(2);">click here to see</a> exactly what data \
-     has been collected, or check out the graphs below for a summary.</p>\
-     <p>The study will end <span id="test-end-time"></span>. If you don\'t want to \
-     participate, please <a href="chrome://testpilot/content/status-quit.html?eid=2">\
-     click here to quit</a>.</p>\
-     <p>Otherwise, buckle up and get ready for the flight!</p>'
-     + IN_PROGRESS_DATA_DISPLAY_HTML + FINE_PRINT;
+    return '<h4>Facts About Your Browser Use This Week</h4>\
+    <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
+     hours actively using Firefox this week. Firefox was running but \
+    idle for a total of <span id="idle-time-span"></span> hours.</p>\
+    <p><b>Bookmarks:</b> At the beginning of the week you had <span id="first-num-bkmks-span"></span>\
+    bookmarks. Now you have <span id="num-bkmks-span"></span> bookmarks in \
+    <span id="num-folders-span"></span> folders, to a max folder depth of \
+    <span id="max-depth-span"></span>.</p>\
+    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> files\
+    during this week.</p>\
+    <p><b>Extensions:</b> At the beginning of the week you had \
+    <span id="first-num-extensions"></span> Firefox extensions installed.  Now \
+    you have <span id="num-extensions"></span> extensions installed.</p>\
+    </div>';
   });
 
+WeekLifeStudyWebContent.prototype.__defineGetter__("dataCanvas",
+  function() {
+      return this.rawDataLink +
+      '<div class="dataBox">' +
+      '<canvas id="data-canvas" width="500" height="300"></canvas>'
+      + this.saveButtons +
+      this.dataViewExplanation +'</div>';
+  });
 WeekLifeStudyWebContent.prototype.__defineGetter__("completedHtml",
   function() {
     return '<h2>A Week in the Life of a Browser</h2><p>Greetings!  The &quot;a week in the \
@@ -933,17 +891,7 @@ WeekLifeStudyWebContent.prototype.__defineGetter__("completedHtml",
      <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
      </span></div><p>If you don\'t want to upload your data, please \
      <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>'
-     + COMPLETED_DATA_DISPLAY_HTML + FINE_PRINT;
-  });
-
-WeekLifeStudyWebContent.prototype.__defineGetter__("upcomingHtml",
-  function() {
-    return '<h2>A Week in the Life of a Browser</h2><p>Upcoming...</p>';
-  });
-
-WeekLifeStudyWebContent.prototype.__defineGetter__("remainDataHtml",
-  function() {
-    return '<h3>Collected Data:</h3>' + COMPLETED_DATA_DISPLAY_HTML;
+     + COMPLETED_DATA_DISPLAY_HTML;
   });
 
 WeekLifeStudyWebContent.prototype.deleteDataOlderThanAWeek = function(store) {
@@ -1063,7 +1011,7 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
     browserUseTimeData.push( [lastTimestamp, 2] );
     bookmarksData.push([lastTimestamp, bkmks]);
 
-    let canvas = document.getElementById("browser-use-time-canvas");
+    let canvas = document.getElementById("data-canvas");
     let ctx = canvas.getContext("2d");
 
     let boundingRect = { originX: 40,

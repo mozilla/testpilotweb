@@ -1,6 +1,6 @@
 /* Basic panel experiment */
 BaseClasses = require("study_base_classes.js");
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
+Components.utils.import("resource://gre/modules/AddonManager.jsm"); // TODO generally put these closer to where they're used
 
 exports.experimentInfo = {
   startDate: null,
@@ -11,15 +11,15 @@ exports.experimentInfo = {
   summary: "This auto-recurring study aims to explore larger trends of how "
            + "the browser is being used over time. It will periodically collect "
            + "data on the browser's basic performance for one week, running "
-           + "the same study again every 60 days, through Dec. 2009 to "
-           + "Dec.2010.",
+           + "the same study again every 60 days, from Oct. 2010 to "
+           + "Oct. 2011.",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/a-week-life/week-life-thumbnail.png",
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 60,
   versionNumber: 5,
   minTPVersion: "1.0rc1",
-  minFXVersion: "4.0b1"
+  minFXVersion: "3.5"
 };
 
 const WeekEventCodes = {
@@ -524,6 +524,9 @@ var SessionRestoreObserver = {
 
 
 
+// TODO if we don't need per-window observation, we don't need to make one of these.
+// On the other hand, if SessionRestoreObserver is instantiated once per window,
+// it should be through here!
 function WeekLifeStudyWindowObserver(window, globalInstance) {
   // Call base class constructor (Important!)
   WeekLifeStudyWindowObserver.baseConstructor.call(this, window, globalInstance);
@@ -824,11 +827,15 @@ WeekLifeStudyGlobalObserver.prototype.onWindowClosed = function(window) {
 // Instantiate and export the global observer (required!)
 exports.handlers = new WeekLifeStudyGlobalObserver();
 
+// TODO a lot of this text is defined in the base classes and doesn't need to be
+// reproduced here.
 const FINE_PRINT = '<p><b>The Fine Print:</b> All test data you submit will be anonymized and will not be \
 personally identifiable.  We do not collect any URLs that you visit, search terms \
 that you enter, or sites that you bookmark.  The uploaded test data is annotated \
 with your locale settings, Firefox version, Test Pilot version, operating system \
 version, and any survey answers you have provided.';
+
+// TODO when upcoming, all it says is "Upcoming...".  Put some better text there.
 
 const IN_PROGRESS_DATA_DISPLAY_HTML =
    '<canvas id="browser-use-time-canvas" width="500" height="300"></canvas>\
@@ -874,12 +881,13 @@ function WeekLifeStudyWebContent()  {
   WeekLifeStudyWebContent.baseConstructor.call(this, exports.experimentInfo);
 }
 BaseClasses.extend(WeekLifeStudyWebContent, BaseClasses.GenericWebContent);
-//TODO
+//TODO What is this?  There's no bar chart!
 WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
     return "This bar chart shows *TODO*";
   });
-//TODO
+// TODO dataCanvas is supposed to be here to factor out the common text from the
+// stuff above
 WeekLifeStudyWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
       return '<div class="dataBox"><h3>View Your Data:</h3>' +
@@ -960,6 +968,8 @@ WeekLifeStudyWebContent.prototype.deleteDataOlderThanAWeek = function(store) {
 
 /* Produce bar chart using flot lobrary; ,
  * sorted, in a bar chart. */
+// TODO this function is not using graphUtils (flot) at all!
+// take advantage of flot to simplify this code.
 WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
                                                        document,
                                                        graphUtils) {

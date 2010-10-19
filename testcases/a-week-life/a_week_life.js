@@ -92,10 +92,9 @@ exports.dataStoreInfo = {
 
 var BookmarkObserver = {
   alreadyInstalled: false,
-  store: null,
   bmsvc: null,
 
-  install: function(store) {
+  install: function() {
      /* See
      https://developer.mozilla.org/en/nsINavBookmarkObserver and
      https://developer.mozilla.org/en/nsINavBookmarksService
@@ -107,7 +106,6 @@ var BookmarkObserver = {
       this.lmsvc = Cc["@mozilla.org/browser/livemark-service;2"]
         .getService(Ci.nsILivemarkService);
       this.bmsvc.addObserver(this, false);
-      this.store = store;
       this.alreadyInstalled = true;
     }
   },
@@ -165,8 +163,8 @@ var BookmarkObserver = {
     console.info("Results: There are " + totalBookmarks + " bookmarks.");
     console.info("In " + totalFolders + " folders.");
     console.info("Greatest folder depth is " + greatestDepth);
-    this.store.rec(WeekEventCodes.BOOKMARK_STATUS, totalBookmarks, totalFolders,
-                   greatestDepth);
+    exports.handlers.record(WeekEventCodes.BOOKMARK_STATUS, totalBookmarks,
+                            totalFolders, greatestDepth);
   },
 
   uninstall: function() {
@@ -183,12 +181,12 @@ var BookmarkObserver = {
       // and we don't really care about them.
       switch (type) {
         case this.bmsvc.TYPE_BOOKMARK:
-          console.info("Bookmark added.");
-          this.store.rec(WeekEventCodes.BOOKMARK_CREATE, BMK_TYPE_BOOKMARK, "", "");
+          exports.handlers.record(WeekEventCodes.BOOKMARK_CREATE,
+                                  "New Bookmark Added");
         break;
         case this.bmsvc.TYPE_FOLDER:
-          console.info("Bookmark Folder added.");
-          this.store.rec(WeekEventCodes.BOOKMARK_CREATE, BMK_TYPE_FOLDER, "" , "");
+          exports.handlers.record(WeekEventCodes.BOOKMARK_CREATE,
+                                  "New Bookmark Folder");
         break;
       }
     }
@@ -197,8 +195,8 @@ var BookmarkObserver = {
   onItemRemoved: function(itemId, parentId, index, type) {
     let folderId = this.bmsvc.getFolderIdForItem(itemId);
     if (!this.lmsvc.isLivemark(folderId)) {
-      this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, BMK_MOD_REMOVED, "", "");
-      console.info("Bookmark removed!");
+      exports.handlers.record(WeekEventCodes.BOOKMARK_MODIFY,
+                              "Bookmark Removed");
     }
   },
 
@@ -208,21 +206,20 @@ var BookmarkObserver = {
     // much info, so we're not going to track it for now.
     /*let folderId = this.bmsvc.getFolderIdForItem(bookmarkId);
     if (!this.lmsvc.isLivemark(folderId)) {
-      this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_CHANGED]);
+      exports.handlers.record(WeekEventCodes.BOOKMARK_MODIFY, [BMK_MOD_CHANGED]);
       console.info("Bookmark modified!");
     }*/
   },
 
   onItemVisited: function(bookmarkId, visitId, time) {
     // This works.
-    this.store.rec(WeekEventCodes.BOOKMARK_CHOOSE, "", "", "");
-    console.info("Bookmark visited!");
+    exports.handlers.record(WeekEventCodes.BOOKMARK_CHOOSE);
   },
 
   onItemMoved: function(itemId, oldParentId, oldIndex, newParentId,
                         newIndex, type) {
-    this.store.rec(WeekEventCodes.BOOKMARK_MODIFY, BMK_MOD_MOVED, "", "");
-    console.info("Bookmark moved!");
+    exports.handlers.record(WeekEventCodes.BOOKMARK_MODIFY,
+                            "Bookmark Moved");
   }
 };
 
@@ -707,13 +704,19 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
 WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
                                                         val3, timestamp) {
   // Make sure string columns are strings
-  if (typeof val1 != "string") {
+  if (!val1) {
+    val1 = "";
+  } else if (typeof val1 != "string") {
     val1 = val1.toString();
   }
-  if (typeof val2 != "string") {
+  if (!val2) {
+    val2 = "";
+  } else if (typeof val2 != "string") {
     val2 = val2.toString();
   }
-  if (typeof val3 != "string") {
+  if (!val3) {
+    val3 = "";
+  } else if (typeof val3 != "string") {
     val3 = val3.toString();
   }
   if (!timestamp) {

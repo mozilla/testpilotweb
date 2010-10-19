@@ -64,20 +64,6 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
                             "History Count", "Profile Age",
                             "Session Restore Preferences"];
 
-// subcodes for BOOKMARK_MODIFY:
-const BMK_MOD_CHANGED = 0;
-const BMK_MOD_REMOVED = 1;
-const BMK_MOD_MOVED = 2;
-
-// subcodes for bookmark type:
-const BMK_TYPE_BOOKMARK = "0";
-const BMK_TYPE_FOLDER = "1";
-
-const UNINSTALL_DONE = "0";
-const UNINSTALL_CANCELLED = "1";
-
-// TODO why make data1/data2/data3 strings but then not use them for anything
-// except status codes???
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_results.sqlite",
   tableName: "week_in_the_life",
@@ -232,18 +218,16 @@ var IdlenessObserver = {
    * method: self-pinging on a timer.
    */
   alreadyInstalled: false,
-  store: null,
   idleService: null,
   lastSelfPing: 0,
   selfPingTimer: null,
   selfPingInterval: 300000, // Five minutes
 
-  install: function(store) {
+  install: function() {
     if (!this.alreadyInstalled) {
       console.info("Adding idleness observer.");
       this.idleService = Cc["@mozilla.org/widget/idleservice;1"]
        .getService(Ci.nsIIdleService);
-      this.store = store;
       // addIdleObserver takes seconds, not ms.  600s = 10 minutes.
       this.idleService.addIdleObserver(this, 600);
       this.alreadyInstalled = true;
@@ -279,10 +263,10 @@ var IdlenessObserver = {
         // before either of them... account for this in processing.
         let estimatedStop = self.lastSelfPing + self.selfPingInterval;
         // backdate my own timestamp:
-        self.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
-                                data1: "1", data2: "0", data3: "0",
-                                timestamp: estimatedStop});
-        self.store.rec(WeekEventCodes.BROWSER_ACTIVATE, "1", "", "");
+        exports.handlers.record(WeekEventCodes.BROWSER_INACTIVE,
+                                "Self-ping timer", "", "", estimatedStop);
+        exports.handlers.record(WeekEventCodes.BROWSER_ACTIVATE,
+                                "Self-ping timer");
       }
       self.lastSelfPing = now;
     }, this.selfPingInterval, 1);
@@ -294,16 +278,16 @@ var IdlenessObserver = {
     if (topic == 'idle') {
       console.info("User has gone idle for " + data + " milliseconds.");
       let idleTime = Date.now() - parseInt(data);
-      this.store.storeEvent({ event_code: WeekEventCodes.BROWSER_INACTIVE,
-                              data1: "2", data2: "0", data3: "0",
-                              timestamp: idleTime});
+      exports.handlers.record(WeekEventCodes.BROWSER_INACTIVE,
+                              "IdleService observer", "", "", idleTime);
       if (this.selfPingTimer) {
         this.selfPingTimer.cancel();
       }
     }
     if (topic == 'back') {
       console.info("User is back! Was idle for " + data + " milliseconds.");
-      this.store.rec(WeekEventCodes.BROWSER_ACTIVATE, "2", "", "");
+      exports.handlers.record(WeekEventCodes.BROWSER_ACTIVATE,
+                              "IdleService observer");
       this.lastSelfPing = Date.now();
       this.pingSelf();
     }
@@ -312,11 +296,9 @@ var IdlenessObserver = {
 
 var ExtensionObserver = {
   alreadyInstalled: false,
-  store: null,
 
-  install: function(store) {
+  install: function() {
     if (!this.alreadyInstalled) {
-      this.store = store;
       let self = this;
       AddonManager.addInstallListener(self.instalListener);
       AddonManager.addAddonListener(self.addonListener);
@@ -327,8 +309,10 @@ var ExtensionObserver = {
   instalListener : {
     onInstallEnded : function (aInstall, aAddon) {
       console.info("onInstallEnded!");
+        // TODO is there a reason we're recording names and IDs on uninstall
+      // but not on install?
       if ("extension" == aAddon.type){
-        ExtensionObserver.store.rec(WeekEventCodes.ADDON_INSTALL, "", "", "");
+        exports.handlers.record(WeekEventCodes.ADDON_INSTALL);
         console.info("An extension was installed!");
       }
     }
@@ -337,8 +321,8 @@ var ExtensionObserver = {
   addonListener : {
     onUninstalling: function(aAddon) {
       if ("extension" == aAddon.type){
-        ExtensionObserver.store.rec(WeekEventCodes.ADDON_UNINSTALL,
-                                  UNINSTALL_DONE, "addon name: " + aAddon.name,
+        exports.handlers.record(WeekEventCodes.ADDON_UNINSTALL,
+                                "Uninstall Done", "addon name: " + aAddon.name,
                                   "addon id: " + aAddon.id);
         console.info(aAddon.name +
                      " will be uninstalled after the application restarts.!");
@@ -348,8 +332,9 @@ var ExtensionObserver = {
     onOperationCancelled: function(aAddon) {
       //PENDING_NONE: 0
       if ("extension" == aAddon.type && 0 == aAddon.pendingOperations) {
-          ExtensionObserver.store.rec(WeekEventCodes.ADDON_UNINSTALL,
-                              UNINSTALL_CANCELLED, "addon name: " + aAddon.name,
+          exports.handlers.record(WeekEventCodes.ADDON_UNINSTALL,
+                                  "Uninstall Canceled",
+                                  "addon name: " + aAddon.name,
                                   "addon id: " + aAddon.id);
         console.info(aAddon.name +
                    " will NOT be uninstalled after the application restarts.!");
@@ -385,20 +370,18 @@ var ExtensionObserver = {
           }
         }
       });
-      console.info ("Recording extensions active: " + numberActive +
-                    " inactive: " + numberInactive);
-      ExtensionObserver.store.rec(WeekEventCodes.ADDON_STATUS, numberActive,
-                                  numberInactive, "");
+      exports.handlers.record(WeekEventCodes.ADDON_STATUS,
+                              numberActive + " active",
+                              numberInactive + " inactive");
     });
   }
 };
 
 var DownloadsObserver = {
   alreadyInstalled: false,
-  store: null,
   downloadManager: null,
 
-  install: function(store) {
+  install: function() {
     if (!this.alreadyInstalled) {
       console.info("Adding downloads observer.");
       this.obsService = Cc["@mozilla.org/observer-service;1"]
@@ -408,7 +391,6 @@ var DownloadsObserver = {
       /*this.downloadManager = Cc["@mozilla.org/download-manager;1"]
                    .getService(Ci.nsIDownloadManager);
       this.downloadManager.addListener(this);*/
-      this.store = store;
       this.alreadyInstalled = true;
     }
   },
@@ -424,7 +406,7 @@ var DownloadsObserver = {
   observe: function (subject, topic, state) {
     if (topic == "dl-done") {
       console.info("A download completed.");
-      this.store.rec(WeekEventCodes.DOWNLOAD, "", "", "");
+      exports.handelrs.record(WeekEventCodes.DOWNLOAD);
     }
   }
 
@@ -444,12 +426,11 @@ var MemoryObserver = {
    * It retrieves memory information periodically according to the timerInterval
    */
   alreadyInstalled: false,
-  store: null,
   memoryManager: null,
   memoryInfoTimer: null,
   timerInterval: 600000, // Ten minutes
 
-   install: function(store) {
+   install: function() {
     if (!this.alreadyInstalled) {
       console.info("Adding memory observer.");
 
@@ -459,7 +440,6 @@ var MemoryObserver = {
       this.memoryInfoTimer = Components.classes["@mozilla.org/timer;1"]
         .createInstance(Components.interfaces.nsITimer);
 
-      this.store = store;
       //Get Memory info on startup
       this.getMemoryInfo();
       let self = this;
@@ -480,18 +460,15 @@ var MemoryObserver = {
 
   getMemoryInfo: function() {
     let enumRep = this.memoryManager.enumerateReporters();
-    let now = Date.now();
     while (enumRep.hasMoreElements()) {
       let mr = enumRep.getNext().QueryInterface(Ci.nsIMemoryReporter);
-      console.info("memory path: "+ mr.path + " memory used: " + mr.memoryUsed);
-      this.store.storeEvent({ event_code: WeekEventCodes.MEMORY_USAGE,
-                        data1: "" + mr.path, data2: "" + mr.memoryUsed,
-                        data3: "", timestamp: now});
-
+      exports.handlers.record(WeekEventCodes.MEMORY_USAGE,
+                              mr.path, mr.memoryUsed);
     }
   }
 };
 
+// TODO Don't use global variable here.
 //Global variable to keep track of all restored tabs
 let totalRestoringTabs = 0;
 //let sessionRestoredTabs = 0;

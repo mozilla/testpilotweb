@@ -705,31 +705,32 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
 
 // Utility function for recording events:
 WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
-                                                  val3) {
-  if (!this.privateMode) {
-    // Make sure string columns are strings
-    if (typeof val1 != "string") {
-      val1 = val1.toString();
-    }
-    if (typeof val2 != "string") {
-      val2 = val2.toString();
-    }
-    if (typeof val3 != "string") {
-      val3 = val3.toString();
-    }
-    WeekLifeStudyGlobalObserver.superClass.record.call(this,
-      {
-        event_code: eventCode,
-        data1: val1,
-        data2: val2,
-        data3: val3,
-        timestamp: Date.now()
-      });
-    /* This dump statement is for debugging and SHOULD be removed before
-     * the study is released. */
-    dump("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "
-         + val3 + "\n");
+                                                        val3, timestamp) {
+  // Make sure string columns are strings
+  if (typeof val1 != "string") {
+    val1 = val1.toString();
   }
+  if (typeof val2 != "string") {
+    val2 = val2.toString();
+  }
+  if (typeof val3 != "string") {
+    val3 = val3.toString();
+  }
+  if (!timestamp) {
+    timestamp = Date.now();
+  }
+  WeekLifeStudyGlobalObserver.superClass.record.call(this,
+  {
+    event_code: eventCode,
+    data1: val1,
+    data2: val2,
+    data3: val3,
+    timestamp: timestamp
+  });
+  /* This dump statement is for debugging and SHOULD be removed before
+   * the study is released. */
+  dump("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "
+       + val3 + "\n");
 };
 
 WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {

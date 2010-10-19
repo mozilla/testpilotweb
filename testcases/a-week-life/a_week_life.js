@@ -76,6 +76,8 @@ const BMK_TYPE_FOLDER = "1";
 const UNINSTALL_DONE = "0";
 const UNINSTALL_CANCELLED = "1";
 
+// TODO why make data1/data2/data3 strings but then not use them for anything
+// except status codes???
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_results.sqlite",
   tableName: "week_in_the_life",
@@ -665,10 +667,6 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
   obsService: null;
   _sessionStartup: null;
   let self = this;
-  //Attach a convenience method to the data store object:
-  store.rec = function(eventCode, data1, data2, data3) {
-    self.record(eventCode, data1, data2, data3);
-  };
   this._dataStore = store;
   // Record the version of this study at startup: this lets us see
   // what data was recorded before and after an update, which lets us
@@ -719,13 +717,14 @@ WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
     if (typeof val3 != "string") {
       val3 = val3.toString();
     }
-    this._store.storeEvent({
-      event_code: eventCode,
-      data1: val1,
-      data2: val2,
-      data3: val3,
-      timestamp: Date.now()
-    });
+    WeekLifeStudyGlobalObserver.superClass.record.call(this,
+      {
+        event_code: eventCode,
+        data1: val1,
+        data2: val2,
+        data3: val3,
+        timestamp: Date.now()
+      });
     /* This dump statement is for debugging and SHOULD be removed before
      * the study is released. */
     dump("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "

@@ -877,12 +877,6 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
         case WeekEventCodes.BOOKMARK_CREATE:
           switch (row.data1) {
             case "New Bookmark Added":
-            /* TODO string concat bug happening here?  Recorded as:
-             *     exports.handlers.record(WeekEventCodes.BOOKMARK_STATUS,
-                            totalBookmarks + " total bookmarks",
-                            totalFolders + " folders",
-                            "folder depth " + greatestDepth);
-             */
               bkmks += 1;
               bookmarksData.push( [row.timestamp, bkmks] );
             break;
@@ -891,7 +885,12 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
             break;
           }
         break;
-          // TODO bookmark remove!
+        case WeekEventCodes.BOOKMARK_MODIFY:
+          if (row.data1 == "Bookmark Removed") {
+            bkmks -= 1;
+            bookmarksData.push( [row.timestamp, bkmks] );
+          }
+        break;
         case WeekEventCodes.DOWNLOAD:
           numDownloads += 1;
         break;

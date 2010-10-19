@@ -145,12 +145,10 @@ var BookmarkObserver = {
     for each (rootFolder in rootFolders) {
       digIntoFolder(rootFolder, 0);
     }
-
-    console.info("Results: There are " + totalBookmarks + " bookmarks.");
-    console.info("In " + totalFolders + " folders.");
-    console.info("Greatest folder depth is " + greatestDepth);
-    exports.handlers.record(WeekEventCodes.BOOKMARK_STATUS, totalBookmarks,
-                            totalFolders, greatestDepth);
+    exports.handlers.record(WeekEventCodes.BOOKMARK_STATUS,
+                            totalBookmarks + " total bookmarks",
+                            totalFolders + " folders",
+                            "folder depth " + greatestDepth);
   },
 
   uninstall: function() {

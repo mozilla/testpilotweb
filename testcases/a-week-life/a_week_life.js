@@ -728,7 +728,7 @@ WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
     });
     /* This dump statement is for debugging and SHOULD be removed before
      * the study is released. */
-    console.info("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "
+    dump("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "
          + val3 + "\n");
   }
 };

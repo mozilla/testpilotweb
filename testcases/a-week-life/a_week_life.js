@@ -5,8 +5,8 @@ Components.utils.import("resource://gre/modules/AddonManager.jsm"); // TODO gene
 exports.experimentInfo = {
   startDate: null,
   duration: 7,
-  testName: "A Week in the Life of a Browser",
-  testId: 2,
+  testName: "A Week in the Life of a Browser (v2)",
+  testId: 12,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/a-week-life.html",
   summary: "This auto-recurring study aims to explore larger trends of how "
            + "the browser is being used over time. It will periodically collect "
@@ -65,8 +65,8 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
                             "Session Restore Preferences"];
 
 exports.dataStoreInfo = {
-  fileName: "testpilot_week_in_the_life_results.sqlite",
-  tableName: "week_in_the_life",
+  fileName: "testpilot_week_in_the_life_v2_results.sqlite",
+  tableName: "week_in_the_life_v2",
   columns: [{property: "event_code", type: BaseClasses.TYPE_INT_32, displayName: "Event",
              displayValue: eventCodeToEventName},
             {property: "data1", type: BaseClasses.TYPE_STRING, displayName: "Data 1"},

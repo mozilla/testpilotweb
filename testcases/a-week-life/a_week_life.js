@@ -441,7 +441,7 @@ var MemoryObserver = {
       //Get Memory info on startup
       this.getMemoryInfo();
       let self = this;
-      this.memoryInfoTimer.initWithCallback(function(){self.getMemoryInfo()}
+      this.memoryInfoTimer.initWithCallback(function(){self.getMemoryInfo();}
         ,this.timerInterval, this.memoryInfoTimer.TYPE_REPEATING_SLACK);
       this.alreadyInstalled = true;
     }
@@ -466,50 +466,28 @@ var MemoryObserver = {
   }
 };
 
-// TODO Don't use global variable here.
-//Global variable to keep track of all restored tabs
-let totalRestoringTabs = 0;
-//let sessionRestoredTabs = 0;
-var SessionRestoreObserver = {
-  //TODO: Check if it is better to add a listener to Restore btn (id:errorTryAgain)
-  //Add total restored windows.
 
-  install: function(aWindow) {
-      aWindow.document.addEventListener("SSTabRestoring",
-      SessionRestoreObserver.increaseTabCounter, false);
-
-    //aWindow.document.addEventListener("SSTabRestored",
-    //  function(){
-    //    sessionRestoredTabs = sessionRestoredTabs + 1;
-    //    console.info("Tabs RESTORED: " + sessionRestoredTabs);
-    //  }, false);
-  },
-
-  uninstall: function(aWindow) {
-    aWindow.document.removeEventListener("SSTabRestoring",
-      SessionRestoreObserver.increaseTabCounter, false);
-  },
-
-  increaseTabCounter: function() {
-    totalRestoringTabs = totalRestoringTabs + 1;
-    console.info("Current Total Restoring Tabs: " + totalRestoringTabs);
-  }
-};
-
-
-
-// TODO if we don't need per-window observation, we don't need to make one of these.
-// On the other hand, if SessionRestoreObserver is instantiated once per window,
-// it should be through here!
 function WeekLifeStudyWindowObserver(window, globalInstance) {
-  // Call base class constructor (Important!)
   WeekLifeStudyWindowObserver.baseConstructor.call(this, window, globalInstance);
 }
-// set up BackButtonWindowObserver as a subclass of GenericWindowObserver:
 BaseClasses.extend(WeekLifeStudyWindowObserver,
                    BaseClasses.GenericWindowObserver);
 WeekLifeStudyWindowObserver.prototype.install = function() {
-}
+  this.totalTabsRestored = 0;
+  let self = this;
+//TODO: Check if it is better to add a listener to Restore btn (id:errorTryAgain)
+  //Add total restored windows.
+
+  this._listen(this.window.document, "SSTabRestoring",
+               function() {self.increaseTabCounter();},
+               false);
+};
+
+WeekLifeStudyWindowObserver.prototype.increaseTabCounter = function() {
+  this.totalRestoringTabs += 1;
+  console.info("Current Total Restoring Tabs: " + totalRestoringTabs);
+};
+
 
 function WeekLifeStudyGlobalObserver() {
   WeekLifeStudyGlobalObserver.baseConstructor.call(this,
@@ -582,25 +560,21 @@ WeekLifeStudyGlobalObserver.prototype.recordSessionStorePrefs = function() {
   let prefValue = prefBranch.getIntPref("page");
   //browser.startup.page 0: blank page, 1: homepage, 3: previous session
   this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-              "browser.startup.page", prefValue, "");
-  console.info("browser.startup.page: " + prefValue);
+              "browser.startup.page", prefValue);
 
   prefBranch = prefs.getBranch("browser.sessionstore.");
 
   prefValue = prefBranch.getBoolPref("resume_from_crash");
   this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-              "browser.sessionstore.resume_from_crash", prefValue, "");
-  console.info("browser.sessionstore.resume_from_crash: " + prefValue);
+              "browser.sessionstore.resume_from_crash", prefValue);
 
   prefValue = prefBranch.getBoolPref("resume_session_once");
   this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-              "browser.sessionstore.resume_session_once", prefValue, "");
-  console.info("browser.sessionstore.resume_session_once: "+ prefValue);
+              "browser.sessionstore.resume_session_once", prefValue);
 
   prefValue = prefBranch.getIntPref("max_resumed_crashes");
   this.record(WeekEventCodes.SESSION_RESTORE_PREFERENCES,
-              "browser.sessionstore.max_resumed_crashes", prefValue, "");
-  console.info("browser.sessionstore.max_resumed_crashes: "+ prefValue);
+              "browser.sessionstore.max_resumed_crashes", prefValue);
 };
 
 WeekLifeStudyGlobalObserver.prototype.startAllObservers = function(store) {
@@ -622,11 +596,9 @@ WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
 WeekLifeStudyGlobalObserver.prototype.observe = function(subject, topic, data) {
   if (topic == "quit-application") {
     if (data == "shutdown") {
-      this.record(WeekEventCodes.BROWSER_SHUTDOWN, "", "", "");
-      console.info("Week in the Life study got shutdown message.");
+      this.record(WeekEventCodes.BROWSER_SHUTDOWN);
     } else if (data == "restart") {
-      this.record(WeekEventCodes.BROWSER_RESTART,  "", "", "");
-      console.info("Week in the Life study got startup message.");
+      this.record(WeekEventCodes.BROWSER_RESTART);
     }
   }
 };
@@ -714,7 +686,7 @@ WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
 WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
   WeekLifeStudyGlobalObserver.superClass.onAppStartup.call(this);
   // TODO how can we tell if something has gone wrong with session restore?
-  this.record(WeekEventCodes.BROWSER_START, "", "", "");
+  this.record(WeekEventCodes.BROWSER_START);
   console.info("Week in the life study got app startup message.");
 
   //RESTORE SESSION information, number of tabs and windows restored
@@ -749,7 +721,7 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
     console.info("Session Restored: total windows: "+ countWindows
       + " total tabs: " +  countTabs);
     this.record(WeekEventCodes.SESSION_ON_RESTORE, "Windows " + countWindows,
-                "Tabs " + countTabs, "");
+                "Tabs " + countTabs);
   }
 };
 
@@ -759,15 +731,21 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
 //};
 
 WeekLifeStudyGlobalObserver.prototype.onExperimentShutdown = function() {
-  WeekLifeStudyGlobalObserver.superClass.onExperimentShutdown.call(this);
-  if(totalRestoringTabs > 0) {
-    //TODO: Check if it can be recorded before onExperimentShutdown
-    console.info("Recording total restored tabs (SSTabRestoring): "
-      + totalRestoringTabs);
-    this.record(WeekEventCodes.SESSION_RESTORE, "Windows",
-               "Tabs " + totalRestoringTabs, "");
-    totalRestoringTabs = 0;
+  // Record total number of tabs (collect from individual window observers)
+  // before killing the window observers:
+  let totalRestoringTabs = 0;
+  for (let i = 0; i < this._windowObservers.length; i++) {
+    totalRestoringTabs += this._windowObservers[i].totalRestoringTabs;
   }
+  //TODO: Check if it can be recorded before onExperimentShutdown
+
+  // TODO isn't this redundant with the number of windows and tabs as
+  // recorded in the onAppStartup handler??
+
+  this.record(WeekEventCodes.SESSION_RESTORE, "Windows",
+              "Tabs " + totalRestoringTabs);
+
+  WeekLifeStudyGlobalObserver.superClass.onExperimentShutdown.call(this);
   console.info("Week in the life: Shutting down subobservers.");
   this.stopAllObservers();
   // This check is to make sure nothing weird will happen if
@@ -780,26 +758,14 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentShutdown = function() {
 
 WeekLifeStudyGlobalObserver.prototype.onEnterPrivateBrowsing = function() {
   WeekLifeStudyGlobalObserver.superClass.onEnterPrivateBrowsing.call(this);
-  console.info("Week in the Life: Got private browsing on message.");
-  this.record(WeekEventCodes.PRIVATE_ON, "", "", "");
+  this.record(WeekEventCodes.PRIVATE_ON);
   this.stopAllObservers();
 };
 
 WeekLifeStudyGlobalObserver.prototype.onExitPrivateBrowsing = function() {
   WeekLifeStudyGlobalObserver.superClass.onExitPrivateBrowsing.call(this);
-  console.info("Week in the Life: Got private browsing off message.");
-  this.record(WeekEventCodes.PRIVATE_OFF, "", "", "");
+  this.record(WeekEventCodes.PRIVATE_OFF);
   this.startAllObservers();
-};
-
-WeekLifeStudyGlobalObserver.prototype.onNewWindow = function(window) {
-  WeekLifeStudyGlobalObserver.superClass.onNewWindow.call(this, window);
-  SessionRestoreObserver.install(window);
-};
-
-WeekLifeStudyGlobalObserver.prototype.onWindowClosed = function(window) {
-  WeekLifeStudyGlobalObserver.superClass.onWindowClosed.call(this, window);
-  SessionRestoreObserver.uninstall(window);
 };
 
 // Instantiate and export the global observer (required!)

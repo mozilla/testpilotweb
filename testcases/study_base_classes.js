@@ -57,6 +57,16 @@ exports.GenericWebContent.prototype = {
       this.saveButtons;
   },
 
+  get recurOptions() {
+     return '<p>This test will automatically recur every ' +
+       this.expInfo.recurrenceInterval + ' days for up to\
+     one year. If you would prefer to have Test Pilot submit your data\
+     automatically next time, instead of asking you, you can check the box\
+     below:<br/>\
+     <input type="checkbox" id="always-submit-checkbox">\
+     Automatically submit data for this test from now on<br/>';
+  },
+
   get inProgressHtml () {
     return '<h2>Thank you, Test Pilot!</h2>' +
       '<p>The ' + this.titleLink + ' study is currently in progress.</p>' +
@@ -70,8 +80,10 @@ exports.GenericWebContent.prototype = {
 
   get completedHtml() {
     return '<h2>Excellent! You just finished the ' + this.titleLink + ' Study!</h2>' +
-    '<b>The study is complete and your test data is ready to submit!</b>\
-    <ul><li>You have 7 days to decide if you want to submit your data.  7 days \
+    '<b>The study is complete and your test data is ready to submit!</b>' +
+      (this.expInfo.recursAutomatically ? this.recurOptions : "") +
+      this.uploadData +
+    '<ul><li>You have 7 days to decide if you want to submit your data.  7 days \
     after the study is complete, your data will be automatically removed from \
     your computer if you don\'t submit it.</li>\
     <li>You can save your graph or export the raw data now or after you submit \
@@ -79,7 +91,7 @@ exports.GenericWebContent.prototype = {
     '<li>If you choose to cancel the study now, your data will be removed from \
     your computer immediately. You won\'t be able to see your chart or the raw \
     data after you cancel the study. You can ' + this.optOutLink +
-    '.</li>' + this.uploadData + this.dataCanvas;
+    '.</li>' + this.dataCanvas;
   },
 
   get upcomingHtml() {

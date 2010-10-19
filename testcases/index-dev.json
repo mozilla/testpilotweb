@@ -3,7 +3,7 @@
   {"default":
     {"name": "Dependencies",
      "jarfile": "base_classes.jar",
-     "hash": "214bf47ac032d95e9266779f572ad1343522f33ec553b1a606989cef6fe6aaec"
+     "hash": "3a538f98708e657943d13b86ae93930eb32616f261298b2503d65d7d6250718d"
     }
   },
 
@@ -27,7 +27,7 @@
     {"name": "A Week in the Life of a Browser",
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
-     "hash": "7dc470f04ab6d0c95cbf932889739f7347aabb7b867791b6f80c2f2b0b8eb4f7"
+     "hash": "c0098b75051715a5ba7a6b197a753ff4469c25c9b5af321475c9f9e631bbcfca"
     }
   },
 

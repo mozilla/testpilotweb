@@ -827,23 +827,6 @@ WeekLifeStudyGlobalObserver.prototype.onWindowClosed = function(window) {
 // Instantiate and export the global observer (required!)
 exports.handlers = new WeekLifeStudyGlobalObserver();
 
-const COMPLETED_DATA_DISPLAY_HTML =   /* Note this is in past tense*/
-    '<h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
-    To <span id="usage-period-end-span"></span></h4>\
-    <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
-    hours actively using Firefox on that week. Firefox was running but \
-    idle for a total of <span id="idle-time-span"></span> hours.</p>\
-    <p><b>Bookmarks:</b> At the beginning of the week you had <span id="first-num-bkmks-span"></span>\
-    bookmarks. At the end you had <span id="num-bkmks-span"></span> bookmarks in \
-    <span id="num-folders-span"></span> folders, to a max folder depth of \
-    <span id="max-depth-span"></span>.</p>\
-    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> files\
-    during that period.</p>\
-    <p><b>Extensions:</b> At the beginning of the week you had \
-    <span id="first-num-extensions"></span> Firefox extensions installed.  \
-    At the end you had <span id="num-extensions"></span> extensions installed.</p>\
-    </div>';
-
 // Web content
 function WeekLifeStudyWebContent()  {
   WeekLifeStudyWebContent.baseConstructor.call(this, exports.experimentInfo);
@@ -851,7 +834,11 @@ function WeekLifeStudyWebContent()  {
 BaseClasses.extend(WeekLifeStudyWebContent, BaseClasses.GenericWebContent);
 WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return '<h4>Facts About Your Browser Use This Week</h4>\
+  // TODO customize this text a little bit, e.g. "extensions" and "files"
+  // should become singular if there was only one.  "Now" should be replaced
+    // by "at the end of the week" if the study is over.
+    return '<h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
+    To <span id="usage-period-end-span"></span></h4>\
     <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
      hours actively using Firefox this week. Firefox was running but \
     idle for a total of <span id="idle-time-span"></span> hours.</p>\
@@ -869,29 +856,9 @@ WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
 
 WeekLifeStudyWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
-      return this.rawDataLink +
-      '<div class="dataBox">' +
-      '<canvas id="data-canvas" width="500" height="300"></canvas>'
-      + this.saveButtons +
-      this.dataViewExplanation +'</div>';
-  });
-WeekLifeStudyWebContent.prototype.__defineGetter__("completedHtml",
-  function() {
-    return '<h2>A Week in the Life of a Browser</h2><p>Greetings!  The &quot;a week in the \
-     life of a browser&quot; study has just completed!  The last step is to submit \
-     the data. \
-     You can <a onclick="showRawData(2);">click here to see</a> the complete raw \
-     data set, just as it will be uploaded to Mozilla.</p>\
-     <p>This test will automatically recur every 60 days for up to one year.\
-     If you would prefer to have Test Pilot submit your data automatically next time, \
-     instead of asking you, you can check the box below:<br/>\
-     <input type="checkbox" id="always-submit-checkbox">\
-     Automatically submit data for this test from now on<br/>\
-     <div class="home_callout_continue"><img class="homeIcon" src="chrome://testpilot/skin/images/home_computer.png">\
-     <span id="upload-status"><a onclick="uploadData();">Submit your data &raquo;</a>\
-     </span></div><p>If you don\'t want to upload your data, please \
-     <a href="chrome://testpilot/content/status-quit.html?eid=2">click here to quit</a>.</p>'
-     + COMPLETED_DATA_DISPLAY_HTML;
+      return this.rawDataLink + '<div class="dataBox">' +
+      '<canvas id="data-canvas" width="500" height="300"></canvas>' +
+      this.saveButtons + this.dataViewExplanation +'</div>';
   });
 
 WeekLifeStudyWebContent.prototype.deleteDataOlderThanAWeek = function(store) {

@@ -869,16 +869,22 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
         case WeekEventCodes.BOOKMARK_STATUS:
           bkmks = parseInt(row.data1);
           folders = parseInt(row.data2);
-          depth = parseInt(row.data3);
+          depth = parseInt(row.data3); // TODO this is getting NaN
           bookmarksData.push( [row.timestamp, bkmks] );
         break;
         case WeekEventCodes.BOOKMARK_CREATE:
           switch (row.data1) {
-            case BMK_TYPE_BOOKMARK:
+            case "New Bookmark Added":
+            /* TODO string concat bug happening here?  Recorded as:
+             *     exports.handlers.record(WeekEventCodes.BOOKMARK_STATUS,
+                            totalBookmarks + " total bookmarks",
+                            totalFolders + " folders",
+                            "folder depth " + greatestDepth);
+             */
               bkmks += 1;
               bookmarksData.push( [row.timestamp, bkmks] );
             break;
-            case BMK_TYPE_FOLDER:
+            case "New Bookmark Folder":
               folders += 1;
             break;
           }
@@ -897,10 +903,10 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
           break;
         case WeekEventCodes.ADDON_UNINSTALL:
           switch (row.data1) {
-            case UNINSTALL_DONE:
+            case "Uninstall Done":
               numAddons -= 1;
             break;
-            case UNINSTALL_CANCELLED:
+            case "Uninstall Canceled":
               numAddons += 1;
             break;
           }

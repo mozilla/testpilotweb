@@ -835,7 +835,9 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
   // Get rid of old data so it doesn't pollute current submission
   this.deleteDataOlderThanAWeek(experiment.dataStore);
   experiment.getDataStoreAsJSON(function(rawData) {
-    let bkmks, folders, depth;
+    let bkmks = 0;
+    let folders = 0;
+    let depth = 0;
     let browserUseTimeData = [];
     let bookmarksData = [];
     let addonsData = [];
@@ -907,7 +909,7 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
               numAddons -= 1;
             break;
             case "Uninstall Canceled":
-              numAddons += 1;
+              numAddons += 1;  // TODO shouldn't this leave the number alone?
             break;
           }
           addonsData.push( [row.timestamp, numAddons] );
@@ -999,12 +1001,15 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
     ctx.mozTextStyle = "10pt sans serif";
     ctx.fillStyle = "grey";
     ctx.save();
+    let initialNumBkmks = (bookmarksData.length > 0)? bookmarksData[0][1]: 0;
+
     ctx.translate(5, (boundingRect.height/2) -
-                  bkmkYScale * bookmarksData[0][1] + 25);
-    ctx.mozDrawText(bookmarksData[0][1] + " bookmarks");
+                  bkmkYScale * initialNumBkmks + 25);
+    ctx.mozDrawText(initialNumBkmks + " bookmarks");
     ctx.restore();
     ctx.save();
-    let lastNumBkmks = bookmarksData[bookmarksData.length -1][1];
+    let lastNumBkmks = (bookmarksData.length > 0) ?
+                         bookmarksData[bookmarksData.length -1][1]: 0;
     ctx.translate(boundingRect.width - 80,
                   (boundingRect.height/2) - bkmkYScale * lastNumBkmks + 25);
     ctx.mozDrawText(lastNumBkmks + " bookmarks");
@@ -1055,12 +1060,20 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
     if (endSpan) {
       endSpan.innerHTML = getFormattedDateString(lastTimestamp);
     }
-    document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
+    if (bookmarksData.length > 0) {
+      document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
+    } else {
+      document.getElementById("first-num-bkmks-span").innerHTML = 0;
+    }
     document.getElementById("num-bkmks-span").innerHTML = bkmks;
     document.getElementById("num-folders-span").innerHTML = folders;
     document.getElementById("max-depth-span").innerHTML = depth;
     document.getElementById("num-downloads").innerHTML = numDownloads;
-    document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
+    if (addonsData.length > 0) {
+      document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
+    } else {
+      document.getElementById("first-num-extensions").innerHTML = 0;
+    }
     document.getElementById("num-extensions").innerHTML = numAddons;
     document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
     document.getElementById("idle-time-span").innerHTML = getHours(idleTime);

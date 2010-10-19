@@ -17,12 +17,6 @@
    "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
   },
 
-  {"name": "Search",
-   "jarfile": "search/searchbar-study.jar",
-   "studyfile": "searchbar-study.js",
-   "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
-  },
-
   {"name": "Firefox 4 Beta Interface 2",
    "jarfile": "beta/combined.jar",
    "studyfile": "combined.js",
@@ -53,14 +47,6 @@
   },
 
   {"default":
-    {"name": "Search",
-     "jarfile": "search/searchbar-study.jar",
-     "studyfile": "searchbar-study.js",
-     "hash": "c9b9e39ba3bc304b1794f971af23a170927a42bc57289bbcc109f079b10a2ce2"
-    }
-  },
-
-  {"default":
     {"name": "Firefox 4 Beta Interface 2",
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
@@ -78,6 +64,13 @@
 ],
 
 "legacy": [
+{"name": "Search",
+ "id": "8",
+ "url": "https://testpilot.mozillalabs.com/testcases/searchui",
+ "summary": "What are the most used interfaces to access search engines through Firefox?",
+ "thumbnail": "https://testpilot.mozillalabs.com/testcases/search/searchbar-thumbnail.png"
+},
+
 {"name": "Firefox 4 Beta Interface",
  "id": "100",
  "url": "https://testpilot.mozillalabs.com/testcases/betaui.html",

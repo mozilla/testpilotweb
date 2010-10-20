@@ -770,10 +770,8 @@ function WeekLifeStudyWebContent()  {
 }
 BaseClasses.extend(WeekLifeStudyWebContent, BaseClasses.GenericWebContent);
 WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
+//TODO when study over, should say "at the end of the week" instead of "now".
   function() {
-  // TODO customize this text a little bit, e.g. "extensions" and "files"
-  // should become singular if there was only one.  "Now" should be replaced
-    // by "at the end of the week" if the study is over.
     return '<h4>Facts About Your Browser Use From <span id="usage-period-start-span"></span>\
     To <span id="usage-period-end-span"></span></h4>\
     <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
@@ -862,9 +860,9 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
           browserUseTimeData.push( [row.timestamp, 1]);
         break;
         case WeekEventCodes.BOOKMARK_STATUS:
-          bkmks = parseInt(row.data1);
-          folders = parseInt(row.data2);
-          depth = parseInt(row.data3); // TODO this is getting NaN
+          bkmks = parseInt(row.data1.replace("total bookmarks", ""));
+          folders = parseInt(row.data2.replace("folders", ""));
+          depth = parseInt(row.data3.replace("folder depth", ""));
           bookmarksData.push( [row.timestamp, bkmks] );
         break;
         case WeekEventCodes.BOOKMARK_CREATE:

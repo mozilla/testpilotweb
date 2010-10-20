@@ -427,7 +427,7 @@ var MemoryObserver = {
   alreadyInstalled: false,
   memoryManager: null,
   memoryInfoTimer: null,
-  timerInterval: 600000, // Ten minutes
+  timerInterval: 3600000, // One hour
 
    install: function() {
     if (!this.alreadyInstalled) {

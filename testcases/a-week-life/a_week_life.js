@@ -779,15 +779,15 @@ WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
     <p><b>Browsing:</b> You have spent a total of <span id="total-use-time-span"></span>\
      hours actively using Firefox this week. Firefox was running but \
     idle for a total of <span id="idle-time-span"></span> hours.</p>\
-    <p><b>Bookmarks:</b> At the beginning of the week you had <span id="first-num-bkmks-span"></span>\
-    bookmarks. Now you have <span id="num-bkmks-span"></span> bookmarks in \
-    <span id="num-folders-span"></span> folders, to a max folder depth of \
-    <span id="max-depth-span"></span>.</p>\
-    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> files\
+    <p><b>Bookmarks:</b> At the beginning of the week you had \
+    <span id="first-num-bkmks-span"></span>. Now you have \
+    <span id="num-bkmks-span"></span> in <span id="num-folders-span"></span>, \
+    to a max folder depth of <span id="max-depth-span"></span>.</p>\
+    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> \
     during this week.</p>\
     <p><b>Extensions:</b> At the beginning of the week you had \
-    <span id="first-num-extensions"></span> Firefox extensions installed.  Now \
-    you have <span id="num-extensions"></span> extensions installed.</p>\
+    <span id="first-num-extensions"></span> installed.  Now \
+    you have <span id="num-extensions"></span> installed.</p>\
     </div>';
   });
 
@@ -1052,21 +1052,27 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
     if (endSpan) {
       endSpan.innerHTML = getFormattedDateString(lastTimestamp);
     }
-    if (bookmarksData.length > 0) {
-      document.getElementById("first-num-bkmks-span").innerHTML = bookmarksData[0][1];
-    } else {
-      document.getElementById("first-num-bkmks-span").innerHTML = 0;
-    }
-    document.getElementById("num-bkmks-span").innerHTML = bkmks;
-    document.getElementById("num-folders-span").innerHTML = folders;
+    let firstNumBookmarks =  (bookmarksData.length > 0)?bookmarksData[0][1]:0;
+    document.getElementById("first-num-bkmks-span").innerHTML =
+                                    (firstNumBookmarks == 1)? "one bookmark" :
+                                    firstNumBookmarks + " bookmarks";
+    document.getElementById("num-bkmks-span").innerHTML =
+                                    (lastNumBkmks == 1)? "one bookmark" :
+                                    lastNumBkmks + " bookmarks";
+    document.getElementById("num-folders-span").innerHTML =
+                                    (folders == 1)? "one folder" :
+                                    folders + " folders";
     document.getElementById("max-depth-span").innerHTML = depth;
-    document.getElementById("num-downloads").innerHTML = numDownloads;
-    if (addonsData.length > 0) {
-      document.getElementById("first-num-extensions").innerHTML = addonsData[0][1];
-    } else {
-      document.getElementById("first-num-extensions").innerHTML = 0;
-    }
-    document.getElementById("num-extensions").innerHTML = numAddons;
+    document.getElementById("num-downloads").innerHTML =
+                                    (numDownloads == 1)? "one file" :
+                                    numDownloads + " files";
+    let firstNumAddons = (addonsData.length > 0)? addonsData[0][1] : 0;
+    document.getElementById("first-num-extensions").innerHTML =
+                                    (firstNumAddons == 1)? "one Firefox extension" :
+                                    firstNumAddons + " Firefox extensions";
+    document.getElementById("num-extensions").innerHTML =
+                                    (numAddons == 1)? "one extension" :
+                                    numAddons + " extensions";
     document.getElementById("total-use-time-span").innerHTML = getHours(totalUseTime);
     document.getElementById("idle-time-span").innerHTML = getHours(idleTime);
   });

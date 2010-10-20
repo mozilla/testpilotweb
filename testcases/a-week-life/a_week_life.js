@@ -378,6 +378,7 @@ var ExtensionObserver = {
 var DownloadsObserver = {
   alreadyInstalled: false,
   downloadManager: null,
+  obsService: null,
 
   install: function() {
     if (!this.alreadyInstalled) {
@@ -577,12 +578,12 @@ WeekLifeStudyGlobalObserver.prototype.recordSessionStorePrefs = function() {
               "browser.sessionstore.max_resumed_crashes", prefValue);
 };
 
-WeekLifeStudyGlobalObserver.prototype.startAllObservers = function(store) {
-  BookmarkObserver.install(store);
-  IdlenessObserver.install(store);
-  ExtensionObserver.install(store);
-  DownloadsObserver.install(store);
-  MemoryObserver.install(store);
+WeekLifeStudyGlobalObserver.prototype.startAllObservers = function() {
+  BookmarkObserver.install();
+  IdlenessObserver.install();
+  ExtensionObserver.install();
+  DownloadsObserver.install();
+  MemoryObserver.install();
 };
 
 WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
@@ -594,6 +595,7 @@ WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
 };
 
 WeekLifeStudyGlobalObserver.prototype.observe = function(subject, topic, data) {
+  // TODO test that this actually gets called.
   if (topic == "quit-application") {
     if (data == "shutdown") {
       this.record(WeekEventCodes.BROWSER_SHUTDOWN);
@@ -605,18 +607,11 @@ WeekLifeStudyGlobalObserver.prototype.observe = function(subject, topic, data) {
 
 WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
   WeekLifeStudyGlobalObserver.superClass.onExperimentStartup.call(this, store);
-  //let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-  //                      .getService(Ci.nsIWindowMediator);
-  _dataStore: null;
-  obsService: null;
-  _sessionStartup: null;
   let self = this;
-  this._dataStore = store;
   // Record the version of this study at startup: this lets us see
   // what data was recorded before and after an update, which lets us
   // know whether any given data included a given bug-fix or not.
-  this.record(WeekEventCodes.STUDY_STATUS, exports.experimentInfo.versionNumber,
-              "", "");
+  this.record(WeekEventCodes.STUDY_STATUS, exports.experimentInfo.versionNumber);
 
   //Record plugin info
   for each (let plugin in this.getPluginInfo()) {
@@ -635,13 +630,14 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
   console.info("Profile Age: "+ profileAge + " milliseconds");
   this.record(WeekEventCodes.PROFILE_AGE, profileAge, "", "");
 
-    //Record session store main preferences
+  //Record session store main preferences
   this.recordSessionStorePrefs();
 
   console.info("Week in the life: Starting subobservers.");
-  this.startAllObservers(this._dataStore);
+  this.startAllObservers();
   BookmarkObserver.runGlobalBookmarkQuery();
   ExtensionObserver.runGlobalAddonsQuery();
+
   this.obsService = Cc["@mozilla.org/observer-service;1"]
                          .getService(Ci.nsIObserverService);
   this.obsService.addObserver(this, "quit-application", false);
@@ -691,12 +687,9 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
 
   //RESTORE SESSION information, number of tabs and windows restored
   let stateObject = null;
-  let sessionData;
-  if (!this._sessionStartup) {
-    this._sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"]
+  let sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"]
                   .getService(Ci.nsISessionStartup);
-  }
-  sessionData = this._sessionStartup.state;
+  let sessionData = sessionStartup.state;
   if (sessionData) {
     stateObject = JSON.parse(sessionData);
     let countWindows = 0;

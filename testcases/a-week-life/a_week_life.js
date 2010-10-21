@@ -709,11 +709,6 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
   }
 };
 
-//WeekLifeStudyGlobalObserver.prototype.onAppShutdown = function() {
-//  WeekLifeStudyGlobalObserver.superClass.onAppShutdown.call(this);
-//  this.record();
-//};
-
 WeekLifeStudyGlobalObserver.prototype.onExperimentShutdown = function() {
 
   WeekLifeStudyGlobalObserver.superClass.onExperimentShutdown.call(this);

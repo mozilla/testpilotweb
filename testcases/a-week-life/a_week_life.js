@@ -728,8 +728,9 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentShutdown = function() {
 };
 
 WeekLifeStudyGlobalObserver.prototype.onEnterPrivateBrowsing = function() {
-  WeekLifeStudyGlobalObserver.superClass.onEnterPrivateBrowsing.call(this);
+  // call record first, otherwise it becomes a no-op when we enter PB mode
   this.record(WeekEventCodes.PRIVATE_ON);
+  WeekLifeStudyGlobalObserver.superClass.onEnterPrivateBrowsing.call(this);
   this.stopAllObservers();
 };
 

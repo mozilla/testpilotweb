@@ -44,7 +44,7 @@ const WeekEventCodes = {
   PRIVATE_OFF: 18,
   MEMORY_USAGE:19,
   SESSION_ON_RESTORE:20,
-  SESSION_RESTORE: 21,
+  SESSION_RESTORE: 21, // NOT USED
   PLUGIN_VERSION:22,
   HISTORY_STATUS: 23,
   PROFILE_AGE: 24,
@@ -474,19 +474,8 @@ function WeekLifeStudyWindowObserver(window, globalInstance) {
 BaseClasses.extend(WeekLifeStudyWindowObserver,
                    BaseClasses.GenericWindowObserver);
 WeekLifeStudyWindowObserver.prototype.install = function() {
-  this.totalTabsRestored = 0;
-  let self = this;
 //TODO: Check if it is better to add a listener to Restore btn (id:errorTryAgain)
   //Add total restored windows.
-
-  this._listen(this.window.document, "SSTabRestoring",
-               function() {self.increaseTabCounter();},
-               false);
-};
-
-WeekLifeStudyWindowObserver.prototype.increaseTabCounter = function() {
-  this.totalRestoringTabs += 1;
-  console.info("Current Total Restoring Tabs: " + totalRestoringTabs);
 };
 
 
@@ -715,6 +704,8 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
       + " total tabs: " +  countTabs);
     this.record(WeekEventCodes.SESSION_ON_RESTORE, "Windows " + countWindows,
                 "Tabs " + countTabs);
+  } else {
+    this.record(WeekEventCodes.SESSION_ON_RESTORE, "Windows 0", "Tabs 0");
   }
 };
 
@@ -724,19 +715,6 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
 //};
 
 WeekLifeStudyGlobalObserver.prototype.onExperimentShutdown = function() {
-  // Record total number of tabs (collect from individual window observers)
-  // before killing the window observers:
-  let totalRestoringTabs = 0;
-  for (let i = 0; i < this._windowObservers.length; i++) {
-    totalRestoringTabs += this._windowObservers[i].totalRestoringTabs;
-  }
-  //TODO: Check if it can be recorded before onExperimentShutdown
-
-  // TODO isn't this redundant with the number of windows and tabs as
-  // recorded in the onAppStartup handler??
-
-  this.record(WeekEventCodes.SESSION_RESTORE, "Windows",
-              "Tabs " + totalRestoringTabs);
 
   WeekLifeStudyGlobalObserver.superClass.onExperimentShutdown.call(this);
   console.info("Week in the life: Shutting down subobservers.");
@@ -934,6 +912,8 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
 
     //Draw colored bar - orange for using the browser, yellow for running
     // but not being used, white for no use.
+    let barHeight = 50;  // TODO vary barHeight based on mem consumption
+    let bottom = 270;
     for (rowNum = 0; rowNum < browserUseTimeData.length - 1; rowNum++) {
       let row = browserUseTimeData[rowNum];
       let nextRow = browserUseTimeData[rowNum + 1];
@@ -952,7 +932,7 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
         ctx.fillStyle = "orange";
       break;
       }
-      ctx.fillRect(x, 180, width, 50);
+      ctx.fillRect(x, bottom-barHeight, width, barHeight);
     }
     // Add legend to explain colored bar:
     ctx.strokeStyle ="black";

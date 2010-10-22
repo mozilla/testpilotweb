@@ -48,7 +48,8 @@ const WeekEventCodes = {
   PLUGIN_VERSION:22,
   HISTORY_STATUS: 23,
   PROFILE_AGE: 24,
-  SESSION_RESTORE_PREFERENCES: 25
+  SESSION_RESTORE_PREFERENCES: 25,
+  NUM_TABS: 26
 };
 
 var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown",
@@ -62,7 +63,8 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
                             "Total Windows/Tabs in about:sessionrestore",
                             "Actual Restored Windows/Tabs", "Plugin Version",
                             "History Count", "Profile Age",
-                            "Session Restore Preferences"];
+                            "Session Restore Preferences",
+                            "Num Windows/Tabs"];
 
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_v2_results.sqlite",
@@ -458,6 +460,8 @@ var MemoryObserver = {
   },
 
   getMemoryInfo: function() {
+    // Along with memory stats, also record number of open windows and tabs:
+    exports.handlers.recordNumWindowsAndTabs();
     let enumRep = this.memoryManager.enumerateReporters();
     while (enumRep.hasMoreElements()) {
       let mr = enumRep.getNext().QueryInterface(Ci.nsIMemoryReporter);
@@ -476,6 +480,50 @@ BaseClasses.extend(WeekLifeStudyWindowObserver,
 WeekLifeStudyWindowObserver.prototype.install = function() {
 //TODO: Check if it is better to add a listener to Restore btn (id:errorTryAgain)
   //Add total restored windows.
+
+  // Watch for tab opens/closes:
+  let browser = this.window.getBrowser();
+  let container = browser.tabContainer;
+  this._listen(container, "TabOpen", function() {
+                 exports.handlers.recordNumWindowsAndTabs();
+               }, false);
+  this._listen(container, "TabClose", function() {
+                 // This happens before the tab closes, so adjust by
+                 // -1 to get the number after the close:
+                 exports.handlers.recordNumWindowsAndTabs(-1);
+               }, false);
+
+  // Since a new window opened, record number of windows and tabs
+  // INCLUDING the one we just opened:
+  let numTabs = 0;
+  let numWindows = exports.handlers._windowObservers.length;
+  for (let i = 0; i < numWindows; i++) {
+    let window = exports.handlers._windowObservers[i].window;
+    let tabs = window.getBrowser().tabContainer.itemCount;
+    numTabs += tabs;
+  }
+  numTabs += this.window.getBrowser().tabContainer.itemCount;
+  exports.handlers.record( WeekEventCodes.NUM_TABS,
+                           (numWindows + 1) + " windows",
+                           numTabs + " tabs" );
+};
+
+WeekLifeStudyWindowObserver.prototype.uninstall = function() {
+  WeekLifeStudyWindowObserver.superClass.uninstall.call(this);
+  // A window closed, so record new number of windows and tabs
+  // EXCLUDING this one.
+  let numTabs = 0;
+  let numWindows = exports.handlers._windowObservers.length;
+  for (let i = 0; i < numWindows; i++) {
+    let window = exports.handlers._windowObservers[i].window;
+    if (window != this.window) {
+      let tabs = window.getBrowser().tabContainer.itemCount;
+      numTabs += tabs;
+    }
+  }
+  exports.handlers.record( WeekEventCodes.NUM_TABS,
+                           (numWindows - 1) + " windows",
+                           numTabs + " tabs" );
 };
 
 
@@ -540,6 +588,23 @@ WeekLifeStudyGlobalObserver.prototype.getProfileAge = function() {
     }
   }
   return oldestCreationTime;
+};
+
+WeekLifeStudyGlobalObserver.prototype.recordNumWindowsAndTabs = function(adj) {
+  let numTabs = 0;
+  if (adj != undefined) {
+    // adj is adjustment, it's a hack that lets us subtract 1 on the tab
+    // close in order to record what the number is after the close.
+    numTabs += adj;
+  }
+  let numWindows = this._windowObservers.length;
+  for (let i = 0; i < numWindows; i++) {
+    let window = this._windowObservers[i].window;
+    let tabs = window.getBrowser().tabContainer.itemCount;
+    numTabs += tabs;
+  }
+  this.record( WeekEventCodes.NUM_TABS, numWindows + " windows",
+               numTabs + " tabs" );
 };
 
 WeekLifeStudyGlobalObserver.prototype.recordSessionStorePrefs = function() {

@@ -49,7 +49,8 @@ const WeekEventCodes = {
   HISTORY_STATUS: 23,
   PROFILE_AGE: 24,
   SESSION_RESTORE_PREFERENCES: 25,
-  NUM_TABS: 26
+  NUM_TABS: 26,
+  STARTUP_TIME: 27
 };
 
 var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown",
@@ -64,7 +65,7 @@ var eventCodeToEventName = ["Study Status", "Firefox Startup", "Firefox Shutdown
                             "Actual Restored Windows/Tabs", "Plugin Version",
                             "History Count", "Profile Age",
                             "Session Restore Preferences",
-                            "Num Windows/Tabs"];
+                            "Num Windows/Tabs", "Startup Time"];
 
 exports.dataStoreInfo = {
   fileName: "testpilot_week_in_the_life_v2_results.sqlite",
@@ -771,6 +772,28 @@ WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {
                 "Tabs " + countTabs);
   } else {
     this.record(WeekEventCodes.SESSION_ON_RESTORE, "Windows 0", "Tabs 0");
+  }
+
+  // If available, record startup time!
+  let runtime = Cc["@mozilla.org/xre/runtime;1"].getService(Ci.nsIXULRuntime);
+  if (runtime && runtime.launchTimestamp) {
+    let launched = runtime.launchTimestamp;
+    let startup = runtime.startupTimestamp;
+    let startupDuration = startup - launched;
+    let app = Cc["@mozilla.org/toolkit/app-startup;1"]
+          .getService(Ci.nsIAppStartup2);
+    if (app && app.restoredTimestamp) {
+      let restored = app.restoredTimestamp;
+      let restoreDuration = restored - startup;
+      this.record(WeekEventCodes.STARTUP_TIME,
+                  "Startup: " + startupDuration,
+                  "Restore: " + restoreDuration);
+    } else {
+      this.record(WeekEventCodes.STARTUP_TIME,
+                  "Startup: " + startupDuration);
+    }
+  } else {
+    this.record(WeekEventCodes.STARTUP_TIME, "Unavailable");
   }
 };
 

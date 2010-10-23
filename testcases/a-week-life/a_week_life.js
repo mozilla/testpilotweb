@@ -7,7 +7,7 @@ exports.experimentInfo = {
   duration: 7,
   testName: "A Week in the Life of a Browser (v2)",
   testId: 12,
-  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/a-week-life.html",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/aweeklife2",
   summary: "This auto-recurring study aims to explore larger trends of how "
            + "the browser is being used over time. It will periodically collect "
            + "data on the browser's basic performance for one week, running "

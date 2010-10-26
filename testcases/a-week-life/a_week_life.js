@@ -16,7 +16,7 @@ exports.experimentInfo = {
   thumbnail: "https://testpilot.mozillalabs.com/testcases/a-week-life/week-life-thumbnail.png",
   optInRequired: false,
   recursAutomatically: true,
-  recurrenceInterval: 60,
+  recurrenceInterval: 30,
   versionNumber: 5,
   minTPVersion: "1.0rc1",
   minFXVersion: "3.5"

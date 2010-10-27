@@ -11,7 +11,7 @@ exports.experimentInfo = {
   summary: "This auto-recurring study aims to explore larger trends of how "
            + "the browser is being used over time. It will periodically collect "
            + "data on the browser's basic performance for one week, running "
-           + "the same study again every 60 days, from Oct. 2010 to "
+           + "the same study again every 30 days, from Oct. 2010 to "
            + "Oct. 2011.",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/a-week-life/week-life-thumbnail.png",
   optInRequired: false,

@@ -180,8 +180,15 @@ var BookmarkObserver = {
   },
 
   onItemRemoved: function(itemId, parentId, index, type) {
-    let folderId = this.bmsvc.getFolderIdForItem(itemId);
-    if (!this.lmsvc.isLivemark(folderId)) {
+    let isLivemark;
+    try {
+      let folderId = this.bmsvc.getFolderIdForItem(itemId);
+      isLivemark = this.lmsvc.isLivemark(folderId);
+    } catch(e) {
+      // Sometimes calling getFolderIdForItem gives NS_ERROR_ILLEGAL_VALUE
+      isLivemark = false;
+    }
+    if (!isLivemark) {
       exports.handlers.record(WeekEventCodes.BOOKMARK_MODIFY,
                               "Bookmark Removed");
     }
@@ -406,9 +413,10 @@ var DownloadsObserver = {
   },
 
   observe: function (subject, topic, state) {
+    dump("Download observer: s = " + subject + ", t=" + topic + ", s=" + state + "\n");
     if (topic == "dl-done") {
       console.info("A download completed.");
-      exports.handelrs.record(WeekEventCodes.DOWNLOAD);
+      exports.handlers.record(WeekEventCodes.DOWNLOAD);
     }
   }
 
@@ -484,6 +492,10 @@ WeekLifeStudyWindowObserver.prototype.install = function() {
 
   // Watch for tab opens/closes:
   let browser = this.window.getBrowser();
+  if (!browser) {
+    dump("A non-browser window was opened. Ignoring.\n");
+    return;
+  }
   let container = browser.tabContainer;
   this._listen(container, "TabOpen", function() {
                  exports.handlers.recordNumWindowsAndTabs();

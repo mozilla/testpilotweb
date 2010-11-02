@@ -649,10 +649,6 @@ WeekLifeStudyGlobalObserver.prototype.record = function(eventCode, val1, val2,
     data3: val3,
     timestamp: timestamp
   });
-  /* This dump statement is for debugging and SHOULD be removed before
-   * the study is released. */
-  dump("Recorded " + eventCode + ", " + val1 + ", " + val2 + ", "
-       + val3 + "\n");
 };
 
 WeekLifeStudyGlobalObserver.prototype.onAppStartup = function() {

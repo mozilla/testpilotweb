@@ -882,6 +882,10 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
     }
 
     // TODO x-axis dates are incorrectly converting to GMT somehow.
+    /* TODO graph would be more readable if we drew lines between
+     * observations points - but NOT lines down to zero-level, they
+     * make the graph very busy and hard to read.  Instead, draw
+     * disconnected lines. */
     let plotDiv = document.getElementById("graph-div");
     plotDiv.style.height="600px";
     graphUtils.plot(plotDiv, [{label: "Memory Used (MB) (Left Axis)",
@@ -894,7 +898,7 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
                                yaxis: 2,
                                points: {show: true}
                               }],
-                    {xaxis: {mode: "time", timeformat: "%b %d, %h:00"},
+                    {xaxis: {mode: "time", timeformat: "%b %d, %h:%m"},
                      yaxis: {},
                      y2axis: {minTickSize: 1, tickDecimals: 0}}
                   );

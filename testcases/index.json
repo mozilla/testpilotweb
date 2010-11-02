@@ -27,6 +27,12 @@
    "jarfile": "beta/beta-ui2-survey.jar",
    "studyfile": "beta-ui2-survey.js",
    "hash": "7590142f090744e8758f426fcf602a4d502a6f4482a792d937a56e20d4c20499"
+  },
+
+  {"name": "A Week in the Life of a Browser",
+   "jarfile": "a-week-life/week_life.jar",
+   "studyfile": "a_week_life.js",
+   "hash": "32216a9abea1007b186ba3571b29aa05225f7cb289d5a0ede19628f7e5ca6c6c"
   }
 ],
 
@@ -59,6 +65,14 @@
     "jarfile": "beta/beta-ui2-survey.jar",
     "studyfile": "beta-ui2-survey.js",
     "hash": "7590142f090744e8758f426fcf602a4d502a6f4482a792d937a56e20d4c20499"
+    }
+  },
+
+  {"default":
+    {"name": "A Week in the Life of a Browser",
+     "jarfile": "a-week-life/week_life.jar",
+     "studyfile": "a_week_life.js",
+     "hash": "32216a9abea1007b186ba3571b29aa05225f7cb289d5a0ede19628f7e5ca6c6c"
     }
   }
 ],

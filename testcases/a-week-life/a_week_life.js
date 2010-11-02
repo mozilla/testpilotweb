@@ -35,7 +35,7 @@ const WeekEventCodes = {
   SEARCHBAR_SWITCH: 7,
   BOOKMARK_STATUS: 8,
   BOOKMARK_CREATE: 9,
-  BOOKMARK_CHOOSES: 10,
+  BOOKMARK_CHOOSE: 10,
   BOOKMARK_MODIFY: 11,
   DOWNLOAD: 12,
   DOWNLOAD_MODIFY: 13,
@@ -182,17 +182,9 @@ var BookmarkObserver = {
   },
 
   onItemRemoved: function(itemId, parentId, index, type) {
-    let isLivemark;
-    try {
-      let folderId = this.bmsvc.getFolderIdForItem(itemId);
-      isLivemark = this.lmsvc.isLivemark(folderId);
-    } catch(e) {
-      // Sometimes calling getFolderIdForItem gives NS_ERROR_ILLEGAL_VALUE
-      // TODO This is a workaround, not a good solution - sometimes they are
-      // livemarks, and we don't want to count those as removals.
-      isLivemark = false;
-    }
+    let isLivemark = this.lmsvc.isLivemark(parentId);
     if (!isLivemark) {
+    // Ignore livemarks
       exports.handlers.record(WeekEventCodes.BOOKMARK_MODIFY,
                               "Bookmark Removed");
     }

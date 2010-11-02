@@ -573,7 +573,6 @@ WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
 };
 
 WeekLifeStudyGlobalObserver.prototype.observe = function(subject, topic, data) {
-  // TODO test that this actually gets called.
   if (topic == "quit-application") {
     if (data == "shutdown") {
       this.record(WeekEventCodes.BROWSER_SHUTDOWN);
@@ -776,9 +775,9 @@ WeekLifeStudyWebContent.prototype.__defineGetter__("dataCanvas",
 
 WeekLifeStudyWebContent.prototype.__defineGetter__("saveButtons",
   function() {
-    // TODO modify this to use the canvas created by Flot.
-    return '<div><button type="button" \
-    onclick="saveCanvas(document.getElementById(\'data-canvas\'))">\
+    // Flot creates a canvas inside graph-div; that's the one we need.
+    let btnCode = "saveCanvas(document.getElementById('graph-div').getElementsByTagName('canvas').item(0))";
+    return '<div><button type="button" onclick="' + btnCode + '">\
     Save Graph</button>&nbsp;&nbsp;<button type="button"\
     onclick="exportData();">Export Data</button></div>';
   });

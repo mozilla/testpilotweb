@@ -1,9 +1,6 @@
 /* Basic panel experiment */
 BaseClasses = require("study_base_classes.js");
 
-// TODO this import breaks on Firefox 3.6.
-Components.utils.import("resource://gre/modules/AddonManager.jsm");
-
 exports.experimentInfo = {
   startDate: null,
   duration: 7,
@@ -298,89 +295,6 @@ var IdlenessObserver = {
   }
 };
 
-var ExtensionObserver = {
-  alreadyInstalled: false,
-
-  install: function() {
-    if (!this.alreadyInstalled) {
-      let self = this;
-      AddonManager.addInstallListener(self.instalListener);
-      AddonManager.addAddonListener(self.addonListener);
-      this.alreadyInstalled = true;
-    }
-  },
-
-  instalListener : {
-    onInstallEnded : function (aInstall, aAddon) {
-      console.info("onInstallEnded!");
-        // TODO is there a reason we're recording names and IDs on uninstall
-      // but not on install?
-      if ("extension" == aAddon.type){
-        exports.handlers.record(WeekEventCodes.ADDON_INSTALL);
-        console.info("An extension was installed!");
-      }
-    }
-  },
-
-  addonListener : {
-    onUninstalling: function(aAddon) {
-      if ("extension" == aAddon.type){
-        exports.handlers.record(WeekEventCodes.ADDON_UNINSTALL,
-                                "Uninstall Done", "addon name: " + aAddon.name,
-                                  "addon id: " + aAddon.id);
-        console.info(aAddon.name +
-                     " will be uninstalled after the application restarts.!");
-      }
-    },
-
-    onOperationCancelled: function(aAddon) {
-      //PENDING_NONE: 0
-      if ("extension" == aAddon.type && 0 == aAddon.pendingOperations) {
-          exports.handlers.record(WeekEventCodes.ADDON_UNINSTALL,
-                                  "Uninstall Canceled",
-                                  "addon name: " + aAddon.name,
-                                  "addon id: " + aAddon.id);
-        console.info(aAddon.name +
-                   " will NOT be uninstalled after the application restarts.!");
-      }
-    }
-  },
-
-  uninstall: function() {
-    if (this.alreadyInstalled) {
-      let self = this;
-      AddonManager.removeAddonListener(self.addonListener);
-      AddonManager.removeInstallListener(self.instalListener);
-      console.info("Removing Addon Listeners sucessfully");
-      this.alreadyInstalled = false;
-    }
-  },
-
-  runGlobalAddonsQuery: function () {
-    //Reference: https://developer.mozilla.org/en/Addons/Add-on_Manager
-    AddonManager.getAllAddons(function(aAddons) {
-      let numberActive = 0;
-      let numberInactive = 0;
-      aAddons.forEach(function(aAddon) {
-        //TODO: Should be recorded isCompatible
-        //type: "extension" "plugin" "theme"
-        if ("extension" == aAddon.type){
-          if (true == aAddon.userDisabled) {
-            console.info ("true == aAddon.userDisabled");
-            numberInactive += 1;
-          } else {
-            console.info ("else true == aAddon.userDisabled");
-            numberActive += 1;
-          }
-        }
-      });
-      exports.handlers.record(WeekEventCodes.ADDON_STATUS,
-                              numberActive + " active",
-                              numberInactive + " inactive");
-    });
-  }
-};
-
 var DownloadsObserver = {
   alreadyInstalled: false,
   downloadManager: null,
@@ -647,7 +561,6 @@ WeekLifeStudyGlobalObserver.prototype.recordSessionStorePrefs = function() {
 WeekLifeStudyGlobalObserver.prototype.startAllObservers = function() {
   BookmarkObserver.install();
   IdlenessObserver.install();
-  ExtensionObserver.install();
   DownloadsObserver.install();
   MemoryObserver.install();
 };
@@ -655,7 +568,6 @@ WeekLifeStudyGlobalObserver.prototype.startAllObservers = function() {
 WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
   BookmarkObserver.uninstall();
   IdlenessObserver.uninstall();
-  ExtensionObserver.uninstall();
   DownloadsObserver.uninstall();
   MemoryObserver.uninstall();
 };
@@ -702,7 +614,6 @@ WeekLifeStudyGlobalObserver.prototype.onExperimentStartup = function(store) {
   console.info("Week in the life: Starting subobservers.");
   this.startAllObservers();
   BookmarkObserver.runGlobalBookmarkQuery();
-  ExtensionObserver.runGlobalAddonsQuery();
 
   this.obsService = Cc["@mozilla.org/observer-service;1"]
                          .getService(Ci.nsIObserverService);
@@ -853,9 +764,6 @@ WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
     to a max folder depth of <span id="max-depth-span"></span>.</p>\
     <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> \
     during this week.</p>\
-    <p><b>Extensions:</b> At the beginning of the week you had \
-    <span id="first-num-extensions"></span> installed.  Now \
-    you have <span id="num-extensions"></span> installed.</p>\
     </div>';
   });
 
@@ -931,43 +839,24 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
           firstNumBookmarks = bkmks;
         }
       break;
-        case WeekEventCodes.BOOKMARK_CREATE:
-          switch (row.data1) {
-            case "New Bookmark Added":
-              bkmks += 1;
-            break;
-            case "New Bookmark Folder":
-              folders += 1;
-            break;
-          }
-        break;
-        case WeekEventCodes.BOOKMARK_MODIFY:
-          if (row.data1 == "Bookmark Removed") {
-            bkmks -= 1;
-          }
-        break;
-        case WeekEventCodes.DOWNLOAD:
-          numDownloads += 1;
-        break;
-        case WeekEventCodes.ADDON_STATUS:
-          numAddons = parseInt(row.data1);
-          if (firstNumAddons == null) {
-            firstNumAddons = numAddons;
-          }
+      case WeekEventCodes.BOOKMARK_CREATE:
+        switch (row.data1) {
+          case "New Bookmark Added":
+            bkmks += 1;
           break;
-        case WeekEventCodes.ADDON_INSTALL:
-          numAddons += 1;
+          case "New Bookmark Folder":
+            folders += 1;
           break;
-        case WeekEventCodes.ADDON_UNINSTALL:
-          switch (row.data1) {
-            case "Uninstall Done":
-              numAddons -= 1;
-            break;
-            case "Uninstall Canceled":
-              numAddons += 1;  // TODO shouldn't this leave the number alone?
-            break;
-          }
-          break;
+        }
+      break;
+      case WeekEventCodes.BOOKMARK_MODIFY:
+        if (row.data1 == "Bookmark Removed") {
+          bkmks -= 1;
+        }
+      break;
+      case WeekEventCodes.DOWNLOAD:
+        numDownloads += 1;
+      break;
       case WeekEventCodes.MEMORY_USAGE:
         if (row.data1.indexOf("mapped") != -1) {
           let numBytes = parseInt(row.data2) / ( 1024 * 1024);
@@ -1051,15 +940,6 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
     document.getElementById("num-downloads").innerHTML =
                                     (numDownloads == 1)? "one file" :
                                     numDownloads + " files";
-    if (firstNumBookmarks == null) {
-      firstNumBookmarks = 0;
-    }
-    document.getElementById("first-num-extensions").innerHTML =
-                                    (firstNumAddons == 1)? "one Firefox extension" :
-                                    firstNumAddons + " Firefox extensions";
-    document.getElementById("num-extensions").innerHTML =
-                                    (numAddons == 1)? "one extension" :
-                                    numAddons + " extensions";
   });
 };
 

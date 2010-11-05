@@ -25,6 +25,9 @@ var EXP_GROUP_CODES = {
   TWITTER_LAST: 4
 };
 
+const GROUP_PREF = "extensions.testpilot.searchbar_study.expGroupId";
+const OLD_MENU_PREF = "extensions.testpilot.searchbar_study.originalMenu";
+
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
   {property: "ui_method", type: BaseClasses.TYPE_INT_32, displayName: "UI method",
@@ -90,7 +93,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: false,
   recurrenceInterval: 0,
-  versionNumber: 2,
+  versionNumber: 3,
   minTPVersion: "1.0b4",
   minFXVersion: "4.0b4pre"
 };
@@ -133,7 +136,6 @@ SearchbarWindowObserver.prototype.install = function() {
     this._listen(appcontent, "DOMContentLoaded", function(evt) {
                    let win = evt.originalTarget.defaultView;
                    let url = win.history.current;
-                   dump("URL is " + url + "\n");
 
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
                      let srp = SEARCH_RESULTS_PAGES[i];
@@ -142,14 +144,11 @@ SearchbarWindowObserver.prototype.install = function() {
                        // use MOZ_HOME_PAGE only if previous page was mozilla page
                        try {
                          let prev = win.history.previous;
-                         dump("Previous is " + prev + "\n");
                          if (prev.indexOf(".google.") > -1 &&
                              prev.indexOf("/firefox") > -1) {
-                           dump("I think this is search from moz homepage.\n");
                            uiMethod = UI_METHOD_CODES.MOZ_HOME_PAGE;
                          }
                        } catch(e) {}
-                       dump("Recording a search engine result page.\n");
                        exports.handlers.record(srp.name, uiMethod, 0);
                        break;
                      }
@@ -215,16 +214,19 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   // If this is the first run we need to assign you to an experiment group randomly
   // and change your search engine menu accordingly.
   let prefs = require("preferences-service");
-  let prefName = "extensions.testpilot.searchbar_study.expGroupId";
-  this._expGroupId = prefs.get(prefName, "");
-  if (this._expGroupId == "") {
+  dump("Looking for experiment group pref...\n");
+  if (prefs.isSet(GROUP_PREF)) {
+    this._expGroupId = prefs.get(GROUP_PREF);
+    dump("Already set, using " + this._expGroupId + "\n");
+  } else {
     this._expGroupId = Math.floor(Math.random()*5);
+    prefs.set(GROUP_PREF, this._expGroupId);
+    dump("Time to generate a new groupID!  Generated " + this._expGroupId + "\n");
     if (this._expGroupId != EXP_GROUP_CODES.CONTROL) {
       // before changing the search engine menu, record the old order in
       // a preference so we can put it back.
       this.rememberMenu();
     }
-    prefs.set(prefName, this._expGroupId);
     switch (this._expGroupId) {
     case EXP_GROUP_CODES.CONTROL:
       // Control group - no change
@@ -281,14 +283,13 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
 GlobalSearchbarObserver.prototype.rememberMenu = function() {
   let searchSvc = this.getSearchSvc();
   let prefs = require("preferences-service");
-  let prefName = "extensions.testpilot.searchbar_study.originalMenu";
   let sortedEngines = searchSvc.getEngines();
   let originalMenu = [];
   for (let x = 0; x < sortedEngines.length; x++) {
     originalMenu.push(sortedEngines[x].name);
   }
   let string = JSON.stringify(originalMenu);
-  prefs.set(prefName, string);
+  prefs.set(OLD_MENU_PREF, string);
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
   let expGroup = this._expGroupId;
@@ -307,8 +308,7 @@ GlobalSearchbarObserver.prototype.doExperimentCleanup = function() {
   // TODO don't restore if they modified search engine menu during the study
   let searchSvc = this.getSearchSvc();
   let prefs = require("preferences-service");
-  let prefName = "extensions.testpilot.searchbar_study.originalMenu";
-  let originalMenu = JSON.parse(prefs.get(prefName, "[]"));
+  let originalMenu = JSON.parse(prefs.get(OLD_MENU_PREF, "[]"));
   let messedUpEngines = searchSvc.getEngines();
   for (let x = 0; x < messedUpEngines.length; x++) {
     let engName = messedUpEngines[x].name;
@@ -323,8 +323,8 @@ GlobalSearchbarObserver.prototype.doExperimentCleanup = function() {
   }
 
   // More cleanup: remove prefs
-  prefs.reset(prefName);
-  prefs.reset("extensions.testpilot.searchbar_study.expGroupId");
+  prefs.reset(OLD_MENU_PREF);
+  prefs.reset(GROUP_PREF);
 };
 
 exports.handlers = new GlobalSearchbarObserver();

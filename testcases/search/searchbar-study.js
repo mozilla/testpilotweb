@@ -277,7 +277,10 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   this.record("", UI_METHOD_CODES.STUDY_VERSION, exports.experimentInfo.versionNumber);
   let sortedEngines = searchSvc.getEngines();
   for (let x = 0; x < sortedEngines.length; x++) {
-    this.record(sortedEngines[x].name, UI_METHOD_CODES.MENU_CONTENTS, x);
+    if (!sortedEngines[x].hidden) {
+      dump("Recording that you have " + sortedEngines[x].name + "\n");
+      this.record(sortedEngines[x].name, UI_METHOD_CODES.MENU_CONTENTS, x);
+    }
   }
 };
 GlobalSearchbarObserver.prototype.rememberMenu = function() {

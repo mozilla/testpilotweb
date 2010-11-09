@@ -342,16 +342,29 @@ var DownloadsObserver = {
 
 var MemoryObserver = {
   /* Uses nsIMemoryReporterManager, see about:memory
-   * It retrieves memory information periodically according to the timerInterval
+   * It retrieves memory information periodically according to the
+   * timerInterval.
    */
   alreadyInstalled: false,
   memoryManager: null,
   memoryInfoTimer: null,
   timerInterval: 15 * 60 * 1000, // 15 minutes
 
-   install: function() {
+  install: function() {
     if (!this.alreadyInstalled) {
       console.info("Adding memory observer.");
+
+      /* Bug 610488 - don't attempt to record memory on Fx4b7 on Linux; it
+       * will cause a crash: */
+      let version = Cc["@mozilla.org/fuel/application;1"]
+                      .getService(Ci.fuelIApplication).version;
+      let os = Cc["@mozilla.org/xre/app-info;1"]
+                 .getService(Ci.nsIXULRuntime).OS;
+      if ((version == "4.0b7" || version == "4.0b7pre") &&
+        os.indexOf("Linux") > -1) {
+        this.alreadyInstalled = true;
+        return;
+      }
 
       this.memoryManager = Cc["@mozilla.org/memory-reporter-manager;1"]
         .getService(Components.interfaces.nsIMemoryReporterManager);
@@ -362,8 +375,10 @@ var MemoryObserver = {
       //Get Memory info on startup
       this.getMemoryInfo();
       let self = this;
-      this.memoryInfoTimer.initWithCallback(function(){self.getMemoryInfo();}
-        ,this.timerInterval, this.memoryInfoTimer.TYPE_REPEATING_SLACK);
+      this.memoryInfoTimer.initWithCallback(
+        function(){self.getMemoryInfo();},
+        this.timerInterval,
+        this.memoryInfoTimer.TYPE_REPEATING_SLACK);
       this.alreadyInstalled = true;
     }
   },

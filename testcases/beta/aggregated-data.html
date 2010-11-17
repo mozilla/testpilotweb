@@ -1,0 +1,280 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: Firefox 4 Beta Interface - Version 2: Aggregated Data Samples</title>
+</head>
+<body>
+
+<div id="container">
+
+	<div id="content-standalone">
+          <p><a href="../../index.html">Home</a> &gt; <a href="https://testpilot.mozillalabs.com/testcases">Test Cases</a> &gt; <a href="../betaui2.html">Firefox 4 Beta Interface - Version 2</a> &gt; Aggregated Data Samples</p>	
+		<div id="intro">
+		
+			<h1>Firefox 4 Beta Interface - Version 2: Aggregated Data Samples</h1>
+			
+			<h2>Test Description </h2>
+			
+			<ul>
+			<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/betaui2.html">Firefox 4 Beta Interface – Version 2</a>.</li>
+			<li>Test duration: 7 days*</li>
+			<li>Test type: Global</li>
+			<li>Firefox versions covered: Firefox 4 Beta</li>
+			<li>Data submission: 671,043 test sets submitted from 50+ locales, September 2010.</li>
+			</ul>
+		</div>
+		
+		<div id="data"> 
+		
+			<h2> Test Data </h2>
+			<p>Anyone is welcome to download and use the aggregated data files below.</p>
+
+			<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">Num. of Tables</span></td><td><span class="headers">Num. of Users</span></td><td><span class="headers">Description</span></td></tr>
+</table>
+
+[TODO]
+                  
+			
+			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+			
+			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+			
+			<h3>How to read the data</h3>
+                 <p>There are two ways to work with this data sample: you can download the SQLite database, which consists of 7 tables, or if you are more comfortable working with .csv's, you can download the beta_interface_2_sample.zip file, which contains the same 7 tables as separate .csv's. See below for a description of the tables and their columns.
+</p>
+
+<h4>Table Name: 'users'</h4>
+
+<p>Main table of users and the meta data associated with each user. Note: 'user_id' is consistent over all tables - tables can by merged by/on 'user_id'</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+<tr><td>user_id</td><td>All rows that have the same user number came from the same submission. Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.) These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</td></tr>
+	<tr><td>fx_version</td><td>Firefox Version</td></tr>
+	<tr><td>os</td><td>OS Version</td></tr>
+</table>
+
+<h4>Table name: 'events'</h4>
+<p>Main table of users and their UI interactions.  Each row in the events table is a single UI interaction. Note: This table contains only Windows 7 and Windows Vista users to avoid the complexities of the cross-platform UI differences and because the major Firefox 4 UI changes were on these operating systems.</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+<tr><td>user_id</td><td>See 'users' table</tr>
+<tr><td>timestamp</td><td>The time at which the event occurred, given in milliseconds since epoch.</td></tr>
+<tr><td>category</td><td>Category of UI element; see below for a complete list of tracked UI elements.</td></tr>
+<tr><td>item</td><td>UI element; see below for a complete list of tracked UI elements.</td></tr>
+</table>
+
+<h4>Table name: 'survey'</h4>
+<p>Table of users and associated Beta Background Survey answers.  For each row, the first column is 'user_id' and each of the following 14 columns represent the 14 survey questions. Answer choices are coded to integers, so for a given question, '0' represents the first answer choice, '1' corresponds to the second answer choice, and so on.  Answers to questions where multiple choices can be selected are pipe delimited.  See here for the survey questions and please note that because the survey was optional, the table does not include all users.</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Survey Question</span></td>
+      <td><span class="headers">Answer 0</span></td>
+      <td><span class="headers">Answer 1</span></td>
+      <td><span class="headers">Answer 2</span></td>
+      <td><span class="headers">Answer 3</span></td>
+      <td><span class="headers">Answer 4</span></td>
+      <td><span class="headers">Answer 5</span></td>
+      <td><span class="headers">Answer 6</span></td>
+    </tr>
+  <tr><td>How long have you used Firefox?</td><td>Less than 3 months</td><td>3 to 6 months</td><td>6 months to a year</td><td>1 to 2 years</td><td>2 to 3 years</td><td>3 to 5 years</td><td>More than 5 years</td></tr>
+
+  <tr><td>Do you use more than one browser in your daily life?</td><td>No. I only use Firefox.</td><td>Yes, I use other browsers besides Firefox.</td></tr>
+
+  <tr><td>If you use other browsers besides Firefox, what are they?</td><td>Chrome</td><td>Safari</td><td>Opera</td><td>Internet Explorer (all versions)</td><td></tr>
+
+  <tr><td>If you use multiple browsers, what do you consider to be your primary browser?</td><td>I don't use other browsers, only use Firefox</td><td>Firefox</td><td>Chrome</td><td>Safari</td><td>Opera</td><td>Internet Explorer (all versions)</td></tr>
+
+<tr><td>What is your gender?</td><td>Male</td><td>Female</td></tr>
+
+<tr><td>How old are you?</td><td>Under 18</td><td>18-25</td><td>26-35</td><td>36-45</td><td>46-55</td><td>Older than 55</td></tr>
+
+<tr><td>How much time do you spend on the Web each day?</td><td>Less than 1 hour</td><td>1-2 hours</td><td>2-4 hours</td><td>4-6 hours</td><td>6-8 hours</td><td>8-10 hours</td><td>More than 10 hours</td></tr>
+
+<tr><td>How would you describe your computer/web skill level?</td><td>(Scale 1-10)</td></tr>
+
+<tr><td>Where do you usually access the Internet?</td><td>Home</td><td>Work</td><td>School</td><td>Mobile</td></tr>
+
+<tr><td>What smartphone device are you currently using?</td><td>Apple iPhone</td><td>Google Android (ex: Droid, HTC Hero)</td><td>Microsoft Windows Mobile (ex: HTC Imagio, Samsung Omnia)</td><td>Nokia Maemo ( ex: N900, N810)</td><td>Nokia Symbian (ex: N97, E71)</td><td>Palm (ex: Pre, Treo)</td><td>RIM Blackberry</td><td>I don't use a smartphone.</td></tr>
+    
+<tr><td>What are the main reason you use the Web?</td><td>Work: coding related</td><td>Work: non-coding related</td><td>School</td><td>Personal life assistance</td><td>Communication</td><td>Socializing</td><td>Entertainment</td></tr>
+    
+<tr><td>What are your most frequently visited websites?</td><td>Search engines</td><td>Video sites</td><td>News sites</td><td>Social networking sites</td><td>Browser based games</td><td>Shopping</td><td>Paying bills and online banking</td><td>File download sites</td><td>Webmail</td><td>Forums</td><td>Adult pages</td><td>Gambling and online betting</td><td>Online word processing: Google Docs, Spreadsheets</td></tr>
+
+    <tr><td>How do you find out about the latest computer and technology news?</td><td>Online news sources: Google News, CNN,etc.</td><td>Online blogs: tech blogs, news blogs, etc.</td><td>Offline news sources: printed newspapers, magazines,etc.</td><td>Someone you know: a coworker, friend or family member,etc.</td><td>Advertisements</td><td>Social media: Facebook, Twitter, Ning, etc.</td></tr>
+
+<tr><td>How would you describe yourself as a web user?</td><td>(Free entry)</td></tr>
+
+</table>
+
+[TODO IS -1 DECLINE TO ANSWER OR WHAT]
+
+<h3>Filtered Extensions</h3>
+
+The following extensions are known to cause major changes to the behavior of Firefox menus.  Data submissions from users who had one of these extensions installed have been filtered out of the data sets provided on this page, to ensure that the data sets are as representative as possible of default Firefox behavior:
+
+<ul>
+  <li>TinyMenu</li>
+  <li>Menu Editor</li>
+  <li>Compact Menu</li>
+  <li>More Tools Menu</li>
+  <li>Extended Copy Menu</li>
+  <li>Personal Menu</li>
+</ul>
+
+<h3>Complete list of tracked UI elements</h3>
+
+<table class="callout">
+  <tr><td><span class="headers">Category</span></td><td><span class="headers">Item</span></td><td><span class="headers">Additional Information</span></td></tr>
+<tr><td>customization</td><td>tabs on top</td></tr>
+<tr><td>customization</td><td>tabs on bottom</td></tr>
+<tr><td>customization</td><td>menu bar hidden</td></tr>
+<tr><td>customization</td><td>menu bar shown</td></tr>
+<tr><td>customization</td><td>bookmark bar hidden</td></tr>
+<tr><td>customization</td><td>bookmark bar shown</td></tr>
+<tr><td>customization</td><td>status bar hidden</td></tr>
+<tr><td>customization</td><td>status bar shown</td></tr>
+<tr><td>combined menu</td><td>firefox button</td></tr>
+<tr><td>combined menu</td><td>new tab</td></tr>
+<tr><td>combined menu</td><td>new tab sub</td></tr>
+<tr><td>combined menu</td><td>new window</td></tr>
+<tr><td>combined menu</td><td>open file</td></tr>
+<tr><td>combined menu</td><td>cut</td></tr>
+<tr><td>combined menu</td><td>paste</td></tr>
+<tr><td>combined menu</td><td>copy</td></tr>
+<tr><td>combined menu</td><td>start private browsing</td></tr>
+<tr><td>combined menu</td><td>save page </td></tr>
+<tr><td>combined menu</td><td>send link</td></tr>
+<tr><td>combined menu</td><td>print</td></tr>
+<tr><td>combined menu</td><td>print sub</td></tr>
+<tr><td>combined menu</td><td>page setup</td></tr>
+<tr><td>combined menu</td><td>print preview</td></tr>
+<tr><td>combined menu</td><td>find</td></tr>
+<tr><td>combined menu</td><td>web developer</td></tr>
+<tr><td>combined menu</td><td>web console</td></tr>
+<tr><td>combined menu</td><td>inspect</td></tr>
+<tr><td>combined menu</td><td>view page source</td></tr>
+<tr><td>combined menu</td><td>work offline</td></tr>
+<tr><td>combined menu</td><td>full screen</td></tr>
+<tr><td>combined menu</td><td>bookmarks</td></tr>
+<tr><td>combined menu</td><td>show all bookmarks</td></tr>
+<tr><td>combined menu</td><td>bookmark this page</td></tr>
+<tr><td>combined menu</td><td>user bookbark item</td></tr>
+<tr><td>combined menu</td><td>subscribe to this page</td></tr>
+<tr><td>combined menu</td><td>history</td></tr>
+<tr><td>combined menu</td><td>clear recent history</td></tr>
+<tr><td>combined menu</td><td>show all history</td></tr>
+<tr><td>combined menu</td><td>user history item</td></tr>
+<tr><td>combined menu</td><td>recently closed tabs item</td></tr>
+<tr><td>combined menu</td><td>restore all tabs</td></tr>
+<tr><td>combined menu</td><td>recently closed windows item</td></tr>
+<tr><td>combined menu</td><td>recently closed tabs</td></tr>
+<tr><td>combined menu</td><td>restore all windows</td></tr>
+<tr><td>combined menu</td><td>recently closed windows</td></tr>
+<tr><td>combined menu</td><td>toolbar layout</td></tr>
+<tr><td>combined menu</td><td>help sub</td></tr>
+<tr><td>combined menu</td><td>exit</td></tr>
+<tr><td>combined menu</td><td>downloads</td></tr>
+<tr><td>combined menu</td><td>add-ons</td></tr>
+<tr><td>combined menu</td><td>options</td></tr>
+<tr><td>combined menu</td><td>options sub</td></tr>
+<tr><td>combined menu</td><td>toggle menu bar</td></tr>
+<tr><td>combined menu</td><td>toggle nagivation toolbar</td></tr>
+<tr><td>combined menu</td><td>toggle bookmarks toolbar</td></tr>
+<tr><td>combined menu</td><td>toggle status bar</td></tr>
+<tr><td>combined menu</td><td>toggle tabs on top</td></tr>
+<tr><td>combined menu</td><td>help</td></tr>
+<tr><td>combined menu</td><td>getting started</td></tr>
+<tr><td>combined menu</td><td>about firefox</td></tr>
+<tr><td>navigation toolbar</td><td>back</td></tr>
+<tr><td>navigation toolbar</td><td>forward</td></tr>
+<tr><td>navigation toolbar</td><td>open recent history drop down menu</td></tr>
+<tr><td>navigation toolbar</td><td>reload</td></tr>
+<tr><td>navigation toolbar</td><td>stop</td></tr>
+<tr><td>navigation toolbar</td><td>home</td></tr>
+<tr><td>navigation toolbar</td><td>rss feed</td></tr>
+<tr><td>navigation toolbar</td><td>bookmark star</td></tr>
+<tr><td>context menu</td><td>toolbar layout</td></tr>
+<tr><td>tab bar</td><td>scroll left</td></tr>
+<tr><td>tab bar</td><td>scroll right</td></tr>
+<tr><td>tab bar</td><td>new tab button</td></tr>
+<tr><td>tab bar</td><td>open drop down menu</td></tr>
+<tr><td>tab bar</td><td>pick from drop down menu</td></tr>
+<tr><td>search bar</td><td>drop down menu</td></tr>
+<tr><td>search bar</td><td>drop down menu</td></tr>
+<tr><td>search bar</td><td>search by enter key</td></tr>
+<tr><td>search bar</td><td>search by go button</td></tr>
+<tr><td>search bar</td><td>same search same engine</td></tr>
+<tr><td>search bar</td><td>same search different engine</td></tr>
+<tr><td>site id button</td><td>none</td></tr>
+<tr><td>site id button</td><td>ssl</td></tr>
+<tr><td>site id button</td><td>ev</td></tr>
+<tr><td>url bar</td><td>go to url by enter key</td></tr>
+<tr><td>url bar</td><td>go to url by go button</td></tr>
+<tr><td>url bar</td><td>search by enter key</td></tr>
+<tr><td>url bar</td><td>search by go button</td></tr>
+<tr><td>url bar</td><td>open most frequently used drop down menu</td></tr>
+<tr><td>site id button</td><td>more info</td></tr>
+<tr><td>feedback button</td><td>feedback button</td></tr>
+<tr><td>feedback button</td><td>happy</td></tr>
+<tr><td>feedback button</td><td>sad</td></tr>
+<tr><td>feedback button</td><td>show all studies</td></tr>
+<tr><td>bookmarks button</td><td>bookmarks button</td></tr>
+<tr><td>bookmarks button</td><td>bookmark all tabs</td></tr>
+<tr><td>bookmarks button</td><td>show all bookmarks</td></tr>
+<tr><td>bookmarks button</td><td>toggle bookmarks toolbar</td><td></td></tr>
+<tr><td>bookmarks button</td><td>toggle bookmarks sidebar</td><td></td></tr>
+<tr><td>bookmarks button</td><td>user bookmark item</td><td></td></tr>
+<tr><td>vertical scrollbar</td><td>scroll down</td><td></td></tr>
+<tr><td>vertical scrollbar</td><td>scroll up</td><td></td></tr>
+<tr><td>horizontal scroll bar</td><td>scroll right</td><td></td></tr>
+<tr><td>horizontal scroll bar</td><td>scroll left</td><td></td></tr>
+<tr><td>vertical scrollbar</td><td>slider track and drag</td><td></td></tr>
+<tr><td>horizontal scroll bar</td><td>slider track and drag</td><td></td></tr>
+<tr><td>panorma</td><td>open</td><td></td></tr>
+<tr><td>panorma</td><td>exit</td><td></td></tr>
+<tr><td>panorma</td><td>panorama button</td><td></td></tr>
+<tr><td>keyboard shortcut</td><td>back</td><td>alt + left arrow</td></tr>
+<tr><td>keyboard shortcut</td><td>bookmark all tabs</td><td>ctrl + shift + D</td></tr>
+<tr><td>keyboard shortcut</td><td>bookmark this page</td><td>ctrl + D</td></tr>
+<tr><td>keyboard shortcut</td><td>clear recent history</td><td>ctrl + shift + del</td></tr>
+<tr><td>keyboard shortcut</td><td>close tab</td><td>ctrl + w</td></tr>
+<tr><td>keyboard shortcut</td><td>close window</td><td>ctrl + shift + w</td></tr>
+<tr><td>keyboard shortcut</td><td>downloads</td><td>ctrl + J</td></tr>
+<tr><td>keyboard shortcut</td><td>find</td><td>ctrl + f</td></tr>
+<tr><td>keyboard shortcut</td><td>find again</td><td>ctrl + g</td></tr>
+<tr><td>keyboard shortcut</td><td>forward</td><td>alt + right arrow</td></tr>
+<tr><td>keyboard shortcut</td><td>full screen</td><td>F11</td></tr>
+<tr><td>keyboard shortcut</td><td>home</td><td>alt + home</td></tr>
+<tr><td>keyboard shortcut</td><td>new tab</td><td>ctrl + T</td></tr>
+<tr><td>keyboard shortcut</td><td>new window</td><td>ctrl + N</td></tr>
+<tr><td>keyboard shortcut</td><td>open file</td><td>ctrl + O</td></tr>
+<tr><td>keyboard shortcut</td><td>print</td><td>ctrl + p</td></tr>
+<tr><td>keyboard shortcut</td><td>reload</td><td>ctrl + R</td></tr>
+<tr><td>keyboard shortcut</td><td>save page </td><td>ctrl + S</td></tr>
+<tr><td>keyboard shortcut</td><td>select location bar</td><td>alt + D</td></tr>
+<tr><td>keyboard shortcut</td><td>select location bar</td><td>ctrl + L</td></tr>
+<tr><td>keyboard shortcut</td><td>start private browsing</td><td>ctrl + shift + P</td></tr>
+<tr><td>keyboard shortcut</td><td>undo close tab</td><td>ctrl + shift + T</td></tr>
+<tr><td>keyboard shortcut</td><td>undo close window</td><td>ctrl + shift + N</td></tr>
+<tr><td>keyboard shortcut</td><td>view page source</td><td>ctrl + u</td></tr>
+<tr><td>keyboard shortcut</td><td>web search</td><td>ctrl + k</td></tr>
+<tr><td>keyboard shortcut</td><td>web search</td><td>ctrl + e</td></tr>
+<tr><td>keyboard shortcut</td><td>Zoom In</td><td>ctrl + +</td></tr>
+<tr><td>keyboard shortcut</td><td>Zoom Out</td><td>ctrl + -</td></tr>
+<tr><td>keyboard shortcut</td><td>Zoom Reset</td><td>ctrl + 0</td></tr>
+</table>
+
+			<p><br><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/us/88x31.png" /></a></p>
+			
+		</div>
+	
+	</div>
+
+</div>
+
+</body></html>

@@ -1,0 +1,172 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" media="all" href="/css/screen-standalone.css" />
+	<title>Test Pilot: A Week in the Life of a Browser - Version 2: Aggregated Data Samples</title>
+</head>
+<body>
+
+
+<div id="container">
+
+	<div id="content-standalone">
+          <p><a href="../../index.html">Home</a> &gt; <a href="https://testpilot.mozillalabs.com/testcases">Test Cases</a> &gt; <a href="../aweeklife2.html">A Week in the Life of a Browser - Version 2</a> &gt; Aggregated Data Samples</p>	
+		<div id="intro">
+		
+			<h1>A Week in the Life of a Browser - Version 2: Aggregated Data Samples</h1>
+			
+			<h2>Test Description </h2>
+			
+			<ul>
+			<li>Test name:  <a href="https://testpilot.mozillalabs.com/testcases/aweeklife2.html">A Week in the Life of a Browser – Version 2</a>.</li>
+			<li>Test duration: 7 days</li>
+			<li>Test type: Global</li>
+			<li>Firefox versions covered: Fx 3.5 and Fx 3.6, Fx4 Beta</li>
+			<li>Data submission: 527,817 test sets submitted in November 2010.</li>
+			</ul>
+		</div>
+
+		
+		<div id="data"> 
+		
+			<h2> Test Data </h2>
+			<p>Anyone is welcome to download and use the aggregated data files below.</p>
+
+			<table class="callout"><tr><td><span class="headers">Filename</span></td><td><span class="headers">Download Size</span></td><td><span class="headers">Num. of Tables</span></td><td><span class="headers">Num. of Users</span></td><td><span class="headers">Description</span></td></tr>
+</table>
+
+[TODO]
+
+			<p>All of this data has been collected and is being shared under the terms of the <a href="https://testpilot.mozillalabs.com/privacy.html">Test Pilot Privacy Policy </a> from Mozilla Labs.  We license this data for use by anyone under the terms of the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 United States License.</a>. This license allows derived works as well as commercial use, as long as you give attribution for the source of the data.</p>
+			
+			<p>There is no personally-identifiable information, and no URLs, contained in this data set.</p>
+			
+			<h3>How to read the data</h3>
+                 <p>There are two ways to work with this data sample: you can download the SQLite database, which consists of 3 tables, or if you are more comfortable working with .csv's, you can download the [TODO].zip file, which contains the same 3 tables as separate .csv's. See below for a description of the tables and their columns.
+</p>
+
+<h4>Table Name: 'users'</h4>
+
+<p>Main table of users and the metadata associated with each user. Note: 'user_id' is consistent over all tables - tables can by merged by/on 'user_id'</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+<tr><td>user_id</td><td>All rows that have the same user number came from the same submission. Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.) These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</td></tr>
+<tr><td>fx_version</td><td>Firefox Version</td></tr>
+<tr><td>os</td><td>OS Version</td></tr>
+</table>
+
+<h4>Table Name: 'events'</h4>
+<p>Main table of users and recorded events.</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Column Name</span></td>
+      <td><span class="headers">Explanation</span></td></tr>
+<tr><td>user_id</td><td>See 'users' table'</td></tr>
+<tr><td>event_code</td><td>Integer defining what the event was; see below for a description of these event codes.</td></tr>
+<tr><td>data1</td><td>String; interpretation depends on event_code </td></tr>
+<tr><td>data2</td><td>String; interpretation depends on event_code</td></tr>
+<tr><td>data3</td><td>String; interpretation depends on event_code  </td></tr>
+<tr><td>timestamp</td><td>The time at which the event occurred, given in milliseconds since epoch.</td></tr>
+</table>
+
+<h4>Event Codes</h4>
+
+<table class="callout">
+  <tr><td><span class="headers">event_code number</span></td>
+      <td><span class="headers">Name</span></td>
+      <td><span class="headers">Explanation</span></td>
+      <td><span class="headers">Meaning of data1, data2, data3 columns</span></td></tr>
+
+<tr><td>0</td><td>STUDY_STATUS</td><td>Recorded on study startup.</td><td>'data1' identifies the version number of the study (currently 5).</td></tr>
+
+<tr><td></td><td>BROWSER_START</td><td>Recorded on application startup.</td><td>No additional data recorded.</td></tr>
+
+<tr><td>2</td><td>BROWSER_SHUTDOWN</td><td>Recorded on application shutdown.</td><td>No additional data recorded.</td></tr>
+
+<tr><td>3</td><td>BROWSER_RESTART</td><td>Recorded on application shutdown, if the user triggered the shutdown by clicking "Restart Firefox" (for instance in the add-ons manager).</td><td>No additional data recorded.</td></tr>
+
+<tr><td>4</td><td>BROWSER_ACTIVATE</td><td>Recorded when the browser returns to active use after going idle.</td><td>'data1' column identifies the mechanism used to detect activation (basically debugging info): "Self-ping timer" or "IdleService observer".</td></tr>
+
+<tr><td>5</td><td>BROWSER_INACTIVE</td><td>Recorded when we detect that the browser has gone idle, either through the self-ping timer (study pings itself every five minutes while firefox is active) or through the IdleService observer (which triggers after ten minutes of Firefox being idle).</td><td>Data1 column says either "Self-ping timer" or "IdleService observer".</td></tr>
+
+<tr><td>8</td><td>BOOKMARK_STATUS</td><td>Recorded on app startup.</td><td>'data1' is the total number of bookmarks found. 'data2' is the total number of bookmark folders. 'data3' is the maximum depth of bookmark folders.</td></tr>
+
+<tr><td>9</td><td>BOOKMARK_CREATE</td><td>Recorded when user creates a new bookmark OR a new bookmark folder. Ignores Livemark folders and does not trigger when a bookmark is created in one of these.</td><td>'data1' is either "New Bookmark Added" or "New Bookmark Folder".</td></tr>
+
+<tr><td>10</td><td>BOOKMARK_CHOOSE</td><td>Recorded when user chooses a bookmark.</td><td>No additional data.</td></tr>
+
+<tr><td>11</td><td>BOOKMARK_MODIFY</td><td>Recorded when user deletes a bookmark or moves it to a different folder. Ignores Livemark folders.</td><td>Data1 is either "Bookmark Removed" or "Bookmark Moved".</td></tr>
+
+<tr><td>12</td><td>DOWNLOAD</td><td>Recored when a download completes.</td><td>No additional data.</td></tr>
+
+<tr><td>17</td><td>PRIVATE_ON</td><td>Recorded when user enters private browsing mode. When in private browsing mode, no further recording is done.</td><td>No additional data. </td></tr>
+
+<tr><td>18</td><td>PRIVATE_OFF</td><td>Recorded when user exits private browsing mode.</td><td>No additional data.</td></tr>
+
+<tr><td>19</td><td>MEMORY_USAGE</td><td>Memory usage is recorded once every 15 minutes (although this was originally set to 1hr so data prior to Nov 6 will be 1 hour intervals), and upon startup. When memory usage is recorded, it will iterate through all the reporters in the memory manager, recording a MEMORY_USAGE event for each reporter.</td><td>'data1' contains the reporter path, and 'data2' contains the amount of memory used, in bytes.</td></tr>
+
+<tr><td>20</td><td>SESSION_ON_RESTORE</td><td>Recorded on application startup, when session restore triggers.</td><td>'data1' is the number of windows restored, 'data2' is the number of tabs restored across all windows. If no session restore occurs, will record 0 for both columns.</td></tr>
+
+<tr><td>22</td><td>PLUGIN_VERSION</td><td>On experiment startup, experiment records one PLUGIN_VERSION event for each plugin.</td><td>'data1' is plugin filename, 'data2' is plugin version, 'data3' is plugin name.</td></tr>
+
+<tr><td>23</td><td>HISTORY_STATUS</td><td>Recorded on experiment startup.</td><td>'data1' is the total number of distinct places in the Places database, i.e. history items.</td></tr>
+
+<tr><td>24</td><td>PROFILE_AGE</td><td>Recorded on experiment startup.</td><td>'data1' is the age (as a timestamp) of the oldest file in the profile directory. (Using the last-modified date, since creation date is not always available)</td></tr>
+
+<tr><td>25</td><td>SESSION_RESTORE_PREFERENCES</td><td>On experiment startup, recorded once for each preference relevant to session restore.</td><td>'data1' is name of the pref, 'data2' is the value. Recorded prefs are browser.sessionstore.resume_from_crash, .resume_session_once, and .max_resumed_crashes.</td></tr>
+
+<tr><td>26</td><td>NUM_TABS</td><td>Recorded whenever memory is recorded (at startup and every 15 minutes) and also whenever a window or tab is opened or closed.</td><td>'data1' is number of windows, 'data2' is number of tabs (including the one just opened).</td></tr>
+
+<tr><td>27</td><td>STARTUP_TIME</td><td>Recorded on startup. Will be used in the future to record time taken for Firefox to start up; however this data is not yet available.</td></tr>
+  </table>
+
+
+<h4>Table name: 'survey'</h4>
+<p>Table of users and associated Beta Background Survey answers.  For each row, the first column is 'user_id' and each of the following 14 columns represent the 14 survey questions. Answer choices are coded to integers, so for a given question, '0' represents the first answer choice, '1' corresponds to the second answer choice, and so on.  Answers to questions where multiple choices can be selected are pipe delimited.  See here for the survey questions and please note that because the survey was optional, the table does not include all users.</p>
+
+<table class="callout">
+  <tr><td><span class="headers">Survey Question</span></td>
+      <td><span class="headers">Answer 0</span></td>
+      <td><span class="headers">Answer 1</span></td>
+      <td><span class="headers">Answer 2</span></td>
+      <td><span class="headers">Answer 3</span></td>
+      <td><span class="headers">Answer 4</span></td>
+      <td><span class="headers">Answer 5</span></td>
+      <td><span class="headers">Answer 6</span></td>
+    </tr>
+  <tr><td>How long have you used Firefox?</td><td>Less than 3 months</td><td>3 to 6 months</td><td>6 months to a year</td><td>1 to 2 years</td><td>2 to 3 years</td><td>3 to 5 years</td><td>More than 5 years</td></tr>
+
+  <tr><td>Do you use more than one browser in your daily life?</td><td>No. I only use Firefox.</td><td>Yes, I use other browsers besides Firefox.</td></tr>
+
+  <tr><td>If you use other browsers besides Firefox, what are they?</td><td>Chrome</td><td>Safari</td><td>Opera</td><td>Internet Explorer (all versions)</td><td></tr>
+
+  <tr><td>If you use multiple browsers, what do you consider to be your primary browser?</td><td>I don't use other browsers, only use Firefox</td><td>Firefox</td><td>Chrome</td><td>Safari</td><td>Opera</td><td>Internet Explorer (all versions)</td></tr>
+
+<tr><td>What is your gender?</td><td>Male</td><td>Female</td></tr>
+
+<tr><td>How old are you?</td><td>Under 18</td><td>18-25</td><td>26-35</td><td>36-45</td><td>46-55</td><td>Older than 55</td></tr>
+
+<tr><td>How much time do you spend on the Web each day?</td><td>Less than 1 hour</td><td>1-2 hours</td><td>2-4 hours</td><td>4-6 hours</td><td>6-8 hours</td><td>8-10 hours</td><td>More than 10 hours</td></tr>
+
+<tr><td>How would you describe your computer/web skill level?</td><td>(Scale 1-10)</td></tr>
+
+<tr><td>Where do you usually access the Internet?</td><td>Home</td><td>Work</td><td>School</td><td>Mobile</td></tr>
+
+<tr><td>What smartphone device are you currently using?</td><td>Apple iPhone</td><td>Google Android (ex: Droid, HTC Hero)</td><td>Microsoft Windows Mobile (ex: HTC Imagio, Samsung Omnia)</td><td>Nokia Maemo ( ex: N900, N810)</td><td>Nokia Symbian (ex: N97, E71)</td><td>Palm (ex: Pre, Treo)</td><td>RIM Blackberry</td><td>I don't use a smartphone.</td></tr>
+    
+<tr><td>What are the main reason you use the Web?</td><td>Work: coding related</td><td>Work: non-coding related</td><td>School</td><td>Personal life assistance</td><td>Communication</td><td>Socializing</td><td>Entertainment</td></tr>
+    
+<tr><td>What are your most frequently visited websites?</td><td>Search engines</td><td>Video sites</td><td>News sites</td><td>Social networking sites</td><td>Browser based games</td><td>Shopping</td><td>Paying bills and online banking</td><td>File download sites</td><td>Webmail</td><td>Forums</td><td>Adult pages</td><td>Gambling and online betting</td><td>Online word processing: Google Docs, Spreadsheets</td></tr>
+
+    <tr><td>How do you find out about the latest computer and technology news?</td><td>Online news sources: Google News, CNN,etc.</td><td>Online blogs: tech blogs, news blogs, etc.</td><td>Offline news sources: printed newspapers, magazines,etc.</td><td>Someone you know: a coworker, friend or family member,etc.</td><td>Advertisements</td><td>Social media: Facebook, Twitter, Ning, etc.</td></tr>
+
+<tr><td>How would you describe yourself as a web user?</td><td>(Free entry)</td></tr>
+
+</table>
+
+<hr>
+<address></address>
+<!-- hhmts start --> Last modified: Wed Nov 17 14:42:20 PST 2010 <!-- hhmts end -->
+</body> </html>

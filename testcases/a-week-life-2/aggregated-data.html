@@ -54,8 +54,12 @@
   <tr><td><span class="headers">Column Name</span></td>
       <td><span class="headers">Explanation</span></td></tr>
 <tr><td>user_id</td><td>All rows that have the same user number came from the same submission. Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.) These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</td></tr>
-<tr><td>fx_version</td><td>Firefox Version</td></tr>
-<tr><td>os</td><td>OS Version</td></tr>
+<tr><td>location</td><td>Not used</td></tr>
+<tr><td>fx_version</td><td>Firefox version</td></tr>
+<tr><td>os</td><td>OS version</td></tr>
+<tr><td>version</td><td>Test Pilot Extension version</td></tr>
+<tr><td>survey_answers</td><td>Not used</td></tr>
+<tr><td>number_extensions</td><td>Number of installed add-ons/extensions</td></tr>
 </table>
 
 <h4>Table Name: 'events'</h4>
@@ -69,7 +73,9 @@
 <tr><td>data1</td><td>String; interpretation depends on event_code </td></tr>
 <tr><td>data2</td><td>String; interpretation depends on event_code</td></tr>
 <tr><td>data3</td><td>String; interpretation depends on event_code  </td></tr>
-<tr><td>timestamp</td><td>The time at which the event occurred, given in milliseconds since epoch.</td></tr>
+<tr><td>timestamp</td><td>The time at which the event occurred, given in milliseconds since epoch</td></tr>
+<tr><td>session_id</td><td>Not used</td></tr>
+
 </table>
 
 <h4>Event Codes</h4>

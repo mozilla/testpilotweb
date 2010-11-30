@@ -52,8 +52,12 @@
   <tr><td><span class="headers">Column Name</span></td>
       <td><span class="headers">Explanation</span></td></tr>
 <tr><td>user_id</td><td>All rows that have the same user number came from the same submission. Each submission is assumed to be a different user, but there are various ways that a single user could make multiple submissions (e.g. multiple computers, multiple Firefox profiles, etc.) These user numbers have no meaning or correlation to anything outside of the aggregated data file in which they appear. Their order has been randomized, so the numbers do not correspond to the order in which submissions were received.</td></tr>
+	<tr><td>location</td><td>Not used</td></tr>
 	<tr><td>fx_version</td><td>Firefox Version</td></tr>
 	<tr><td>os</td><td>OS Version</td></tr>
+	<tr><td>version</td><td>Test Pilot Extension version</td></tr>
+	<tr><td>survey_answers</td><td>Not used</td></tr>
+	<tr><td>number_extensions</td><td>Number of installed add-ons/extensions</td></tr>
 </table>
 
 <h4>Table name: 'events'</h4>
@@ -132,14 +136,14 @@ The following extensions are known to cause major changes to the behavior of Fir
 
 <table class="callout">
   <tr><td><span class="headers">Category</span></td><td><span class="headers">Item</span></td><td><span class="headers">Additional Information</span></td></tr>
-<tr><td>customization</td><td>tabs on top</td></tr>
-<tr><td>customization</td><td>tabs on bottom</td></tr>
-<tr><td>customization</td><td>menu bar hidden</td></tr>
-<tr><td>customization</td><td>menu bar shown</td></tr>
-<tr><td>customization</td><td>bookmark bar hidden</td></tr>
-<tr><td>customization</td><td>bookmark bar shown</td></tr>
-<tr><td>customization</td><td>status bar hidden</td></tr>
-<tr><td>customization</td><td>status bar shown</td></tr>
+<tr><td>customization</td><td>tabs on top</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>tabs on bottom</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>menu bar hidden</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>menu bar shown</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>bookmark bar hidden</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>bookmark bar shown</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>status bar hidden</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
+<tr><td>customization</td><td>status bar shown</td><td>Records setting of user preference on every Firefox startup/restart</td></tr>
 <tr><td>combined menu</td><td>firefox button</td></tr>
 <tr><td>combined menu</td><td>new tab</td></tr>
 <tr><td>combined menu</td><td>new tab sub</td></tr>

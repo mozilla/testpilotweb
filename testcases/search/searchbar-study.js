@@ -27,6 +27,7 @@ var EXP_GROUP_CODES = {
 
 const GROUP_PREF = "extensions.testpilot.searchbar_study.expGroupId";
 const OLD_MENU_PREF = "extensions.testpilot.searchbar_study.originalMenu";
+const HIST_LEN_PROP = "TestPilotSearchStudyHistLen";
 
 var SEARCHBAR_EXPERIMENT_COLUMNS =  [
   {property: "engine_name", type: BaseClasses.TYPE_STRING, displayName: "Search Engine"},
@@ -106,10 +107,25 @@ exports.dataStoreInfo = {
 
 function SearchbarWindowObserver(window) {
   SearchbarWindowObserver.baseConstructor.call(this, window);
+  this._sessionStore = Cc["@mozilla.org/browser/sessionstore;1"]
+                    .getService(Ci.nsISessionStore);
 };
 BaseClasses.extend(SearchbarWindowObserver, BaseClasses.GenericWindowObserver);
+SearchbarWindowObserver.prototype.getCurrTab = function() {
+  return this.window.getBrowser().selectedTab;
+};
+SearchbarWindowObserver.prototype.getTabHistLen = function() {
+  let val = this._sessionStore.getTabValue(this.getCurrTab(), HIST_LEN_PROP);
+  dump("getTabHistLen: " + val + "\n");
+  return val;
+};
+SearchbarWindowObserver.prototype.setTabHistLen = function(val) {
+  this._sessionStore.setTabValue(this.getCurrTab(), HIST_LEN_PROP, val);
+  dump("setTabHistLen: " + val + "\n");
+};
 SearchbarWindowObserver.prototype.install = function() {
   let window = this.window;
+  let self = this;
   let searchBar = window.document.getElementById("searchbar");
   let recordSearch = function() {
     let currEngine = searchBar.searchService.currentEngine;
@@ -133,8 +149,20 @@ SearchbarWindowObserver.prototype.install = function() {
   // Watch content space for search results pages loading
   let appcontent = window.document.getElementById("appcontent");
   if (appcontent) {
-    this._listen(appcontent, "DOMContentLoaded", function(evt) {
+    this._listen(appcontent, "load", function(evt) {  // was DOMContentLoaded
+                   // Ignore load if it's not adding to history!
+
+                     // OK this is closer to what we want but still not exactly it
+                   // search thru search bar records
                    let win = evt.originalTarget.defaultView;
+                   let histLen = win.history.length;
+                   if (histLen == self.getTabHistLen()) {
+                     // no change to history length: not a new load
+                     // TODO we could use this to detect when you return to a
+                     // search results page, though!
+                     return;
+                   }
+                   self.setTabHistLen(histLen);
                    let url = win.history.current;
 
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
@@ -296,6 +324,7 @@ GlobalSearchbarObserver.prototype.rememberMenu = function() {
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
   let expGroup = this._expGroupId;
+  dump("Recording search with UI method " + uiMethod + "\n");
   if (!this.privateMode) {
     this._store.storeEvent({
       engine_name: searchEngine,

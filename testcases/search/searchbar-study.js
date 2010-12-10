@@ -109,6 +109,7 @@ function SearchbarWindowObserver(window) {
   SearchbarWindowObserver.baseConstructor.call(this, window);
   this._sessionStore = Cc["@mozilla.org/browser/sessionstore;1"]
                     .getService(Ci.nsISessionStore);
+  this._expectingResultsLoad = false;
 };
 BaseClasses.extend(SearchbarWindowObserver, BaseClasses.GenericWindowObserver);
 SearchbarWindowObserver.prototype.getCurrTab = function() {
@@ -116,12 +117,10 @@ SearchbarWindowObserver.prototype.getCurrTab = function() {
 };
 SearchbarWindowObserver.prototype.getTabHistLen = function() {
   let val = this._sessionStore.getTabValue(this.getCurrTab(), HIST_LEN_PROP);
-  dump("getTabHistLen: " + val + "\n");
   return val;
 };
 SearchbarWindowObserver.prototype.setTabHistLen = function(val) {
   this._sessionStore.setTabValue(this.getCurrTab(), HIST_LEN_PROP, val);
-  dump("setTabHistLen: " + val + "\n");
 };
 SearchbarWindowObserver.prototype.install = function() {
   let window = this.window;
@@ -137,11 +136,15 @@ SearchbarWindowObserver.prototype.install = function() {
   // Listen for searches from search bar
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
+                   self._expectingResultsLoad = true; // searchbar will make results load
+                   // TODO not accurate if the results page fails to load for some
+                   // reason... needs to be some way for this flag to get cleared.
                    recordSearch();
                  }
                }, false);
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
+                   self._expectingResultsLoad = true; // searchbar will make results load
                    recordSearch();
                  }
                }, false);
@@ -151,9 +154,6 @@ SearchbarWindowObserver.prototype.install = function() {
   if (appcontent) {
     this._listen(appcontent, "load", function(evt) {  // was DOMContentLoaded
                    // Ignore load if it's not adding to history!
-
-                     // OK this is closer to what we want but still not exactly it
-                   // search thru search bar records
                    let win = evt.originalTarget.defaultView;
                    let histLen = win.history.length;
                    if (histLen == self.getTabHistLen()) {
@@ -165,6 +165,7 @@ SearchbarWindowObserver.prototype.install = function() {
                    self.setTabHistLen(histLen);
                    let url = win.history.current;
 
+                    // Look for matches in our list of search result pages
                    for (let i = 0; i < SEARCH_RESULTS_PAGES.length; i++) {
                      let srp = SEARCH_RESULTS_PAGES[i];
                      if (srp.pattern.test(url)) {
@@ -177,19 +178,29 @@ SearchbarWindowObserver.prototype.install = function() {
                            uiMethod = UI_METHOD_CODES.MOZ_HOME_PAGE;
                          }
                        } catch(e) {}
-                       exports.handlers.record(srp.name, uiMethod, 0);
+
+                       // if results page load is expected, don't record it:
+                       if (uiMethod == UI_METHOD_CODES.WEBSITE && self._expectingResultsLoad) {
+                         self._expectingResultsLoad = false;
+                       } else {
+                         exports.handlers.record(srp.name, uiMethod, 0);
+                       }
                        break;
                      }
                    }
                  }, true);
-    /* Twitter searches don't reload the page but go to a magic in page
+    /* Twitter searches don't reload the page but go to a magic in-page
      * anchor (i.e. twitter.com/#search?q=string) so we won't catch them
      * with DOMContentLoaded events... watch for the hashchange instead. */
     this._listen(window, "hashchange", function(evt) {
                    let url = window.content.document.location;
                    if (/twitter\.com.+search.+q=/.test(url)) {
-                     exports.handlers.record("Twitter", UI_METHOD_CODES.WEBSITE,
-                                             0);
+                     if (self._expectingResultsLoad) {
+                       self._expectingResultsLoad = false;
+                     } else {
+                       exports.handlers.record("Twitter", UI_METHOD_CODES.WEBSITE,
+                                               0);
+                     }
                    }
                  }, true);
   }
@@ -200,6 +211,7 @@ SearchbarWindowObserver.prototype.install = function() {
     let text = urlBar.value;
     // Assume it's a search if there's a space and/or no period
     if ((text.indexOf(" ") > -1) || (text.indexOf(".") == -1)) {
+      self._expectingResultsLoad = true; // urlbar search will make results load
       exports.handlers.record("Google", UI_METHOD_CODES.URL_BAR, 0);
     }
   };
@@ -216,6 +228,7 @@ SearchbarWindowObserver.prototype.install = function() {
   let popup = window.document.getElementById("contentAreaContextMenu");
   this._listen(popup, "command", function(evt) {
                  if (evt.originalTarget.id == "context-searchselect") {
+                   self._expectingResultsLoad = true; // ctx menu will make results load
                    exports.handlers.record("", UI_METHOD_CODES.CONTEXT_MENU, 0);
                  }
                }, false);
@@ -392,29 +405,10 @@ SearchbarStudyWebContent.prototype.onPageLoad = function(experiment,
   experiment.getDataStoreAsJSON(function(rawData) {
     let counts = [0, 0, 0, 0, 0, 0];
     for each (let row in rawData) {
-      switch (row.ui_method) {
-      case UI_METHOD_CODES.MENU_CONTENTS:
-        continue;
-      case UI_METHOD_CODES.STUDY_VERSION:
-        version = parseInt(row.engine_pos);
-        continue;
-      /* Correction - urlbar, context menu, and search box searches produce
-       * an additional website/homepage event that we don't want to count.
-       * Subtract from the total to keep the chart accurate. */
-      case UI_METHOD_CODES.URL_BAR:
-      case UI_METHOD_CODES.CONTEXT_MENU:
-      case UI_METHOD_CODES.SEARCH_BOX:
-        let countToCorrect = UI_METHOD_CODES.WEBSITE;
-        if (version == 1) {
-          countToCorrect = UI_METHOD_CODES.MOZ_HOME_PAGE;
-          if (row.ui_method == UI_METHOD_CODES.SEARCH_BOX &&
-              row.engine_name.indexOf("Google") == -1) {
-            countToCorrect = UI_METHOD_CODES.WEBSITE;
+      if (row.ui_method != UI_METHOD_CODES.MENU_CONTENTS &&
+          row.ui_method != UI_METHOD_CODES.STUDY_VERSION ) {
+            counts[row.ui_method] += 1;
           }
-        }
-        counts[countToCorrect] -= 1;
-      }
-      counts[row.ui_method] += 1;
     }
     for (let i = 0; i < counts.length; i++) {
       if (counts[i] > 0) {

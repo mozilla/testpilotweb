@@ -86,8 +86,8 @@ var SEARCH_RESULTS_PAGES = [
 exports.experimentInfo = {
   startDate: null, // Null start date means we can start immediately.
   duration: 7, // Days
-  testName: "Search Interfaces",
-  testId: 8,
+  testName: "Search Interfaces v2",
+  testId: 13,
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/searchui",
   summary: "What are the most used interfaces to access search engines through Firefox?",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/search/searchbar-thumbnail.png",
@@ -229,7 +229,10 @@ SearchbarWindowObserver.prototype.install = function() {
   this._listen(popup, "command", function(evt) {
                  if (evt.originalTarget.id == "context-searchselect") {
                    self._expectingResultsLoad = true; // ctx menu will make results load
-                   exports.handlers.record("", UI_METHOD_CODES.CONTEXT_MENU, 0);
+                   let currEngine = searchBar.searchService.currentEngine;
+                   let name = currEngine.name;
+                   let index = searchBar.searchService.getEngines().indexOf(currEngine);
+                   exports.handlers.record(name, UI_METHOD_CODES.CONTEXT_MENU, index);
                  }
                }, false);
 };

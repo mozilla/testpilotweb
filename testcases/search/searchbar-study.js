@@ -46,6 +46,7 @@ var SEARCHBAR_EXPERIMENT_COLUMNS =  [
 // TODO google maps (by click on link) double-counted?
 var SEARCH_RESULTS_PAGES = [
   {pattern: /www\.google\.com.+tbs=vid.+q=/, name: "Google Video"},
+  {pattern: /images\.google\.com.+q=/, name: "Google Images"},
   {pattern: /maps\.google\.com.+q=/, name: "Google Maps"},
   {pattern: /news\.google\.com.+q=/, name: "Google News"},
   {pattern: /www\.google\.com\/.+q=/, name: "Google"},
@@ -324,7 +325,6 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   let sortedEngines = searchSvc.getEngines();
   for (let x = 0; x < sortedEngines.length; x++) {
     if (!sortedEngines[x].hidden) {
-      dump("Recording that you have " + sortedEngines[x].name + "\n");
       this.record(sortedEngines[x].name, UI_METHOD_CODES.MENU_CONTENTS, x);
     }
   }
@@ -342,7 +342,6 @@ GlobalSearchbarObserver.prototype.rememberMenu = function() {
 };
 GlobalSearchbarObserver.prototype.record = function(searchEngine, uiMethod, index) {
   let expGroup = this._expGroupId;
-  dump("Recording search with UI method " + uiMethod + "\n");
   if (!this.privateMode) {
     this._store.storeEvent({
       engine_name: searchEngine,

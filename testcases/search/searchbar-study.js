@@ -88,7 +88,7 @@ exports.experimentInfo = {
   duration: 7, // Days
   testName: "Search Interfaces v2",
   testId: 13,
-  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/searchui",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/searchui2",
   summary: "What are the most used interfaces to access search engines through Firefox?",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/search/searchbar-thumbnail.png",
   optInRequired: false,
@@ -194,6 +194,11 @@ SearchbarWindowObserver.prototype.install = function() {
      * with DOMContentLoaded events... watch for the hashchange instead. */
     this._listen(window, "hashchange", function(evt) {
                    let url = window.content.document.location;
+                   if (/www\.google\.com\/#.*q=/.test(url)) {
+                     self._expectingResultsLoad = true;
+                     exports.handlers.record("Google", UI_METHOD_CODES.WEBSITE,
+                                             0);
+                   }
                    if (/twitter\.com.+search.+q=/.test(url)) {
                      if (self._expectingResultsLoad) {
                        self._expectingResultsLoad = false;
@@ -258,14 +263,11 @@ GlobalSearchbarObserver.prototype.onExperimentStartup = function(store) {
   // If this is the first run we need to assign you to an experiment group randomly
   // and change your search engine menu accordingly.
   let prefs = require("preferences-service");
-  dump("Looking for experiment group pref...\n");
   if (prefs.isSet(GROUP_PREF)) {
     this._expGroupId = prefs.get(GROUP_PREF);
-    dump("Already set, using " + this._expGroupId + "\n");
   } else {
     this._expGroupId = Math.floor(Math.random()*5);
     prefs.set(GROUP_PREF, this._expGroupId);
-    dump("Time to generate a new groupID!  Generated " + this._expGroupId + "\n");
     if (this._expGroupId != EXP_GROUP_CODES.CONTROL) {
       // before changing the search engine menu, record the old order in
       // a preference so we can put it back.

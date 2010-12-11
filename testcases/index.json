@@ -33,6 +33,12 @@
    "jarfile": "a-week-life/week_life.jar",
    "studyfile": "a_week_life.js",
    "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
+  },
+
+  {"name": "Search",
+   "jarfile": "search/searchbar-study.jar",
+   "studyfile": "searchbar-study.js",
+   "hash": "6bd8d2b9cb8abf90175c976f2524bdedf70aa8ef574040ed7d2a769d0da7ddda"
   }
 ],
 
@@ -73,6 +79,14 @@
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
      "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
+    }
+  },
+
+  {"default":
+    {"name": "Search",
+     "jarfile": "search/searchbar-study.jar",
+     "studyfile": "searchbar-study.js",
+     "hash": "6bd8d2b9cb8abf90175c976f2524bdedf70aa8ef574040ed7d2a769d0da7ddda"
     }
   }
 ],

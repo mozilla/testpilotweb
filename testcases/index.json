@@ -67,14 +67,6 @@
   },
 
   {"default":
-    {"name": "Beta UI Survey 2",
-    "jarfile": "beta/beta-ui2-survey.jar",
-    "studyfile": "beta-ui2-survey.js",
-    "hash": "7590142f090744e8758f426fcf602a4d502a6f4482a792d937a56e20d4c20499"
-    }
-  },
-
-  {"default":
     {"name": "A Week in the Life of a Browser",
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
@@ -103,7 +95,14 @@
  "id": "100",
  "url": "https://testpilot.mozillalabs.com/testcases/betaui.html",
  "summary": "We are studying how the changes to the toolbar and menu bar in the Firefox 4 beta affect usage of the interface.",
- "thumbnail": "http://hg.mozilla.org/labs/testpilot/raw-file/269edaf8034d/extension/skin/all/badge-default.png"
+ "thumbnail":"http://hg.mozilla.org/labs/testpilot/raw-file/269edaf8034d/extension/skin/all/badge-default.png"
+},
+
+{"name": "Beta UI Survey 2",
+"id": "101",
+"url": "https://testpilot.mozillalabs.com/testcases/betaui2",
+"summary": "We are studying how the changes to the toolbar and menu bar in the Firefox 4 beta affect usage of the interface.",
+"thumbnail": "http://hg.mozilla.org/labs/testpilot/raw-file/269edaf8034d/extension/skin/all/badge-default.png"
 },
 
 {"name": "Toolbar Study",

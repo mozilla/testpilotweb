@@ -3,6 +3,7 @@ const CHECK_BOXES_WITH_FREE_ENTRY = 1;
 const SCALE = 2;
 const FREE_ENTRY = 3;
 const CHECK_BOXES = 4;
+const MULTIPLE_CHOICE_WITH_FREE_ENTRY = 5;
 
 exports.surveyInfo = {
   surveyId: "basic_panel_survey_2",
@@ -34,11 +35,11 @@ You can always use the button below to review or change your answers.</p>",
      choices: ["Chrome","Safari","Opera","Internet Explorer (all versions)"],
      free_entry: "Other" },
   { question: "If you use multiple browsers, what do you consider to be your primary browser?",
-    type: MULTIPLE_CHOICE,
+    type: MULTIPLE_CHOICE_WITH_FREE_ENTRY,
     choices: ["I don't use other browsers, only use Firefox"," Firefox","Chrome","Safari","Opera","Internet Explorer (all versions)"],
     free_entry: "Other" },
   { question: "What is your gender?",
-    type: MULTIPLE_CHOICE,
+    type: MULTIPLE_CHOICE_WITH_FREE_ENTRY,
     choices: ["Male", "Female"],
     free_entry: "Other" },
   {question: "How old are you?",

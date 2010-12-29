@@ -8,7 +8,7 @@ exports.surveyInfo = {
   surveyId: "basic_panel_survey_2",
   surveyName: "Firefox 4 Beta User Background Survey",
   summary: "This survey will help us build a better picture of the majority "
-    + "of Firefox 4 Beta user. This survey doesn't contain any personally "
+    + "of Firefox 4 Beta users. This survey doesn't contain any personally "
     + "identifiable questions."
     + "Thank you for your time!",
   thumbnail: "",
@@ -19,7 +19,7 @@ It will be uploaded along with any user study data that you choose to submit. \
 You can always use the button below to review or change your answers.</p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   minTPVersion: "1.0a1",
-  versionNumber: 3,
+  versionNumber: 4,
   surveyQuestions:  [
    { question: "How long have you used Firefox?",
      type: MULTIPLE_CHOICE,
@@ -39,7 +39,8 @@ You can always use the button below to review or change your answers.</p>",
     free_entry: "Other" },
   { question: "What is your gender?",
     type: MULTIPLE_CHOICE,
-    choices: ["Male", "Female"]},
+    choices: ["Male", "Female"],
+    free_entry: "Other" },
   {question: "How old are you?",
    type: MULTIPLE_CHOICE,
    choices: ["Under 18",

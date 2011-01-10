@@ -23,22 +23,10 @@
    "hash": "d534b22b220bf473463d0874f3f57a0d471db95a9b0d5cd40ffff2cd5b309d14"
   },
 
-  {"name": "Beta UI Survey 2",
-   "jarfile": "beta/beta-ui2-survey.jar",
-   "studyfile": "beta-ui2-survey.js",
-   "hash": "7590142f090744e8758f426fcf602a4d502a6f4482a792d937a56e20d4c20499"
-  },
-
   {"name": "A Week in the Life of a Browser",
    "jarfile": "a-week-life/week_life.jar",
    "studyfile": "a_week_life.js",
    "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
-  },
-
-  {"name": "Search",
-   "jarfile": "search/searchbar-study.jar",
-   "studyfile": "searchbar-study.js",
-   "hash": "6bd8d2b9cb8abf90175c976f2524bdedf70aa8ef574040ed7d2a769d0da7ddda"
   }
 ],
 
@@ -71,14 +59,6 @@
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
      "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
-    }
-  },
-
-  {"default":
-    {"name": "Search",
-     "jarfile": "search/searchbar-study.jar",
-     "studyfile": "searchbar-study.js",
-     "hash": "6bd8d2b9cb8abf90175c976f2524bdedf70aa8ef574040ed7d2a769d0da7ddda"
     }
   }
 ],

@@ -61,6 +61,14 @@
     "studyfile": "beta-ui2-survey.js",
     "hash": "7590142f090744e8758f426fcf602a4d502a6f4482a792d937a56e20d4c20499"
     }
+  },
+
+  {"default":
+    {"name": "Strict Entry Security Evaluation",
+    "jarfile": "cmu/strict_entry.jar",
+    "studyfile": "strict_entry.js",
+    "hash": "67c2855504a1c74448eab488a9aa3dcbd8ab1bd39323a7777e56d82620470142"
+    }
   }
 ],
 

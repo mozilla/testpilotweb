@@ -1,3 +1,5 @@
+// This file is an example study.  It doesn't do anything, but it
+// provides a basis for you to start creating your own Test Pilot study.
 
 
 // We're using the Cuddlefish JS module framework, so importing a module
@@ -15,9 +17,9 @@ const EVENT_CODE_STUDY_STARTUP = 0;
 // experimentInfo is an obect providing metadata about the study.
 exports.experimentInfo = {
 
-  testName: "Security Evaluation",
+  testName: "Evaluation of Proposed Security Standard",
   testId: 1337,  // must be unique across all test pilot studies
-  //testInfoUrl: "http://websec.sv.cmu.edu", // URL of page explaining your study
+  //testInfoUrl: "https://testpilot.mozillalabs.com/testcases/strictentry", // URL of page explaining your study, uncomment when ready
   summary: "This study is designed by the Web Security group of Carnegie Mellon University"+
 	  " to evaluate the backward compatibility of a new browser architecture",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
@@ -95,6 +97,8 @@ EntryPointWindowObserver.prototype.install = function() {
 
 		   let content_doc = this.window.document.getElementById("content").contentDocument;
 	    	   let my_doc = content_doc.documentElement.innerHTML; //HTML content of the main document
+		   if (!my_doc)return false;
+
 		   let doc_loc = ""+content_doc.location; //location of the document, converted to string
 		   let dummy;
 		   const HOST_LEN = host_list.length;
@@ -139,9 +143,9 @@ EntryPointWindowObserver.prototype.install = function() {
 
 					//We have a special case for gmail, check secondary login pages
 					//pages like http://mail.google.com/a/sv.cmu.edu/
-					if (j==0 && rel_path.search(/^\/a\/[^\/]*\/?$/g)!= -1)violation=2;
-
-					console.info("Host:"+host+" Path:"+rel_path+" violation:"+violation);
+					if (j==0 &&
+						(rel_path.search(/^\/a\/[^\/]*\/?$/g)!= -1 ||
+						rel_path.search(/^\/mail\/\?hl=[a-zA-Z]*&amp;tab=[a-zA-Z]*\/?$/g)!=-1))violation=2;
 
 					break;
 				}
@@ -183,14 +187,16 @@ BaseClasses.extend(StrictEntryWebContent, BaseClasses.GenericWebContent);
 
 StrictEntryWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
-    return "";
+	return '<div class="dataBox"><h3>View Your Data:</h3>' +
+          this.dataViewExplanation +
+          this.rawDataLink + '</div>';
   });
 
 StrictEntryWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "For this study, we simulated a hypothetical scenario where Strict Entry"+
-	" Security was enabled for ten websites. The data we collected indicates"+
-	" whether each of the ten websites is backward compatible with all the web pages"+
+    return "For this study, we simulated a hypothetical scenario where our security"+
+	" policy was enabled for ten websites. The data we collected indicates"+
+	" whether each of the ten websites is backward compatible with web pages"+
 	" you have visited";
   });
 

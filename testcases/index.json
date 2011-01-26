@@ -20,13 +20,13 @@
   {"name": "Firefox 4 Beta Interface 2",
    "jarfile": "beta/combined.jar",
    "studyfile": "combined.js",
-   "hash": "d534b22b220bf473463d0874f3f57a0d471db95a9b0d5cd40ffff2cd5b309d14"
+   "hash": "09ca72caa421715db229b6313c452577cb629a5d21db1ff8028533a6964f5bdc"
   },
 
   {"name": "A Week in the Life of a Browser",
    "jarfile": "a-week-life/week_life.jar",
    "studyfile": "a_week_life.js",
-   "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
+   "hash": "65a57f3cf2440a7e56c4f799a544916e8a670c1f223719986703dd16bd09788d"
   }
 ],
 

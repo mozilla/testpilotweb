@@ -18,7 +18,15 @@ exports.experimentInfo = {
   recurrenceInterval: 30,
   versionNumber: 5,
   minTPVersion: "1.0rc1",
-  minFXVersion: "3.5"
+  minFXVersion: "3.5",
+  runOrNotFunc: function() {
+    //Don't run if on Firefox 4b10 and Mac OS 10.6.6.
+     let version = Cc["@mozilla.org/xre/app-info;1"]
+      .getService(Ci.nsIXULAppInfo).version;
+     let os = Cc["@mozilla.org/network/protocol;1?name=http"]
+       .getService(Ci.nsIHttpProtocolHandler).oscpu;
+    return (version != "4.0b10" || os.indexOf("Mac OS X 10.6") == -1);
+  }
 };
 
 const WeekEventCodes = {

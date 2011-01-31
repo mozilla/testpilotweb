@@ -14,14 +14,17 @@ BaseClasses = require("study_base_classes.js");
 // We use the Cuddlefish 'exports' object to expose these.
 const EVENT_CODE_STUDY_STARTUP = 0;
 
+//global store variable
+var dbstore;
+
 // experimentInfo is an obect providing metadata about the study.
 exports.experimentInfo = {
 
   testName: "Evaluation of Proposed Security Standard",
   testId: 1337,  // must be unique across all test pilot studies
-  //testInfoUrl: "https://testpilot.mozillalabs.com/testcases/strictentry", // URL of page explaining your study, uncomment when ready
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/secure-sites-compatibility.html", // URL of page explaining your study, uncomment when ready
   summary: "This study is designed by the Web Security group of Carnegie Mellon University"+
-	  " to evaluate the backward compatibility of a new browser architecture",
+	  " to evaluate the backward compatibility of a new security feature",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
   versionNumber: 1, // update this when changing your study
@@ -46,8 +49,8 @@ exports.experimentInfo = {
 // dataStoreInfo describes the database table in which your study's
 // data will be stored (in the Firefox built-in SQLite database)
 exports.dataStoreInfo = {
-  fileName: "testpilot_strict_entry_results.sqlite",
-  tableName: "testpilot_strict_entry_study",
+  fileName: "testpilot_entry_isolation_results.sqlite",
+  tableName: "testpilot_entry_isolation_study",
   columns: [
     {property: "urlHash", type: BaseClasses.TYPE_STRING,
      displayName: "URL HASH"},
@@ -113,6 +116,17 @@ EntryPointWindowObserver.prototype.install = function() {
 		   //SHA-1 of the current document location
 		   let url_hash = b64_sha1(doc_loc);
 
+		   //db hack to check if we have visited this page
+		   let db_query = "SELECT * FROM " + dbstore._tableName + " WHERE urlHash = :row_id";
+		   let statement = dbstore._createStatement(db_query);
+		   statement.params.row_id=url_hash;
+
+		   if (statement.executeStep()){
+			statement.reset();
+	   	   	return;
+		   }
+		   statement.reset();
+
 		   //URL regex
 		   let urls = my_doc.match(/(src|href)\s*=\s*['"“”‘’]\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
 
@@ -150,13 +164,14 @@ EntryPointWindowObserver.prototype.install = function() {
 					break;
 				}
 			}
-			//saves in db
+			//add element into db
 			exports.handlers.record({urlHash: url_hash, entryIndex: host_index, entryViolation: violation});
 		   }
 
 	}, true);
   }
- }
+};
+
 
 
 
@@ -172,6 +187,14 @@ EntryPointWindowObserver.prototype.install = function() {
  BaseClasses.extend(EntryPointGlobalObserver,
                     BaseClasses.GenericGlobalObserver);
 
+
+EntryPointGlobalObserver.prototype.onExperimentStartup = function(store) {
+  // store is a reference to the live database table connection
+  // you MUST call the base class onExperimentStartup and give it the store
+  // reference:
+  EntryPointGlobalObserver.superClass.onExperimentStartup.call(this, store);
+  dbstore = store;
+};
 
 // Instantiate and export the global observer (required!)
 exports.handlers = new EntryPointGlobalObserver();
@@ -189,19 +212,97 @@ StrictEntryWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
 	return '<div class="dataBox"><h3>View Your Data:</h3>' +
           this.dataViewExplanation +
-          this.rawDataLink + '</div>';
+          this.rawDataLink +
+	  '<div class="dataBox"><div id="graph-div"></div>'+
+	  this.saveButtons + '</div>';
   });
+
+StrictEntryWebContent.prototype.__defineGetter__("saveButtons",
+   function() {
+     // Flot creates a canvas inside graph-div; that's the one we need.
+     let btnCode = "saveCanvas(document.getElementById('graph-div').getElementsByTagName('canvas').item(0))";
+     return '<div><button type="button" onclick="' + btnCode + '">\
+     Save Graph</button>&nbsp;&nbsp;<button type="button"\
+     onclick="exportData();">Export Data</button></div>';
+   });
 
 StrictEntryWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
     return "For this study, we simulated a hypothetical scenario where our security"+
-	" policy was enabled for ten websites. The data we collected indicates"+
-	" whether each of the ten websites is backward compatible with web pages"+
-	" you have visited";
+	" policy was enabled for ten websites (see graph below). The data we collected shows"+
+	" whether each of the ten websites is compatible with our policy";
   });
+
+
+//graphing function
+StrictEntryWebContent.prototype.onPageLoad = function(experiment, document, graphUtils){
+	experiment.getDataStoreAsJSON(function(rawData){
+		//number of times this host has appeared
+		let host_count = new Array(0,0,0,0,0,0,0,0,0,0);
+		//number of times violation of a host has occurred
+		let vio_count = new Array(0,0,0,0,0,0,0,0,0,0);
+
+		for each (let row in rawData){
+			//first, we want to see which site the data belongs to
+			//compatibilty factor = (all links - violation)/all links
+
+			if (row.entryIndex >=0){ //host match
+				host_count[row.entryIndex]++;
+				//violation occured
+				if (row.entryViolation == 1) vio_count[row.entryIndex]++;
+			}
+
+		}
+
+		//hell, its graphing time!
+		let plotDiv = document.getElementById("graph-div");
+   	    	plotDiv.style.height="600px";
+
+		let data_points = [];
+		for (let i=0; i<10; i++){
+			//if no one links this host, then its 100% compatible
+			if (host_count[i]==0) data_points.push([100,i]);
+			//else calculate the compatibility
+			else data_points.push([(host_count[i]-vio_count[i])*100/host_count[i],i]);
+		}
+
+		graphUtils.plot(plotDiv, [
+				{
+					color: "rgb(100,123,255)",
+					label: "Compatibility (%)",
+					data: data_points,
+					bars: {
+						align:"center",
+						barWidth: 0.8,
+						horizontal:true,
+						show:true
+					}
+				}],
+				{
+					legend:{ position: "nw"},
+					xaxis:{position: "top", tickSize:20, min:0, max: 100},
+					yaxis:{ ticks:[[0,"Gmail"],
+						      	[1,"Bank Of America"],
+						      	[2,"Wells Fargo"],
+						      	[3,"Chase"],
+						      	[4,"Cisco"],
+							[5,"Pivotal Tracker"],
+							[6,"Chat Roulette"],
+							[7,"Last.fm"],
+							[8,"CNN"],
+							[9,"NYTimes"]]
+					      },
+				});
+
+
+	});
+};
+
 
 // Instantiate and export the web content (required!)
 exports.webContent = new StrictEntryWebContent();
+
+
 
 // Register any code we want called when the study is unloaded:
 require("unload").when(
@@ -401,7 +502,7 @@ function binb2hex(binarray)
  */
 function binb2b64(binarray)
 {
-  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789AB";
   var str = "";
   for(var i = 0; i < binarray.length * 4; i += 3)
   {

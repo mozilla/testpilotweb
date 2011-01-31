@@ -27,7 +27,7 @@
     {"name": "A Week in the Life of a Browser",
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
-     "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
+     "hash": "637b620e6ea2a28700b9c42689c269e2e2ac355fc51c996351436826c861df7a"
     }
   },
 
@@ -51,7 +51,7 @@
     {"name": "Firefox 4 Beta Interface 2",
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
-     "hash": "d534b22b220bf473463d0874f3f57a0d471db95a9b0d5cd40ffff2cd5b309d14"
+     "hash": "90de1c64d6668e5eabafc656915c1417ad08dd2f1053695e1ef8912e74cf5aad"
     }
   },
 
@@ -67,7 +67,7 @@
     {"name": "Strict Entry Security Evaluation",
     "jarfile": "cmu/strict_entry.jar",
     "studyfile": "strict_entry.js",
-    "hash": "b4ed47c60154be924d37a4c4119f7fb128740ce3fcbf447b2ef58bddf28a3996"
+    "hash": "393c3b2e3cd72e8c3df9a95dcaee3daff3ee987b57c199b82cbc3e694d59c362"
     }
   }
 ],

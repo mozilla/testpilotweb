@@ -1,9 +1,3 @@
-// This file is an example study.  It doesn't do anything, but it
-// provides a basis for you to start creating your own Test Pilot study.
-
-
-// We're using the Cuddlefish JS module framework, so importing a module
-// is done with require().  Here we import the base classes we'll build on.
 BaseClasses = require("study_base_classes.js");
 
 // Our Test Pilot study must implement and expose four things:
@@ -24,13 +18,13 @@ exports.experimentInfo = {
   testId: 1337,  // must be unique across all test pilot studies
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/secure-sites-compatibility.html", // URL of page explaining your study, uncomment when ready
   summary: "This study is designed by the Web Security group of Carnegie Mellon University"+
-	  " to evaluate the backward compatibility of a new security feature",
+	  " to evaluate the backward compatibility of a new security feature.",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
   versionNumber: 1, // update this when changing your study
     // so you can identify results submitted from different versions
 
-  duration: 5, // a number of days - fractions OK.
+  duration: 3, // a number of days - fractions OK.
   minTPVersion: "1.0a1", // Test Pilot versions older than this
     // will not run the study.
   minFXVersion: "3.6", // Firefox versions older than this will
@@ -210,92 +204,36 @@ BaseClasses.extend(StrictEntryWebContent, BaseClasses.GenericWebContent);
 
 StrictEntryWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
-	return '<div class="dataBox"><h3>View Your Data:</h3>' +
-          this.dataViewExplanation +
-          this.rawDataLink +
-	  '<div class="dataBox"><div id="graph-div"></div>'+
-	  this.saveButtons + '</div>';
+      return '<div class="dataBox"><h3>View Your Data:</h3>' +
+      this.dataViewExplanation +
+      this.rawDataLink +
+      '<canvas id="data-canvas" width="480" height="400"></canvas>' +
+      this.saveButtons + '</div>';
   });
-
-StrictEntryWebContent.prototype.__defineGetter__("saveButtons",
-   function() {
-     // Flot creates a canvas inside graph-div; that's the one we need.
-     let btnCode = "saveCanvas(document.getElementById('graph-div').getElementsByTagName('canvas').item(0))";
-     return '<div><button type="button" onclick="' + btnCode + '">\
-     Save Graph</button>&nbsp;&nbsp;<button type="button"\
-     onclick="exportData();">Export Data</button></div>';
-   });
-
 StrictEntryWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "For this study, we simulated a hypothetical scenario where our security"+
-	" policy was enabled for ten websites (see graph below). The data we collected shows"+
-	" whether each of the ten websites is compatible with our policy";
+    return "This study tests each website that you visit against the CMU Web Security "
+          + "group's hypothetical &quot;Strict Entry&quot; security policy.  The graph "
+          + "below shows what fraction of the websites "
+            + "would be in agreement with such a policy.";
   });
 
 
 //graphing function
 StrictEntryWebContent.prototype.onPageLoad = function(experiment, document, graphUtils){
-	experiment.getDataStoreAsJSON(function(rawData){
-		//number of times this host has appeared
-		let host_count = new Array(0,0,0,0,0,0,0,0,0,0);
-		//number of times violation of a host has occurred
-		let vio_count = new Array(0,0,0,0,0,0,0,0,0,0);
+  let self = this;
+  let canvas = document.getElementById("data-canvas");
+  experiment.getDataStoreAsJSON(function(rawData){
+    let vio_count = 0;
+    for each (let row in rawData){
+      if (row.entryViolation == 1) vio_count++;
+    }
+    let row_count = rawData.length;
 
-		for each (let row in rawData){
-			//first, we want to see which site the data belongs to
-			//compatibilty factor = (all links - violation)/all links
-
-			if (row.entryIndex >=0){ //host match
-				host_count[row.entryIndex]++;
-				//violation occured
-				if (row.entryViolation == 1) vio_count[row.entryIndex]++;
-			}
-
-		}
-
-		//hell, its graphing time!
-		let plotDiv = document.getElementById("graph-div");
-   	    	plotDiv.style.height="600px";
-
-		let data_points = [];
-		for (let i=0; i<10; i++){
-			//if no one links this host, then its 100% compatible
-			if (host_count[i]==0) data_points.push([100,i]);
-			//else calculate the compatibility
-			else data_points.push([(host_count[i]-vio_count[i])*100/host_count[i],i]);
-		}
-
-		graphUtils.plot(plotDiv, [
-				{
-					color: "rgb(100,123,255)",
-					label: "Compatibility (%)",
-					data: data_points,
-					bars: {
-						align:"center",
-						barWidth: 0.8,
-						horizontal:true,
-						show:true
-					}
-				}],
-				{
-					legend:{ position: "nw"},
-					xaxis:{position: "top", tickSize:20, min:0, max: 100},
-					yaxis:{ ticks:[[0,"Gmail"],
-						      	[1,"Bank Of America"],
-						      	[2,"Wells Fargo"],
-						      	[3,"Chase"],
-						      	[4,"Cisco"],
-							[5,"Pivotal Tracker"],
-							[6,"Chat Roulette"],
-							[7,"Last.fm"],
-							[8,"CNN"],
-							[9,"NYTimes"]]
-					      },
-				});
-
-
-	});
+    let dataSet = [ { name: "Would violate policy", frequency: vio_count},
+      {name: "Would not violate policy", frequency: row_count - vio_count}];
+    self.drawPieChart(canvas, dataSet);
+   });
 };
 
 

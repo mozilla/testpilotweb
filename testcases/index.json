@@ -60,14 +60,6 @@
      "studyfile": "a_week_life.js",
      "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
     }
-  },
-
-  {"default":
-    {"name": "Strict Entry Security Evaluation",
-    "jarfile": "cmu/strict_entry.jar",
-    "studyfile": "strict_entry.js",
-    "hash": "cb0573bedd307c3a41140b93af23c9ad0b99a8071b87868c68e84f658e06f8d5"
-    }
   }
 ],
 

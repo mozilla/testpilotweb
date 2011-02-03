@@ -51,7 +51,7 @@ exports.dataStoreInfo = {
     {property: "entryIndex", type: BaseClasses.TYPE_INT_32,
      displayName: "Index of entry host"},
     {property: "entryViolation", type: BaseClasses.TYPE_INT_32,
-	    displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]}
+     displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]}
   ]
 };
 
@@ -100,7 +100,8 @@ EntryPointWindowObserver.prototype.install = function() {
 		   let dummy;
 		   const HOST_LEN = host_list.length;
 
-		   //for convenience, if the site belongs to of our strict entry sites, just skip the experiment all together
+		   //for convenience, if the site belongs to of our strict entry sites,
+                   // just skip the experiment all together
 		   //we will miss some cases but not a big deal,
 		   for (var i=0; i<HOST_LEN; i++){
 			dummy = doc_loc.indexOf(host_list[i],0);
@@ -115,7 +116,17 @@ EntryPointWindowObserver.prototype.install = function() {
 		   let statement = dbstore._createStatement(db_query);
 		   statement.params.row_id=url_hash;
 
-		   if (statement.executeStep()){
+                   statement.executeAsync({
+                     handleResult: function(aResultSet) {
+                     },
+                     handleError: function(aError) {
+                     },
+                     handleCompletion: function(aReason) {
+                       if (aReason == Ci.mozIStorageStatementCallback.REASON_FINISHED) {
+                       }
+                     }
+                   });
+		   /*if (statement.executeStep()){
 			statement.reset();
 	   	   	return;
 		   }
@@ -160,7 +171,7 @@ EntryPointWindowObserver.prototype.install = function() {
 			}
 			//add element into db
 			exports.handlers.record({urlHash: url_hash, entryIndex: host_index, entryViolation: violation});
-		   }
+		   }*/
 
 	}, true);
   }

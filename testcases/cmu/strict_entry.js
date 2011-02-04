@@ -21,13 +21,13 @@ exports.experimentInfo = {
 	  " to evaluate the backward compatibility of a new security feature.",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
-  versionNumber: 1, // update this when changing your study
+  versionNumber: 2, // update this when changing your study
     // so you can identify results submitted from different versions
 
   duration: 3, // a number of days - fractions OK.
   minTPVersion: "1.0a1", // Test Pilot versions older than this
     // will not run the study.
-  minFXVersion: "3.6", // Firefox versions older than this will
+  minFXVersion: "4.0b10", // Firefox versions older than this will
     // not run the study.
 
   // For studies that automatically recur:
@@ -36,7 +36,12 @@ exports.experimentInfo = {
 
   // When the study starts:
   startDate: null, // null means "start immediately".
-  optInRequired: false // opt-in studies not yet implemented
+  optInRequired: false, // opt-in studies not yet implemented
+  runOrNotFunc: function() {
+    // true only if they have already run it
+    let prefs = require("preferences-service");
+    return (prefs.isSet("extensions.testpilot.taskstatus.1337"));
+  }
 };
 
 
@@ -51,7 +56,7 @@ exports.dataStoreInfo = {
     {property: "entryIndex", type: BaseClasses.TYPE_INT_32,
      displayName: "Index of entry host"},
     {property: "entryViolation", type: BaseClasses.TYPE_INT_32,
-     displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]}
+	    displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]}
   ]
 };
 
@@ -100,8 +105,7 @@ EntryPointWindowObserver.prototype.install = function() {
 		   let dummy;
 		   const HOST_LEN = host_list.length;
 
-		   //for convenience, if the site belongs to of our strict entry sites,
-                   // just skip the experiment all together
+		   //for convenience, if the site belongs to of our strict entry sites, just skip the experiment all together
 		   //we will miss some cases but not a big deal,
 		   for (var i=0; i<HOST_LEN; i++){
 			dummy = doc_loc.indexOf(host_list[i],0);
@@ -116,62 +120,61 @@ EntryPointWindowObserver.prototype.install = function() {
 		   let statement = dbstore._createStatement(db_query);
 		   statement.params.row_id=url_hash;
 
-                   statement.executeAsync({
-                     handleResult: function(aResultSet) {
-                     },
-                     handleError: function(aError) {
-                     },
-                     handleCompletion: function(aReason) {
-                       if (aReason == Ci.mozIStorageStatementCallback.REASON_FINISHED) {
-                       }
-                     }
-                   });
-		   /*if (statement.executeStep()){
-			statement.reset();
-	   	   	return;
-		   }
-		   statement.reset();
+		   var not_visited=1;
+		   //we will execute the rest of our study asynchronously
+		   //only if our DB does not have the data already
+		   statement.executeAsync({
+			handleResult: function(aResultSet){
+		  	   if (aResultSet.getNextRow()){
+				  not_visited=0;
+			   }
+			},
 
-		   //URL regex
-		   let urls = my_doc.match(/(src|href)\s*=\s*['"“”‘’]\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
+			handleCompletion: function(aReason) {
+				if (not_visited){//a new page!
+				   //URL regex
+				   let urls = my_doc.match(/(src|href)\s*=\s*['"“”‘’]\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
 
-		   let url_len = urls.length;
-                   for (var i=0; i<url_len; i++){
+				   let url_len = urls.length;
+				   for (var i=0; i<url_len; i++){
 
-			//first, extract the url
-			let url_pos = urls[i].search(/\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
+					//first, extract the url
+					let url_pos = urls[i].search(/\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
 
-			let url_str = urls[i].substring(url_pos);
+					let url_str = urls[i].substring(url_pos);
 
-			//extract the host name
-			let ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-			let parsed_URL = ioService.newURI(url_str, null, null);
-			let host = parsed_URL.host;
+					//extract the host name
+					let ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+					let parsed_URL = ioService.newURI(url_str, null, null);
+					let host = parsed_URL.host;
 
-			//check if the hostname matches with one of the entry point hosts
-			let host_index = -1;
-			let violation = 0;
-			for (let j=0; j<HOST_LEN; j++){
-				if (host_list[j]==host){ //Host name of our URL matches one of the entry hosts
-					host_index = j;
+					//check if the hostname matches with one of the entry point hosts
+					let host_index = -1;
+					let violation = 0;
+					for (let j=0; j<HOST_LEN; j++){
+						if (host_list[j]==host){ //Host name of our URL matches one of the entry hosts
+							host_index = j;
 
-					//now, we check if the relative PATHs match
-					let rel_path = parsed_URL.path;
-					if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //at ending back slash
-					if (rel_path!=path_list[j]) violation=1;//Path mismatch with entry point path
+							//now, we check if the relative PATHs match
+							let rel_path = parsed_URL.path;
+							if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //at ending back slash
+							if (rel_path!=path_list[j]) violation=1;//Path mismatch with entry point path
 
-					//We have a special case for gmail, check secondary login pages
-					//pages like http://mail.google.com/a/sv.cmu.edu/
-					if (j==0 &&
-						(rel_path.search(/^\/a\/[^\/]*\/?$/g)!= -1 ||
-						rel_path.search(/^\/mail\/\?hl=[a-zA-Z]*&amp;tab=[a-zA-Z]*\/?$/g)!=-1))violation=2;
-
-					break;
-				}
+							//We have a special case for gmail, check secondary login pages
+							//pages like http://mail.google.com/a/sv.cmu.edu/
+							if (j==0 &&
+								(rel_path.search(/^\/a\/[^\/]*\/?$/g)!= -1 ||
+								rel_path.search(/^\/mail\/\?hl=[a-zA-Z]*&amp;tab=[a-zA-Z]*\/?$/g)!=-1))violation=2;
+							//add element into db
+							exports.handlers.record({urlHash: url_hash, entryIndex: host_index, entryViolation: violation});
+							break;
+						}
+					}
+				   }
+			   }
 			}
-			//add element into db
-			exports.handlers.record({urlHash: url_hash, entryIndex: host_index, entryViolation: violation});
-		   }*/
+		   });
+
 
 	}, true);
   }
@@ -240,6 +243,8 @@ StrictEntryWebContent.prototype.onPageLoad = function(experiment, document, grap
       if (row.entryViolation == 1) vio_count++;
     }
     let row_count = rawData.length;
+
+    if (row_count==0) row_count++; //if no data gathered, then it is 100% compatible
 
     let dataSet = [ { name: "Would violate policy", frequency: vio_count},
       {name: "Would not violate policy", frequency: row_count - vio_count}];
@@ -466,4 +471,6 @@ function binb2b64(binarray)
   }
   return str;
 }
+
+
 

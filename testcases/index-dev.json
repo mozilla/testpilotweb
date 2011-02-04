@@ -67,7 +67,7 @@
     {"name": "Strict Entry Security Evaluation",
     "jarfile": "cmu/strict_entry.jar",
     "studyfile": "strict_entry.js",
-    "hash": "2d205409f1573137b5553e24e66d9e8356d29ffe47c485caa35b3a5f4c089896"
+    "hash": "ef2e299d9e10cb08449151598912689aeb8403ed262c2dc7d75962cebd0844ba"
     }
   }
 ],

@@ -31,7 +31,7 @@
 ],
 
 "new_experiments": [
-  {"default":f
+  {"default":
     {"name": "Dependencies",
      "jarfile": "base_classes.jar",
      "hash": "3a538f98708e657943d13b86ae93930eb32616f261298b2503d65d7d6250718d"

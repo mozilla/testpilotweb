@@ -1,36 +1,4 @@
-{"experiments": [{"name": "A Week in the Life of a Browser",
-                  "filename": "a-week-life/a_week_life.js"},
-                 {"name": "Pilot Background Survey",
-                  "filename": "pilot-background-survey.js"}],
-"libraries": [{"name": "Study Base Classes Library",
-                  "filename": "study_base_classes.js"}],
-
-"experiment_jars": [
-  {"name": "Dependencies",
-   "jarfile": "base_classes.jar",
-   "hash": "3a538f98708e657943d13b86ae93930eb32616f261298b2503d65d7d6250718d"
-  },
-
-  {"name": "Pilot Background Survey",
-   "jarfile": "basic-survey.jar",
-   "studyfile": "pilot-background-survey.js",
-   "hash": "bdc8842255f723a5d0ca64bf14417a741df2f91981f521c9abfd2ba49082aefa"
-  },
-
-  {"name": "Firefox 4 Beta Interface 2",
-   "jarfile": "beta/combined.jar",
-   "studyfile": "combined.js",
-   "hash": "09ca72caa421715db229b6313c452577cb629a5d21db1ff8028533a6964f5bdc"
-  },
-
-  {"name": "A Week in the Life of a Browser",
-   "jarfile": "a-week-life/week_life.jar",
-   "studyfile": "a_week_life.js",
-   "hash": "65a57f3cf2440a7e56c4f799a544916e8a670c1f223719986703dd16bd09788d"
-  }
-],
-
-"new_experiments": [
+{"new_experiments": [
   {"default":
     {"name": "Dependencies",
      "jarfile": "base_classes.jar",
@@ -42,7 +10,7 @@
     {"name": "Pilot Background Survey",
      "jarfile": "basic-survey.jar",
      "studyfile": "pilot-background-survey.js",
-     "hash": "411258fc41f84f88617e72bf761e6f5b9ca4d380d24f5286f22c5af7dc4ed128"
+     "hash": "bdc8842255f723a5d0ca64bf14417a741df2f91981f521c9abfd2ba49082aefa"
     }
   },
 
@@ -50,7 +18,7 @@
     {"name": "Firefox 4 Beta Interface 2",
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
-     "hash": "d534b22b220bf473463d0874f3f57a0d471db95a9b0d5cd40ffff2cd5b309d14"
+     "hash": "90de1c64d6668e5eabafc656915c1417ad08dd2f1053695e1ef8912e74cf5aad"
     }
   },
 
@@ -58,10 +26,12 @@
     {"name": "A Week in the Life of a Browser",
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
-     "hash": "92ce798ade87eeff07822c2d8921e5f96da40f54b0e6ba4ad5a07a85bc839289"
+     "hash": "637b620e6ea2a28700b9c42689c269e2e2ac355fc51c996351436826c861df7a"
     }
   }
 ],
+
+"maintain_experiments": [],
 
 "legacy": [
 {"name": "Search",

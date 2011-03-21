@@ -15,14 +15,6 @@
   },
 
   {"default":
-    {"name": "Firefox 4 Beta Interface 2",
-     "jarfile": "beta/combined.jar",
-     "studyfile": "combined.js",
-     "hash": "90de1c64d6668e5eabafc656915c1417ad08dd2f1053695e1ef8912e74cf5aad"
-    }
-  },
-
-  {"default":
     {"name": "A Week in the Life of a Browser",
      "jarfile": "a-week-life/week_life.jar",
      "studyfile": "a_week_life.js",
@@ -31,7 +23,15 @@
   }
 ],
 
-"maintain_experiments": [],
+"maintain_experiments": [
+  {"default":
+    {"name": "Firefox 4 Beta Interface 2",
+     "jarfile": "beta/combined.jar",
+     "studyfile": "combined.js",
+     "hash": "90de1c64d6668e5eabafc656915c1417ad08dd2f1053695e1ef8912e74cf5aad"
+    }
+  }
+],
 
 "legacy": [
 {"name": "Search",

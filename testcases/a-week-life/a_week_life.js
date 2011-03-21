@@ -16,7 +16,7 @@ exports.experimentInfo = {
   optInRequired: false,
   recursAutomatically: true,
   recurrenceInterval: 30,
-  versionNumber: 5,
+  versionNumber: 6,
   minTPVersion: "1.0rc1",
   minFXVersion: "3.5",
   runOrNotFunc: function() {
@@ -584,14 +584,14 @@ WeekLifeStudyGlobalObserver.prototype.recordSessionStorePrefs = function() {
 WeekLifeStudyGlobalObserver.prototype.startAllObservers = function() {
   BookmarkObserver.install();
   IdlenessObserver.install();
-  DownloadsObserver.install();
+  //DownloadsObserver.install();
   MemoryObserver.install();
 };
 
 WeekLifeStudyGlobalObserver.prototype.stopAllObservers = function() {
   BookmarkObserver.uninstall();
   IdlenessObserver.uninstall();
-  DownloadsObserver.uninstall();
+  //DownloadsObserver.uninstall();
   MemoryObserver.uninstall();
 };
 
@@ -780,8 +780,6 @@ WeekLifeStudyWebContent.prototype.__defineGetter__("dataViewExplanation",
     <span id="first-num-bkmks-span"></span>. Now you have \
     <span id="num-bkmks-span"></span> in <span id="num-folders-span"></span>, \
     to a max folder depth of <span id="max-depth-span"></span>.</p>\
-    <p><b>Downloads:</b> You downloaded <span id="num-downloads"></span> \
-    during this week.</p>\
     </div>';
   });
 
@@ -959,9 +957,9 @@ WeekLifeStudyWebContent.prototype.onPageLoad = function(experiment,
                                     (folders == 1)? "one folder" :
                                     folders + " folders";
     document.getElementById("max-depth-span").innerHTML = depth;
-    document.getElementById("num-downloads").innerHTML =
+    /*document.getElementById("num-downloads").innerHTML =
                                     (numDownloads == 1)? "one file" :
-                                    numDownloads + " files";
+                                    numDownloads + " files";*/
   });
 };
 

@@ -12,14 +12,6 @@
      "studyfile": "pilot-background-survey.js",
      "hash": "bdc8842255f723a5d0ca64bf14417a741df2f91981f521c9abfd2ba49082aefa"
     }
-  },
-
-  {"default":
-    {"name": "A Week in the Life of a Browser",
-     "jarfile": "a-week-life/week_life.jar",
-     "studyfile": "a_week_life.js",
-     "hash": "18388e3fcf76876f0ccbdf15f3b2a5134ce447a9ccc584122b77f1d096d82ef0"
-    }
   }
 ],
 

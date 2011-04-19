@@ -21,7 +21,7 @@ exports.experimentInfo = {
 	  " and Stanford University to evaluate the backward compatibility of a new security feature.",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
-  versionNumber: 2, // update this when changing your study
+  versionNumber: 3, // update this when changing your study
     // so you can identify results submitted from different versions
 
   duration: 3, // a number of days - fractions OK.

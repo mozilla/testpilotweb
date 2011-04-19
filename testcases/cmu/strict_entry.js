@@ -17,8 +17,8 @@ exports.experimentInfo = {
   testName: "Evaluation of Proposed Security Standard",
   testId: 1337,  // must be unique across all test pilot studies
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/secure-sites-compatibility.html", // URL of page explaining your study, uncomment when ready
-  summary: "This study is designed by the Web Security group of Carnegie Mellon University"+
-	  " to evaluate the backward compatibility of a new security feature.",
+  summary: "This study is designed by the Web Security groups of Carnegie Mellon University"+
+	  " and Stanford University to evaluate the backward compatibility of a new security feature.",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
   versionNumber: 2, // update this when changing your study
@@ -36,12 +36,7 @@ exports.experimentInfo = {
 
   // When the study starts:
   startDate: null, // null means "start immediately".
-  optInRequired: false, // opt-in studies not yet implemented
-  runOrNotFunc: function() {
-    // true only if they have already run it
-    let prefs = require("preferences-service");
-    return (prefs.isSet("extensions.testpilot.taskstatus.1337"));
-  }
+  optInRequired: false // opt-in studies not yet implemented
 };
 
 
@@ -52,20 +47,18 @@ exports.dataStoreInfo = {
   tableName: "testpilot_entry_isolation_study",
   columns: [
     {property: "urlHash", type: BaseClasses.TYPE_STRING,
-     displayName: "URL HASH"},
+     displayName: "URL hash"},
     {property: "entryIndex", type: BaseClasses.TYPE_INT_32,
      displayName: "Index of entry host"},
     {property: "entryViolation", type: BaseClasses.TYPE_INT_32,
-	    displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]}
+	    displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]},
+    {property: "hasParameter", type: BaseClasses.TYPE_INT_32,
+	    displayName: "Violation caused by parameter?", displayValue:["No","Yes"]},
+    {property: "pathHash", type:BaseClasses.TYPE_STRING,
+	    displayName: "path hash"}
   ]
 };
 
-
-/* Now for the actual observation of the events that we care about.
- * We must register a global observer object; we can optionally also
- * register a per-window observer object.  Each will get notified of
- * certain events, and can install further listeners/observers of their own.
- */
 
 // Define a per-window observer class by extending the generic one from
 // BaseClasses:
@@ -78,20 +71,127 @@ BaseClasses.extend(EntryPointWindowObserver,
                    BaseClasses.GenericWindowObserver);
 EntryPointWindowObserver.prototype.install = function() {
 
-  //list of hosts that hypothetically opted in to strict entry
+  //list of domains that opted into entry isolation. We have 4 categories of sites
+  //web applications -> gmail, pivoltal tracker, last.fm, chatroulette
+  //banking sites -> bank of america, chase, capital one, wellsfargo
+  //news site / social network -> CNN, NYtimes, Facebook
+  //Web store applications -> grooveshark, flixter
   let host_list = new Array(
-		  "mail.google.com",//gmail first for a reason
-		  "www.bankofamerica.com",
-		  "www.wellsfargo.com",
-		  "www.chase.com",
-		  "www.cisco.com",
-		  "www.pivotaltracker.com",
-		  "www.chatroulette.com",
-		  "www.last.fm",
-		  "www.cnn.com",
-		  "www.nytimes.com");
+		  /^mail\.google\.com$/gi,
+		  /^onlineeast[0-9]\.bankofamerica\.com$/gi,
+		  /^onlinebanking\.capitalone\.com$/gi,
+		  /^chaseonline\.chase\.com$/gi,
+		  /^online\.wellsfargo\.com$/gi,
+		  /^www\.cisco\.com$/gi,
+		  /^www\.pivotaltracker\.com$/gi,
+		  /^www\.chatroulette\.com$/gi,
+		  /^www\.last\.fm$/gi,
+		  /^www\.cnn\.com$/gi,
+		  /^www\.nytimes\.com$/gi,
+		  /^www\.facebook\.com$/gi,
+		  /^listen\.grooveshark\.com$/gi,
+		  /^flixster\.rottentomatoes\.com$/gi
+		  );
+
+
+  //the protection boundary of each domain from the list above
+  let allow_nav = new Array(
+		  /^mail\.google\.com$/gi,
+ 		  /^([a-zA-Z0-9-_]+\.)*bankofamerica\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*capitalone\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*chase\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*wellsfargo\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*cisco\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*pivotaltracker\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*chatroulette\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*last\.fm$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*cnn\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*nytimes\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*facebook\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*grooveshark\.com$/gi,
+		  /^([a-zA-Z0-9-_]+\.)*rottentomatoes\.com$/gi
+		  );
+
+
   //entry point paths for our hosts
-  let path_list = new Array("/mail/","/","/","/","/","/","/","/","/","/");
+  let path_list = new Array("/","/","/","/","/","/","/","/","/","/","/","/","/","/");
+
+  //secondary entry points
+  let sec_entry = new Array(14);
+  sec_entry[0] = new Array(4);   //gmail home page
+  sec_entry[0][0] = /^\/a\/[^\/]*\/$/gi;
+  sec_entry[0][1] = /^\/a\/[^\/]*\/#inbox\/$/gi;
+  sec_entry[0][2] = /^\/mail\/\?hl=[a-zA-Z]*&amp;tab=[a-zA-Z]*\/$/gi;
+  sec_entry[0][3] = /^\/mail\/$/gi;
+
+  sec_entry[1] = new Array(4);//bank of america home page
+  sec_entry[1][0] = /^\/cmsContent\/en_US\/eas-docs\/help\/help_tf\.html\/$/gi;
+  sec_entry[1][1] = /^\/cmsContent\/en_US\/eas-docs\/help\/help_faq\.html\/$/gi;
+  sec_entry[1][2] = /^\/cgi-bin\/ias\/[a-zA-Z]\/[0-9](\/GotoLogout)?\/$/gi;
+  sec_entry[1][3] = /^\/cgi-bin\/ias\/[0-9]\/[a-zA-Z](\/GotoLogout)?\/$/gi;
+
+
+  sec_entry[2] = new Array(3);//capital one home page
+  sec_entry[2][0] = /^\/CapitalOne\/$/gi;
+  sec_entry[2][1] = /^\/CapitalOne\/Enrollment\.aspx\/$/gi;
+  sec_entry[2][2] = /^\/CapitalOne\/Help\.aspx\?[^\/]*\/$/gi;
+
+  sec_entry[3] = new Array(6);//chase home page
+  sec_entry[3][0] = /^\/Logon\.aspx\?[^\/]*\/$/gi;
+  sec_entry[3][1] = /^\/Logon\.aspx\/$/gi;
+  sec_entry[3][2] = /^\/MyAccounts\.aspx\/$/gi;
+  sec_entry[3][3] = /^\/Secure\/OSL\.aspx\/$/gi;
+  sec_entry[3][4] = /^\/secure\/LogOff\.aspx\/$/gi;
+  sec_entry[3][5] = /^\/online\/home\/sso_co_home\.jsp\/$/gi;
+
+  sec_entry[5] = new Array(4); //wellfargo home page
+  sec_entry[5][0] = /^\/signon\/$/gi;
+  sec_entry[5][1] = /^\/das\/cgi-bin\/session\.cgi\/$/gi;
+  sec_entry[5][2] = /^\/das\/signon\/$/gi;
+  sec_entry[5][3] = /^\/das\/channel\/enrollDisplay\/$/gi;
+
+  sec_entry[5] = new Array(6);//cisco top pages
+  sec_entry[5][0] = /^\/web\/learning\/netacad\/$/gi;
+  sec_entry[5][1] = /^\/web\/about\/ac40\/about_cisco_careers_home\.html\/$/gi;
+  sec_entry[5][2] = /^\/web\/learning\/le3\/learning_career_certifications_and_learning_paths_home\.html\/$/gi;
+  sec_entry[5][3] = /^\/en\/US\/support\/index\.html\/$/gi;
+  sec_entry[5][4] = /^\/web\/products\/$/gi;
+  sec_entry[5][5] = /^\/web\/login\/index\.html\/$/gi;
+
+  sec_entry[6] = new Array(4);//pivoltal tracker top pages
+  sec_entry[6][0] = /^\/signin\/$/gi;
+  sec_entry[6][1] = /^\/learnmore\/$/gi;
+  sec_entry[6][2] = /^\/help\/gettingstarted\/$/gi;
+  sec_entry[6][3] = /^\/help\/thirdpartytools\/$/gi;
+
+  sec_entry[7] = new Array(); //chat roulette
+
+  sec_entry[8] = new Array(2);//last.fm
+  sec_entry[8][0] = /^\/listen\/$/gi;
+  sec_entry[8][1] = /^\/login\/$/gi;
+
+  sec_entry[9] = new Array(5); // cnn
+  sec_entry[9][0] = /^\/WORLD\/$/gi;
+  sec_entry[9][1] = /^\/video\/$/gi;
+  sec_entry[9][2] = /^\/POLITICS\/$/gi;
+  sec_entry[9][3] = /^\/US\/$/gi;
+  sec_entry[9][4] = /^\/TECH\/$/gi;
+
+  sec_entry[10] = new Array(5); //NYTimes
+  sec_entry[10][0] = /^\/pages\/todayspaper\/index\.html\/$/gi;
+  sec_entry[10][1] = /^\/pages\/books\/index\.html\/$/gi;
+  sec_entry[10][2] = /^\/best-sellers-books\/overview\.html\/$/gi;
+  sec_entry[10][3] = /^\/ref\/membercenter\/nytarchive\.html\/$/gi;
+  sec_entry[10][4] = /^\/pages\/opinion\/index\.html\/$/gi;
+
+  sec_entry[11] = new Array(1); //facebook
+  sec_entry[11][0] = /^\/login\.php\/$/gi;
+
+  sec_entry[12] = new Array(1); //grooveshark
+  sec_entry[12][0] = /^\/popular\/$/gi;
+
+  sec_entry[13] = new Array(); //rottentomatoes
+
 
   let appcontent = this.window.document.getElementById("appcontent");
   if (appcontent){ //listens to the DOM load event
@@ -100,21 +200,18 @@ EntryPointWindowObserver.prototype.install = function() {
 		   let content_doc = this.window.document.getElementById("content").contentDocument;
 	    	   let my_doc = content_doc.documentElement.innerHTML; //HTML content of the main document
 		   if (!my_doc)return false;
-
 		   let doc_loc = ""+content_doc.location; //location of the document, converted to string
 		   let dummy;
-		   const HOST_LEN = host_list.length;
+		   const HOST_LEN = allow_nav.length;
 
-		   //for convenience, if the site belongs to of our strict entry sites, just skip the experiment all together
+		   //for convenience, if the site belongs to of white listed sites, just skip the experiment all together
 		   //we will miss some cases but not a big deal,
 		   for (var i=0; i<HOST_LEN; i++){
-			dummy = doc_loc.indexOf(host_list[i],0);
-			if(dummy >= 0)return;
+			if(doc_loc.search(allow_nav[i])!=-1) return;
 		   }
 
-		   //SHA-1 of the current document location
+		   //SHA-1, the proper way
 		   let url_hash = b64_sha1(doc_loc);
-
 		   //db hack to check if we have visited this page
 		   let db_query = "SELECT * FROM " + dbstore._tableName + " WHERE urlHash = :row_id";
 		   let statement = dbstore._createStatement(db_query);
@@ -132,13 +229,13 @@ EntryPointWindowObserver.prototype.install = function() {
 
 			handleCompletion: function(aReason) {
 				if (not_visited){//a new page!
-				   //URL regex
+				   //regex used to find all URL on the page... not the perfect way to do things, but the best we can do
 				   let urls = my_doc.match(/(src|href)\s*=\s*['"“”‘’]\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
 
 				   let url_len = urls.length;
 				   for (var i=0; i<url_len; i++){
 
-					//first, extract the url
+					//regex to extract the url
 					let url_pos = urls[i].search(/\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
 
 					let url_str = urls[i].substring(url_pos);
@@ -152,21 +249,43 @@ EntryPointWindowObserver.prototype.install = function() {
 					let host_index = -1;
 					let violation = 0;
 					for (let j=0; j<HOST_LEN; j++){
-						if (host_list[j]==host){ //Host name of our URL matches one of the entry hosts
+						if (host.search(host_list[j])!=-1){ //Host name of our URL matches one of the entry hosts
 							host_index = j;
-
 							//now, we check if the relative PATHs match
 							let rel_path = parsed_URL.path;
-							if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //at ending back slash
+							if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //add ending back slash
 							if (rel_path!=path_list[j]) violation=1;//Path mismatch with entry point path
 
-							//We have a special case for gmail, check secondary login pages
-							//pages like http://mail.google.com/a/sv.cmu.edu/
-							if (j==0 &&
-								(rel_path.search(/^\/a\/[^\/]*\/?$/g)!= -1 ||
-								rel_path.search(/^\/mail\/\?hl=[a-zA-Z]*&amp;tab=[a-zA-Z]*\/?$/g)!=-1))violation=2;
-							//add element into db
-							exports.handlers.record({urlHash: url_hash, entryIndex: host_index, entryViolation: violation});
+
+							// check for secondary entry points
+							for (let sec_ele=0; sec_ele < sec_entry[j].length; sec_ele++)
+								if (rel_path.search(sec_entry[j][sec_ele])!=-1) violation=2;
+
+							//does the URL have parameters?
+							let has_param = 0;
+							if (violation>0) has_param = (rel_path.search(/[\?|#]/gi)==-1) ? 0 : 1;
+
+							//we want to hash the path WITHOUT parameters
+							//therefore, remove everything after the '?' and '#' character
+							let path_hash = rel_path;
+							if (path_hash.search(/\?/gi) != -1){
+								let temp_str = path_hash.split(/\?/gi);
+								path_hash = temp_str[0];
+							}
+							if (path_hash.search(/#/gi) != -1){
+								let temp_str = path_hash.split(/#/gi);
+								path_hash = temp_str[0];
+							}
+
+							//hash the path
+							path_hash = b64_sha1(path_hash);
+
+							//add element into db, we are not store the URL here, but the violation flag
+							exports.handlers.record({urlHash: url_hash,
+								entryIndex: host_index,
+								entryViolation: violation,
+								hasParameter: has_param,
+								pathHash:path_hash});
 							break;
 						}
 					}
@@ -181,6 +300,31 @@ EntryPointWindowObserver.prototype.install = function() {
 };
 
 
+//sha1 crypto function
+function b64_sha1(plaintext){
+
+   let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+	   createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+   converter.charset = "UTF-8";
+
+   let result = {};
+   let data = converter.convertToByteArray(plaintext, result);
+   let ch = Components.classes["@mozilla.org/security/hash;1"].
+	   createInstance(Components.interfaces.nsICryptoHash);
+
+   ch.init(ch.SHA1);
+   ch.update(data, data.length);
+   let ciphertext = ch.finish(true);
+
+   //at this point, url_hash should contain the b64 encode of the hash
+   //these three lines are needed to prevent XSS filter from messing up our string
+   ciphertext = ciphertext.replace(/\+/gi,"-");
+   ciphertext = ciphertext.replace(/\//gi, "_");
+   ciphertext = ciphertext.replace(/\=/gi, "Z"); //this is fine, since '=' is pading
+
+   return ciphertext;
+
+}
 
 
 // Now we'll define the global observer class by extending the generic one:
@@ -226,8 +370,8 @@ StrictEntryWebContent.prototype.__defineGetter__("dataCanvas",
   });
 StrictEntryWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "This study tests each website that you visit against the CMU Web Security "
-          + "group's hypothetical &quot;Strict Entry&quot; security policy.  The graph "
+    return "This study tests each website that you visit against the CMU and Stanford Web Security "
+          + "groups' hypothetical &quot;Entry Isolation&quot; security policy.  The graph "
           + "below shows what fraction of the websites "
             + "would be in agreement with such a policy.";
   });
@@ -265,212 +409,5 @@ require("unload").when(
   });
 
 // We're done!
-
-
-
-//============================== SHA-1 Implementation =========================/
-/*
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
- * in FIPS PUB 180-1
- * Version 2.1a Copyright Paul Johnston 2000 - 2002.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for details.
- */
-
-/*
- * Configurable variables. You may need to tweak these to be compatible with
- * the server-side, but the defaults work in most cases.
- */
-var hexcase = 0;  /* hex output format. 0 - lowercase; 1 - uppercase        */
-var b64pad  = ""; /* base-64 pad character. "=" for strict RFC compliance   */
-var chrsz   = 8;  /* bits per input character. 8 - ASCII; 16 - Unicode      */
-
-/*
- * These are the functions you'll usually want to call
- * They take string arguments and return either hex or base-64 encoded strings
- */
-function hex_sha1(s){return binb2hex(core_sha1(str2binb(s),s.length * chrsz));}
-function b64_sha1(s){return binb2b64(core_sha1(str2binb(s),s.length * chrsz));}
-function str_sha1(s){return binb2str(core_sha1(str2binb(s),s.length * chrsz));}
-function hex_hmac_sha1(key, data){ return binb2hex(core_hmac_sha1(key, data));}
-function b64_hmac_sha1(key, data){ return binb2b64(core_hmac_sha1(key, data));}
-function str_hmac_sha1(key, data){ return binb2str(core_hmac_sha1(key, data));}
-
-/*
- * Perform a simple self-test to see if the VM is working
- */
-function sha1_vm_test()
-{
-  return hex_sha1("abc") == "a9993e364706816aba3e25717850c26c9cd0d89d";
-}
-
-/*
- * Calculate the SHA-1 of an array of big-endian words, and a bit length
- */
-function core_sha1(x, len)
-{
-  /* append padding */
-  x[len >> 5] |= 0x80 << (24 - len % 32);
-  x[((len + 64 >> 9) << 4) + 15] = len;
-
-  var w = Array(80);
-  var a =  1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-  var d =  271733878;
-  var e = -1009589776;
-
-  for(var i = 0; i < x.length; i += 16)
-  {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
-    var olde = e;
-
-    for(var j = 0; j < 80; j++)
-    {
-      if(j < 16) w[j] = x[i + j];
-      else w[j] = rol(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
-      var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)),
-                       safe_add(safe_add(e, w[j]), sha1_kt(j)));
-      e = d;
-      d = c;
-      c = rol(b, 30);
-      b = a;
-      a = t;
-    }
-
-    a = safe_add(a, olda);
-    b = safe_add(b, oldb);
-    c = safe_add(c, oldc);
-    d = safe_add(d, oldd);
-    e = safe_add(e, olde);
-  }
-  return Array(a, b, c, d, e);
-
-}
-
-/*
- * Perform the appropriate triplet combination function for the current
- * iteration
- */
-function sha1_ft(t, b, c, d)
-{
-  if(t < 20) return (b & c) | ((~b) & d);
-  if(t < 40) return b ^ c ^ d;
-  if(t < 60) return (b & c) | (b & d) | (c & d);
-  return b ^ c ^ d;
-}
-
-/*
- * Determine the appropriate additive constant for the current iteration
- */
-function sha1_kt(t)
-{
-  return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
-         (t < 60) ? -1894007588 : -899497514;
-}
-
-/*
- * Calculate the HMAC-SHA1 of a key and some data
- */
-function core_hmac_sha1(key, data)
-{
-  var bkey = str2binb(key);
-  if(bkey.length > 16) bkey = core_sha1(bkey, key.length * chrsz);
-
-  var ipad = Array(16), opad = Array(16);
-  for(var i = 0; i < 16; i++)
-  {
-    ipad[i] = bkey[i] ^ 0x36363636;
-    opad[i] = bkey[i] ^ 0x5C5C5C5C;
-  }
-
-  var hash = core_sha1(ipad.concat(str2binb(data)), 512 + data.length * chrsz);
-  return core_sha1(opad.concat(hash), 512 + 160);
-}
-
-/*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally
- * to work around bugs in some JS interpreters.
- */
-function safe_add(x, y)
-{
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
-}
-
-/*
- * Bitwise rotate a 32-bit number to the left.
- */
-function rol(num, cnt)
-{
-  return (num << cnt) | (num >>> (32 - cnt));
-}
-
-/*
- * Convert an 8-bit or 16-bit string to an array of big-endian words
- * In 8-bit function, characters >255 have their hi-byte silently ignored.
- */
-function str2binb(str)
-{
-  var bin = Array();
-  var mask = (1 << chrsz) - 1;
-  for(var i = 0; i < str.length * chrsz; i += chrsz)
-    bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (32 - chrsz - i%32);
-  return bin;
-}
-
-/*
- * Convert an array of big-endian words to a string
- */
-function binb2str(bin)
-{
-  var str = "";
-  var mask = (1 << chrsz) - 1;
-  for(var i = 0; i < bin.length * 32; i += chrsz)
-    str += String.fromCharCode((bin[i>>5] >>> (32 - chrsz - i%32)) & mask);
-  return str;
-}
-
-/*
- * Convert an array of big-endian words to a hex string.
- */
-function binb2hex(binarray)
-{
-  var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
-  var str = "";
-  for(var i = 0; i < binarray.length * 4; i++)
-  {
-    str += hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8+4)) & 0xF) +
-           hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8  )) & 0xF);
-  }
-  return str;
-}
-
-/*
- * Convert an array of big-endian words to a base-64 string
- */
-function binb2b64(binarray)
-{
-  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789AB";
-  var str = "";
-  for(var i = 0; i < binarray.length * 4; i += 3)
-  {
-    var triplet = (((binarray[i   >> 2] >> 8 * (3 -  i   %4)) & 0xFF) << 16)
-                | (((binarray[i+1 >> 2] >> 8 * (3 - (i+1)%4)) & 0xFF) << 8 )
-                |  ((binarray[i+2 >> 2] >> 8 * (3 - (i+2)%4)) & 0xFF);
-    for(var j = 0; j < 4; j++)
-    {
-      if(i * 8 + j * 6 > binarray.length * 32) str += b64pad;
-      else str += tab.charAt((triplet >> 6*(3-j)) & 0x3F);
-    }
-  }
-  return str;
-}
-
 
 

@@ -14,14 +14,14 @@ var dbstore;
 // experimentInfo is an obect providing metadata about the study.
 exports.experimentInfo = {
 
-  testName: "Evaluation of Proposed Security Standard",
-  testId: 1337,  // must be unique across all test pilot studies
+  testName: "Evaluation of New Security Feature",
+  testId: 1338,  // must be unique across all test pilot studies
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/secure-sites-compatibility.html", // URL of page explaining your study, uncomment when ready
   summary: "This study is designed by the Web Security groups of Carnegie Mellon University"+
 	  " and Stanford University to evaluate the backward compatibility of a new security feature.",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
-  versionNumber: 3, // update this when changing your study
+  versionNumber: 1, // update this when changing your study
     // so you can identify results submitted from different versions
 
   duration: 3, // a number of days - fractions OK.
@@ -43,8 +43,8 @@ exports.experimentInfo = {
 // dataStoreInfo describes the database table in which your study's
 // data will be stored (in the Firefox built-in SQLite database)
 exports.dataStoreInfo = {
-  fileName: "testpilot_entry_isolation_results.sqlite",
-  tableName: "testpilot_entry_isolation_study",
+  fileName: "testpilot_entry_isolation_v2_results.sqlite",
+  tableName: "testpilot_entry_isolation_v2_study",
   columns: [
     {property: "urlHash", type: BaseClasses.TYPE_STRING,
      displayName: "URL hash"},
@@ -121,7 +121,7 @@ EntryPointWindowObserver.prototype.install = function() {
   sec_entry[0] = new Array(4);   //gmail home page
   sec_entry[0][0] = /^\/a\/[^\/]*\/$/gi;
   sec_entry[0][1] = /^\/a\/[^\/]*\/#inbox\/$/gi;
-  sec_entry[0][2] = /^\/mail\/\?hl=[a-zA-Z]*&amp;tab=[a-zA-Z]*\/$/gi;
+  sec_entry[0][2] = /^\/mail\/\?hl=[a-zA-Z]*&tab=[a-zA-Z]*\/$/gi;
   sec_entry[0][3] = /^\/mail\/$/gi;
 
   sec_entry[1] = new Array(4);//bank of america home page
@@ -192,6 +192,31 @@ EntryPointWindowObserver.prototype.install = function() {
 
   sec_entry[13] = new Array(); //rottentomatoes
 
+  url_tag = new Array(
+		  "a",
+		  "img",
+		  "frame",
+		  "object",
+		  "script",
+		  "area",
+		  "base",
+		  "iframe",
+		  "input",
+		  "link"
+		  ); //tags that contain the URL element
+
+  tag_attr = new Array(
+		  "href",
+		  "src",
+		  "src",
+		  "data",
+		  "src",
+		  "href",
+		  "href",
+		  "src",
+		  "src",
+		  "href"
+		  ); //the attributes of each tag
 
   let appcontent = this.window.document.getElementById("appcontent");
   if (appcontent){ //listens to the DOM load event
@@ -201,18 +226,22 @@ EntryPointWindowObserver.prototype.install = function() {
 	    	   let my_doc = content_doc.documentElement.innerHTML; //HTML content of the main document
 		   if (!my_doc)return false;
 		   let doc_loc = ""+content_doc.location; //location of the document, converted to string
-		   let dummy;
+
+		   //Service for URL extraction
+		   let ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+		   //parse the url to extract the host name
+		   let parsed_doc_loc = ioService.newURI(doc_loc, null, null);
+		   let doc_loc_host = parsed_doc_loc.host;
 		   const HOST_LEN = allow_nav.length;
 
-		   //for convenience, if the site belongs to of white listed sites, just skip the experiment all together
-		   //we will miss some cases but not a big deal,
+		   //we want skip the study for all same "origin" navigations,
 		   for (var i=0; i<HOST_LEN; i++){
-			if(doc_loc.search(allow_nav[i])!=-1) return;
+			if(doc_loc_host.search(allow_nav[i])!=-1) return;
 		   }
 
 		   //SHA-1, the proper way
 		   let url_hash = b64_sha1(doc_loc);
-		   //db hack to check if we have visited this page
+		   //small DB hack to check if we have visited this page, to stop DB explsion
 		   let db_query = "SELECT * FROM " + dbstore._tableName + " WHERE urlHash = :row_id";
 		   let statement = dbstore._createStatement(db_query);
 		   statement.params.row_id=url_hash;
@@ -229,23 +258,31 @@ EntryPointWindowObserver.prototype.install = function() {
 
 			handleCompletion: function(aReason) {
 				if (not_visited){//a new page!
-				   //regex used to find all URL on the page... not the perfect way to do things, but the best we can do
-				   let urls = my_doc.match(/(src|href)\s*=\s*['"“”‘’]\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
+
+				   let url_tag_len = url_tag.length;
+				   let urls = new Array();
+
+				   for (let i=0; i<url_tag_len; i++){  //for all tags that contain possible URL elements
+					let ele_arr = content_doc.documentElement.getElementsByTagName(url_tag[i]); //if they appear on our page
+					let ele_arr_len = ele_arr.length;
+
+					for(let j=0; j<ele_arr_len; j++){ //for each element found
+						let temp_url = ele_arr[j].getAttribute(tag_attr[i]);
+						if (temp_url!="" && (temp_url.search(/^https?/gi)!=-1)){ //if it contains a url, we push it
+
+							urls.push(temp_url);
+						}
+					}
+				   }
 
 				   let url_len = urls.length;
 				   for (var i=0; i<url_len; i++){
 
-					//regex to extract the url
-					let url_pos = urls[i].search(/\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi);
-
-					let url_str = urls[i].substring(url_pos);
-
 					//extract the host name
-					let ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-					let parsed_URL = ioService.newURI(url_str, null, null);
+					let parsed_URL = ioService.newURI(urls[i], null, null);
 					let host = parsed_URL.host;
 
-					//check if the hostname matches with one of the entry point hosts
+					//check if the hostname matches with one of the entry isolation hosts with our policy enabled
 					let host_index = -1;
 					let violation = 0;
 					for (let j=0; j<HOST_LEN; j++){
@@ -253,9 +290,11 @@ EntryPointWindowObserver.prototype.install = function() {
 							host_index = j;
 							//now, we check if the relative PATHs match
 							let rel_path = parsed_URL.path;
-							if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //add ending back slash
-							if (rel_path!=path_list[j]) violation=1;//Path mismatch with entry point path
 
+							if (rel_path.length==0)rel_path='/';
+							else if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //add ending back slash
+
+							if (rel_path!=path_list[j]) violation=1;//Path mismatch with entry point path
 
 							// check for secondary entry points
 							for (let sec_ele=0; sec_ele < sec_entry[j].length; sec_ele++)
@@ -271,16 +310,19 @@ EntryPointWindowObserver.prototype.install = function() {
 							if (path_hash.search(/\?/gi) != -1){
 								let temp_str = path_hash.split(/\?/gi);
 								path_hash = temp_str[0];
+								if (path_hash[path_hash.length-1]!='/')path_hash +='/';
 							}
 							if (path_hash.search(/#/gi) != -1){
 								let temp_str = path_hash.split(/#/gi);
 								path_hash = temp_str[0];
+								if (path_hash[path_hash.length-1]!='/')path_hash +='/';
 							}
 
 							//hash the path
 							path_hash = b64_sha1(path_hash);
 
-							//add element into db, we are not store the URL here, but the violation flag
+							//add element into db, we are not storing any URLs here, only the hash
+							//Note storing the URL hash is neccessary to stop DB from exploding in size
 							exports.handlers.record({urlHash: url_hash,
 								entryIndex: host_index,
 								entryViolation: violation,
@@ -293,7 +335,6 @@ EntryPointWindowObserver.prototype.install = function() {
 			   }
 			}
 		   });
-
 
 	}, true);
   }

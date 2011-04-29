@@ -14,7 +14,7 @@ var dbstore;
 // experimentInfo is an obect providing metadata about the study.
 exports.experimentInfo = {
 
-  testName: "Evaluation of New Security Feature",
+  testName: "Evaluation of New Security Feature (v2)",
   testId: 1338,  // must be unique across all test pilot studies
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/secure-sites-compatibility.html", // URL of page explaining your study, uncomment when ready
   summary: "This study is designed by the Web Security groups of Carnegie Mellon University"+
@@ -25,7 +25,7 @@ exports.experimentInfo = {
     // so you can identify results submitted from different versions
 
   duration: 3, // a number of days - fractions OK.
-  minTPVersion: "1.0a1", // Test Pilot versions older than this
+  minTPVersion: "1.0.9", // Test Pilot versions older than this
     // will not run the study.
   minFXVersion: "4.0b10", // Firefox versions older than this will
     // not run the study.
@@ -36,7 +36,10 @@ exports.experimentInfo = {
 
   // When the study starts:
   startDate: null, // null means "start immediately".
-  optInRequired: false // opt-in studies not yet implemented
+  optInRequired: false, // opt-in studies not yet implemented
+
+  randomDeployment: { rolloutCode: "3rdparty",
+                      minRoll: 98, maxRoll: 98} // 1 random percent of users get the study
 };
 
 
@@ -55,7 +58,7 @@ exports.dataStoreInfo = {
     {property: "hasParameter", type: BaseClasses.TYPE_INT_32,
 	    displayName: "Violation caused by parameter?", displayValue:["No","Yes"]},
     {property: "pathHash", type:BaseClasses.TYPE_STRING,
-	    displayName: "path hash"} 
+	    displayName: "path hash"}
   ]
 };
 
@@ -92,8 +95,8 @@ EntryPointWindowObserver.prototype.install = function() {
 		  /^listen\.grooveshark\.com$/gi,
 		  /^flixster\.rottentomatoes\.com$/gi
 		  );
-  
-  
+
+
   //the protection boundary of each domain from the list above
   let allow_nav = new Array(
 		  /^mail\.google\.com$/gi,
@@ -111,7 +114,7 @@ EntryPointWindowObserver.prototype.install = function() {
 		  /^([a-zA-Z0-9-_]+\.)*grooveshark\.com$/gi,
 		  /^([a-zA-Z0-9-_]+\.)*rottentomatoes\.com$/gi
 		  );
-  
+
 
   //entry point paths for our hosts
   let path_list = new Array("/","/","/","/","/","/","/","/","/","/","/","/","/","/");
@@ -121,7 +124,7 @@ EntryPointWindowObserver.prototype.install = function() {
   sec_entry[0] = new Array(4);   //gmail home page
   sec_entry[0][0] = /^\/a\/[^\/]*\/$/gi;
   sec_entry[0][1] = /^\/a\/[^\/]*\/#inbox\/$/gi;
-  sec_entry[0][2] = /^\/mail\/\?hl=[a-zA-Z]*&tab=[a-zA-Z]*\/$/gi; 
+  sec_entry[0][2] = /^\/mail\/\?hl=[a-zA-Z]*&tab=[a-zA-Z]*\/$/gi;
   sec_entry[0][3] = /^\/mail\/$/gi;
 
   sec_entry[1] = new Array(4);//bank of america home page
@@ -147,13 +150,13 @@ EntryPointWindowObserver.prototype.install = function() {
   sec_entry[5] = new Array(4); //wellfargo home page
   sec_entry[5][0] = /^\/signon\/$/gi;
   sec_entry[5][1] = /^\/das\/cgi-bin\/session\.cgi\/$/gi;
-  sec_entry[5][2] = /^\/das\/signon\/$/gi; 
-  sec_entry[5][3] = /^\/das\/channel\/enrollDisplay\/$/gi; 
+  sec_entry[5][2] = /^\/das\/signon\/$/gi;
+  sec_entry[5][3] = /^\/das\/channel\/enrollDisplay\/$/gi;
 
   sec_entry[5] = new Array(6);//cisco top pages
   sec_entry[5][0] = /^\/web\/learning\/netacad\/$/gi;
   sec_entry[5][1] = /^\/web\/about\/ac40\/about_cisco_careers_home\.html\/$/gi;
-  sec_entry[5][2] = /^\/web\/learning\/le3\/learning_career_certifications_and_learning_paths_home\.html\/$/gi; 
+  sec_entry[5][2] = /^\/web\/learning\/le3\/learning_career_certifications_and_learning_paths_home\.html\/$/gi;
   sec_entry[5][3] = /^\/en\/US\/support\/index\.html\/$/gi;
   sec_entry[5][4] = /^\/web\/products\/$/gi;
   sec_entry[5][5] = /^\/web\/login\/index\.html\/$/gi;
@@ -227,14 +230,14 @@ EntryPointWindowObserver.prototype.install = function() {
 		   if (!my_doc)return false;
 		   let doc_loc = ""+content_doc.location; //location of the document, converted to string
 
-		   //Service for URL extraction			
+		   //Service for URL extraction
 		   let ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 		   //parse the url to extract the host name
 		   let parsed_doc_loc = ioService.newURI(doc_loc, null, null);
 		   let doc_loc_host = parsed_doc_loc.host;
 		   const HOST_LEN = allow_nav.length;
 
-		   //we want skip the study for all same "origin" navigations,  
+		   //we want skip the study for all same "origin" navigations,
 		   for (var i=0; i<HOST_LEN; i++){
 			if(doc_loc_host.search(allow_nav[i])!=-1) return;
 		   }
@@ -258,19 +261,21 @@ EntryPointWindowObserver.prototype.install = function() {
 
 			handleCompletion: function(aReason) {
 				if (not_visited){//a new page!
-				   
+
 				   let url_tag_len = url_tag.length;
 				   let urls = new Array();
 
 				   for (let i=0; i<url_tag_len; i++){  //for all tags that contain possible URL elements
 					let ele_arr = content_doc.documentElement.getElementsByTagName(url_tag[i]); //if they appear on our page
 					let ele_arr_len = ele_arr.length;
-					
+
 					for(let j=0; j<ele_arr_len; j++){ //for each element found
 						let temp_url = ele_arr[j].getAttribute(tag_attr[i]);
-						if (temp_url!="" && (temp_url.search(/^https?/gi)!=-1)){ //if it contains a url, we push it
-						
-							urls.push(temp_url);
+						if (temp_url != null && temp_url.length>0){
+							if (temp_url.search(/^https?/gi)!=-1){ //if it contains a url, we push it
+
+								urls.push(temp_url);
+							}
 						}
 					}
 				   }
@@ -289,7 +294,7 @@ EntryPointWindowObserver.prototype.install = function() {
 						if (host.search(host_list[j])!=-1){ //Host name of our URL matches one of the entry hosts
 							host_index = j;
 							//now, we check if the relative PATHs match
-							let rel_path = parsed_URL.path; 
+							let rel_path = parsed_URL.path;
 
 							if (rel_path[rel_path.length-1]=='#' || rel_path[rel_path.length-1]=='?'){//remove ending '#' '?'
 								console.info("First:"+rel_path);
@@ -299,40 +304,40 @@ EntryPointWindowObserver.prototype.install = function() {
 
 							if (rel_path.length==0)rel_path='/';
 							else if (rel_path.length>0 && rel_path[rel_path.length-1]!='/')rel_path+='/'; //add ending back slash
-							
+
 							if (rel_path!=path_list[j]) violation=1;//Path mismatch with entry point path
-						
+
 							// check for secondary entry points
 							for (let sec_ele=0; sec_ele < sec_entry[j].length; sec_ele++)
 								if (rel_path.search(sec_entry[j][sec_ele])!=-1) violation=2;
-							
+
 							//does the URL have parameters?
 							let has_param = 0;
-							if (violation>0) has_param = (rel_path.search(/[\?|#]/gi)==-1) ? 0 : 1;	
-							
-							//we want to hash the path WITHOUT parameters	
+							if (violation>0) has_param = (rel_path.search(/[\?|#]/gi)==-1) ? 0 : 1;
+
+							//we want to hash the path WITHOUT parameters
 							//therefore, remove everything after the '?' and '#' character
 							let path_hash = rel_path;
 							if (path_hash.search(/\?/gi) != -1){
 								let temp_str = path_hash.split(/\?/gi);
 								path_hash = temp_str[0];
 								if (path_hash[path_hash.length-1]!='/')path_hash +='/';
-							}	
+							}
 							if (path_hash.search(/#/gi) != -1){
 								let temp_str = path_hash.split(/#/gi);
 								path_hash = temp_str[0];
 								if (path_hash[path_hash.length-1]!='/')path_hash +='/';
 							}
-								
+
 							//hash the path
 							path_hash = b64_sha1(path_hash);
 
-							//add element into db, we are not storing any URLs here, only the hash 
+							//add element into db, we are not storing any URLs here, only the hash
 							//Note storing the URL hash is neccessary to stop DB from exploding in size
-							exports.handlers.record({urlHash: url_hash, 
-								entryIndex: host_index, 
-								entryViolation: violation, 
-								hasParameter: has_param, 
+							exports.handlers.record({urlHash: url_hash,
+								entryIndex: host_index,
+								entryViolation: violation,
+								hasParameter: has_param,
 								pathHash:path_hash});
 							break;
 						}
@@ -352,7 +357,7 @@ function b64_sha1(plaintext){
 
    let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
 	   createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-   converter.charset = "UTF-8"; 
+   converter.charset = "UTF-8";
 
    let result = {};
    let data = converter.convertToByteArray(plaintext, result);
@@ -366,10 +371,10 @@ function b64_sha1(plaintext){
    //at this point, url_hash should contain the b64 encode of the hash
    //these three lines are needed to prevent XSS filter from messing up our string
    ciphertext = ciphertext.replace(/\+/gi,"-");
-   ciphertext = ciphertext.replace(/\//gi, "_"); 
+   ciphertext = ciphertext.replace(/\//gi, "_");
    ciphertext = ciphertext.replace(/\=/gi, "Z"); //this is fine, since '=' is pading
-   
-   return ciphertext; 
+
+   return ciphertext;
 
 }
 

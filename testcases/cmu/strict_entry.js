@@ -13,7 +13,6 @@ var dbstore;
 
 // experimentInfo is an obect providing metadata about the study.
 exports.experimentInfo = {
-
   testName: "Evaluation of New Security Feature (v2)",
   testId: 1338,  // must be unique across all test pilot studies
   testInfoUrl: "https://testpilot.mozillalabs.com/testcases/secure-sites-compatibility.html", // URL of page explaining your study, uncomment when ready
@@ -21,11 +20,11 @@ exports.experimentInfo = {
 	  " and Stanford University to evaluate the backward compatibility of a new security feature.",
   thumbnail: "http://websec.sv.cmu.edu/images/seclab-128.png", // URL of image representing your study
   // (will be displayed at 90px by 90px)
-  versionNumber: 1, // update this when changing your study
+  versionNumber: 2, // update this when changing your study
     // so you can identify results submitted from different versions
 
   duration: 3, // a number of days - fractions OK.
-  minTPVersion: "1.0.9", // Test Pilot versions older than this
+  minTPVersion: "1.1", // Test Pilot versions older than this
     // will not run the study.
   minFXVersion: "4.0b10", // Firefox versions older than this will
     // not run the study.
@@ -39,7 +38,7 @@ exports.experimentInfo = {
   optInRequired: false, // opt-in studies not yet implemented
 
   randomDeployment: { rolloutCode: "3rdparty",
-                      minRoll: 90, maxRoll: 99} // 10 random percent of users get the study
+                      minRoll: 70, maxRoll: 99} // 30 random percent of users get the study
 };
 
 
@@ -56,7 +55,7 @@ exports.dataStoreInfo = {
     {property: "entryViolation", type: BaseClasses.TYPE_INT_32,
 	    displayName: "Entry would violate policy?", displayValue:["No","Yes","Partially"]},
     {property: "hasParameter", type: BaseClasses.TYPE_INT_32,
-	    displayName: "Violation caused by parameter?", displayValue:["No","Yes"]},
+	    displayName: "Violation caused by parameter?", displayValue:["No","Yes", "N/A"]},
     {property: "pathHash", type:BaseClasses.TYPE_STRING,
 	    displayName: "path hash"}
   ]
@@ -225,6 +224,8 @@ EntryPointWindowObserver.prototype.install = function() {
   if (appcontent){ //listens to the DOM load event
  	this._listen(appcontent, "DOMContentLoaded", function(evt){
 
+		   var direct_visits = -1;
+
 		   let content_doc = this.window.document.getElementById("content").contentDocument;
 	    	   let my_doc = content_doc.documentElement.innerHTML; //HTML content of the main document
 		   if (!my_doc)return false;
@@ -239,7 +240,7 @@ EntryPointWindowObserver.prototype.install = function() {
 
 		   //we want skip the study for all same "origin" navigations,
 		   for (var i=0; i<HOST_LEN; i++){
-			if(doc_loc_host.search(allow_nav[i])!=-1) return;
+			if(doc_loc_host.search(allow_nav[i])!=-1) direct_visits=i;
 		   }
 
 		   //SHA-1, the proper way
@@ -261,6 +262,17 @@ EntryPointWindowObserver.prototype.install = function() {
 
 			handleCompletion: function(aReason) {
 				if (not_visited){//a new page!
+
+				   //if we are on a sensitive page, skip it
+				   if (direct_visits!=-1){
+				   	exports.handlers.record({urlHash: url_hash,
+								entryIndex: direct_visits,
+								entryViolation: 0,
+								hasParameter: 2,
+								pathHash:""});
+							return;
+				   }
+
 
 				   let url_tag_len = url_tag.length;
 				   let urls = new Array();
@@ -398,6 +410,18 @@ EntryPointGlobalObserver.prototype.onExperimentStartup = function(store) {
   // reference:
   EntryPointGlobalObserver.superClass.onExperimentStartup.call(this, store);
   dbstore = store;
+};
+
+EntryPointGlobalObserver.prototype.getStudyMetadata = function() {
+  // Record date at which this user started the study, so we can eliminate
+  // people running old version
+  let prefs = Cc["@mozilla.org/preferences-service;1"]
+    .getService(Ci.nsIPrefService);
+
+  let prefBranch = prefs.getBranch("extensions.testpilot.");
+  let prefValue = prefBranch.getCharPref("startDate.1338");
+
+  return [{name: "startDate", value: prefValue}];
 };
 
 // Instantiate and export the global observer (required!)

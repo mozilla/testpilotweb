@@ -39,7 +39,7 @@ exports.experimentInfo = {
   optInRequired: false, // opt-in studies not yet implemented
 
   randomDeployment: { rolloutCode: "3rdparty",
-                      minRoll: 98, maxRoll: 98} // 1 random percent of users get the study
+                      minRoll: 90, maxRoll: 99} // 10 random percent of users get the study
 };
 
 

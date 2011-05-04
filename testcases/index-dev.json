@@ -13,23 +13,7 @@
      "studyfile": "pilot-background-survey.js",
      "hash": "bdc8842255f723a5d0ca64bf14417a741df2f91981f521c9abfd2ba49082aefa"
     }
-  },
-
-  {"default":
-    {"name": "Search",
-     "jarfile": "search/searchbar-study.jar",
-     "studyfile": "searchbar-study.js",
-     "hash": "6bd8d2b9cb8abf90175c976f2524bdedf70aa8ef574040ed7d2a769d0da7ddda"
-    }
-  },
-
-  {"default":
-    {"name": "A Week in the Life of a Browser",
-     "jarfile": "a-week-life/week_life.jar",
-     "studyfile": "a_week_life.js",
-     "hash": "18388e3fcf76876f0ccbdf15f3b2a5134ce447a9ccc584122b77f1d096d82ef0"
-    }
-  },
+  }
 
   {"default":
     {"name": "Example Study",
@@ -40,18 +24,18 @@
   },
 
   {"default":
-    {"name": "Firefox 4 Beta Interface 2",
-     "jarfile": "beta/combined.jar",
-     "studyfile": "combined.js",
-     "hash": "90de1c64d6668e5eabafc656915c1417ad08dd2f1053695e1ef8912e74cf5aad"
+    {"name": "Early Adopter Study",
+     "jarfile": "newfeature/new_feature.jar",
+     "studyfile": "new_feature_study.js",
+     "hash": "9532b896391dbe6b03ed236377f127bac97e7122fef3fb95e407c46a0927e3b8"
     }
   },
 
   {"default":
-    {"name": "Beta UI Survey 2",
-    "jarfile": "beta/beta-ui2-survey.jar",
-    "studyfile": "beta-ui2-survey.js",
-    "hash": "7590142f090744e8758f426fcf602a4d502a6f4482a792d937a56e20d4c20499"
+    {"name": "Early Adopter Survey",
+     "jarfile": "newfeature/early_adopter_survey.jar",
+     "studyfile": "early_adopter_survey.js",
+     "hash": "b3d3cdc8005a644b1db0b75a2cfe54e10f1e3da1cb95a19d6523ce5fd6089609"
     }
   },
 

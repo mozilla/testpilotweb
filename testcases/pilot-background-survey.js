@@ -12,7 +12,6 @@ exports.surveyInfo = {
     + "of Firefox 4 Beta users. This survey doesn't contain any personally "
     + "identifiable questions."
     + "Thank you for your time!",
-  thumbnail: "",
   surveyExplanation: "<p>Thank you for joining the Firefox 4 Beta Program!</p> \
 <p>Please help us build a better picture of our Beta users by completing this survey!  \
 This survey doesn't contain any personally identifiable questions. \

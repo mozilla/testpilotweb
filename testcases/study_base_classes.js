@@ -8,7 +8,7 @@ exports.GenericWebContent = function(experimentInfo) {
 
 exports.GenericWebContent.prototype = {
   get rawDataLink() {
-    return '<p><a onclick="showRawData(' + this.expInfo.testId + ');">'
+    return '<p><a onclick="showRawData(\'' + this.expInfo.testId + '\');">'
      + 'Click here</a> to see a display of all the collected data '
      + 'in its raw form, exactly as it will be sent.</p>';
   },

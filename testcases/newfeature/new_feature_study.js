@@ -46,6 +46,9 @@ exports.dataStoreInfo = {
  */
 
 function record(event, data) {
+  if (typeof data != "string") {
+    data = data.toString();
+  }
   exports.handlers.record({key: event, value: data, timestamp: Date.now()});
 }
 
@@ -112,6 +115,10 @@ EarlyAdopterWindowObserver.prototype.recordPanoramaState = function() {
 
 EarlyAdopterWindowObserver.prototype.install = function() {
   let window = this.window;
+  if (!window.gBrowser) {
+    // not a tabbed browser window: ignore
+    return;
+  }
   record("App tabs on window open", window.gBrowser._numPinnedTabs);
   this.recordPanoramaState();
 
@@ -252,7 +259,7 @@ EarlyAdopterGlobalObserver.prototype.getStudyMetadata = function() {
     prefs.push({name: "Sync configured", value: "false"});
   }
   let lastSync = Application.prefs.getValue("services.sync.lastSync", 0);
-  prefs.push({name: "Last sync time", value: lastSyncTime});
+  prefs.push({name: "Last sync time", value: lastSync});
 
   return prefs;
 };

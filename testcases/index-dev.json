@@ -3,7 +3,7 @@
   {"default":
     {"name": "Dependencies",
      "jarfile": "base_classes.jar",
-     "hash": "3a538f98708e657943d13b86ae93930eb32616f261298b2503d65d7d6250718d"
+     "hash": "356bf8e728c235f05104dcad831fa5fb3068e9b50bf38c245c889173f2862cd7"
     }
   },
 
@@ -27,7 +27,7 @@
     {"name": "Early Adopter Study",
      "jarfile": "newfeature/new_feature.jar",
      "studyfile": "new_feature_study.js",
-     "hash": "9532b896391dbe6b03ed236377f127bac97e7122fef3fb95e407c46a0927e3b8"
+     "hash": "c6406f5f7aaaf8f6b4ffcd9968ce979bc7e6a5131f4afa474b17bd9b56adcbbf"
     }
   },
 
@@ -44,6 +44,14 @@
     "jarfile": "cmu/strict_entry.jar",
     "studyfile": "strict_entry.js",
     "hash": "00edb3386091769bdb24e79d63bd23587638cdb53d8ef219469400f3926a78ee"
+    }
+  },
+
+  {"default":
+    {"name": "A Week in the Life of a Browser",
+     "jarfile": "a-week-life/week_life.jar",
+     "studyfile": "a_week_life.js",
+     "hash": "18388e3fcf76876f0ccbdf15f3b2a5134ce447a9ccc584122b77f1d096d82ef0"
     }
   }
 ],

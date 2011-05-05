@@ -24,18 +24,18 @@
   },
 
   {"default":
-    {"name": "Early Adopter Study",
-     "jarfile": "newfeature/new_feature.jar",
-     "studyfile": "new_feature_study.js",
-     "hash": "c6406f5f7aaaf8f6b4ffcd9968ce979bc7e6a5131f4afa474b17bd9b56adcbbf"
-    }
-  },
-
-  {"default":
     {"name": "Early Adopter Survey",
      "jarfile": "newfeature/early_adopter_survey.jar",
      "studyfile": "early_adopter_survey.js",
      "hash": "b3d3cdc8005a644b1db0b75a2cfe54e10f1e3da1cb95a19d6523ce5fd6089609"
+    }
+  },
+
+  {"default":
+    {"name": "Early Adopter Study",
+     "jarfile": "newfeature/new_feature.jar",
+     "studyfile": "new_feature_study.js",
+     "hash": "a987da2e1c77ef77d432776c8b13fc1cfa1ce878b5c0ee864dfcde765c53aafc"
     }
   },
 

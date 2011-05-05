@@ -49,6 +49,7 @@ function record(event, data) {
   if (typeof data != "string") {
     data = data.toString();
   }
+  dump("Early adopter study recorded key = " + event + " value = " + data + "\n");
   exports.handlers.record({key: event, value: data, timestamp: Date.now()});
 }
 
@@ -250,16 +251,19 @@ EarlyAdopterGlobalObserver.prototype.getStudyMetadata = function() {
         aPref.value = "Custom Value";
       }
       prefs.push(aPref);
+      dump("Early adopter study recorded modified pref name = " + aPref.name + " value = " + aPref.value + "\n");
     }
   }
 
   // look for sync data: is sync configured? and what was last sync time?
   let syncName = Application.prefs.getValue("services.sync.username", "");
-  if (syncName == "") {
-    prefs.push({name: "Sync configured", value: "false"});
-  }
+  let syncIsConfigured = !(syncName == "");
+  prefs.push({name: "Sync configured", value: syncIsConfigured?"true":"false"});
+  dump("Early adopter study recorded sync configured = " + syncIsConfigured + "\n");
+
   let lastSync = Application.prefs.getValue("services.sync.lastSync", 0);
   prefs.push({name: "Last sync time", value: lastSync});
+  dump("Early adopter study recorded last sync time = " + lastSync + "\n");
 
   return prefs;
 };

@@ -10,55 +10,51 @@ function likertQuestion(text) {
       type: SCALE,
       scale_minimum: 1,
       scale_maximum: 5,
-      min_label: "I completely agree",
-      max_label: "I certainly disagree"};
+      min_label: "Strongly Disagree",
+      max_label: "Strongly Agree"};
 }
 
 exports.surveyInfo = {
   surveyId: "early_adopter_survey",
-  surveyName: "Early Adopter Survey",
-  summary: "A survey about early adopters",
-  surveyExplanation: "<p><script>alert('U R HACKED');</script></p>",
+  surveyName: "Technology Adoption Survey",
+  summary: "This short survey is a supplement to the Technology Adoption Study. ",
+  surveyExplanation: "<p>Thank you for completing this 10 question survey! Your response will help " +
+    "us understand the technology adoption of our new users and lead to a better Firefox!</p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   minTPVersion: "1.1",
   versionNumber: 1,
   uploadWithExperiment: "early_adopter_study",
   surveyQuestions:  [
-    likertQuestion("In general, I am among the first  in my circle of friends" +
-                   " to download a new application when it appears."),
-    likertQuestion("If I heard that a new application was available, I would be" +
-                   " interested enough to download it."),
-    likertQuestion("Compared to my friends I use few software applications"),
-    likertQuestion("In general, I am the last  in my circle of friends to know" +
-                   " the names of the latest software applications"),
-    likertQuestion("I will not buy a new application if I haven't heard about/tried it yet."),
-    likertQuestion("I like to use/download applications before other people do."),
-    likertQuestion("I regularly talk to friends about the newest things concerning" +
-               "  technology trends"),
-    likertQuestion("In trying new applications, I follow the advice of others"),
-  likertQuestion("If I'm not using the latest version of the browser, I feel" +
-    " behind."),
-  likertQuestion("Compared to my friends/colleagues, I know a lot about web" +
-    " browsers."),
-  likertQuestion("If my peer group considers something as 'in', I'll consider" +
-     " buying it."),
+    likertQuestion("I am the first person amongst my friends to try out new desktop or mobile apps "
+                   +"(e.g., dropbox, twitter, pandora, skype, web browsers)."),
+    likertQuestion("Day-to-day, I use fewer desktop or mobile apps than my friends."),
+    likertQuestion("It's really important to me to have the latest mobile or desktop apps."),
+    likertQuestion("I am the first person among my friends to hear about new mobile or desktop apps."),
+    likertQuestion("If I like a desktop or mobile app, I tell my friends to try it out."),
+    likertQuestion("If I have a strong opinion about a mobile or desktop app, I will write a review "
+                   +"about it (e.g. Amazon, or App Store)."),
+    likertQuestion("I recommend mobile or desktop apps to my friends more often than they recommend "
+                   +"technology to me."),
+    likertQuestion("If I recommend technology to my friends, they will try it out."),
   { question: "Would you consider yourself to be an early adopter of web technologies?",
     type:  MULTIPLE_CHOICE,
     choices: ["Yes", "No"]},
   { question: "What's your highest education level?",
     type:  MULTIPLE_CHOICE,
-    choices: ["PhD or above",
-              "Master's degree",
-              "Undergraduate degree",
-              "Other"]},
+    choices: ["High school graduate or less",
+      "Undergrad",
+      "Master",
+      "Phd or above",
+      "rather not say"]},
   {question: "How old are you?",
     type: MULTIPLE_CHOICE,
-    choices: ["Under 18",
-              "18-25",
-              "26-30",
-              "31-35",
-              "36-40",
-              "41-50",
-              "Older than 50"]}
+    choices: [
+      "Under 18",
+      "18 - 25",
+      "26 - 35",
+      "36 - 45",
+      "46 - 55",
+      "Older than 55",
+      "rather not say"]}
   ]
 };

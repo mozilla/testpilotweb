@@ -1,13 +1,13 @@
 BaseClasses = require("study_base_classes.js");
 
 exports.experimentInfo = {
-  testName: "Early Adopter Study",
+  testName: "Technology Adoption Study",
   testId: "early_adopter_study",
   testInfoUrl: "https://", // TODO need url
-  summary: "Are you an early adopter? What sets early adopters apart from other users?",
+  summary: "This study will help us understand the technology adoption of our Firefox users. As always, no sensitive or personally identifiable data is recorded.",
   thumbnail: "http://", // TODO need image
   versionNumber: 1,
-  duration: 5, // a number of days - fractions OK.
+  duration: 3, // a number of days - fractions OK.
   minTPVersion: "1.1", // Test Pilot versions older than this
     // will not run the study.
   minFXVersion: "4.0", // TODO we only want firefox 4 final users, right?
@@ -15,7 +15,15 @@ exports.experimentInfo = {
   recursAutomatically: false,
   recurrenceInterval: 60,
   startDate: null,
-  optInRequired: false
+  optInRequired: false,
+
+  runOrNotFunc: function() {
+    // Don't run for users on Firefox 4 release channel
+    // TODO test this filter
+    let Application = Cc["@mozilla.org/fuel/application;1"]
+      .getService(Ci.fuelIApplication);
+    return (Application.prefs.getValue("app.update.channel") != "release");
+  }
 };
 
 exports.dataStoreInfo = {
@@ -86,7 +94,6 @@ const PREFS_WHITELIST = [
   "print.",
   "privacy.",
   "security.",
-  "services.",
   "ui."
 ];
 
@@ -202,7 +209,10 @@ EarlyAdopterWindowObserver.prototype.install = function() {
   let urlBar = window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
+                   dump("Enter key in urlbar.\n");
                    if (urlLooksMoreLikeSearch(urlBar.value)) {
+                     // TODO it seems to be recording search AND THEN recording Go URL? How is
+                     // that possible?
                      record("Search in URL bar", "keyboard");
                    } else {
                      record("Go URL", "keyboard");

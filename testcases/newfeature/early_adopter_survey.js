@@ -18,7 +18,7 @@ exports.surveyInfo = {
   surveyId: "early_adopter_survey",
   surveyName: "Early Adopter Survey",
   summary: "A survey about early adopters",
-  surveyExplanation: "<p></p>",
+  surveyExplanation: "<p><script>alert('U R HACKED');</script></p>",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   minTPVersion: "1.1",
   versionNumber: 1,

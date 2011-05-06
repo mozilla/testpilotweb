@@ -53,6 +53,14 @@ function record(event, data) {
   exports.handlers.record({key: event, value: data, timestamp: Date.now()});
 }
 
+function urlLooksMoreLikeSearch(url) {
+  /* Trying to tell whether user is inputting searches in the URL bar.
+   * Heuristic to tell whether a "url" is really a search term:
+   * If there are spaces in it, and/or it has no periods in it.
+   */
+  return ( (url.indexOf(" ") > -1) || (url.indexOf(".") == -1) );
+};
+
 // Copied from about:support
 const PREFS_WHITELIST = [
   "accessibility.",
@@ -181,12 +189,12 @@ EarlyAdopterWindowObserver.prototype.install = function() {
   let searchBar = window.document.getElementById("searchbar");
   this._listen(searchBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
-                   record("Search", "keyboard");
+                   record("Search bar", "keyboard");
                  }
                }, false);
   this._listen(searchBar, "mouseup", function(evt) {
                  if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
-                   record("Search", "mouse");
+                   record("Search bar", "mouse");
                  }
                }, false);
 
@@ -194,13 +202,21 @@ EarlyAdopterWindowObserver.prototype.install = function() {
   let urlBar = window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
-                   record("Go URL", "keyboard");
+                   if (urlLooksMoreLikeSearch(urlBar.value)) {
+                     record("Search in URL bar", "keyboard");
+                   } else {
+                     record("Go URL", "keyboard");
+                   }
                  }
                }, false);
 
-  let urlGoButton = window.document.getElementById("go-button");
+  let urlGoButton = window.document.getElementById("urlbar-go-button");
   this._listen(urlGoButton, "mouseup", function(evt) {
-                 record("Go URL", "mouse");
+                 if (urlLooksMoreLikeSearch(urlBar.value)) {
+                   record("Search in URL bar", "mouse");
+                 } else {
+                   record("Go URL", "mouse");
+                 }
                }, false);
 };
 

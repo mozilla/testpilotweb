@@ -738,10 +738,6 @@ CombinedStudyWebContent.prototype.onPageLoad = function(experiment,
       }
     }
 
-    stats.sort(function(a, b) {
-      return b.quantity - a.quantity;
-    });
-
     let numItems = stats.length<15?stats.length:15;
     let d1 = [];
     let yAxisLabels = [];

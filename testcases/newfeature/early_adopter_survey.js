@@ -34,8 +34,8 @@ exports.surveyInfo = {
     likertQuestion("If I have a strong opinion about a mobile or desktop app, I will write a review "
                    +"about it (e.g. Amazon, or App Store)."),
     likertQuestion("I recommend mobile or desktop apps to my friends more often than they recommend "
-                   +"technology to me."),
-    likertQuestion("If I recommend technology to my friends, they will try it out."),
+                   +"them to me."),
+    likertQuestion("If I recommend mobile or desktop apps to my friends, they will try them out."),
   { question: "Would you consider yourself to be an early adopter of web technologies?",
     type:  MULTIPLE_CHOICE,
     choices: ["Yes", "No"]},
@@ -56,5 +56,12 @@ exports.surveyInfo = {
       "46 - 55",
       "Older than 55",
       "rather not say"]}
-  ]
+  ],
+
+  runOrNotFunc: function() {
+    // Don't run for users on Firefox 4 release channel
+    let Application = Cc["@mozilla.org/fuel/application;1"]
+      .getService(Ci.fuelIApplication);
+    return (Application.prefs.getValue("app.update.channel", "") != "release");
+  }
 };

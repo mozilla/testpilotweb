@@ -22,7 +22,7 @@ exports.experimentInfo = {
     // TODO test this filter
     let Application = Cc["@mozilla.org/fuel/application;1"]
       .getService(Ci.fuelIApplication);
-    return (Application.prefs.getValue("app.update.channel") != "release");
+    return (Application.prefs.getValue("app.update.channel", "") != "release");
   }
 };
 
@@ -31,9 +31,9 @@ exports.dataStoreInfo = {
   tableName: "testpilot_earlyadopter_study",
   columns: [
     {property: "key", type: BaseClasses.TYPE_STRING,
-     displayName: "Key"},
+     displayName: "Event"},
     {property: "value", type: BaseClasses.TYPE_STRING,
-     displayName: "Value"},
+     displayName: "Details"},
     {property: "timestamp", type: BaseClasses.TYPE_DOUBLE, displayName: "Time",
      displayValue: function(value) {return new Date(value).toLocaleString();}}
   ]
@@ -211,8 +211,6 @@ EarlyAdopterWindowObserver.prototype.install = function() {
                  if (evt.keyCode == 13) { // Enter key
                    dump("Enter key in urlbar.\n");
                    if (urlLooksMoreLikeSearch(urlBar.value)) {
-                     // TODO it seems to be recording search AND THEN recording Go URL? How is
-                     // that possible?
                      record("Search in URL bar", "keyboard");
                    } else {
                      record("Go URL", "keyboard");
@@ -319,7 +317,58 @@ EarlyAdopterWebContent.prototype.__defineGetter__("dataViewExplanation",
 EarlyAdopterWebContent.prototype.onPageLoad = function(experiment,
                                                   document,
                                                   graphUtils) {
-  // TODO
+  experiment.getDataStoreAsJSON(function(rawData) {
+    if (rawData.length == 0) {
+      dump("No raw data, returning.\n");
+      return;
+    }
+    let stats = [{key: "App tab pinned", count: 0},
+                 {key: "App tab unpinned", count: 0},
+                 {key: "Panorama opened", count: 0},
+                 {key: "Panorama closed", count: 0},
+                 {key: "Site ID clicked", count: 0},
+                 {key: "View Source", count: 0},
+                 {key: "Search bar", count: 0},
+                 {key: "Search in URL bar", count: 0},
+                 {key: "Go URL", count: 0}];
+    let item;
+    let lastActionId;
+    dump("Counting\n");
+    for each( let row in rawData) {
+      for (let x = 0; x < stats.length; x++) {
+        if (stats[x].key == row.key) {
+          stats[x].count++;
+          break;
+        }
+      }
+    }
+    dump("Making labels\n");
+    let numItems = stats.length;
+    let d1 = [];
+    let yAxisLabels = [];
+    for (let i = 0; i < numItems; i++) {
+      let item = stats[i];
+      d1.push([item.count, i - 0.5]);
+      let labelText = stats[i].key;
+      yAxisLabels.push([i, labelText]);
+    }
+    try {
+      let plotDiv = document.getElementById("data-plot-div");
+      if (plotDiv == null) {
+        dump("no plot div!\n");
+        return;
+      }
+      dump("Plotting now...\n");
+      graphUtils.plot(plotDiv, [{data: d1}],
+                      {series: {bars: {show: true, horizontal: true}},
+                       yaxis: {ticks: yAxisLabels},
+                       xaxis: {tickDecimals: 0}});
+      dump("Plotted.\n");
+    } catch(e) {
+      dump("Error: " + e + "\n");
+      console.warn("Problem with graphutils: " + e + "\n");
+    }
+  });
 };
 
 exports.webContent = new EarlyAdopterWebContent();

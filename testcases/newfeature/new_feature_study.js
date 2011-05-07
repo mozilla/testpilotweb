@@ -308,7 +308,7 @@ EarlyAdopterWebContent.prototype.__defineGetter__("dataCanvas",
   });
 EarlyAdopterWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "The bar chart below shows your frequency of use of certain features";
+    return "The bar chart below shows your frequency of use of certain features.";
   });
 
 

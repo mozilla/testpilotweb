@@ -27,7 +27,7 @@
     {"name": "Tech Adoption Survey",
      "jarfile": "newfeature/early_adopter_survey.jar",
      "studyfile": "early_adopter_survey.js",
-     "hash": "7b785eafe1a0ab01f5c87d196bc66a1df698cedc5bd94f46864e14db942f2686"
+     "hash": "41b8650666e815c04f611c4b5c3dbc013e6f7cc4ad33a09cc32639beb777ede4"
     }
   },
 
@@ -35,7 +35,7 @@
     {"name": "Tech Adoption Study",
      "jarfile": "newfeature/new_feature.jar",
      "studyfile": "new_feature_study.js",
-     "hash": "3d6d341d77ef5f7a5111f691695b52ff831201a5d34ab02b7dcd248c1b6d5e88"
+     "hash": "9048f80220fbdbaacdf054ecac1ac25cb91f34efea29dcee378d4fad8fd9f0e6"
     }
   },
 

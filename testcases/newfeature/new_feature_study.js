@@ -3,19 +3,22 @@ BaseClasses = require("study_base_classes.js");
 exports.experimentInfo = {
   testName: "Technology Adoption Study",
   testId: "early_adopter_study",
-  testInfoUrl: "https://", // TODO need url
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/tech_adoption",
   summary: "This study will help us understand the technology adoption of our Firefox users. As always, no sensitive or personally identifiable data is recorded.",
-  thumbnail: "http://", // TODO need image
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/newfeature/firefox-thumbnail.png",
   versionNumber: 1,
   duration: 3, // a number of days - fractions OK.
   minTPVersion: "1.1", // Test Pilot versions older than this
     // will not run the study.
-  minFXVersion: "4.0", // TODO we only want firefox 4 final users, right?
+  minFXVersion: "4.0",
 
   recursAutomatically: false,
   recurrenceInterval: 60,
   startDate: null,
   optInRequired: false,
+
+  randomDeployment: { rolloutCode: "ur",
+                      minRoll: 1, maxRoll: 10},
 
   runOrNotFunc: function() {
     // Don't run for users on Firefox 4 release channel
@@ -57,7 +60,6 @@ function record(event, data) {
   if (typeof data != "string") {
     data = data.toString();
   }
-  dump("Early adopter study recorded key = " + event + " value = " + data + "\n");
   exports.handlers.record({key: event, value: data, timestamp: Date.now()});
 }
 
@@ -209,7 +211,6 @@ EarlyAdopterWindowObserver.prototype.install = function() {
   let urlBar = window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {
                  if (evt.keyCode == 13) { // Enter key
-                   dump("Enter key in urlbar.\n");
                    if (urlLooksMoreLikeSearch(urlBar.value)) {
                      record("Search in URL bar", "keyboard");
                    } else {
@@ -275,7 +276,6 @@ EarlyAdopterGlobalObserver.prototype.getStudyMetadata = function() {
         aPref.value = "Custom Value";
       }
       prefs.push(aPref);
-      dump("Early adopter study recorded modified pref name = " + aPref.name + " value = " + aPref.value + "\n");
     }
   }
 
@@ -283,11 +283,9 @@ EarlyAdopterGlobalObserver.prototype.getStudyMetadata = function() {
   let syncName = Application.prefs.getValue("services.sync.username", "");
   let syncIsConfigured = !(syncName == "");
   prefs.push({name: "Sync configured", value: syncIsConfigured?"true":"false"});
-  dump("Early adopter study recorded sync configured = " + syncIsConfigured + "\n");
 
   let lastSync = Application.prefs.getValue("services.sync.lastSync", 0);
   prefs.push({name: "Last sync time", value: lastSync});
-  dump("Early adopter study recorded last sync time = " + lastSync + "\n");
 
   return prefs;
 };
@@ -310,7 +308,7 @@ EarlyAdopterWebContent.prototype.__defineGetter__("dataCanvas",
   });
 EarlyAdopterWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "This is a totally made up example study that means nothing.";
+    return "The bar chart below shows your frequency of use of certain features";
   });
 
 
@@ -319,7 +317,6 @@ EarlyAdopterWebContent.prototype.onPageLoad = function(experiment,
                                                   graphUtils) {
   experiment.getDataStoreAsJSON(function(rawData) {
     if (rawData.length == 0) {
-      dump("No raw data, returning.\n");
       return;
     }
     let stats = [{key: "App tab pinned", count: 0},
@@ -333,7 +330,6 @@ EarlyAdopterWebContent.prototype.onPageLoad = function(experiment,
                  {key: "Go URL", count: 0}];
     let item;
     let lastActionId;
-    dump("Counting\n");
     for each( let row in rawData) {
       for (let x = 0; x < stats.length; x++) {
         if (stats[x].key == row.key) {
@@ -342,7 +338,6 @@ EarlyAdopterWebContent.prototype.onPageLoad = function(experiment,
         }
       }
     }
-    dump("Making labels\n");
     let numItems = stats.length;
     let d1 = [];
     let yAxisLabels = [];
@@ -355,17 +350,13 @@ EarlyAdopterWebContent.prototype.onPageLoad = function(experiment,
     try {
       let plotDiv = document.getElementById("data-plot-div");
       if (plotDiv == null) {
-        dump("no plot div!\n");
         return;
       }
-      dump("Plotting now...\n");
       graphUtils.plot(plotDiv, [{data: d1}],
                       {series: {bars: {show: true, horizontal: true}},
                        yaxis: {ticks: yAxisLabels},
                        xaxis: {tickDecimals: 0}});
-      dump("Plotted.\n");
     } catch(e) {
-      dump("Error: " + e + "\n");
       console.warn("Problem with graphutils: " + e + "\n");
     }
   });

@@ -28,14 +28,6 @@
      "studyfile": "new_feature_study.js",
      "hash": "9048f80220fbdbaacdf054ecac1ac25cb91f34efea29dcee378d4fad8fd9f0e6"
     }
-  },
-
-  {"default":
-    {"name": "Strict Entry Security Evaluation",
-    "jarfile": "cmu/strict_entry.jar",
-    "studyfile": "strict_entry.js",
-    "hash": "00edb3386091769bdb24e79d63bd23587638cdb53d8ef219469400f3926a78ee"
-    }
   }
 ],
 
@@ -45,6 +37,14 @@
      "jarfile": "beta/combined.jar",
      "studyfile": "combined.js",
      "hash": "90de1c64d6668e5eabafc656915c1417ad08dd2f1053695e1ef8912e74cf5aad"
+    }
+  },
+
+  {"default":
+    {"name": "Strict Entry Security Evaluation",
+    "jarfile": "cmu/strict_entry.jar",
+    "studyfile": "strict_entry.js",
+    "hash": "00edb3386091769bdb24e79d63bd23587638cdb53d8ef219469400f3926a78ee"
     }
   }
 ],

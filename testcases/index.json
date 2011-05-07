@@ -15,6 +15,22 @@
   },
 
   {"default":
+    {"name": "Tech Adoption Survey",
+     "jarfile": "newfeature/early_adopter_survey.jar",
+     "studyfile": "early_adopter_survey.js",
+     "hash": "41b8650666e815c04f611c4b5c3dbc013e6f7cc4ad33a09cc32639beb777ede4"
+    }
+  },
+
+  {"default":
+    {"name": "Tech Adoption Study",
+     "jarfile": "newfeature/new_feature.jar",
+     "studyfile": "new_feature_study.js",
+     "hash": "9048f80220fbdbaacdf054ecac1ac25cb91f34efea29dcee378d4fad8fd9f0e6"
+    }
+  },
+
+  {"default":
     {"name": "Strict Entry Security Evaluation",
     "jarfile": "cmu/strict_entry.jar",
     "studyfile": "strict_entry.js",

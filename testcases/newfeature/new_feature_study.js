@@ -18,7 +18,7 @@ exports.experimentInfo = {
   optInRequired: false,
 
   randomDeployment: { rolloutCode: "ur",
-                      minRoll: 1, maxRoll: 10},
+                      minRoll: 1, maxRoll: 30},
 
   runOrNotFunc: function() {
     // Don't run for users on Firefox 4 release channel

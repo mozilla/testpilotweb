@@ -2,16 +2,16 @@ BaseClasses = require("study_base_classes.js");
 
 const ADDON_ID = "awesomeBar.HD@prospector.labs.mozilla";
 const ADDON_PREF = "extensions.prospector.awesomeBarHD.";
-const INSTALL_URL = "https://addons.mozilla.org/firefox/downloads/file/120358/mozilla_labs_prospector_awesomebar_hd-10-fx.xpi?src=external-test-pilot";
-const INSTALL_HASH = "sha256:d8115b3b8900700d6688d5380cda39c64013d869cc868ac7db5059677e289546";
+const INSTALL_URL = "https://addons.mozilla.org/firefox/downloads/file/120617/mozilla_labs_prospector_awesomebar_hd-11-fx.xpi?src=external-test-pilot";
+const INSTALL_HASH = "sha256:581c4fae62c63ea847b4fa9373420f360d3d3a55a47a55a9116692d216d551f0";
 const PREF_PREFIX = "extensions.testpilot.";
 const TEST_ID = 10509610;
 
-const CONFIRM_CHECK_EVERY = .1 * 60 * 1000;
-const CONFIRM_CHECK_TRIGGER = .5 * 60 * 1000;
+const CONFIRM_CHECK_EVERY = 1 * 60 * 1000;
+const CONFIRM_CHECK_TRIGGER = 60 * 60 * 1000;
 const CONFIRM_ICON = "chrome://testpilot/skin/testPilot_200x200.png";
-const CONFIRM_QUESTION = "Test Pilot invites you to try a new design for 1 day.\n\nFirefox will return to the original interface when the study finishes. You can also turn off the new design from the Add-ons Manager at any time.";
-const CONFIRM_TITLE = "Activate a new Firefox interface for 24 hours?";
+const CONFIRM_QUESTION = "Test Pilot invites you to try a new design for 1 hour.\n\nFirefox will return to the original interface when the study finishes. You can also turn off the new design from the Add-ons Manager at any time.";
+const CONFIRM_TITLE = "Activate a new Firefox interface for 60 minutes?";
 
 const PREF_ALREADY_INSTALLED = PREF_PREFIX + TEST_ID + ".alreadyInstalled";
 const PREF_METADATA = PREF_PREFIX + TEST_ID + ".metadata";
@@ -27,11 +27,11 @@ let {AddonManager, Services} = modules;
 exports.experimentInfo = {
   testId: TEST_ID,
   testName: "Search Behavior Study",
-  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/search_behavior",
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/search-behavior-study.html",
   summary: "This study will help us understand how Firefox users search on the web. The Firefox user interface may change as part of this study. As always, no sensitive or personally identifiable data is recorded.",
   thumbnail: "http://mozillalabs.com/wp-content/themes/labs_project/img/prospector-header.png",
   versionNumber: 1,
-  duration: 1,
+  duration: .1,
   minTPVersion: "1.1",
   minFXVersion: "4.0",
   optInRequired: true,
@@ -97,7 +97,7 @@ const siteRegexes = [
 ["food Google Places", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=plcs/],
 ["pictures Google Images", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=isch/],
 ["shopping Google Shopping", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=shop/],
-["videos Flickr", /https?:\/\/([^\.]+\.)?flickr\.com\/search.+mt=videos/],
+["videos Flickr Video", /https?:\/\/([^\.]+\.)?flickr\.com\/search.+mt=videos/],
 
 ["search Google", /https?:\/\/([^\.]+\.)?google\.com\/(#|search)/],
 ["search Bing", /https?:\/\/([^\.]+\.)?bing\.com\/search/],
@@ -118,7 +118,7 @@ const siteRegexes = [
 ["news CNN", /https?:\/\/([^\.]+\.)?www\.cnn\.com\/search/],
 ["news New York Times", /https?:\/\/([^\.]+\.)?nytimes\.com\/search/],
 ["news BBC", /https?:\/\/([^\.]+\.)?bbc\.co\.uk\/search/],
-["people Twitter", /https?:\/\/([^\.]+\.)?twitter\.com\/#!\/search/],
+["people Twitter", /https?:\/\/([^\.]+\.)?twitter\.com\/(\?q=[^#]*)?#!\/search/],
 ["people Facebook", /https?:\/\/([^\.]+\.)?facebook\.com\/search/],
 ["people LinkedIn", /https?:\/\/([^\.]+\.)?linkedin\.com\/pub\/dir\/\?/],
 ["pictures Flickr", /https?:\/\/([^\.]+\.)?flickr\.com\/search\/.*[&\?]q=/],
@@ -293,8 +293,16 @@ WindowObs.prototype.install = function() {
           key = "space";
           break;
 
+        case 35:
+          key = "hash";
+          break;
+
         case 58:
           key = "colon";
+          break;
+
+        case 64:
+          key = "at";
           break;
       }
 
@@ -327,8 +335,11 @@ WindowObs.prototype.install = function() {
 
   // Clear out any keys when switching tabs
   self._listen(gBrowser.tabContainer, "TabSelect", function() {
-    for each (let keyLog in keyLogs)
-      keyLog.length = 0;
+    // Results open in a new tab, so wait a bit before clearing to read out data
+    setTimeout(function() {
+      for each (let keyLog in keyLogs)
+        keyLog.length = 0;
+    });
   }, true);
 
   // Watch for switch to tabs
@@ -537,6 +548,9 @@ GlobalObs.prototype.onExperimentStartup = function(store) {
         win.addEventListener("dialogcancel", function() {
           record("addon", "denied");
         }, false);
+
+        // Close this prompt if the study finishes or gets cancelled
+        unload(function() win.close());
       }, "application/x-xpinstall", INSTALL_HASH);
     });
   }

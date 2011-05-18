@@ -42,10 +42,11 @@ exports.experimentInfo = {
     rolloutCode: "ur",
   },
 
-  // Target only english users as the add-on isn't localized
+  // Target only non-release english users as the add-on isn't localized
   runOrNotFunc: function() {
+    let channel = Services.prefs.getCharPref("app.update.channel");
     let locale = Services.prefs.getCharPref("general.useragent.locale");
-    return locale == "en-US";
+    return channel != "release" && locale == "en-US";
   },
 };
 

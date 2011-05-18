@@ -7,6 +7,14 @@
   },
 
   {"default":
+    {"name": "Search Behavior Study",
+     "jarfile": "awesomeBarHD/jar.jar",
+     "studyfile": "search_behavior_study.js",
+     "hash": "39e932c4cdb51054af1f5f491ec34153da1aebf8a4930d6cdc4fd31369f60a31"
+    }
+  },
+
+  {"default":
     {"name": "Pilot Background Survey",
      "jarfile": "basic-survey.jar",
      "studyfile": "pilot-background-survey.js",

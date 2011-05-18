@@ -5,7 +5,7 @@ const ADDON_PREF = "extensions.prospector.awesomeBarHD.";
 const INSTALL_URL = "https://addons.mozilla.org/firefox/downloads/file/120664/mozilla_labs_prospector_awesomebar_hd-12-fx.xpi?src=external-test-pilot";
 const INSTALL_HASH = "sha256:36b6dffa804eebcc7d8fe7855a3ff0bcae5ea2586276a8bd6135c45901a57453";
 const PREF_PREFIX = "extensions.testpilot.";
-const TEST_ID = 10509610;
+const TEST_ID = 10509010;
 
 const CONFIRM_CHECK_EVERY = 1 * 60 * 1000;
 const CONFIRM_CHECK_TRIGGER = 60 * 60 * 1000;

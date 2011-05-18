@@ -12,22 +12,6 @@
      "studyfile": "pilot-background-survey.js",
      "hash": "bdc8842255f723a5d0ca64bf14417a741df2f91981f521c9abfd2ba49082aefa"
     }
-  },
-
-  {"default":
-    {"name": "Tech Adoption Survey",
-     "jarfile": "newfeature/early_adopter_survey.jar",
-     "studyfile": "early_adopter_survey.js",
-     "hash": "368efe9bd31da379cc66a180d277265b61cbbfa6709170e52ea4ca55a2128a7c"
-    }
-  },
-
-  {"default":
-    {"name": "Tech Adoption Study",
-     "jarfile": "newfeature/new_feature.jar",
-     "studyfile": "new_feature_study.js",
-     "hash": "230febc3b195b5cbfb45ab497b0e230a349c3bbc639c428d88edf4710dbc4c98"
-    }
   }
 ],
 
@@ -45,6 +29,22 @@
     "jarfile": "cmu/strict_entry.jar",
     "studyfile": "strict_entry.js",
     "hash": "00edb3386091769bdb24e79d63bd23587638cdb53d8ef219469400f3926a78ee"
+    }
+  },
+
+  {"default":
+    {"name": "Tech Adoption Survey",
+     "jarfile": "newfeature/early_adopter_survey.jar",
+     "studyfile": "early_adopter_survey.js",
+     "hash": "368efe9bd31da379cc66a180d277265b61cbbfa6709170e52ea4ca55a2128a7c"
+    }
+  },
+
+  {"default":
+    {"name": "Tech Adoption Study",
+     "jarfile": "newfeature/new_feature.jar",
+     "studyfile": "new_feature_study.js",
+     "hash": "230febc3b195b5cbfb45ab497b0e230a349c3bbc639c428d88edf4710dbc4c98"
     }
   }
 ],

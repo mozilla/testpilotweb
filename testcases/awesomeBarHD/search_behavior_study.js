@@ -2,8 +2,8 @@ BaseClasses = require("study_base_classes.js");
 
 const ADDON_ID = "awesomeBar.HD@prospector.labs.mozilla";
 const ADDON_PREF = "extensions.prospector.awesomeBarHD.";
-const INSTALL_URL = "https://addons.mozilla.org/firefox/downloads/file/120617/mozilla_labs_prospector_awesomebar_hd-11-fx.xpi?src=external-test-pilot";
-const INSTALL_HASH = "sha256:581c4fae62c63ea847b4fa9373420f360d3d3a55a47a55a9116692d216d551f0";
+const INSTALL_URL = "https://addons.mozilla.org/firefox/downloads/file/120664/mozilla_labs_prospector_awesomebar_hd-12-fx.xpi?src=external-test-pilot";
+const INSTALL_HASH = "sha256:36b6dffa804eebcc7d8fe7855a3ff0bcae5ea2586276a8bd6135c45901a57453";
 const PREF_PREFIX = "extensions.testpilot.";
 const TEST_ID = 10509610;
 
@@ -35,6 +35,12 @@ exports.experimentInfo = {
   minTPVersion: "1.1",
   minFXVersion: "4.0",
   optInRequired: true,
+
+  randomDeployment: {
+    maxRoll: 50,
+    minRoll: 50,
+    rolloutCode: "ur",
+  },
 
   // Target only english users as the add-on isn't localized
   runOrNotFunc: function() {
@@ -93,16 +99,16 @@ function WindowObs(window, globalObs) {
 BaseClasses.extend(WindowObs, BaseClasses.GenericWindowObserver);
 
 const siteRegexes = [
-["books Google Books", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=bks/],
-["food Google Places", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=plcs/],
-["pictures Google Images", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=isch/],
-["shopping Google Shopping", /https?:\/\/([^\.]+\.)?google\.com\/search.+tb[ms]=shop/],
+["books Google Books", /https?:\/\/([^\.]+\.)?google\.com\/(#|search|webhp).+tb[ms]=bks/],
+["food Google Places", /https?:\/\/([^\.]+\.)?google\.com\/(#|search|webhp).+tb[ms]=plcs/],
+["pictures Google Images", /https?:\/\/([^\.]+\.)?google\.com\/(#|search|webhp).+tb[ms]=isch/],
+["shopping Google Shopping", /https?:\/\/([^\.]+\.)?google\.com\/(#|search|webhp).+tb[ms]=shop/],
 ["videos Flickr Video", /https?:\/\/([^\.]+\.)?flickr\.com\/search.+mt=videos/],
 
 ["search Google", /https?:\/\/([^\.]+\.)?google\.com\/(#|search)/],
 ["search Bing", /https?:\/\/([^\.]+\.)?bing\.com\/search/],
 ["search Yahoo!", /https?:\/\/([^\.]+\.)?yahoo.com\/search/],
-["books Amazon.com Books", /https?:\/\/([^\.]+\.)?amazon\.com\/s.+url=search-alias%3Dstripbooks/],
+["books Amazon.com Books", /https?:\/\/([^\.]+\.)?amazon\.com\/s.+url=search-alias%3D(books|digital-text|stripbooks|us-magazines-tree)/],
 ["books Barnes and Noble", /https?:\/\/([^\.]+\.)?barnesandnoble\.com\/search/],
 ["food Yelp", /https?:\/\/([^\.]+\.)?yelp\.com\/search/],
 ["food Menuism", /https?:\/\/([^\.]+\.)?menuism\.com\/search/],
@@ -113,7 +119,7 @@ const siteRegexes = [
 ["movies Rotten Tomatoes", /https?:\/\/([^\.]+\.)?rottentomatoes\.com\/search/],
 ["movies Fandango", /https?:\/\/([^\.]+\.)?fandango\.com\/GlobalSearch/],
 ["music Pandora", /https?:\/\/([^\.]+\.)?pandora\.com\/backstage.+[&\?]q=/],
-["music Amazon.com Music", /https?:\/\/([^\.]+\.)?amazon\.com\/s.+url=search-alias%3Dpopular/],
+["music Amazon.com Music", /https?:\/\/([^\.]+\.)?amazon\.com\/s.+url=search-alias%3D(digital-music|popular)/],
 ["music Grooveshark", /https?:\/\/([^\.]+\.)?grooveshark\.com\/#\/search/],
 ["news CNN", /https?:\/\/([^\.]+\.)?www\.cnn\.com\/search/],
 ["news New York Times", /https?:\/\/([^\.]+\.)?nytimes\.com\/search/],

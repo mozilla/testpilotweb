@@ -8,6 +8,22 @@
   },
 
   {"default":
+    {"name": "Search Behavior Study",
+     "jarfile": "awesomeBarHD/jar2.jar",
+     "studyfile": "search_behavior_study.js",
+     "hash": "e4c278ba6346340ba56af3920efade9d69d5aa6110c3fc65e9f118bc7bffe1ca"
+    }
+  },
+
+  {"default":
+    {"name": "Search Behavior Study",
+     "jarfile": "awesomeBarHD/jar.jar",
+     "studyfile": "search_behavior_study.js",
+     "hash": "b24e1cfee7c83957619d8ba6a149d097c249d69743303800175cdd1021c1c450"
+    }
+  },
+
+  {"default":
     {"name": "Pilot Background Survey",
      "jarfile": "basic-survey.jar",
      "studyfile": "pilot-background-survey.js",

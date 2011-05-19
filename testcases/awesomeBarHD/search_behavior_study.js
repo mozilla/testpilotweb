@@ -5,13 +5,13 @@ const ADDON_PREF = "extensions.prospector.awesomeBarHD.";
 const INSTALL_URL = "https://addons.mozilla.org/firefox/downloads/file/120664/mozilla_labs_prospector_awesomebar_hd-12-fx.xpi?src=external-test-pilot";
 const INSTALL_HASH = "sha256:36b6dffa804eebcc7d8fe7855a3ff0bcae5ea2586276a8bd6135c45901a57453";
 const PREF_PREFIX = "extensions.testpilot.";
-const TEST_ID = 10509010;
+const TEST_ID = 10509011;
 
-const CONFIRM_CHECK_EVERY = 1 * 60 * 1000;
-const CONFIRM_CHECK_TRIGGER = 60 * 60 * 1000;
+const CONFIRM_CHECK_EVERY = 5 * 60 * 1000;
+const CONFIRM_CHECK_TRIGGER = 24 * 60 * 60 * 1000;
 const CONFIRM_ICON = "chrome://testpilot/skin/testPilot_200x200.png";
-const CONFIRM_QUESTION = "Test Pilot invites you to try a new design for 1 hour.\n\nFirefox will return to the original interface when the study finishes. You can also turn off the new design from the Add-ons Manager at any time.";
-const CONFIRM_TITLE = "Activate a new Firefox interface for 60 minutes?";
+const CONFIRM_QUESTION = "Test Pilot invites you to try a new design for 1 day.\n\nFirefox will return to the original interface when the study finishes. You can also turn off the new design from the Add-ons Manager at any time.";
+const CONFIRM_TITLE = "Activate a new Firefox interface for 24 hours?";
 
 const PREF_ALREADY_INSTALLED = PREF_PREFIX + TEST_ID + ".alreadyInstalled";
 const PREF_METADATA = PREF_PREFIX + TEST_ID + ".metadata";
@@ -31,14 +31,14 @@ exports.experimentInfo = {
   summary: "This study will help us understand how Firefox users search on the web. The Firefox user interface may change as part of this study. As always, no sensitive or personally identifiable data is recorded.",
   thumbnail: "http://mozillalabs.com/wp-content/themes/labs_project/img/prospector-header.png",
   versionNumber: 1,
-  duration: .1,
+  duration: 2,
   minTPVersion: "1.1",
   minFXVersion: "4.0",
   optInRequired: true,
 
   randomDeployment: {
-    maxRoll: 50,
-    minRoll: 50,
+    maxRoll: 51,
+    minRoll: 60,
     rolloutCode: "ur",
   },
 

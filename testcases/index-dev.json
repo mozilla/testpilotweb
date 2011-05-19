@@ -8,10 +8,10 @@
   },
 
   {"default":
-    {"name": "Search Behavior Study",
+    {"name": "Search Behavior Study 2",
      "jarfile": "awesomeBarHD/jar2.jar",
-     "studyfile": "search_behavior_study.js",
-     "hash": "e4c278ba6346340ba56af3920efade9d69d5aa6110c3fc65e9f118bc7bffe1ca"
+     "studyfile": "search_behavior_study2.js",
+     "hash": "a7bb5bfac5f28f7887268d99c6009438aa4d32bb2f9f353bbf0e1b93f53d84f7"
     }
   },
 

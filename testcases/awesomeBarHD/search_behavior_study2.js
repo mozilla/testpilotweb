@@ -37,9 +37,9 @@ exports.experimentInfo = {
   optInRequired: true,
 
   randomDeployment: {
-    maxRoll: 51,
-    minRoll: 60,
     rolloutCode: "ur",
+    minRoll: 51,
+    maxRoll: 60,
   },
 
   // Target only non-release english users as the add-on isn't localized

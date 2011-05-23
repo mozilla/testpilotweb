@@ -7,18 +7,10 @@
   },
 
   {"default":
-    {"name": "Search Behavior Study 2",
-     "jarfile": "awesomeBarHD/jar2.jar",
-     "studyfile": "search_behavior_study2.js",
-     "hash": "31c4528fdb76d10c18ba875dddce3152c5b46878cc1258f81298bcb8653d013e"
-    }
-  },
-
-  {"default":
-    {"name": "Search Behavior Study",
-     "jarfile": "awesomeBarHD/jar.jar",
-     "studyfile": "search_behavior_study.js",
-     "hash": "b24e1cfee7c83957619d8ba6a149d097c249d69743303800175cdd1021c1c450"
+    {"name": "Search Behavior Study 3",
+     "jarfile": "awesomeBarHD/jar3.jar",
+     "studyfile": "search_behavior_study3.js",
+     "hash": "33fbfa341cb87edcfc493b3e849d11d44f110620ae041d91cf7c6aeec8874175"
     }
   },
 
@@ -45,6 +37,22 @@
     "jarfile": "cmu/strict_entry.jar",
     "studyfile": "strict_entry.js",
     "hash": "00edb3386091769bdb24e79d63bd23587638cdb53d8ef219469400f3926a78ee"
+    }
+  },
+
+  {"default":
+    {"name": "Search Behavior Study",
+     "jarfile": "awesomeBarHD/jar.jar",
+     "studyfile": "search_behavior_study.js",
+     "hash": "b24e1cfee7c83957619d8ba6a149d097c249d69743303800175cdd1021c1c450"
+    }
+  },
+
+  {"default":
+    {"name": "Search Behavior Study 2",
+     "jarfile": "awesomeBarHD/jar2.jar",
+     "studyfile": "search_behavior_study2.js",
+     "hash": "31c4528fdb76d10c18ba875dddce3152c5b46878cc1258f81298bcb8653d013e"
     }
   },
 

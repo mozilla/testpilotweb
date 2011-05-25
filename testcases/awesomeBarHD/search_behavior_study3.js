@@ -509,9 +509,25 @@ GlobalObs.prototype.onAppStartup = function() {
 GlobalObs.prototype.onExperimentStartup = function(store) {
   // Install the add-on if it's not installed yet
   function installAddon() {
-    AddonManager.getAddonByID(ADDON_ID, function(addon) {
+    // Look through all add-ons for an existing install or conflicts
+    AddonManager.getAllAddons(function(addons) {
+      let conflicts = ["conflict"];
+      let installed = false;
+      addons.forEach(function({id}) {
+        switch (id) {
+          // Remember that it was already installed
+          case ADDON_ID:
+            installed = true;
+            break;
+
+          // Record that we found this conflict
+          case "{dc572301-7619-498c-a57d-39143191b318}":
+            conflicts.push("tabmixplus")
+            break;
+        }
+      });
+
       // Set various prefs to remember our state
-      let installed = addon != null;
       Services.prefs.setBoolPref(PREF_ALREADY_INSTALLED, installed)
       Services.prefs.setBoolPref(PREF_PROMPTED, true);
 
@@ -521,6 +537,11 @@ GlobalObs.prototype.onExperimentStartup = function(store) {
       // Already installed so nothing to do
       if (installed) {
         record("addon", "existed");
+        return;
+      }
+      // Don't install if we have conflicts
+      else if (conflicts.length > 1) {
+        record("addon", conflicts.join(" "));
         return;
       }
 

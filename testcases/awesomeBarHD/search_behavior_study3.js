@@ -19,6 +19,17 @@ const PREF_PROMPTED = PREF_PREFIX + TEST_ID + ".prompted";
 const PREF_SHUTDOWN = PREF_PREFIX + TEST_ID + ".shutdown";
 const PREF_TESTPILOT = ADDON_PREF + "testpilot";
 
+const ADDON_CONFLICTS = {
+  "{2458abc0-f443-11dd-87af-0800200c9a66}": "bloodyred",
+  "{3ffb7be0-8bde-11de-8a39-0800200c9a66}": "purplefox",
+  "{dc572301-7619-498c-a57d-39143191b318}": "tabmixplus",
+  "djziggy@gmail.com": "lavafoxv1blue",
+  "info@djzig.com": "lavafoxv1",
+  "nasanightlaunch@example.com": "nasanightlaunch",
+  "zigboom@ymail.com": "lavafoxv1green",
+  "zigboom.designs@gmail.com": "blackfoxv1blue",
+};
+
 let modules = {};
 Cu.import("resource://gre/modules/AddonManager.jsm", modules);
 Cu.import("resource://gre/modules/Services.jsm", modules);
@@ -514,17 +525,12 @@ GlobalObs.prototype.onExperimentStartup = function(store) {
       let conflicts = ["conflict"];
       let installed = false;
       addons.forEach(function({id}) {
-        switch (id) {
-          // Remember that it was already installed
-          case ADDON_ID:
-            installed = true;
-            break;
-
-          // Record that we found this conflict
-          case "{dc572301-7619-498c-a57d-39143191b318}":
-            conflicts.push("tabmixplus")
-            break;
-        }
+        // Remember that it was already installed
+        if (id == ADDON_ID)
+          installed = true;
+        // Remember that we found this conflict
+        else if (id in ADDON_CONFLICTS)
+          conflicts.push(ADDON_CONFLICTS[id]);
       });
 
       // Set various prefs to remember our state

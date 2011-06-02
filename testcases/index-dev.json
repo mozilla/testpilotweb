@@ -69,6 +69,14 @@
      "studyfile": "a_week_life.js",
      "hash": "18388e3fcf76876f0ccbdf15f3b2a5134ce447a9ccc584122b77f1d096d82ef0"
     }
+  },
+
+  {"default":
+    {"name": "Garbage Collector Performance",
+     "jarfile": "garbage-collection/gcstudy.jar",
+     "studyfile": "gcstudy.js",
+     "hash": "6d99b17bb5487aba75873e667fbbb814f808786cd69ab8b7077a60791d49e484"
+    }
   }
 ],
 

@@ -77,7 +77,17 @@
      "studyfile": "gcstudy.js",
      "hash": "6d99b17bb5487aba75873e667fbbb814f808786cd69ab8b7077a60791d49e484"
     }
+  },
+
+  {"default":
+    {"name": "New Tab Study",
+     "jarfile": "new-tab-study/new_tab_study.jar",
+     "studyfile": "new_tab_study.js",
+     "hash": "daa35c3d2871ae04ab5680ffb9bf626226b2557055ff50fbe2d294eab989d76b"
+    }
   }
+
+
 ],
 
 "legacy": [

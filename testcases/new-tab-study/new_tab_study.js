@@ -55,6 +55,19 @@ const METHODS = {
 	CLOSE: 			201
 }
 
+const LOADPAGE_METHOD_NAMES = {
+	110: "BAR_ENTER",	
+	101: "BAR_GO_BTN",	
+	102: "BAR_DROP_CLICK",
+	103: "BAR_DROP_ENTER",
+	110: "SEARCH_ENTER",	
+	111: "SEARCH_GO_BTN",
+	120: "TOP_SITES",	
+	121: "BOOKMARK_BAR",	
+	122: "BOOKMARK_MENU",	
+	130: "HISTORY_MENU",	
+	199: "BAR_DROP"
+}
 
 // ----------------- database schema
 
@@ -442,6 +455,8 @@ NewTabWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
       return '<h4>Frequencies of Domains:</h4><div id="data-plot-div"></div>' +
       	this.saveButtons + '</div>'
+      	+'<h4>Browsing methods:</h4><div id="data-plot-div2"></div>' +
+      	this.saveButtons + '</div>'
       	+'<div class="dataBox"><h3>View Your Data:</h3>' +
       	this.dataViewExplanation +
       	this.rawDataLink;
@@ -450,7 +465,8 @@ NewTabWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
     return "<p>The study is used to collect data about how users behave after opening a new tab.</p>"
     +"<p>During the study from <span id='study-start-date-span'></span> to <span id='study-end-date-span'></span>, you have opened <span id='new-tab-num-span'></span> new tabs and loaded pages in new tabs for <span id='pageload-num-span'></span> times.</p>"
-    +"<p>The browsing frequency of the main domains:<div id='main-domain-num-span'></div></p>";
+    +"<p>The browsing frequency of the main domains:<div id='main-domain-num-span'></div></p>"
+    +"<p>The frequency of loading a new page with different methods:<div id='method-freq-div'></div></p>";
   });
 
 // This function is called when the experiment page load is done
@@ -470,10 +486,27 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    experiment.getDataStoreAsJSON(function(rawData) {
    	var tab_counter = 0;
    	var pageload_counter = 0;
+   	
    	var domains = new Array();
    	var domain_hash = new Object();
    	var domain_counter = 0;
    	
+   	var mtd_hash = new Object();
+   	for each (let code in METHODS) {
+   		mtd_hash[code] = 0;
+   	}
+//  BAR_ENTER: 		100,	
+// 	BAR_GO_BTN: 	101,	
+// 	BAR_DROP_CLICK:	102,
+// 	BAR_DROP_ENTER:	103,	
+// 	SEARCH_ENTER:	110,	
+// 	SEARCH_GO_BTN:	111,	
+// 	TOP_SITES:		120,	
+// 	BOOKMARK_BAR:	121,	
+// 	BOOKMARK_MENU:	122,	
+// 	HISTORY_MENU:	130,	
+// 	BAR_DROP: 		199,
+	
    	var start_timestamp = 0;
    	var last_timestamp = (new Date()).getTime();
    	
@@ -490,6 +523,7 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    			pageload_counter += 1;
    			domains.push(url);
    			domain_hash[url] = 0;
+   			mtd_hash[row.method] += 1;
    		}
    	}
    	for each (let url in domains) {
@@ -497,15 +531,27 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    	}
    	
    	let domainData = [];
-   	var test_string = "<ul>";
+   	var domain_string = "<ul>";
    	var i = 0;
    	for(var url in domain_hash) {
-   		test_string += "<li>"+url+":"+domain_hash[url]+"</li>";
+   		domain_string += "<li>"+url+":"+domain_hash[url]+"</li>";
    		domainData.push([i, domain_hash[url]]);
    		i += 1;
    	}
-   	test_string += "</ul>";
+   	domain_string += "</ul>";
     domainData.sort(function(a, b) {return a[1] - b[1]})
+    
+    let methodData = [];
+    let axisLabels = [];
+    var i = 0;
+    var mtd_string = "<ul>";
+    for (var code in LOADPAGE_METHOD_NAMES) {
+    	mtd_string += "<li>"+LOADPAGE_METHOD_NAMES[code]+":"+mtd_hash[code]+"</li>";
+    	methodData.push([i, mtd_hash[code]]);
+    	axisLabels.push([i, LOADPAGE_METHOD_NAMES[code]]);
+    	i += 1;
+    }
+    mtd_string += "</ul>";
     
     let getFormattedDateString = function(timestamp) {
       let date = new Date(timestamp);
@@ -522,21 +568,38 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
     
     let numNewtabSpan = document.getElementById("new-tab-num-span");
     if(numNewtabSpan) numNewtabSpan.innerHTML = tab_counter;
+    
     let numDomainSpan = document.getElementById("main-domain-num-span");
-    if(numDomainSpan) numDomainSpan.innerHTML = test_string;
+    if(numDomainSpan) numDomainSpan.innerHTML = domain_string;
+    
     let pageloadSpan = document.getElementById("pageload-num-span");
     if(pageloadSpan) pageloadSpan.innerHTML = pageload_counter;
+    
+    let methodDiv = document.getElementById("method-freq-div");
+    if(methodDiv) methodDiv.innerHTML = mtd_string;
+    
     
     ///// PLOTTING
     
     let plotDiv = document.getElementById("data-plot-div");
-    plotDiv.style.width="400px";
+    plotDiv.style.width="500px";
     plotDiv.style.height="300px";
     graphUtils.plot(plotDiv, [{label: "frequency of ranked domain",
                                data: domainData,
                                bars: {show: true}
                                }],
-                    {xaxis: {ticks:1},
+                    {xaxis: {},
+                     yaxis: {},
+                    }
+                  );
+    let plotDiv = document.getElementById("data-plot-div2");
+    plotDiv.style.width="500px";
+    plotDiv.style.height="300px";
+    graphUtils.plot(plotDiv, [{label: "frequency of browsing methods",
+                               data: methodData,
+                               bars: {show: true}
+                               }],
+                    {xaxis: {ticks:axisLabels},
                      yaxis: {},
                     }
                   );

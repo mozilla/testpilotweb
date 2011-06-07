@@ -4,7 +4,7 @@ BaseClasses = require("study_base_classes.js");
 exports.experimentInfo = {
 
   testName: "New Tab Study",
-  testId: 201106061747,		//  unique
+  testId: 201106061747,	//  unique
   testInfoUrl: "https://",	// URL of page explaining your study
   summary: "Detect what the users do after open a new blank tab",
   thumbnail: "http://", // URL of image representing your study (90x90)
@@ -169,7 +169,7 @@ NewTabWindowObserver.prototype.install = function() {
 				tabid:		exports.handlers.current_tab_id, 
 				event:		EVENTS.START, 
 				method:		METHODS.COMMAND_T, 
-				url:		"about:blank"
+				url:		""
 			});
 			
 		}else{
@@ -180,7 +180,7 @@ NewTabWindowObserver.prototype.install = function() {
 				self.record ({
 					timestamp:	Date.now(), 
 					tabid:		exports.handlers.current_tab_id, 
-					event:		EVENTS.START, 
+					event:		EVENTS.LEAVE, 
 					method:		METHODS.LEAVE, 
 					url:		url_domain
 				});
@@ -440,15 +440,17 @@ BaseClasses.extend(NewTabWebContent, BaseClasses.GenericWebContent);
 
 NewTabWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
-      return '<div class="dataBox"><h3>View Your Data:</h3>' +
-      this.dataViewExplanation +
-      this.rawDataLink +
-      '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
-      this.saveButtons + '</div>';
+      return '<h4>Frequencies of Domains:</h4><div id="data-plot-div"></div>' +
+      	this.saveButtons + '</div>'
+      	+'<div class="dataBox"><h3>View Your Data:</h3>' +
+      	this.dataViewExplanation +
+      	this.rawDataLink;
   });
 NewTabWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "This is a totally made up example study that means nothing.";
+    return "<p>The study is used to collect data about how users behave after opening a new tab.</p>"
+    +"<p>During the study from <span id='study-start-date-span'></span> to <span id='study-end-date-span'></span>, you have opened <span id='new-tab-num-span'></span> new tabs and loaded pages in new tabs for <span id='pageload-num-span'></span> times.</p>"
+    +"<p>The browsing frequency of the main domains:<div id='main-domain-num-span'></div></p>";
   });
 
 // This function is called when the experiment page load is done
@@ -464,6 +466,86 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    * that we defined in the dataCanvas getter in order to display the
    * experiment data to the user in an easily understood form.
    */
+   
+   experiment.getDataStoreAsJSON(function(rawData) {
+   	var tab_counter = 0;
+   	var pageload_counter = 0;
+   	var domains = new Array();
+   	var domain_hash = new Object();
+   	var domain_counter = 0;
+   	
+   	var start_timestamp = 0;
+   	var last_timestamp = (new Date()).getTime();
+   	
+   	for each (let row in rawData) {
+   		var evt = row.event;
+   		var ts = row.timestamp;
+   		var url = row.url.toString();
+   		if(start_timestamp==0)
+   			start_timestamp = ts;
+   		if(evt == EVENTS.START) {
+   			tab_counter += 1;
+   		}
+   		if(evt == EVENTS.LOAD_PAGE && url != "") {
+   			pageload_counter += 1;
+   			domains.push(url);
+   			domain_hash[url] = 0;
+   		}
+   	}
+   	for each (let url in domains) {
+   		domain_hash[url] += 1;
+   	}
+   	
+   	let domainData = [];
+   	var test_string = "<ul>";
+   	var i = 0;
+   	for(var url in domain_hash) {
+   		test_string += "<li>"+url+":"+domain_hash[url]+"</li>";
+   		domainData.push([i, domain_hash[url]]);
+   		i += 1;
+   	}
+   	test_string += "</ul>";
+    domainData.sort(function(a, b) {return a[1] - b[1]})
+    
+    let getFormattedDateString = function(timestamp) {
+      let date = new Date(timestamp);
+      let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+                  "Sep", "Oct", "Nov", "Dec"];
+      return months[date.getMonth()] + " " + date.getDate() + ", "
+        + date.getFullYear();
+    };
+    
+   	let startSpan = document.getElementById("study-start-date-span");
+    let endSpan = document.getElementById("study-end-date-span");
+    if(startSpan) startSpan.innerHTML = getFormattedDateString(start_timestamp);
+    if(endSpan) endSpan.innerHTML = getFormattedDateString(last_timestamp);
+    
+    let numNewtabSpan = document.getElementById("new-tab-num-span");
+    if(numNewtabSpan) numNewtabSpan.innerHTML = tab_counter;
+    let numDomainSpan = document.getElementById("main-domain-num-span");
+    if(numDomainSpan) numDomainSpan.innerHTML = test_string;
+    let pageloadSpan = document.getElementById("pageload-num-span");
+    if(pageloadSpan) pageloadSpan.innerHTML = pageload_counter;
+    
+    ///// PLOTTING
+    
+    let plotDiv = document.getElementById("data-plot-div");
+    plotDiv.style.width="400px";
+    plotDiv.style.height="300px";
+    graphUtils.plot(plotDiv, [{label: "frequency of ranked domain",
+                               data: domainData,
+                               bars: {show: true}
+                               }],
+                    {xaxis: {ticks:1},
+                     yaxis: {},
+                    }
+                  );
+
+    
+    
+    
+   });
+   
 };
 
 // Instantiate and export the web content (required!)

@@ -4,7 +4,7 @@ BaseClasses = require("study_base_classes.js");
 exports.experimentInfo = {
 
   testName: "New Tab Study",
-  testId: 20110606newtabstudy		//  unique
+  testId: 201106061747		//  unique
   testInfoUrl: "https://",	// URL of page explaining your study
   summary: "Detect what the users do after open a new blank tab",
   thumbnail: "http://", // URL of image representing your study (90x90)

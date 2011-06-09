@@ -45,9 +45,11 @@ const METHODS = {
 	
 	SEARCH_ENTER:	110,	
 	SEARCH_GO_BTN:	111,
+	SEARCH_DROP_ENTER: 112,
+	SEARCH_DROP_CLICK: 113,
 	
 	TOP_SITES:		120,	
-	BOOKMARK_BAR:	121,	
+	BOOKMARK_BAR:	121,
 	BOOKMARK_MENU:	122,
 	
 	HISTORY_MENU:	130,
@@ -59,17 +61,10 @@ const METHODS = {
 }
 
 const LOADPAGE_METHOD_NAMES = {
-	110: "BAR_ENTER",	
-	101: "BAR_GO_BTN",	
-	102: "BAR_DROP_CLICK",
-	103: "BAR_DROP_ENTER",
-	110: "SEARCH_ENTER",	
-	111: "SEARCH_GO_BTN",
-	120: "TOP_SITES",	
-	121: "BOOKMARK_BAR",	
-	122: "BOOKMARK_MENU",	
-	130: "HISTORY_MENU",	
-	199: "BAR_DROP"
+	10: "UrlBar",
+	11: "SearchBar",
+	12: "Bookmarks",	
+	13: "History"
 }
 
 // ----------------- database schema
@@ -97,7 +92,9 @@ exports.dataStoreInfo = {
     {property: "tabid", type: BaseClasses.TYPE_DOUBLE, displayName: "Unique tab ID"}, //this is same as the timestamp when the tab is created
     {property: "event", type: BaseClasses.TYPE_INT_32, displayName: "Event"},
     {property: "method", type: BaseClasses.TYPE_INT_32, displayName: "Method"},
-    {property: "url", type: BaseClasses.TYPE_STRING, displayName: "URL"}
+    {property: "url", type: BaseClasses.TYPE_STRING, displayName: "URL"},
+    {property: "clipboard", type: BaseClasses.TYPE_STRING, displayName: "Clip Board"},
+    {property: "isclipboardurl", type: BaseClasses.TYPE_INT_32, displayName: "does Clip Board contain URL"}
   ]
 };
 
@@ -130,6 +127,91 @@ NewTabWindowObserver.prototype.getUrlBarString = function() {
 	}
 	return "";
 }
+
+
+
+
+NewTabWindowObserver.prototype.newTabSelected = function(event) {
+	var mtd = exports.handlers.method;
+	var mtd_str = exports.handlers.method_string;
+	exports.handlers.method = -1;
+	exports.handlers.method_string = "";
+	exports.handlers.urlbar_down_pressed = false;
+	exports.handlers.searchbar_down_pressed = false;
+	
+	try{
+		let urlBar = this.window.document.getElementById("urlbar");
+		var arr = urlBar.value.split("/",3);
+		var domain = arr.join("/");
+	}catch(err){
+		dump("[urlbar error] "+err+"\n");
+		var domain = "";
+	}
+	//dump("Tab selected - " + domain + " - " + exports.handlers.current_tab_id + "\n");
+	if( domain == "" )
+	{
+		//// START a new blank tab
+		exports.handlers.current_tab_id = Date.now();
+		if(mtd<0){
+			mtd = METHODS.COMMAND_T;
+			mtd_str = "METHODS.COMMAND_T";
+		}
+		// get clipbord data
+		try {
+			let clip = Cc["@mozilla.org/widget/clipboard;1"].getService(Components.interfaces.nsIClipboard);
+			let trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
+  			trans.addDataFlavor("text/unicode");
+			clip.getData(trans, clip.kGlobalClipboard);
+			var str = new Object();
+			var strLength = new Object();
+			trans.getTransferData("text/unicode", str, strLength);
+			if (str) {
+				str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+				var cbtext = str.data.substring(0, strLength.value / 2);
+				cbtext = cbtext.substring(0,10);
+				dump('clipboardData: '+cbtext+'\n');
+				var isCbtextUrl = 0;
+				if(cbtext.substring(0,4)=="http") isCbtextUrl = 1;
+			}
+		}catch(err2){
+			var cbtext = "";
+			dump("[clipboard error] "+err2+"\n");
+		}
+		
+		dump("[START] "+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.START+","+ mtd_str+","+cbtext+"\n");			
+		this.record ({
+			timestamp:	Date.now(), 
+			tabid:		exports.handlers.current_tab_id, 
+			event:		EVENTS.START, 
+			method:		mtd, 
+			url:		"",
+			clipboard:	cbtext,
+			isclipboardurl: isCbtextUrl
+		});		
+	}else {
+			if(exports.handlers.current_tab_id >0) {
+				//// LEAVE a new tab			
+				if(mtd<0){
+					mtd = METHODS.LEAVE;
+					mtd_str = "METHODS.LEAVE";
+				}
+				dump("[LEAVE]"+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.LEAVE+"," + mtd_str + "," + domain + "\n");
+				this.record ({
+					timestamp:	Date.now(), 
+					tabid:		exports.handlers.current_tab_id, 
+					event:		EVENTS.LEAVE, 
+					method:		mtd, 
+					url:		domain,
+					clipboard:	"",
+					isclipboardurl: -1
+				});
+				exports.handlers.current_tab_id = -1;
+			}
+	}
+	
+}
+
+
 	
 
 NewTabWindowObserver.prototype.newPageLoad = function(event) {
@@ -139,6 +221,7 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 	var mtd_str = exports.handlers.method_string;
 	
 	exports.handlers.urlbar_down_pressed = false;
+	exports.handlers.searchbar_down_pressed = false;
 	exports.handlers.event = -1;
 	exports.handlers.event_string = "";
 	exports.handlers.method = -1;
@@ -151,76 +234,25 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 		dump("[RECORD] "+Date.now()+","+tid+","+evt_str+","+mtd_str+","+domain+"\n");
 		this.record ({
 			timestamp:Date.now(), 
-			tabid:tid, 
-			event:evt, 
-			method:mtd, 
-			url:domain
+			tabid:		tid, 
+			event:		evt, 
+			method:		mtd, 
+			url:		domain,
+			clipboard:	"",
+			isclipboardurl: -1
 		});
 
 	}
 }
 
 
-NewTabWindowObserver.prototype.newTabSelected = function(event) {
-	var mtd = exports.handlers.method;
-	var mtd_str = exports.handlers.method_string;
-	exports.handlers.method = -1;
-	exports.handlers.method_string = "";
-	exports.handlers.urlbar_down_pressed = false;
-	dump(event+"CALLLLLLLLLL, " +Date.now()+"|"+ mtd + "," + mtd_str + "\n");
-	
-	try{
-		let urlBar = this.window.document.getElementById("urlbar");
-		var arr = urlBar.value.split("/",3);
-		var domain = arr.join("/");
-	}catch(err){
-		dump("[error] "+err+"\n");
-		domain = "";
-	}
-	//var domain = "";
-	dump("Tab selected - " + domain + " - " + exports.handlers.current_tab_id + "\n");
-	if( domain == "" )
-	{
-		//// START a new blank tab
-		exports.handlers.current_tab_id = Date.now();
-		if(mtd<0){
-			mtd = METHODS.COMMAND_T;
-			mtd_str = "METHODS.COMMAND_T";
-		}
-		dump("[START] "+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.START+","+ mtd_str+",\n");			
-		this.record ({
-			timestamp:	Date.now(), 
-			tabid:		exports.handlers.current_tab_id, 
-			event:		EVENTS.START, 
-			method:		mtd, 
-			url:		""
-		});		
-	}else {
-			if(exports.handlers.current_tab_id >0) {
-				//// LEAVE a new tab			
-				if(mtd<0){
-					mtd = METHODS.LEAVE;
-					mtd_str = "METHODS.LEAVE";
-				}				dump("[LEAVE]"+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.LEAVE+"," + mtd_str + "," + domain + "\n");
-				this.record ({
-					timestamp:	Date.now(), 
-					tabid:		exports.handlers.current_tab_id, 
-					event:		EVENTS.LEAVE, 
-					method:		mtd, 
-					url:		domain
-				});
-				exports.handlers.current_tab_id = -1;
-			}
-	}
-	
-}
 
 
 
 //.install() method will get called whenever a new window is opened
 NewTabWindowObserver.prototype.install = function() {
 	
-	dump("Starting to install listeners for NewTabWindowObserver. " +Date.now() +"\n");
+	//dump("Starting to install listeners for NewTabWindowObserver. " +Date.now() +"\n");
 	let window = this.window;
 	let self = this;
 	
@@ -291,20 +323,42 @@ NewTabWindowObserver.prototype.install = function() {
 	
 	// 2.1 Search Bar
 	
+	// search bar dropdown
+	let searchBarDropdown = window.document.getElementById("PopupAutoComplete");
+	this._listen(searchBarDropdown, "click", function(evt){
+			dump("[click search bar dropdown]");
+			exports.handlers.event = EVENTS.LOAD_PAGE;
+			exports.handlers.event_string = "EVENTS.LOAD_PAGE";
+			exports.handlers.method = METHODS.SEARCH_DROP_CLICK;
+			exports.handlers.method_string = "METHODS.SEARCH_DROP_CLICK";
+	}, false);
+	
 	// Listen on search bar, by keyboard
 	let searchBar = window.document.getElementById("searchbar");
 	this._listen(searchBar, "keydown", function(evt) {
-				 if (evt.keyCode == 13) { 
-				 	// Enter key
-				 	if(exports.handlers.current_tab_id>0) {
-				 		dump("searchbar enter.\n");
-				 		exports.handlers.event = EVENTS.LOAD_PAGE;
-				 		exports.handlers.event_string = "EVENTS.LOAD_PAGE";
-				 		exports.handlers.method = METHODS.SEARCH_ENTER;
-				 		exports.handlers.method_string = "METHODS.SEARCH_ENTER";		 		
+				if(evt.keyCode == 40) {
+					exports.handlers.searchbar_down_pressed = true;
+					dump("search bar down key pressed.\n");
+				}
+				if (evt.keyCode == 13) { 
+					// Enter key
+					if(exports.handlers.current_tab_id>0) {
+						dump("searchbar enter.\n");
+						exports.handlers.event = EVENTS.LOAD_PAGE;
+						exports.handlers.event_string = "EVENTS.LOAD_PAGE";
+						
+						if(exports.handlers.searchbar_down_pressed)
+						{
+							exports.handlers.method = METHODS.SEARCH_DROP_ENTER;
+				 			exports.handlers.method_string = "METHODS.SEARCH_DROP_ENTER";
+						}else{
+							exports.handlers.method = METHODS.SEARCH_ENTER;
+				 			exports.handlers.method_string = "METHODS.SEARCH_ENTER";
+						}						
 					}
-				 }
-			   }, false);
+					exports.handlers.searchbar_down_pressed = false;
+				}
+	}, false);
 	
 	// Listen on search bar, by mouse
 	this._listen(searchBar, "mouseup", function(evt) {
@@ -319,7 +373,6 @@ NewTabWindowObserver.prototype.install = function() {
 					}
 				 }
 			   }, false);
-	
 	
 	
 	// 2.2 URL Bar
@@ -348,6 +401,7 @@ NewTabWindowObserver.prototype.install = function() {
 					exports.handlers.urlbar_down_pressed = false;
 				}
 			}, false);
+	
 	
 	// URLbar click go-button
 	let urlGoButton = window.document.getElementById("urlbar-go-button");
@@ -400,25 +454,15 @@ NewTabWindowObserver.prototype.install = function() {
 	// Bookmark main menu button -> bookmark item click
 	
 	let bookmarkmemu = window.document.getElementById("bookmarksMenuPopup");
-	this._listen(bookmarkmemu, "command", function(evt){
-	
+	this._listen(bookmarkmemu, "command", function(evt){	
 	    	dump("bookmark main menu click.\n");
 			exports.handlers.event = EVENTS.LOAD_PAGE;
 			exports.handlers.event_string = "EVENTS.LOAD_PAGE";
 			exports.handlers.method = METHODS.BOOKMARK_MENU;
-			exports.handlers.method_string = "METHODS.BOOKMARK_MENU";		 
-				 		
-	    	// function newPageLoad(event) {
- 	    	//	dump(" > Page loaded!\n");
-			// 	    		dump("[RECORD] "+Date.now()+","+exports.handlers.current_tab_id+",EVENTS.LOAD_PAGE, METHODS.BOOKMARK_MENU,"+self.getUrlBarString()+"\n");
-			// 	    	
-			// 				self.record ( {timestamp: Date.now(), tabid: exports.handlers.current_tab_id, event: EVENTS.LOAD_PAGE, method: METHODS.BOOKMARK_MENU, url: self.getUrlBarString()} );
-			// 				
-			// 				window.gBrowser.removeEventListener("load", newPageLoad, true);				
-			// 	    	}
-			// window.gBrowser.addEventListener("load", newPageLoad, true);
-
+			exports.handlers.method_string = "METHODS.BOOKMARK_MENU";
 	    }, true);
+
+
 
 	// Bookmark bar click
 	let bookmarkbar = window.document.getElementById("PlacesToolbar");
@@ -472,8 +516,6 @@ BaseClasses.extend(NewTabGlobalObserver,
 NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
   // "store" is a connection to the database table
 	
-	dump("New tab study starts.");
-	
 	NewTabGlobalObserver.superClass.onExperimentStartup.call(this, store);
 
   /* Any code that you only want to run once per Firefox session
@@ -481,12 +523,12 @@ NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
    * You also have access to XPCOM components through predefined
    * symbols Cc and Ci: */
 
-  let wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-                        .getService(Ci.nsIWindowMediator);
+  let wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 //global variables
   this.current_tab_id = -1;  
   this.urlbar_down_pressed = false;
+  this.searchbar_down_pressed = false;
   this.event = -1;
   this.event_string = "";
   this.method = -1;
@@ -536,7 +578,8 @@ NewTabWebContent.prototype.__defineGetter__("dataViewExplanation",
     return "<p>The study is used to collect data about how users behave after opening a new tab.</p>"
     +"<p>During the study from <span id='study-start-date-span'></span> to <span id='study-end-date-span'></span>, you have opened <span id='new-tab-num-span'></span> new tabs and loaded pages in new tabs for <span id='pageload-num-span'></span> times.</p>"
     +"<p>The browsing frequency of the main domains:<div id='main-domain-num-span'></div></p>"
-    +"<p>The frequency of loading a new page with different methods:<div id='method-freq-div'></div></p>";
+    +"<p>The frequency of loading a new page with different methods:<div id='method-freq-div'></div></p>"
+    +"<p>Whether the clipboard contains a URL when opening a new tab:<div id='clipboard-freq-div'></div></p>";
   });
 
 // This function is called when the experiment page load is done
@@ -561,21 +604,18 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    	var domain_hash = new Object();
    	var domain_counter = 0;
    	
+   	var clipboard_url = 0;
+   	var clipboard_nonurl = 0;
+   	
    	var mtd_hash = new Object();
-   	for each (let code in METHODS) {
+   	for (var code in LOADPAGE_METHOD_NAMES) {
    		mtd_hash[code] = 0;
    	}
-//  BAR_ENTER: 		100,	
-// 	BAR_GO_BTN: 	101,	
-// 	BAR_DROP_CLICK:	102,
-// 	BAR_DROP_ENTER:	103,	
-// 	SEARCH_ENTER:	110,	
-// 	SEARCH_GO_BTN:	111,	
-// 	TOP_SITES:		120,	
-// 	BOOKMARK_BAR:	121,	
-// 	BOOKMARK_MENU:	122,	
-// 	HISTORY_MENU:	130,	
-// 	BAR_DROP: 		199,
+
+//	10: "UrlBar",
+//	11: "SearchBar",
+//	12: "Bookmarks",	
+//	13: "History"
 	
    	var start_timestamp = 0;
    	var last_timestamp = Date.now();
@@ -584,16 +624,19 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    		var evt = row.event;
    		var ts = row.timestamp;
    		var url = row.url.toString();
+   		var isclipboardurl = row.isclipboardurl;
    		if(start_timestamp==0)
    			start_timestamp = ts;
    		if(evt == EVENTS.START) {
    			tab_counter += 1;
+   			if(isclipboardurl == 1) clipboard_url += 1;
+   			else clipboard_nonurl += 1;
    		}
    		if(evt == EVENTS.LOAD_PAGE && url != "") {
    			pageload_counter += 1;
    			domains.push(url);
    			domain_hash[url] = 0;
-   			mtd_hash[row.method] += 1;
+   			mtd_hash[Math.floor(row.method/10)] += 1;
    		}
    	}
    	for each (let url in domains) {
@@ -644,6 +687,9 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
     
     let pageloadSpan = document.getElementById("pageload-num-span");
     if(pageloadSpan) pageloadSpan.innerHTML = pageload_counter;
+    
+    let clipboardFreqDiv = document.getElementById("clipboard-freq-div");
+    if(clipboardFreqDiv) clipboardFreqDiv.innerHTML = "<ul><li>has a url: "+clipboard_url+"</li><li>doesn't have url:  "+clipboard_nonurl+"</li></ul>";
     
     let methodDiv = document.getElementById("method-freq-div");
     if(methodDiv) methodDiv.innerHTML = mtd_string;

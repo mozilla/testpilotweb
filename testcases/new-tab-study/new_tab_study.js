@@ -30,15 +30,18 @@ const EVENTS = {
 }
 
 const METHODS = {
+	UNKNOWN:		999,
+	//------------------
 	COMMAND_T: 		000,	
 	PLUS_BTN: 		001,	
 	DOUBLE_CLICK: 	002,	
-	MENU: 			003,
+	FILE_MENU: 		003,
 	//--------------------
 	BAR_ENTER: 		100,	
 	BAR_GO_BTN: 	101,	
 	BAR_DROP_CLICK:	102,
 	BAR_DROP_ENTER:	103,
+	BAR_DROP_BUTTON: 104,
 	
 	SEARCH_ENTER:	110,	
 	SEARCH_GO_BTN:	111,
@@ -116,15 +119,18 @@ BaseClasses.extend(NewTabWindowObserver,
 // -----------------------------
 // URL BAR STRING
 NewTabWindowObserver.prototype.getUrlBarString = function() {
-	let urlBar = this.window.document.getElementById("urlbar");
-	//if(urlBar.value == "") {
-	//	return "about:blank";
-	//}else{
+	try{
+		let urlBar = this.window.document.getElementById("urlbar");
 		arr = urlBar.value.split("/",3);
-		return arr.join("/");
-	//}
+		domain_string = arr.join("/");
+		return domain_string;
+	}catch(err){
+		dump("OH NO!!!!"+err+"\n");
+		return "";
+	}
+	return "";
 }
-
+	
 
 NewTabWindowObserver.prototype.newPageLoad = function(event) {
 	var evt = exports.handlers.event;
@@ -154,60 +160,123 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 	}
 }
 
+
+NewTabWindowObserver.prototype.newTabSelected = function(event) {
+	var mtd = exports.handlers.method;
+	var mtd_str = exports.handlers.method_string;
+	exports.handlers.method = -1;
+	exports.handlers.method_string = "";
+	exports.handlers.urlbar_down_pressed = false;
+	dump(event+"CALLLLLLLLLL, " +Date.now()+"|"+ mtd + "," + mtd_str + "\n");
+	
+	try{
+		let urlBar = this.window.document.getElementById("urlbar");
+		var arr = urlBar.value.split("/",3);
+		var domain = arr.join("/");
+	}catch(err){
+		dump("[error] "+err+"\n");
+		domain = "";
+	}
+	//var domain = "";
+	dump("Tab selected - " + domain + " - " + exports.handlers.current_tab_id + "\n");
+	if( domain == "" )
+	{
+		//// START a new blank tab
+		exports.handlers.current_tab_id = Date.now();
+		if(mtd<0){
+			mtd = METHODS.COMMAND_T;
+			mtd_str = "METHODS.COMMAND_T";
+		}
+		dump("[START] "+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.START+","+ mtd_str+",\n");			
+		this.record ({
+			timestamp:	Date.now(), 
+			tabid:		exports.handlers.current_tab_id, 
+			event:		EVENTS.START, 
+			method:		mtd, 
+			url:		""
+		});		
+	}else {
+			if(exports.handlers.current_tab_id >0) {
+				//// LEAVE a new tab			
+				if(mtd<0){
+					mtd = METHODS.LEAVE;
+					mtd_str = "METHODS.LEAVE";
+				}				dump("[LEAVE]"+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.LEAVE+"," + mtd_str + "," + domain + "\n");
+				this.record ({
+					timestamp:	Date.now(), 
+					tabid:		exports.handlers.current_tab_id, 
+					event:		EVENTS.LEAVE, 
+					method:		mtd, 
+					url:		domain
+				});
+				exports.handlers.current_tab_id = -1;
+			}
+	}
+	
+}
+
+
+
 //.install() method will get called whenever a new window is opened
 NewTabWindowObserver.prototype.install = function() {
 	
 	dump("Starting to install listeners for NewTabWindowObserver. " +Date.now() +"\n");
 	let window = this.window;
 	let self = this;
+	
 	// ------------------------------------------------
-	// 1. OPEN A NEW BLANK TAB
+	// 0. OPEN/ClOSE A NEW BLANK TAB
 	
 	//// Tab selection event detection
 	//// if this is a new tab, initialize the current_tab_id
 	//// otherwise current_tab_id is reset
-	window.gBrowser.tabContainer.addEventListener("TabSelect", newTabSelected, false);
-	function newTabSelected(event) {
-		
-		//var browser = window.gBrowser.selectedBrowser;
-		var url_domain = self.getUrlBarString();
-		if( url_domain == "" )
-		{
-			//// START a new tab
-			exports.handlers.current_tab_id = Date.now();
-			
-			dump("[RECORD] start "+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.START+","+ METHODS.COMMAND_T+",about:blank"+"\n");			
-			self.record ({
-				timestamp:	Date.now(), 
-				tabid:		exports.handlers.current_tab_id, 
-				event:		EVENTS.START, 
-				method:		METHODS.COMMAND_T, 
-				url:		""
-			});
-			
-		}else{
-			if(exports.handlers.current_tab_id >0) {
-				//// LEAVE a new tab
-				
-				dump("[RECORD] leave "+Date.now()+","+exports.handlers.current_tab_id+","+EVENTS.LEAVE+","+ METHODS.LEAVE+","+url_domain+"\n");
-				self.record ({
-					timestamp:	Date.now(), 
-					tabid:		exports.handlers.current_tab_id, 
-					event:		EVENTS.LEAVE, 
-					method:		METHODS.LEAVE, 
-					url:		url_domain
-				});
-				exports.handlers.current_tab_id = -1;
-				
-				dump(" > current_tab_id="+exports.handlers.current_tab_id+'\n');
-				
+	window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, true);
+	//window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
+	window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
+			dump("[close a tab]\n");
+			exports.handlers.method = METHODS.CLOSE;
+			exports.handlers.method_string = "METHODS.CLOSE";
+	}, false);
+    
+	
+	
+	// ------------------------------------------------
+	// 1. HOW TO OPEN A NEW TAB
+	
+	// 1.1 click the new tab button
+    let tabBar = window.document.getElementById("TabsToolbar");
+    this._listen(tabBar, "mouseup", function(evt) {
+			if (evt.button == 0) {
+				let targ = evt.originalTarget;
+				if (targ.id == "new-tab-button" || targ.className == "tabs-newtab-button") {
+					dump("---- click the new tab button (+)!!\n");
+					exports.handlers.method = METHODS.PLUS_BTN;
+					exports.handlers.method_string = "METHODS.PLUS_BTN";
+				} 
 			}
-		}
-		
-		dump("Tab selected | current_tab_id="+exports.handlers.current_tab_id+" |Domain:"+self.getUrlBarString()+"\n");
-		exports.handlers.urlbar_down_pressed = false;
-		
-	}
+    }, false);
+    
+    // 1.3 double-click
+    // double-click on tabbar may not open a new tab
+    // even it opens a new tab, it cannot fire a "TabSelect" event
+    this._listen(tabBar, "dblclick", function(evt) {
+			dump("---- double click!!\n");
+			exports.handlers.method = METHODS.DOUBLE_CLICK;
+			exports.handlers.method_string = "METHODS.DOUBLE_CLICK";
+			self.newTabSelected();
+    }, false);
+    
+    // 1.2 File->New Tab
+    let filemenubutton = window.document.getElementById("menu_newNavigatorTab");
+    this._listen(filemenubutton, "command", function(evt){
+    		//dump("---- FILE menu button!!" + evt.target.id + "," +evt.type+ "\n");
+    		dump("---- FILE menu button!! \n");
+    		exports.handlers.method = METHODS.COMMAND_T;
+			exports.handlers.method_string = "METHODS.COMMAND_T";
+    }, false);
+    
+    // 1.4 command+T
+	
 	
 	
 	// ----------------------------------------------------
@@ -218,8 +287,7 @@ NewTabWindowObserver.prototype.install = function() {
 	if (appcontent) {
 		dump("add newpageload listener.\n");
 		this._listen(appcontent, "DOMContentLoaded", this.newPageLoad, true);
-	}
-    					
+	}					
 	
 	// 2.1 Search Bar
 	
@@ -300,29 +368,31 @@ NewTabWindowObserver.prototype.install = function() {
 	
 	this._listen(urlBar, "command", function(evt) {
 				 if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
-					// Click URL bar go button
-					
-					
-					dump(urlBar.childNodes.length+"\n");
-					for(var i=0; i<urlBar.childNodes.length; i++) {
-						dump(urlBar.childNodes[i].className+"\n");
-						if(urlBar.childNodes[i].className == "autocomplete-result-popupset") {
-							return urlBar.childNodes[i];
-						}
-					}
-	
-	
+					// Click URL bar go button	
 					if(exports.handlers.current_tab_id>0) {
-						dump("bar drop click.\n");
+						dump("bar drop button click.\n");
 						exports.handlers.event = EVENTS.LOAD_PAGE;
 				 		exports.handlers.event_string = "EVENTS.LOAD_PAGE";
-				 		exports.handlers.method = METHODS.BAR_DROP_CLICK;
-				 		exports.handlers.method_string = "METHODS.BAR_DROP_CLICK";						
+				 		exports.handlers.method = METHODS.BAR_DROP_BUTTON;
+				 		exports.handlers.method_string = "METHODS.BAR_DROP_BUTTON";						
 					}
 				 }
 			   }, false);
-	/* TODO Get clicks on items in URL bar drop-down (or whether an awesomebar
-	* suggestion was hilighted when you hit enter?)  */
+	
+	
+	// Get clicks on items in URL bar drop-down
+	
+	let urlbarDropdown = window.document.getElementById("PopupAutoCompleteRichResult");
+	this._listen(urlbarDropdown, "click", function(evt){
+		if(exports.handlers.current_tab_id>0) {
+			dump("url bar dropdown click!!!!!\n");			
+			exports.handlers.event = EVENTS.LOAD_PAGE;
+			exports.handlers.event_string = "EVENTS.LOAD_PAGE";
+			exports.handlers.method = METHODS.BAR_DROP_CLICK;
+			exports.handlers.method_string = "METHODS.BAR_DROP_CLICK";
+		}
+	});
+	
 	
 	
 	//2.3 Bookmarks
@@ -508,7 +578,7 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 // 	BAR_DROP: 		199,
 	
    	var start_timestamp = 0;
-   	var last_timestamp = (new Date()).getTime();
+   	var last_timestamp = Date.now();
    	
    	for each (let row in rawData) {
    		var evt = row.event;

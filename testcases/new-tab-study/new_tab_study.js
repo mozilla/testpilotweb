@@ -90,15 +90,14 @@ var UserAction = {
 	},
 	clearTabID: function() {
 		this.tabID = null;
-	},
-	
+	},	
 	getMethod: function() {
-		//dump("get Method: "+this.method+"\n");
+		dump("get Method: "+this.method+"\n");
 		return this.method;
 	},
 	setMethod: function(mtd) {		
 		this.method = mtd;
-		//dump("set Method: "+this.method+"\n");
+		dump("set Method: "+this.method+"\n");
 	},
 	clearMethod: function() {
 		this.method = null;
@@ -177,8 +176,12 @@ NewTabWindowObserver.prototype.getClipboard = function(){
 NewTabWindowObserver.prototype.getCurrentTabID = function(){
 	if(this.window.gBrowser != null) {
 		let currentTab = this.window.gBrowser.selectedTab;
-		let tabID = exports.handlers.sessionService.getTabValue(currentTab, "id");
+		let tabIDString = exports.handlers.sessionService.getTabValue(currentTab, "id");
 		// if "id" is not set before, it will be undefined
+		let tabID = 0;
+		if(tabIDString.length >0 )
+			tabID = parseInt(tabIDString);
+		dump( "get tabID: "+(typeof tabID)+", "+tabID+"\n" );
 		return tabID;
 	}
 };
@@ -200,16 +203,17 @@ NewTabWindowObserver.prototype.setCurrentTabID = function(){
 NewTabWindowObserver.prototype.newTabSelected = function(event) {
 
 	var prevTabID = UserAction.getTabID();
-	UserAction.clearTabID();
-	var tabID = this.getCurrentTabID();
-	var domain = this.getUrlBarString();
 	var method = UserAction.getMethod();
 	if(!method) method = "unknown";
+	UserAction.clearTabID();
 	UserAction.clearAction();
 	
+	var tabID = this.getCurrentTabID();
+	var domain = this.getUrlBarString();
+		
 	dump("TabSelected: current tabID: " + tabID + "(len="+tabID.length+"); prev tabID: "+prevTabID+"; domain: "+domain+"\n");
 	
-	if( tabID.length <= 0 && domain.length <= 0) {
+	if( tabID <= 0 && domain.length <= 0) {
 		// START a new blank tab
 		// so we give it an unique id
 		let newTabID = this.setCurrentTabID();
@@ -260,7 +264,7 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 	dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
 	
 	try{
-		if(tabID.length > 0 && method && domain.length > 0 ) {
+		if(tabID > 0 && method && domain.length > 0 ) {
 			dump("[NAVIGATION] " + method + ", domain: " + domain + "\n");
 			this.record ({
 				timestamp:	Date.now(), 

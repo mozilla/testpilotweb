@@ -92,12 +92,12 @@ var UserAction = {
 		this.tabID = null;
 	},	
 	getMethod: function() {
-		dump("get Method: "+this.method+"\n");
+		//dump("get Method: "+this.method+"\n");
 		return this.method;
 	},
 	setMethod: function(mtd) {		
 		this.method = mtd;
-		dump("set Method: "+this.method+"\n");
+		//dump("set Method: "+this.method+"\n");
 	},
 	clearMethod: function() {
 		this.method = null;
@@ -155,7 +155,7 @@ NewTabWindowObserver.prototype.getClipboard = function(){
 			str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
 			clipboardText = str.data.substring(0, strLength.value / 2);
 			clipboardText = clipboardText.substring(0,10); // only get the first 10 characters
-			dump('clipboardData: ' + clipboardText + '\n');
+			//dump('clipboardData: ' + clipboardText + '\n');
 			var isClipboardUrl = 0;
 			if(clipboardText.substring(0,4) == "http")
 				isClipboardUrl = 1;
@@ -165,7 +165,7 @@ NewTabWindowObserver.prototype.getClipboard = function(){
 		}
 		
 	}catch(err){
-		dump("[ERROR] getClipboard(): "+ err +"\n");
+		//dump("[ERROR] getClipboard(): "+ err +"\n");
 	}
 	return clipboard;
 };
@@ -181,7 +181,7 @@ NewTabWindowObserver.prototype.getCurrentTabID = function(){
 		let tabID = 0;
 		if(tabIDString.length >0 )
 			tabID = parseInt(tabIDString);
-		dump( "get tabID: "+(typeof tabID)+", "+tabID+"\n" );
+		//dump( "get tabID: "+(typeof tabID)+", "+tabID+"\n" );
 		return tabID;
 	}
 };
@@ -211,14 +211,28 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 	var tabID = this.getCurrentTabID();
 	var domain = this.getUrlBarString();
 		
-	dump("TabSelected: current tabID: " + tabID + "(len="+tabID.length+"); prev tabID: "+prevTabID+"; domain: "+domain+"\n");
+	//dump("TabSelected: current tabID: " + tabID + "(len="+tabID.length+"); prev tabID: "+prevTabID+"; domain: "+domain+"\n");
+
+	if(prevTabID>0) {			
+		///// LEAVE
+		dump("[LEAVE]" + method + ", domain: " + domain + "\n");
+		this.record ({
+			timestamp:	Date.now(), 
+			tab_id:		prevTabID, 
+			event:		"leave", 
+			method:		method, 
+			url:		domain,
+			clipboard:	"",
+			is_clipboard_url: -1
+		});		
+	}
 	
 	if( tabID <= 0 && domain.length <= 0) {
 		// START a new blank tab
 		// so we give it an unique id
 		let newTabID = this.setCurrentTabID();
 		UserAction.setTabID(newTabID);
-		dump("new tab created: set tab id as "+newTabID+"\n");
+		//dump("new tab created: set tab id as "+newTabID+"\n");
 		let clip = this.getClipboard();
 		
 		dump("[START] " + method + "; clipboard: " + clip.content + "\n");
@@ -231,21 +245,6 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 			clipboard:	clip.content,
 			is_clipboard_url: clip.isUrl
 		});
-	}
-	
-
-	if(prevTabID) {			
-		///// LEAVE
-		dump("[LEAVE]" + method + ", domain: " + domain + "\n");
-		this.record ({
-			timestamp:	Date.now(), 
-			tab_id:		tabID, 
-			event:		"leave", 
-			method:		method, 
-			url:		domain,
-			clipboard:	"",
-			is_clipboard_url: -1
-		});		
 	}
 	
 };
@@ -261,8 +260,7 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 	//var tabID = UserAction.getTabID();
 	var domain = this.getUrlBarString();
 		
-	dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
-	
+	//dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
 	try{
 		if(tabID > 0 && method && domain.length > 0 ) {
 			dump("[NAVIGATION] " + method + ", domain: " + domain + "\n");
@@ -501,7 +499,7 @@ BaseClasses.extend(NewTabGlobalObserver,
 NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
   // "store" is a connection to the database table
 	
-	dump("onExperimentStartup started!\n");
+	//dump("onExperimentStartup started!\n");
 	
 	NewTabGlobalObserver.superClass.onExperimentStartup.call(this, store);
 
@@ -524,7 +522,7 @@ NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
 	
 	this.sessionService = Cc["@mozilla.org/browser/sessionstore;1"].getService(Components.interfaces.nsISessionStore);
 	
-	dump("onExperimentStartup finished!\n");
+	//dump("onExperimentStartup finished!\n");
 
 };
 
@@ -550,8 +548,6 @@ exports.handlers = new NewTabGlobalObserver();
 
 
 
-
-
 // Finally, we make the web content, which defines what will show up on the
 // study detail view page.
 function NewTabWebContent()  {
@@ -559,6 +555,7 @@ function NewTabWebContent()  {
 }
 
 BaseClasses.extend(NewTabWebContent, BaseClasses.GenericWebContent);
+
 
 NewTabWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
@@ -570,6 +567,9 @@ NewTabWebContent.prototype.__defineGetter__("dataCanvas",
       	this.dataViewExplanation +
       	this.rawDataLink;
   });
+  
+  
+  
 NewTabWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
     return "<p>The study is used to collect data about how users behave after opening a new tab.</p>"
@@ -578,6 +578,8 @@ NewTabWebContent.prototype.__defineGetter__("dataViewExplanation",
     +"<p>The frequency of loading a new page with different methods:<div id='method-freq-div'></div></p>"
     +"<p>Does the clipboard contain a URL when opening a new tab:<div id='clipboard-freq-div'></div></p>";
   });
+
+
 
 // This function is called when the experiment page load is done
 NewTabWebContent.prototype.onPageLoad = function(experiment,
@@ -593,8 +595,10 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 	* experiment data to the user in an easily understood form.
 	*/
    
+   
 	experiment.getDataStoreAsJSON(function(rawData) {
-	
+		
+		
 		var tabCounter = 0;
 		var pageloadCounter = 0;
 		
@@ -607,13 +611,12 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 		
 		var startTimestamp = 0;
 		var lastTimestamp = Date.now();
-		
-		try {
-		
+
 		for each (let row in rawData) {
+
 			let evt = row.event.toString();
 			let mtd = row.method.toString();
-			let ts = parseInt(row.timestamp);
+			let ts = row.timestamp;
 			let url = row.url.toString();
 			let isClipUrl = parseInt(row.is_clipboard_url);
 			
@@ -635,11 +638,7 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 				methodHash[mtd.split('_')[0]] += 1;
 			}
 		}
-		
-		}catch(err){
-			dump(err+"\n");
-		}
-		
+
 		for each (let url in domains) {
 			domainHash[url] += 1;
 		}
@@ -653,20 +652,21 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 			i += 1;
 		}
 		domainString += "</ul>";
-		domainData.sort(function(a, b) {return a[1] - b[1]});
-    
+		domainData.sort(function(a, b) {return a[1] - b[1];});
+
 		let methodData = [];
 		let methodString = "<ul>";
 		let axisLabels = [];
 		i = 0;
 		for(let mtd in methodHash) {
-			methodString += "<li>" + mtd + ":" + methodHash[code] + "</li>";
+			methodString += "<li>" + mtd + ":" + methodHash[mtd] + "</li>";
 			methodData.push([i, methodHash[mtd]]);
 			axisLabels.push([i, mtd]);
 			i += 1;
 		}
 		methodString += "</ul>";
-    
+    	
+   		
 		let getFormattedDateString = function(timestamp) {
 			let date = new Date(timestamp);
 			let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
@@ -675,56 +675,55 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 					+ date.getFullYear();
 		};
     
-   	let startSpan = document.getElementById("study-start-date-span");
-    let endSpan = document.getElementById("study-end-date-span");
-    if(startSpan) startSpan.innerHTML = getFormattedDateString(startTimestamp);
-    if(endSpan) endSpan.innerHTML = getFormattedDateString(last_timestamp);
-    
-    let numNewtabSpan = document.getElementById("new-tab-num-span");
-    if(numNewtabSpan) numNewtabSpan.innerHTML = tabCounter;
-    
-    let pageloadSpan = document.getElementById("pageload-num-span");
-    if(pageloadSpan) pageloadSpan.innerHTML = pageloadCounter;
-    
-    let numDomainSpan = document.getElementById("main-domain-num-span");
-    if(numDomainSpan) numDomainSpan.innerHTML = domainString;
-    
-    let clipboardFreqDiv = document.getElementById("clipboard-freq-div");
-    if(clipboardFreqDiv) clipboardFreqDiv.innerHTML = "<ul><li>Yes: " + clipUrl.yes + "</li><li>No:  " + clipUrl.no + "</li></ul>";
-    
-    let methodDiv = document.getElementById("method-freq-div");
-    if(methodDiv) methodDiv.innerHTML = methodString;
-    
-    // Do plotting
-    
-    let plotDiv = document.getElementById("data-plot-div");
-    plotDiv.style.width="500px";
-    plotDiv.style.height="300px";
-    graphUtils.plot(plotDiv, [{label: "frequency of ranked domain",
-                               data: domainData,
-                               bars: {show: true}
-                               }],
-                    {xaxis: {},
-                     yaxis: {},
-                    }
-                  );
-    
-    let plotDiv2 = document.getElementById("data-plot-div2");
-    plotDiv2.style.width="500px";
-    plotDiv2.style.height="300px";
-    graphUtils.plot(plotDiv2, [{label: "frequency of browsing methods",
-                               data: methodData,
-                               bars: {show: true}
-                               }],
-                    {xaxis: {ticks:axisLabels},
-                     yaxis: {},
-                    }
-                  );
+		let startSpan = document.getElementById("study-start-date-span");
+		let endSpan = document.getElementById("study-end-date-span");
+		if(startSpan) startSpan.innerHTML = getFormattedDateString(startTimestamp);
+		if(endSpan) endSpan.innerHTML = getFormattedDateString(lastTimestamp);
+		
+		let numNewtabSpan = document.getElementById("new-tab-num-span");
+		if(numNewtabSpan) numNewtabSpan.innerHTML = tabCounter;
+		
+		let pageloadSpan = document.getElementById("pageload-num-span");
+		if(pageloadSpan) pageloadSpan.innerHTML = pageloadCounter;
+		
+		let numDomainSpan = document.getElementById("main-domain-num-span");
+		if(numDomainSpan) numDomainSpan.innerHTML = domainString;
+		
+		let clipboardFreqDiv = document.getElementById("clipboard-freq-div");
+		if(clipboardFreqDiv) clipboardFreqDiv.innerHTML = "<ul><li>Yes: " + clipUrl.yes + "</li><li>No:  " + clipUrl.no + "</li></ul>";
+		
+		let methodDiv = document.getElementById("method-freq-div");
+		if(methodDiv) methodDiv.innerHTML = methodString;
+		
+		// Do plotting
+		
+		let plotDiv = document.getElementById("data-plot-div");
+		plotDiv.style.width="500px";
+		plotDiv.style.height="300px";
+		graphUtils.plot(plotDiv, [{label: "frequency of ranked domains",
+								   data: domainData,
+								   bars: {show: true}
+								   }],
+						{xaxis: {},
+						 yaxis: {},
+						}
+					  );
+		
+		let plotDiv2 = document.getElementById("data-plot-div2");
+		plotDiv2.style.width="500px";
+		plotDiv2.style.height="300px";
+		graphUtils.plot(plotDiv2, [{label: "frequency of browsing methods",
+								   data: methodData,
+								   bars: {show: true}
+								   }],
+						{xaxis: {ticks:axisLabels},
+						 yaxis: {},
+						}
+					);
 
     
-    
-    
    });
+   
    
 };
 

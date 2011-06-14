@@ -75,6 +75,7 @@ var UserAction = {
 	event: null,
 	
 	clearAction: function() {
+		// not change the tabID
 		this.event = null;
 		this.method = null;
 		this.urlbarDownPressed = false;
@@ -250,11 +251,12 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 NewTabWindowObserver.prototype.newPageLoad = function(event) {
   	
 	var method = UserAction.getMethod();
+	UserAction.clearAction();
+	
 	var tabID = this.getCurrentTabID();
 	//var tabID = UserAction.getTabID();
 	var domain = this.getUrlBarString();
-	UserAction.clearAction();
-	
+		
 	dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
 	
 	try{
@@ -589,34 +591,36 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    
 	experiment.getDataStoreAsJSON(function(rawData) {
 	
-		var tagCounter = 0;
+		var tabCounter = 0;
 		var pageloadCounter = 0;
 		
 		var domains = [];
 		var domainHash = {};
 		var domainCounter = 0;
 		
-		var clipbUrl = {'yes':0, 'no':0};
+		var clipUrl = {'yes':0, 'no':0};
 		var methodHash = {"urlbar":0, "search":0, "bookmark":0, "history":0};
 		
 		var startTimestamp = 0;
 		var lastTimestamp = Date.now();
 		
+		try {
+		
 		for each (let row in rawData) {
-			let evt = row.event;
-			let mtd = row.method;
-			let ts = row.timestamp;
+			let evt = row.event.toString();
+			let mtd = row.method.toString();
+			let ts = parseInt(row.timestamp);
 			let url = row.url.toString();
-			let isClipUrl = row.is_clipboard_url;
+			let isClipUrl = parseInt(row.is_clipboard_url);
 			
 			if(startTimestamp == 0)
 				startTimestamp = ts;
 				
-			if(evt == EVENTS.START) {
+			if(evt == "start") {
 				tabCounter += 1;
 				if(isClipUrl == 1) 
 					clipUrl.yes += 1;
-				else
+				else if(isClipUrl == 0)
 					clipUrl.no += 1;
 			}
 			
@@ -624,13 +628,18 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 				domains.push(url);
 				pageloadCounter += 1;
 				domainHash[url] = 0;
-				methodHash[Math.floor(row.method/10)] += 1;
+				methodHash[mtd.split('_')[0]] += 1;
 			}
 		}
+		
+		}catch(err){
+			dump(err+"\n");
+		}
+		
 		for each (let url in domains) {
 			domainHash[url] += 1;
 		}
-   	
+   		
 		let domainData = [];
 		let domainString = "<ul>";
 		let i = 0;
@@ -643,16 +652,16 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 		domainData.sort(function(a, b) {return a[1] - b[1]});
     
 		let methodData = [];
-		let methodStrig = "<ul>";
+		let methodString = "<ul>";
 		let axisLabels = [];
 		i = 0;
 		for(let mtd in methodHash) {
-			methodStrig += "<li>" + mtd + ":" + methodHash[code] + "</li>";
+			methodString += "<li>" + mtd + ":" + methodHash[code] + "</li>";
 			methodData.push([i, methodHash[mtd]]);
 			axisLabels.push([i, mtd]);
 			i += 1;
 		}
-		methodStrig += "</ul>";
+		methodString += "</ul>";
     
 		let getFormattedDateString = function(timestamp) {
 			let date = new Date(timestamp);
@@ -677,7 +686,7 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
     if(numDomainSpan) numDomainSpan.innerHTML = domainString;
     
     let clipboardFreqDiv = document.getElementById("clipboard-freq-div");
-    if(clipboardFreqDiv) clipboardFreqDiv.innerHTML = "<ul><li>Yes: " + clipUrl.no + "</li><li>No:  " + clipUrl.no + "</li></ul>";
+    if(clipboardFreqDiv) clipboardFreqDiv.innerHTML = "<ul><li>Yes: " + clipUrl.yes + "</li><li>No:  " + clipUrl.no + "</li></ul>";
     
     let methodDiv = document.getElementById("method-freq-div");
     if(methodDiv) methodDiv.innerHTML = methodString;

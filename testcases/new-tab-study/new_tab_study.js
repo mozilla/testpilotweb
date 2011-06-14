@@ -3,8 +3,8 @@ BaseClasses = require("study_base_classes.js");
 // -------------------------------- META DATA --------------------------------
 exports.experimentInfo = {
 
-	testName: "New Tab Study",
-	testId: "new_tab_study",	//  unique
+	testName: "New Tab",
+	testId: "new_tab_study",	//  201106061747
 	testInfoUrl: "https://",	// URL of page explaining your study
 	summary: "Detect what the users do after open a new blank tab",
 	thumbnail: "http://", // URL of image representing your study (90x90)
@@ -64,11 +64,57 @@ exports.dataStoreInfo = {
 
 
 
+
+// action related
+var UserAction = {
+
+	tabID: null,  
+	urlbarDownPressed: false,
+	searchbarDownPressed: false,
+	method: null,
+	event: null,
+	
+	clearAction: function() {
+		this.event = null;
+		this.method = null;
+		this.urlbarDownPressed = false;
+		this.searchbarDownPressed = false;
+	},
+	
+	getTabID: function() {
+		return this.tabID;
+	},
+	setTabID: function(tid) {
+		this.tabID = tid;
+	},
+	clearTabID: function() {
+		this.tabID = null;
+	},
+	
+	getMethod: function() {
+		//dump("get Method: "+this.method+"\n");
+		return this.method;
+	},
+	setMethod: function(mtd) {		
+		this.method = mtd;
+		//dump("set Method: "+this.method+"\n");
+	},
+	clearMethod: function() {
+		this.method = null;
+	},
+	clearKeydownTrack: function() {
+		this.urlbarDownPressed = false;
+		this.searchbarDownPressed = false;
+	}
+};
+
+
 //-------------------------------
 // Define a per-window observer class by extending the generic one from
 // BaseClasses:
 function NewTabWindowObserver(window, globalInstance) {
-  NewTabWindowObserver.baseConstructor.call(this, window, globalInstance);
+	
+	NewTabWindowObserver.baseConstructor.call(this, window, globalInstance);
 }
 
 BaseClasses.extend(NewTabWindowObserver,
@@ -78,46 +124,18 @@ BaseClasses.extend(NewTabWindowObserver,
 
 // -----------------------------
 
-// action related
-NewTabWindowObserver.prototype.action = {
-
-	clearAction: function() {
-		exports.handlers.action.event = null;
-		exports.handlers.action.method = null;
-		exports.handlers.action.urlbarDownPressed = false;
-		exports.handlers.action.searchbarDownPressed = false;
-	},
-	
-	getMethod: function() {
-		var mtd = exports.handlers.action.method;
-		if(!mtd) {
-			mtd = "unknown";
-		}
-		return mtd;
-	},
-
-	setMethod: function(mtd) {
-		exports.handlers.action.method = mtd;
-	},
-
-	clearMethod: function() {
-		exports.handlers.action.method = null;
-	},
-
-	clearKeydownTrack: function() {
-		exports.handlers.action.urlbarDownPressed = false;
-		exports.handlers.action.searchbarDownPressed = false;
-	}
-};
-
-
-
 // Get URL string from the url bar
 NewTabWindowObserver.prototype.getUrlBarString = function() {
-	let urlBar = this.window.document.getElementById("urlbar");
-	let parsedUrl = exports.handlers.iOService.newURI(urlBar.value, null, null);
-	return parsedUrl.scheme+"://"+parsedUrl.host;
-}
+	try{
+		let urlBar = this.window.document.getElementById("urlbar");
+		let iOService = exports.handlers.iOService;
+		let parsedUrl = iOService.newURI(urlBar.value, null, null);
+		return parsedUrl.scheme+"://"+parsedUrl.host;
+	}catch(err){
+		//dump("[ERROR] getUrlBarString(): "+err+"\n");
+	}
+	return "";
+};
 
 
 
@@ -136,41 +154,42 @@ NewTabWindowObserver.prototype.getClipboard = function(){
 		if(str) {
 			str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
 			clipboardText = str.data.substring(0, strLength.value / 2);
-			clipboardText = cbtext.substring(0,10); // only get the first 10 characters
-			dump('clipboardData: ' + ClipboardText + '\n');
+			clipboardText = clipboardText.substring(0,10); // only get the first 10 characters
+			dump('clipboardData: ' + clipboardText + '\n');
 			var isClipboardUrl = 0;
 			if(clipboardText.substring(0,4) == "http")
 				isClipboardUrl = 1;
 				
 			clipboard.content = clipboardText;
 			clipboard.isUrl = isClipboardUrl;
-			
 		}
 		
 	}catch(err){
-		clipboardText = "";
-		dump("[ERROR] getClipboardText(): "+ err +"\n");
+		dump("[ERROR] getClipboard(): "+ err +"\n");
 	}
 	return clipboard;
-}
+};
 
 
 
 // Handling the tabID of current tab
-NewTabWindowObserver.prototype = {
-	getCurrentTabID: function(){
+NewTabWindowObserver.prototype.getCurrentTabID = function(){
+	if(this.window.gBrowser != null) {
 		let currentTab = this.window.gBrowser.selectedTab;
 		let tabID = exports.handlers.sessionService.getTabValue(currentTab, "id");
-		dump("tabID: "+tabID);
 		// if "id" is not set before, it will be undefined
 		return tabID;
-	},
-	
-	setCurrentTabID: function(tabID){
-		let currentTab = this.window.gBrowser.selectedTab;
-		exports.handlers.sessionService.setTabValue(currentTab, "id", tabID);
 	}
-}
+};
+	
+NewTabWindowObserver.prototype.setCurrentTabID = function(){
+	if(this.window.gBrowser != null) {
+		let newTabID = Date.now();
+		let currentTab = this.window.gBrowser.selectedTab;
+		exports.handlers.sessionService.setTabValue(currentTab, "id", newTabID);
+		return newTabID;
+	}
+};
 
 
 
@@ -178,20 +197,26 @@ NewTabWindowObserver.prototype = {
 // tab id is saved in session for this tab
 // if no id, it is a new tab; otherwise it is old.
 NewTabWindowObserver.prototype.newTabSelected = function(event) {
+
+	var prevTabID = UserAction.getTabID();
+	UserAction.clearTabID();
 	var tabID = this.getCurrentTabID();
-	var method = this.action.getMethod();
 	var domain = this.getUrlBarString();
-	this.clearaction();	
-	if(tabID == undefined)
-	{
+	var method = UserAction.getMethod();
+	if(!method) method = "unknown";
+	UserAction.clearAction();
+	
+	dump("TabSelected: current tabID: " + tabID + "(len="+tabID.length+"); prev tabID: "+prevTabID+"; domain: "+domain+"\n");
+	
+	if( tabID.length <= 0 && domain.length <= 0) {
 		// START a new blank tab
 		// so we give it an unique id
-		let newTabID = Date.now();
-		this.setCurrentTabID(newTabID);
-		
+		let newTabID = this.setCurrentTabID();
+		UserAction.setTabID(newTabID);
+		dump("new tab created: set tab id as "+newTabID+"\n");
 		let clip = this.getClipboard();
 		
-		dump("[START] " + method + "; clipboard: " + clip.content + "\n");			
+		dump("[START] " + method + "; clipboard: " + clip.content + "\n");
 		this.record ({
 			timestamp:	Date.now(), 
 			tab_id:		newTabID,
@@ -201,11 +226,11 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 			clipboard:	clip.content,
 			is_clipboard_url: clip.isUrl
 		});
-		
-	}else if(tabID) {
-		
+	}
+	
+
+	if(prevTabID) {			
 		///// LEAVE
-		this.action.clearAction();
 		dump("[LEAVE]" + method + ", domain: " + domain + "\n");
 		this.record ({
 			timestamp:	Date.now(), 
@@ -213,39 +238,43 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 			event:		"leave", 
 			method:		method, 
 			url:		domain,
-			clipboard:	null,
-			is_clipboard_url: null
-		});
-		
+			clipboard:	"",
+			is_clipboard_url: -1
+		});		
 	}
 	
-}
-
+};
 
 	
 // "this" in this function refers to "NewTabWindowObserver"
 NewTabWindowObserver.prototype.newPageLoad = function(event) {
-
-	var method = this.action.getMethod();
+  	
+	var method = UserAction.getMethod();
 	var tabID = this.getCurrentTabID();
+	//var tabID = UserAction.getTabID();
 	var domain = this.getUrlBarString();
-	this.action.clearKeydownTrack();
-	this.action.clearMethod();
+	UserAction.clearAction();
 	
-	if(tabID) {
-		dump("[NAVIGATION] " + method + ", domain: " + domain + "\n");
-		this.record ({
-			timestamp:Date.now(), 
-			tab_id:		tabID, 
-			event:		"navigation", 
-			method:		method, 
-			url:		domain,
-			clipboard:	null,
-			is_clipboard_url: null
-		});
+	dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
+	
+	try{
+		if(tabID.length > 0 && method && domain.length > 0 ) {
+			dump("[NAVIGATION] " + method + ", domain: " + domain + "\n");
+			this.record ({
+				timestamp:	Date.now(), 
+				tab_id:		tabID, 
+				event:		"navigation", 
+				method:		method, 
+				url:		domain,
+				clipboard:	"",
+				is_clipboard_url: -1
+			});
+		}
+	}catch(err){
+		dump("[NewPageLoad ERROR] "+err+"\n");
 	}
 	
-}
+};
 
 
 
@@ -265,7 +294,10 @@ NewTabWindowObserver.prototype.install = function() {
 	//// Attention: use "self.newTabSelected()" so that in the newTabSelected funtion, "this" can refer to windowObserver and therefore "this.getUrlString()" & other similar calls make sense 
 	window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, false);
 	//window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
-	window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){self.action.setMethod("close");}, false);
+	window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
+													dump(" > close a tab\n");
+													UserAction.setMethod("close");
+												}, false);
     
 	
 	
@@ -280,7 +312,7 @@ NewTabWindowObserver.prototype.install = function() {
 						let targ = evt.originalTarget;
 						if (targ.id == "new-tab-button" || targ.className == "tabs-newtab-button") {
 							dump(" > click the new tab button (+)!!\n");
-							self.action.setMethod("plus_button");
+							UserAction.setMethod("plus_button");
 						} 
 					}
     			}, false);
@@ -291,7 +323,7 @@ NewTabWindowObserver.prototype.install = function() {
     // even it opens a new tab, it cannot fire a "TabSelect" event
     this._listen(tabBar, "dblclick", function(evt) {
 					dump(" > double click!!\n");
-					self.action.setMethod("double_click");
+					UserAction.setMethod("double_click");
 					self.newTabSelected(); // trigger the event manually
     			}, false);
     
@@ -301,7 +333,7 @@ NewTabWindowObserver.prototype.install = function() {
     let filemenubutton = window.document.getElementById("menu_newNavigatorTab");
     this._listen(filemenubutton, "command", function(evt){
     				dump(" > FILE menu button!! \n");
-    				self.action.setMethod("command_t");
+    				UserAction.setMethod("command_t");
     			}, false);
     
 
@@ -320,7 +352,7 @@ NewTabWindowObserver.prototype.install = function() {
 	let searchBarDropdown = window.document.getElementById("PopupAutoComplete");
 	this._listen(searchBarDropdown, "click", function(evt){
 					dump(" > click search bar dropdown");
-					self.action.setMethod("search_drop_click");
+					UserAction.setMethod("search_drop_click");
 				}, false);
 	
 	
@@ -330,16 +362,16 @@ NewTabWindowObserver.prototype.install = function() {
 					if(evt.keyCode == 40) { // Down key
 					
 						dump(" > search bar down key pressed.\n");
-						exports.handlers.action.searchbarDownPressed = true;					
+						UserAction.searchbarDownPressed = true;					
 					}
 					if (evt.keyCode == 13) { // Enter key
 					
-						exports.handlers.action.searchbarDownPressed = false; // reset once the enter is pressed
+						UserAction.searchbarDownPressed = false; // reset once the enter is pressed
 						dump("searchbar enter.\n");						
-						if(exports.handlers.action.searchbarDownPressed) {
-							self.action.setMethod("search_drop_enter");
+						if(UserAction.searchbarDownPressed) {
+							UserAction.setMethod("search_drop_enter");
 						}else {
-							self.action.setMethod("search_enter");
+							UserAction.setMethod("search_enter");
 						}						
 					}
 				}, false);
@@ -349,7 +381,7 @@ NewTabWindowObserver.prototype.install = function() {
 	this._listen(searchBar, "mouseup", function(evt) {
 					if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
 						dump(" > search bar go button is clicked.\n");
-						self.action.setMethod("search_go_btn");
+						UserAction.setMethod("search_go_btn");
 					}
 	   			}, false);
 	
@@ -360,15 +392,15 @@ NewTabWindowObserver.prototype.install = function() {
 	this._listen(urlBar, "keydown", function(evt) {				
 					if(evt.keyCode == 40) { // Down key
 						dump(" > url bar down key pressed.\n");
-						exports.handlers.action.urlbarDownPressed = true;
+						UserAction.urlbarDownPressed = true;
 					}					
 					if (evt.keyCode == 13) { // Enter key
 						// Enter key
-						exports.handlers.action.urlbarDownPressed = false;
-						if(exports.handlers.action.urlbarDownPressed) {
-							self.action.setMethod("urlbar_drop_enter");
+						UserAction.urlbarDownPressed = false;
+						if(UserAction.urlbarDownPressed) {
+							UserAction.setMethod("urlbar_drop_enter");
 						}else{
-							self.action.setMethod("urlbar_enter");
+							UserAction.method = "urlbar_enter";
 						}
 					}
 					
@@ -380,7 +412,7 @@ NewTabWindowObserver.prototype.install = function() {
 	this._listen(urlGoButton, "mouseup", function(evt) {
 					// Click URL bar go button
 					dump(' > url bar go-button.\n');
-					self.action.setMethod("urlbar_go_btn");
+					UserAction.setMethod("urlbar_go_btn");
 				 }, false);
 	
 
@@ -391,7 +423,7 @@ NewTabWindowObserver.prototype.install = function() {
 		 			if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
 						// Click URL bar go button
 						dump(" > url bar drop button click.\n");
-						self.action.setMethod("urlbar_drop_btn");					
+						UserAction.setMethod("urlbar_drop_btn");					
 		 			}
 	   			}, false);
 
@@ -401,7 +433,7 @@ NewTabWindowObserver.prototype.install = function() {
 	let urlbarDropdown = window.document.getElementById("PopupAutoCompleteRichResult");
 	this._listen(urlbarDropdown, "click", function(evt){
 					dump("url bar dropdown click!!!!!\n");
-					self.action.setMethod("urlbar_drop_click");
+					UserAction.setMethod("urlbar_drop_click");
 				}, false);
 	
 	
@@ -413,7 +445,7 @@ NewTabWindowObserver.prototype.install = function() {
 	let bookmarkmemu = window.document.getElementById("bookmarksMenuPopup");
 	this._listen(bookmarkmemu, "command", function(evt){
 					dump(" > bookmark main menu click.\n");
-					self.action.setMethod("boookmark_menu");
+					UserAction.setMethod("boookmark_menu");
 				}, false);
 
 
@@ -422,7 +454,7 @@ NewTabWindowObserver.prototype.install = function() {
 	let bookmarkbar = window.document.getElementById("PlacesToolbar");
 	this._listen(bookmarkbar, "click", function(evt){			
 					dump(" > bookmark bar clicked! \n");
-					self.action.setMethod("bookmark_bar");	
+					UserAction.setMethod("bookmark_bar");	
 				}, true);
 	
 	
@@ -431,7 +463,7 @@ NewTabWindowObserver.prototype.install = function() {
 	let historymenu = window.document.getElementById("goPopup");
 	this._listen(historymenu, "command", function(evt){
 					dump(" > history click.\n");
-					self.action.setMethod("history_menu");
+					UserAction.setMethod("history_menu");
 				}, true);
 	
 	
@@ -463,6 +495,8 @@ BaseClasses.extend(NewTabGlobalObserver,
 NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
   // "store" is a connection to the database table
 	
+	dump("onExperimentStartup started!\n");
+	
 	NewTabGlobalObserver.superClass.onExperimentStartup.call(this, store);
 
   /* Any code that you only want to run once per Firefox session
@@ -470,32 +504,23 @@ NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
    * You also have access to XPCOM components through predefined
    * symbols Cc and Ci: */
 
+
   	let wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
-	this.action = {
-		currentTabID: null,  
-		urlbarDownPressed: false,
-		searchbarDownPressed: false,
-		method: null
-	};
 	
-	this.iOService = Cc["@mozilla.org/network/io-service;1"]
-					.getService(Ci.nsIIOService);
+	this.iOService = Cc["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
 	
-	this.clipService = Cc["@mozilla.org/widget/clipboard;1"]
-						.getService(Components.interfaces.nsIClipboard),
+	this.clipService = Cc["@mozilla.org/widget/clipboard;1"].getService(Components.interfaces.nsIClipboard);
 	
-	this.transService = Cc["@mozilla.org/widget/transferable;1"]
-						.createInstance(Components.interfaces.nsITransferable);
+	this.transService = Cc["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
 	
 	this.transService.addDataFlavor("text/unicode");
 	
-	this.sessionService = Cc["@mozilla.org/browser/sessionstore;1"]
-						.getService(Components.interfaces.nsISessionStore);
-  
+	this.sessionService = Cc["@mozilla.org/browser/sessionstore;1"].getService(Components.interfaces.nsISessionStore);
+	
+	dump("onExperimentStartup finished!\n");
+
 };
-
-
 
 /* Other methods of the bae class that you can override are:
  * .onNewWindow(window)
@@ -514,6 +539,11 @@ NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
 
 // Instantiate and export the global observer (required!)
 exports.handlers = new NewTabGlobalObserver();
+
+
+
+
+
 
 
 // Finally, we make the web content, which defines what will show up on the
@@ -602,7 +632,7 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 		}
    	
 		let domainData = [];
-		let domainStr = "<ul>";
+		let domainString = "<ul>";
 		let i = 0;
 		for(let url in domainHash) {
 			domainString += "<li>"+url+":"+domainHash[url]+"</li>";

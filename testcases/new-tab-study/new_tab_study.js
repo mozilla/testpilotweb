@@ -80,6 +80,7 @@ var UserAction = {
 		this.method = null;
 		this.urlbarDownPressed = false;
 		this.searchbarDownPressed = false;
+		//dump("clear\n");
 	},
 	
 	getTabID: function() {
@@ -203,24 +204,24 @@ NewTabWindowObserver.prototype.setCurrentTabID = function(){
 NewTabWindowObserver.prototype.newTabSelected = function(event) {
 
 	var prevTabID = UserAction.getTabID();
-	var method = UserAction.getMethod();
-	if(!method) method = "unknown";
-	UserAction.clearTabID();
-	UserAction.clearAction();
-	
 	var tabID = this.getCurrentTabID();
 	var domain = this.getUrlBarString();
-		
-	//dump("TabSelected: current tabID: " + tabID + "(len="+tabID.length+"); prev tabID: "+prevTabID+"; domain: "+domain+"\n");
-
+	UserAction.clearTabID();
+	
+	dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+"\n");
+	try{
+	
 	if(prevTabID>0) {			
 		///// LEAVE
-		dump("[LEAVE]" + method + ", domain: " + domain + "\n");
+		let leaveMethod = UserAction.getMethod();
+		if(leaveMethod != "leave" && leaveMethod != "close")
+			leaveMethod = "leave";
+		dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
 		this.record ({
 			timestamp:	Date.now(), 
 			tab_id:		prevTabID, 
 			event:		"leave", 
-			method:		method, 
+			method:		leaveMethod, 
 			url:		domain,
 			clipboard:	"",
 			is_clipboard_url: -1
@@ -230,22 +231,33 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 	if( tabID <= 0 && domain.length <= 0) {
 		// START a new blank tab
 		// so we give it an unique id
+		
 		let newTabID = this.setCurrentTabID();
 		UserAction.setTabID(newTabID);
 		//dump("new tab created: set tab id as "+newTabID+"\n");
+		
 		let clip = this.getClipboard();
 		
-		dump("[START] " + method + "; clipboard: " + clip.content + "\n");
+		let startMethod = UserAction.getMethod();
+		if(!startMethod)
+			startMethod = "unknown";
+		
+		dump("-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
 		this.record ({
 			timestamp:	Date.now(), 
 			tab_id:		newTabID,
 			event:		"start", 
-			method:		method, 
+			method:		startMethod, 
 			url:		"",
 			clipboard:	clip.content,
 			is_clipboard_url: clip.isUrl
 		});
 	}
+	
+	}catch(err) {
+		dump("[newTabSelected ERROR] "+err+"\n");
+	}
+	UserAction.clearAction();
 	
 };
 
@@ -253,17 +265,15 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 // "this" in this function refers to "NewTabWindowObserver"
 NewTabWindowObserver.prototype.newPageLoad = function(event) {
   	
-	var method = UserAction.getMethod();
-	UserAction.clearAction();
-	
+	var method = UserAction.getMethod();	
 	var tabID = this.getCurrentTabID();
 	//var tabID = UserAction.getTabID();
 	var domain = this.getUrlBarString();
 		
 	//dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
-	try{
+	try {	
 		if(tabID > 0 && method && domain.length > 0 ) {
-			dump("[NAVIGATION] " + method + ", domain: " + domain + "\n");
+			dump("-[NAVIGATION] " + method + ", domain: " + domain + "\n");
 			this.record ({
 				timestamp:	Date.now(), 
 				tab_id:		tabID, 
@@ -273,10 +283,12 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 				clipboard:	"",
 				is_clipboard_url: -1
 			});
+			UserAction.clearAction();
 		}
-	}catch(err){
-		dump("[NewPageLoad ERROR] "+err+"\n");
+	}catch(err) {
+		dump("[newPageLoad() ERROR] "+err+"\n");
 	}
+	
 	
 };
 

@@ -139,8 +139,8 @@ NewTabWindowObserver.prototype.getUrlBarString = function() {
 };
 
 
-
 // Get clipbord text
+// and determine whether the text is a valid Url!
 NewTabWindowObserver.prototype.getClipboard = function(){
   var clipboard = {content:"", isUrl: 0};
   try{
@@ -158,7 +158,7 @@ NewTabWindowObserver.prototype.getClipboard = function(){
       clipboardText = clipboardText.substring(0,10); // only get the first 10 characters
       //dump('clipboardData: ' + clipboardText + '\n');
       var isClipboardUrl = 0;
-      if(clipboardText.substring(0,4) == "http")
+      if(clipboardText.substring(0,4) == "http" || clipboardText.substring(0,3) == "www")
         isClipboardUrl = 1;
         
       clipboard.content = clipboardText;
@@ -207,8 +207,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
   UserAction.clearTabID();
-  
-  dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+"\n");
+  //dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+"\n");
   
   try{
   
@@ -229,7 +228,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
     });    
   }
   
-  //if( tabID <= 0 && domain.length <= 0) {
+  if( tabID <= 0 && domain.length <= 0) {
     // START a new blank tab
     // so we give it an unique id    
     let newTabID = this.setCurrentTabID();
@@ -251,7 +250,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       clipboard:  clip.content,
       is_clipboard_url: clip.isUrl
     });
- // }
+  }
   
   }catch(err) {
     dump("[newTabSelected ERROR] "+err+"\n");
@@ -345,11 +344,11 @@ NewTabWindowObserver.prototype.install = function() {
     
     // 1.3 File->New Tab
     // 1.4 command+T
-    let filemenubutton = window.document.getElementById("menu_newNavigatorTab");
+    let filemenubutton = window.document.getElementById("key_newNavigatorTab");
     this._listen(filemenubutton, "command", function(evt){
                    dump(" > FILE menu button!! \n");
                    UserAction.setMethod("command_t");
-                 }, false);
+                 }, true);
     
 
 

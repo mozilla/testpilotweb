@@ -229,19 +229,19 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
     });    
   }
   
-  if( tabID <= 0 && domain.length <= 0) {
+  //if( tabID <= 0 && domain.length <= 0) {
     // START a new blank tab
     // so we give it an unique id    
     let newTabID = this.setCurrentTabID();
     UserAction.setTabID(newTabID);
-    dump(Date.now() + "new tab created: set tab id as "+newTabID+"\n");
+    dump(Date.now() + " > new tab created: set tab id as "+newTabID+"\n");
     let clip = this.getClipboard();
     
     let startMethod = UserAction.getMethod();
     if(!startMethod)
       startMethod = "unknown";
     
-    dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
+    dump("-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
     this.record ({
       timestamp:  Date.now(), 
       tab_id:    newTabID,
@@ -251,7 +251,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       clipboard:  clip.content,
       is_clipboard_url: clip.isUrl
     });
-  }
+ // }
   
   }catch(err) {
     dump("[newTabSelected ERROR] "+err+"\n");
@@ -326,7 +326,7 @@ NewTabWindowObserver.prototype.install = function() {
                   if (evt.button == 0) {
                     let targ = evt.originalTarget;
                     if (targ.id == "new-tab-button" || targ.className == "tabs-newtab-button") {
-                      dump(" > click the new tab button (+)!!\n");
+                      dump(" > click the new tab button (+).\n");
                       UserAction.setMethod("plus_button");
                     } 
                   }
@@ -338,9 +338,9 @@ NewTabWindowObserver.prototype.install = function() {
     // even it opens a new tab, it cannot fire a "TabSelect" event
     this._listen(tabBar, "dblclick", function(evt) {
                    UserAction.setMethod("double_click");
-                   dump(Date.now() +" > double click!!\n");
+                   dump(Date.now() +" > double click. \n");
                    self.newTabSelected(null); // trigger the event manually
-                 }, false);
+                 }, true);
     
     
     // 1.3 File->New Tab
@@ -366,7 +366,7 @@ NewTabWindowObserver.prototype.install = function() {
   // search bar dropdown
   let searchBarDropdown = window.document.getElementById("PopupAutoComplete");
   this._listen(searchBarDropdown, "click", function(evt){
-               dump(" > click search bar dropdown");
+               dump(" > click search bar dropdown.\n");
                UserAction.setMethod("search_drop_click");
                }, false);
   
@@ -447,7 +447,7 @@ NewTabWindowObserver.prototype.install = function() {
   
   let urlbarDropdown = window.document.getElementById("PopupAutoCompleteRichResult");
   this._listen(urlbarDropdown, "click", function(evt){
-          dump("url bar dropdown click!!!!!\n");
+          dump(" > url bar dropdown click!!!!!\n");
           UserAction.setMethod("urlbar_drop_click");
         }, false);
   

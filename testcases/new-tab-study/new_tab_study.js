@@ -258,7 +258,6 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 		dump("[newTabSelected ERROR] "+err+"\n");
 	}
 	UserAction.clearAction();
-	
 };
 
 	
@@ -308,7 +307,7 @@ NewTabWindowObserver.prototype.install = function() {
 	//// if this is a new tab, initialize the currentTabID
 	//// otherwise currentTabID is reset
 	//// Attention: use "self.newTabSelected()" so that in the newTabSelected funtion, "this" can refer to windowObserver and therefore "this.getUrlString()" & other similar calls make sense 
-	window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, false);
+	window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, true);
 	//window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
 	window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
 													dump(" > close a tab\n");
@@ -338,9 +337,10 @@ NewTabWindowObserver.prototype.install = function() {
     // double-click on tabbar may not open a new tab
     // even it opens a new tab, it cannot fire a "TabSelect" event
     this._listen(tabBar, "dblclick", function(evt) {
+    				UserAction.setMethod("double_click");
 					dump(" > double click!!\n");
-					UserAction.setMethod("double_click");
-					self.newTabSelected(); // trigger the event manually
+					if(UserAction.getTabID()<=0)
+						self.newTabSelected(); // trigger the event manually
     			}, false);
     
     
@@ -571,11 +571,10 @@ BaseClasses.extend(NewTabWebContent, BaseClasses.GenericWebContent);
 
 NewTabWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
-      return '<h4>Frequencies of Domains (we do not collect actual domains but the hashed strings which cannot be recovered ack to the real domain names):</h4><div id="data-plot-div"></div>' +
-      	this.saveButtons + '</div>'
-      	+'<h4>Browsing methods:</h4><div id="data-plot-div2"></div>' +
-      	this.saveButtons + '</div>'
-      	+'<div class="dataBox"><h3>View Your Data:</h3>' +
+      return '<h4>Everyday activity:</h4><div id="data-plot-div1"></div>'+this.saveButtons + '</div>'
+      + '<h4>Frequencies of Domains (we do not collect actual domains but the hashed strings which cannot be recovered back to the real domain names):</h4><div id="data-plot-div2"></div>'+this.saveButtons+'</div>'
+      + '<h4>Browsing methods:</h4><div id="data-plot-div3"></div>'+this.saveButtons + '</div>'
+      + '<div class="dataBox"><h3>View Your Data:</h3>' +
       	this.dataViewExplanation +
       	this.rawDataLink;
   });
@@ -610,75 +609,6 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
    
 	experiment.getDataStoreAsJSON(function(rawData) {
 		
-		
-		var tabCounter = 0;
-		var pageloadCounter = 0;
-		
-		var domains = [];
-		var domainHash = {};
-		var domainCounter = 0;
-		
-		var clipUrl = {'yes':0, 'no':0};
-		var methodHash = {"urlbar":0, "search":0, "bookmark":0, "history":0};
-		
-		var startTimestamp = 0;
-		var lastTimestamp = Date.now();
-
-		for each (let row in rawData) {
-
-			let evt = row.event.toString();
-			let mtd = row.method.toString();
-			let ts = row.timestamp;
-			let url = row.url.toString();
-			let isClipUrl = parseInt(row.is_clipboard_url);
-			
-			if(startTimestamp == 0)
-				startTimestamp = ts;
-				
-			if(evt == "start") {
-				tabCounter += 1;
-				if(isClipUrl == 1) 
-					clipUrl.yes += 1;
-				else if(isClipUrl == 0)
-					clipUrl.no += 1;
-			}
-			
-			if(evt == "navigation" && url != "") {
-				domains.push(url);
-				pageloadCounter += 1;
-				domainHash[url] = 0;
-				methodHash[mtd.split('_')[0]] += 1;
-			}
-		}
-
-		for each (let url in domains) {
-			domainHash[url] += 1;
-		}
-   		
-		let domainData = [];
-		let domainString = "<ul>";
-		let i = 0;
-		for(let url in domainHash) {
-			domainString += "<li>"+url+":"+domainHash[url]+"</li>";
-			domainData.push([i, domainHash[url]]);
-			i += 1;
-		}
-		domainString += "</ul>";
-		domainData.sort(function(a, b) {return a[1] - b[1];});
-
-		let methodData = [];
-		let methodString = "<ul>";
-		let axisLabels = [];
-		i = 0;
-		for(let mtd in methodHash) {
-			methodString += "<li>" + mtd + ":" + methodHash[mtd] + "</li>";
-			methodData.push([i, methodHash[mtd]]);
-			axisLabels.push([i, mtd]);
-			i += 1;
-		}
-		methodString += "</ul>";
-    	
-   		
 		let getFormattedDateString = function(timestamp) {
 			let date = new Date(timestamp);
 			let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
@@ -686,6 +616,110 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 			return months[date.getMonth()] + " " + date.getDate() + ", "
 					+ date.getFullYear();
 		};
+		
+		var tabCounter = 0;
+		var pageloadCounter = 0;
+		
+		var lastDate = "";
+		var everydayTabs = {};
+		var everydayDomains = {};
+		
+		var domains = [];
+		var domainHash = {};
+		var domainCounter = 0;
+		
+		var clipUrl = {'yes':0, 'no':0};
+		var methodList = ["urlbar", "search", "bookmark", "history"];
+		var methodHash = {"urlbar":0, "search":0, "bookmark":0, "history":0};
+		
+		var startTimestamp = 0;
+		var lastTimestamp = Date.now();
+		
+		for each (let row in rawData) {
+
+			let evt = row.event.toString();
+			let mtd = row.method.toString();
+			let ts = row.timestamp;
+			let currentDate = getFormattedDateString(ts);
+			let url = row.url.toString();
+			let isClipUrl = parseInt(row.is_clipboard_url);
+			
+			if(startTimestamp == 0)
+				startTimestamp = ts;
+			
+			if(currentDate != lastDate) {
+				everydayTabs[currentDate] = 0;
+				everydayDomains[currentDate] = 0;
+				lastDate = currentDate;
+			}
+			
+			if(evt == "start") {
+				everydayTabs[lastDate] += 1;
+				tabCounter += 1;				
+				if(isClipUrl == 1) 
+					clipUrl.yes += 1;
+				else if(isClipUrl == 0)
+					clipUrl.no += 1;
+			}
+			
+			if(evt == "navigation" && url != "") {
+				everydayDomains[lastDate] += 1;
+				domains.push(url);
+				pageloadCounter += 1;
+				domainHash[url] = 0;
+				if(methodList.indexOf(mtd.split('_')[0]) > -1)
+					methodHash[mtd.split('_')[0]] += 1;
+			}
+		}
+
+		for each (let url in domains) {
+			domainHash[url] += 1;
+		}
+   		
+   		// preparing data for everyday activity
+   		let i = 0;
+   		let everydayTabData = [];
+   		let everydayDomainData = [];
+   		let everydayAxisLabels = [];
+   		for (let dt in everydayTabs) {
+   			everydayTabData.push([i,everydayTabs[dt]]);
+   			everydayDomainData.push([i,everydayDomains[dt]]);
+   			everydayAxisLabels.push([i, dt]);
+   			i += 1;
+   		}
+   		
+		// preparing data for domain counting
+		let domainString = "<ul>";
+		for(let url in domainHash)
+			domainString += "<li>"+url+":"+domainHash[url]+"</li>";
+		
+		domainString += "</ul>";
+		let domainFreq = [];
+		let domainData = [];
+		let domainAxisLabels = [];
+		i = 0;
+		for each (let freq in domainHash)
+			domainFreq.push( parseInt(freq) );
+		domainFreq.sort( function(a,b){return b-a;} );
+		dump("domainFreq: "+domainFreq+"\n");
+		for each (let freq in domainFreq) {
+			domainData.push([i, freq]);
+			domainAxisLabels.push([i+0.5, i+1]);
+			i += 1;
+		}
+		
+		// preparing for method counting
+		let methodData = [];
+		let methodString = "<ul>";
+		let axisLabels = [];
+		i = 0;
+		for(let mtd in methodHash) {
+			methodString += "<li>" + mtd + ":" + methodHash[mtd] + "</li>";
+			methodData.push([i, methodHash[mtd]]);
+			axisLabels.push([i+0.5, mtd]);
+			i += 1;
+		}
+		methodString += "</ul>";
     
 		let startSpan = document.getElementById("study-start-date-span");
 		let endSpan = document.getElementById("study-end-date-span");
@@ -709,22 +743,35 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
 		
 		// Do plotting
 		
-		let plotDiv = document.getElementById("data-plot-div");
-		plotDiv.style.width="500px";
-		plotDiv.style.height="300px";
-		graphUtils.plot(plotDiv, [{label: "frequency of ranked domains",
-								   data: domainData,
-								   bars: {show: true}
-								   }],
-						{xaxis: {},
-						 yaxis: {},
+		let plotDiv1 = document.getElementById("data-plot-div1");
+		plotDiv1.style.width="500px";
+		plotDiv1.style.height="300px";
+		graphUtils.plot(plotDiv1, 
+						[{label: "#tabs", data: everydayTabData},
+						{label: "#domains", data: everydayDomainData}],
+						{
+							series:{lines: {show:true}, points: {show:true}},
+							xaxis: {ticks:everydayAxisLabels}, 
+							yaxis: {},
 						}
 					  );
 		
 		let plotDiv2 = document.getElementById("data-plot-div2");
 		plotDiv2.style.width="500px";
 		plotDiv2.style.height="300px";
-		graphUtils.plot(plotDiv2, [{label: "frequency of browsing methods",
+		graphUtils.plot(plotDiv2, [{label: "frequency of ranked domains",
+								   data: domainData,
+								   bars: {show: true}
+								   }],
+						{xaxis: {ticks:domainAxisLabels},
+						 yaxis: {},
+						}
+					  );
+		
+		let plotDiv3 = document.getElementById("data-plot-div3");
+		plotDiv3.style.width="500px";
+		plotDiv3.style.height="300px";
+		graphUtils.plot(plotDiv3, [{label: "frequency of browsing methods",
 								   data: methodData,
 								   bars: {show: true}
 								   }],

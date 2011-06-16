@@ -53,6 +53,7 @@ exports.handlers = {
 
   onExperimentStartup: function(store) {
     this._store = store;
+    let self = this;
 
     let wm = Cc["@mozilla.org/appshell/window-mediator;1"].
       getService(Ci.nsIWindowMediator);
@@ -64,9 +65,13 @@ exports.handlers = {
 
     backButton.addEventListener("click", function() {
                                   console.info("Back button clicked.");
+                                  self.record({event: 1,
+                                               timestamp: Date.now()});
                                 }, false);
     forwardButton.addEventListener("click", function() {
                                      console.info("Forward button clicked.");
+                                     self.record({event: 2,
+                                                  timestamp: Date.now()});
                                    }, false);
 
   },

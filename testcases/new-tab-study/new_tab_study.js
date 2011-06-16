@@ -242,7 +242,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
     let startMethod = currentMethod;
     if(!startMethod)
       startMethod = "unknown";
-    else if (startMethod != "plus_btn" && startMethod != "double_click" && startMethod != "command_t" && startMethod != "file_menu")
+    else if (startMethod == "close")
       startMethod = "unknown";
     
     dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
@@ -316,7 +316,8 @@ NewTabWindowObserver.prototype.install = function() {
   //window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
   window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
                           dump(" > close a tab\n");
-                          UserAction.setMethod("close");
+                          if(UserAction.getMethod() != "double_click")
+                          	UserAction.setMethod("close");
                         }, false);
     
   
@@ -332,7 +333,7 @@ NewTabWindowObserver.prototype.install = function() {
                     let targ = evt.originalTarget;
                     if (targ.id == "new-tab-button" || targ.className == "tabs-newtab-button") {
                       dump(" > click the new tab button (+).\n");
-                      UserAction.setMethod("plus_button");
+                      UserAction.setMethod("plus_btn");
                     } 
                   }
                 }, false);
@@ -344,7 +345,7 @@ NewTabWindowObserver.prototype.install = function() {
     this._listen(tabBar, "dblclick", function(evt) {
                    UserAction.setMethod("double_click");
                    dump(Date.now() +" > double click. \n");
-                   self.newTabSelected("dblclick"); // trigger the event manually
+                   //self.newTabSelected("dblclick"); // trigger the event manually
                  }, true);
     
     

@@ -5,7 +5,7 @@ exports.experimentInfo = {
 
   testName: "New Tab",
   testId: "new_tab_study",  //  201106061747
-  testInfoUrl: "https://",  // URL of page explaining your study
+  testInfoUrl: "https://testpilot.mozillalabs.com/testcases/newtabpage",  // URL of page explaining your study
   summary: "Detect what the users do after open a new blank tab",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/new-tab-study/newtabstudy-thumbnail.png", // URL of image representing your study (90x90)
   
@@ -93,12 +93,12 @@ var UserAction = {
     this.tabID = null;
   },  
   getMethod: function() {
-    //dump("get Method: "+this.method+"\n");
+    dump("get Method: "+this.method+"\n");
     return this.method;
   },
   setMethod: function(mtd) {    
     this.method = mtd;
-    //dump("set Method: "+this.method+"\n");
+    dump("set Method: "+this.method+"\n");
   },
   clearMethod: function() {
     this.method = null;
@@ -205,14 +205,13 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 
   var prevTabID = UserAction.getTabID();
   var currentMethod = UserAction.getMethod();
-  UserAction.clearTabID();
-  UserAction.clearAction();
-  
+
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
 
   dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
   
+  try{
 
   if(prevTabID>0) {      
     ///// LEAVE
@@ -257,7 +256,13 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       is_clipboard_url: clip.isUrl
     });
   }
+  
+  }catch(err) {
+  	dump("[newTabSelected ERROR] "+err+"\n");
+  }
 
+  UserAction.clearTabID();
+  UserAction.clearAction();
 };
 
   
@@ -307,7 +312,7 @@ NewTabWindowObserver.prototype.install = function() {
   //// if this is a new tab, initialize the currentTabID
   //// otherwise currentTabID is reset
   //// Attention: use "self.newTabSelected()" so that in the newTabSelected funtion, "this" can refer to windowObserver and therefore "this.getUrlString()" & other similar calls make sense 
-  window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, true);
+  window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, false);
   //window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
   window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
                           dump(" > close a tab\n");

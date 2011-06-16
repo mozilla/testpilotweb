@@ -205,11 +205,13 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
 
   var prevTabID = UserAction.getTabID();
   var currentMethod = UserAction.getMethod();
-
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
 
   dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
+  
+  UserAction.clearTabID();
+  UserAction.clearAction();
   
   try{
 
@@ -264,8 +266,6 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
   	dump("[newTabSelected ERROR] "+err+"\n");
   }
 
-  UserAction.clearTabID();
-  UserAction.clearAction();
 };
 
   

@@ -213,24 +213,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
   
   try{
 
-  if(prevTabID>0) {      
-    ///// LEAVE
-    let leaveMethod = currentMethod;
-    if(leaveMethod != "leave" && leaveMethod != "close")
-      leaveMethod = "leave";
 
-    dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
-    this.record ({
-      timestamp:  Date.now(), 
-      tab_id:    prevTabID, 
-      event:    "leave", 
-      method:    leaveMethod, 
-      url:    domain,
-      clipboard:  "",
-      is_clipboard_url: -1
-    });
-  }
-  
   if( tabID <= 0 && domain.length <= 0) {
     // START a new blank tab
     // so we give it an unique id    
@@ -256,6 +239,26 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       is_clipboard_url: clip.isUrl
     });
   }
+  
+  
+  if(prevTabID>0) {      
+    ///// LEAVE
+    let leaveMethod = currentMethod;
+    if(leaveMethod != "leave" && leaveMethod != "close")
+      leaveMethod = "leave";
+
+    dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
+    this.record ({
+      timestamp:  Date.now(), 
+      tab_id:    prevTabID, 
+      event:    "leave", 
+      method:    leaveMethod, 
+      url:    domain,
+      clipboard:  "",
+      is_clipboard_url: -1
+    });
+  }
+  
   
   }catch(err) {
   	dump("[newTabSelected ERROR] "+err+"\n");
@@ -312,7 +315,7 @@ NewTabWindowObserver.prototype.install = function() {
   //// if this is a new tab, initialize the currentTabID
   //// otherwise currentTabID is reset
   //// Attention: use "self.newTabSelected()" so that in the newTabSelected funtion, "this" can refer to windowObserver and therefore "this.getUrlString()" & other similar calls make sense 
-  window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, false);
+  window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, true);
   //window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
   window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
                           dump(" > close a tab\n");

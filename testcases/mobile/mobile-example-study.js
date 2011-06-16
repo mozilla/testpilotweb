@@ -36,6 +36,7 @@ exports.handlers = {
 
   onNewWindow: function(window) {
     // not used on mobile?
+    console.info("Mobile Example OnNewWindow.");
   },
 
   onWindowClosed: function(window) {
@@ -51,11 +52,27 @@ exports.handlers = {
   },
 
   onExperimentStartup: function(store) {
-    // TODO
+    this._store = store;
+
+    let wm = Cc["@mozilla.org/appshell/window-mediator;1"].
+      getService(Ci.nsIWindowMediator);
+    let window = wm.getMostRecentWindow("navigator:browser"); // does this work?
+
+    console.info("Mobile Example Experiment Started.  Front window is " + window);
+    let backButton = window.document.getElementById("tool-back");
+    let forwardButton = window.document.getElementById("tool-forward");
+
+    backButton.addEventListener("click", function() {
+                                  console.info("Back button clicked.");
+                                }, false);
+    forwardButton.addEventListener("click", function() {
+                                     console.info("Forward button clicked.");
+                                   }, false);
+
   },
 
   onExperimentShutdown: function() {
-    // TODO
+    // TODO remove some event handlers here
   },
 
   doExperimentCleanup: function() {

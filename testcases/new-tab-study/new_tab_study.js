@@ -204,18 +204,22 @@ NewTabWindowObserver.prototype.setCurrentTabID = function(){
 NewTabWindowObserver.prototype.newTabSelected = function(event) {
 
   var prevTabID = UserAction.getTabID();
+  var currentMethod = UserAction.getMethod();
+  UserAction.clearTabID();
+  UserAction.clearAction();
+  
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
-  UserAction.clearTabID();
-  //dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+"\n");
+
+  //dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
   
-  try{
-  
+
   if(prevTabID>0) {      
     ///// LEAVE
-    let leaveMethod = UserAction.getMethod();
+    let leaveMethod = currentMethod;
     if(leaveMethod != "leave" && leaveMethod != "close")
       leaveMethod = "leave";
+
     dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
     this.record ({
       timestamp:  Date.now(), 
@@ -225,7 +229,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       url:    domain,
       clipboard:  "",
       is_clipboard_url: -1
-    });    
+    });
   }
   
   if( tabID <= 0 && domain.length <= 0) {
@@ -236,11 +240,13 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
     dump(Date.now() + " > new tab created: set tab id as "+newTabID+"\n");
     let clip = this.getClipboard();
     
-    let startMethod = UserAction.getMethod();
+    let startMethod = currentMethod;
     if(!startMethod)
       startMethod = "unknown";
+    else if (startMethod != "plus_btn" && startMethod != "double_click" && startMethod != "command_t" && startMethod != "file_menu")
+      startMethod = "unknown";
     
-    dump("-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
+    dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
     this.record ({
       timestamp:  Date.now(), 
       tab_id:    newTabID,
@@ -251,12 +257,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       is_clipboard_url: clip.isUrl
     });
   }
-  
-  }catch(err) {
-    dump("[newTabSelected ERROR] "+err+"\n");
-  }
-  
-  UserAction.clearAction();
+
 };
 
   
@@ -338,7 +339,7 @@ NewTabWindowObserver.prototype.install = function() {
     this._listen(tabBar, "dblclick", function(evt) {
                    UserAction.setMethod("double_click");
                    dump(Date.now() +" > double click. \n");
-                   self.newTabSelected(null); // trigger the event manually
+                   self.newTabSelected("dblclick"); // trigger the event manually
                  }, true);
     
     

@@ -12,13 +12,23 @@ exports.experimentInfo = {
   versionNumber: 1, 
   duration: 5,       // days
   minTPVersion: "1.0a1",
-  minFXVersion: "4.0", 
+  minFXVersion: "3.6", 
   
   recursAutomatically: false,
   recurrenceInterval: 60, // days
   
   startDate: null, 
-  optInRequired: false 
+  optInRequired: false/*,
+  
+  randomDeployment: { rolloutCode: "ur", minRoll: 1, maxRoll: 40},
+
+  runOrNotFunc: function() {
+   // Don't run for users on release channel
+   let Application = Cc["@mozilla.org/fuel/application;1"]
+     .getService(Ci.fuelIApplication);
+   return (Application.prefs.getValue("app.update.channel", "") != "release");
+ }
+ */
 };
 
 // METHOD CODES:
@@ -389,14 +399,12 @@ NewTabWindowObserver.prototype.install = function() {
             UserAction.searchbarDownPressed = true;          
           }
           if (evt.keyCode == 13) { // Enter key
-          
-            UserAction.searchbarDownPressed = false; // reset once the enter is pressed
             dump("searchbar enter.\n");            
-            if(UserAction.searchbarDownPressed) {
+            if(UserAction.searchbarDownPressed)
               UserAction.setMethod("search_drop_enter");
-            }else {
+            else
               UserAction.setMethod("search_enter");
-            }            
+            UserAction.searchbarDownPressed = false; // reset once the enter is pressed
           }
         }, false);
   
@@ -420,12 +428,11 @@ NewTabWindowObserver.prototype.install = function() {
           }          
           if (evt.keyCode == 13) { // Enter key
             // Enter key
-            UserAction.urlbarDownPressed = false;
-            if(UserAction.urlbarDownPressed) {
+            if(UserAction.urlbarDownPressed)
               UserAction.setMethod("urlbar_drop_enter");
-            }else{
-              UserAction.method = "urlbar_enter";
-            }
+            else
+              UserAction.setMethod("urlbar_enter");
+            UserAction.urlbarDownPressed = false;
           }
           
         }, false);
@@ -755,7 +762,7 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
     plotDiv1.style.height="300px";
     graphUtils.plot(plotDiv1, 
             [{label: "#tabs", data: everydayTabData},
-            {label: "#domains", data: everydayDomainData}],
+            {label: "#webpages", data: everydayDomainData}],
             {
               series:{lines: {show:true}, points: {show:true}},
               xaxis: {ticks:everydayAxisLabels}, 

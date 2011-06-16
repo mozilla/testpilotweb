@@ -7,12 +7,12 @@ const MULTIPLE_CHOICE_WITH_FREE_ENTRY = 5;
 
 exports.surveyInfo = {
   surveyId: "basic_panel_survey_2",
-  surveyName: "Firefox 4 Beta User Background Survey",
+  surveyName: "Firefox Beta User Background Survey",
   summary: "This survey will help us build a better picture of the majority "
-    + "of Firefox 4 Beta users. This survey doesn't contain any personally "
+    + "of Firefox Beta users. This survey doesn't contain any personally "
     + "identifiable questions."
     + "Thank you for your time!",
-  surveyExplanation: "<p>Thank you for joining the Firefox 4 Beta Program!</p> \
+  surveyExplanation: "<p>Thank you for joining the Firefox Beta Program!</p> \
 <p>Please help us build a better picture of our Beta users by completing this survey!  \
 This survey doesn't contain any personally identifiable questions. \
 It will be uploaded along with any user study data that you choose to submit. \

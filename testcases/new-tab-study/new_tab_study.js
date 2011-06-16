@@ -7,7 +7,7 @@ exports.experimentInfo = {
   testId: "new_tab_study",  //  201106061747
   testInfoUrl: "https://",  // URL of page explaining your study
   summary: "Detect what the users do after open a new blank tab",
-  thumbnail: "http://", // URL of image representing your study (90x90)
+  thumbnail: "https://testpilot.mozillalabs.com/testcases/new-tab-study/newtabstudy-thumbnail.png", // URL of image representing your study (90x90)
   
   versionNumber: 1, 
   duration: 5,       // days
@@ -211,7 +211,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
 
-  //dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
+  dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
   
 
   if(prevTabID>0) {      

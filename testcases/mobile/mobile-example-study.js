@@ -114,28 +114,43 @@ ExampleWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
       return '<div class="dataBox"><h3>View Your Data:</h3>' +
       this.dataViewExplanation +
-      this.rawDataLink +
       '<div id="data-plot-div" style="width:480x;height:800px"></div>' +
-      this.saveButtons + '</div>';
+      '</div>';
   });
 ExampleWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
-    return "This is a totally made up example study that means nothing.";
+    return "This is an example study that simply counts the times you hit the"
+           + " forward and back buttons.";
   });
 
 // This function is called when the experiment page load is done
 ExampleWebContent.prototype.onPageLoad = function(experiment,
                                                   document,
                                                   graphUtils) {
-  /* experiment is a reference to the live experiment Task object.
-   * document is a reference to the experiment page document
-   * graphUtils is a rerence to the Flot JS chart plotting library:
-   * see http://code.google.com/p/flot/
-   *
-   * The basic idea here is to plot some kind of chart inside the div tag
-   * that we defined in the dataCanvas getter in order to display the
-   * experiment data to the user in an easily understood form.
-   */
+
+  experiment.getDataStoreAsJSON(function(rawData) {
+    if (rawData.length == 0) {
+      return;
+    }
+    let numBack = 0;
+    let numForward = 0;
+    for each (let row in rawData) {
+      if (row.event == 1) {
+        numBack ++;
+      }
+      if (row.event == 2) {
+        numForward ++;
+      }
+    }
+    let plotDiv = document.getElementById("data-plot-div");
+    if (plotDiv == null)
+      return;
+    graphUtils.plot(plotDiv, [{data: [[1, numBack], [2, numForward]]}],
+                    {series: {bars: {show: true}},
+                     xaxis: {ticks: [[1.5, "Back"], [2.5, "Forward"]]},
+                       yaxis: {tickDecimals: 0}});
+
+  });
 };
 
 // Instantiate and export the web content (required!)

@@ -500,7 +500,7 @@ NewTabWindowObserver.prototype.install = function() {
   let bookmarkmemu = window.document.getElementById("bookmarksMenuPopup");
   this._listen(bookmarkmemu, "command", function(evt){
           //dump(" > bookmark main menu click.\n");
-          UserAction.setMethod("boookmark_menu");
+          UserAction.setMethod("bookmark_menu");
         }, false);
 
 

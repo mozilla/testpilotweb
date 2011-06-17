@@ -67,7 +67,7 @@ exports.dataStoreInfo = {
     {property: "event", type: BaseClasses.TYPE_STRING, displayName: "Event"},
     {property: "method", type: BaseClasses.TYPE_STRING, displayName: "Method"},
     {property: "url", type: BaseClasses.TYPE_STRING, displayName: "URL"},
-    {property: "clipboard", type: BaseClasses.TYPE_STRING, displayName: "Clip Board"}, // this "clipboard" attribute is only used for testing, should be removed later
+    //{property: "clipboard", type: BaseClasses.TYPE_STRING, displayName: "Clip Board"}, // this "clipboard" attribute is only used for testing, should be removed later
     {property: "is_clipboard_url", type: BaseClasses.TYPE_INT_32, displayName: "does Clip Board contain URL"}
   ]
 };
@@ -103,12 +103,12 @@ var UserAction = {
     this.tabID = null;
   },  
   getMethod: function() {
-    dump("get Method: "+this.method+"\n");
+    //dump("get Method: "+this.method+"\n");
     return this.method;
   },
   setMethod: function(mtd) {    
     this.method = mtd;
-    dump("set Method: "+this.method+"\n");
+    //dump("set Method: "+this.method+"\n");
   },
   clearMethod: function() {
     this.method = null;
@@ -153,10 +153,10 @@ NewTabWindowObserver.prototype.hashedString = function(str) {
     }
     
     let s = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
-    dump("hashed: "+str+"-->"+s+"\n");
+    //dump("hashed: "+str+"-->"+s+"\n");
     return s;
   }catch(err){
-    dump("[hashedString() ERROR] "+err+'\n');
+    //dump("[hashedString() ERROR] "+err+'\n');
     return "";
   }
   
@@ -194,7 +194,6 @@ NewTabWindowObserver.prototype.getClipboard = function(){
       str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
       clipboardText = str.data.substring(0, strLength.value / 2);
       clipboardText = clipboardText.substring(0,10); // only get the first 10 characters
-      //dump('clipboardData: ' + clipboardText + '\n');
       var isClipboardUrl = 0;
       if(clipboardText.substring(0,4) == "http" || clipboardText.substring(0,3) == "www")
         isClipboardUrl = 1;
@@ -220,7 +219,6 @@ NewTabWindowObserver.prototype.getCurrentTabID = function(){
     let tabID = 0;
     if(tabIDString.length >0 )
       tabID = parseInt(tabIDString);
-    //dump( "get tabID: "+(typeof tabID)+", "+tabID+"\n" );
     return tabID;
   }
 };
@@ -246,7 +244,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
   
-  dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
+  //dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
   
   UserAction.clearTabID();
   UserAction.clearAction();
@@ -258,7 +256,7 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       // so we give it an unique id    
       let newTabID = this.setCurrentTabID();
       UserAction.setTabID(newTabID);
-      dump(Date.now() + " > new tab created: set tab id as "+newTabID+"\n");
+      //dump(Date.now() + " > new tab created: set tab id as "+newTabID+"\n");
       let clip = this.getClipboard();
       
       let startMethod = currentMethod;
@@ -267,14 +265,14 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       else if (startMethod == "close")
         startMethod = "unknown";
       
-      dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
+      //dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
       this.record ({
         timestamp:  Date.now(), 
         tab_id:    newTabID,
         event:    "start", 
         method:    startMethod, 
         url:    "",
-        clipboard:  clip.content,
+        //clipboard:  clip.content,
         is_clipboard_url: clip.isUrl
       });
     }
@@ -285,20 +283,20 @@ NewTabWindowObserver.prototype.newTabSelected = function(event) {
       if(leaveMethod != "leave" && leaveMethod != "close")
         leaveMethod = "leave";
       
-      dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
+      //dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
       this.record ({
         timestamp:  Date.now(), 
         tab_id:    prevTabID, 
         event:    "leave", 
         method:    leaveMethod, 
         url:    domain,
-        clipboard:  "",
+        //clipboard:  "",
         is_clipboard_url: -1
       });
     }
   
   }catch(err) {
-    dump("[newTabSelected ERROR] "+err+"\n");
+    //dump("[newTabSelected ERROR] "+err+"\n");
   }
 
 };
@@ -315,20 +313,20 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
   //dump("NEW PAGE LOADED DETECTED! "+tabID+","+method+","+domain+"\n");
   try {  
     if(tabID > 0 && method && domain.length > 0 ) {
-      dump("-[NAVIGATION] " + method + ", domain: " + domain + "\n");
+      //dump("-[NAVIGATION] " + method + ", domain: " + domain + "\n");
       this.record ({
         timestamp:  Date.now(), 
         tab_id:    tabID, 
         event:    "navigation", 
         method:    method, 
         url:    domain,
-        clipboard:  "",
+        //clipboard:  "",
         is_clipboard_url: -1
       });
       UserAction.clearAction();
     }
   }catch(err) {
-    dump("[newPageLoad() ERROR] "+err+"\n");
+    //dump("[newPageLoad() ERROR] "+err+"\n");
   }
   
   
@@ -352,7 +350,7 @@ NewTabWindowObserver.prototype.install = function() {
   window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, true);
   //window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
   window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
-              dump(" > close a tab\n");
+              //dump(" > close a tab\n");
               if(UserAction.getMethod() != "double_click")
               UserAction.setMethod("close");
             }, false);
@@ -369,7 +367,7 @@ NewTabWindowObserver.prototype.install = function() {
                   if (evt.button == 0) {
                     let targ = evt.originalTarget;
                     if (targ.id == "new-tab-button" || targ.className == "tabs-newtab-button") {
-                      dump(" > click the new tab button (+).\n");
+                      //dump(" > click the new tab button (+).\n");
                       UserAction.setMethod("plus_btn");
                     } 
                   }
@@ -381,7 +379,7 @@ NewTabWindowObserver.prototype.install = function() {
     // even it opens a new tab, it cannot fire a "TabSelect" event
     this._listen(tabBar, "dblclick", function(evt) {
                    UserAction.setMethod("double_click");
-                   dump(Date.now() +" > double click. \n");
+                   //dump(Date.now() +" > double click. \n");
                    //self.newTabSelected("dblclick"); // trigger the event manually
                  }, true);
     
@@ -390,7 +388,7 @@ NewTabWindowObserver.prototype.install = function() {
     // 1.4 command+T
     let filemenubutton = window.document.getElementById("key_newNavigatorTab");
     this._listen(filemenubutton, "command", function(evt){
-                   dump(" > FILE menu button!! \n");
+                   //dump(" > FILE menu button!! \n");
                    UserAction.setMethod("command_t");
                  }, true);
     
@@ -409,7 +407,7 @@ NewTabWindowObserver.prototype.install = function() {
   // search bar dropdown
   let searchBarDropdown = window.document.getElementById("PopupAutoComplete");
   this._listen(searchBarDropdown, "click", function(evt){
-               dump(" > click search bar dropdown.\n");
+               //dump(" > click search bar dropdown.\n");
                UserAction.setMethod("search_drop_click");
                }, false);
   
@@ -419,11 +417,11 @@ NewTabWindowObserver.prototype.install = function() {
   this._listen(searchBar, "keydown", function(evt) {
           if(evt.keyCode == 40) { // Down key
           
-            dump(" > search bar down key pressed.\n");
+            //dump(" > search bar down key pressed.\n");
             UserAction.searchbarDownPressed = true;          
           }
           if (evt.keyCode == 13) { // Enter key
-            dump("searchbar enter.\n");            
+            //dump("searchbar enter.\n");            
             if(UserAction.searchbarDownPressed)
               UserAction.setMethod("search_drop_enter");
             else
@@ -436,7 +434,7 @@ NewTabWindowObserver.prototype.install = function() {
   // Listen on search bar, by mouse
   this._listen(searchBar, "mouseup", function(evt) {
           if (evt.originalTarget.getAttribute("anonid") == "search-go-button") {
-            dump(" > search bar go button is clicked.\n");
+            //dump(" > search bar go button is clicked.\n");
             UserAction.setMethod("search_go_btn");
           }
            }, false);
@@ -447,7 +445,7 @@ NewTabWindowObserver.prototype.install = function() {
   let urlBar = window.document.getElementById("urlbar");
   this._listen(urlBar, "keydown", function(evt) {        
           if(evt.keyCode == 40) { // Down key
-            dump(" > url bar down key pressed.\n");
+            //dump(" > url bar down key pressed.\n");
             UserAction.urlbarDownPressed = true;
           }          
           if (evt.keyCode == 13) { // Enter key
@@ -466,7 +464,7 @@ NewTabWindowObserver.prototype.install = function() {
   let urlGoButton = window.document.getElementById("urlbar-go-button");
   this._listen(urlGoButton, "mouseup", function(evt) {
           // Click URL bar go button
-          dump(' > url bar go-button.\n');
+          //dump(' > url bar go-button.\n');
           UserAction.setMethod("urlbar_go_btn");
          }, false);
   
@@ -477,7 +475,7 @@ NewTabWindowObserver.prototype.install = function() {
   this._listen(urlBar, "command", function(evt) {
            if (evt.originalTarget.getAttribute("anonid") == "historydropmarker") {
             // Click URL bar go button
-            dump(" > url bar drop button click.\n");
+            //dump(" > url bar drop button click.\n");
             UserAction.setMethod("urlbar_drop_btn");          
            }
            }, false);
@@ -487,7 +485,7 @@ NewTabWindowObserver.prototype.install = function() {
   
   let urlbarDropdown = window.document.getElementById("PopupAutoCompleteRichResult");
   this._listen(urlbarDropdown, "click", function(evt){
-          dump(" > url bar dropdown click!!!!!\n");
+          //dump(" > url bar dropdown click!!!!!\n");
           UserAction.setMethod("urlbar_drop_click");
         }, false);
   
@@ -499,7 +497,7 @@ NewTabWindowObserver.prototype.install = function() {
   
   let bookmarkmemu = window.document.getElementById("bookmarksMenuPopup");
   this._listen(bookmarkmemu, "command", function(evt){
-          dump(" > bookmark main menu click.\n");
+          //dump(" > bookmark main menu click.\n");
           UserAction.setMethod("boookmark_menu");
         }, false);
 
@@ -508,7 +506,7 @@ NewTabWindowObserver.prototype.install = function() {
   // Bookmark bar click
   let bookmarkbar = window.document.getElementById("PlacesToolbar");
   this._listen(bookmarkbar, "click", function(evt){      
-          dump(" > bookmark bar clicked! \n");
+          //dump(" > bookmark bar clicked! \n");
           UserAction.setMethod("bookmark_bar");  
         }, true);
   
@@ -517,7 +515,7 @@ NewTabWindowObserver.prototype.install = function() {
   
   let historymenu = window.document.getElementById("goPopup");
   this._listen(historymenu, "command", function(evt){
-          dump(" > history click.\n");
+          //dump(" > history click.\n");
           UserAction.setMethod("history_menu");
         }, true);
   
@@ -549,8 +547,6 @@ BaseClasses.extend(NewTabGlobalObserver,
  * until the experiment duration is over.) */
 NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
   // "store" is a connection to the database table
-  
-  //dump("onExperimentStartup started!\n");
   
   NewTabGlobalObserver.superClass.onExperimentStartup.call(this, store);
 

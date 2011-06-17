@@ -12,13 +12,13 @@ exports.experimentInfo = {
   versionNumber: 1, 
   duration: 5,       // days
   minTPVersion: "1.0a1",
-  minFXVersion: "3.6", 
+  minFXVersion: "4.0", 
   
   recursAutomatically: false,
   recurrenceInterval: 60, // days
   
   startDate: null, 
-  optInRequired: false/*,
+  optInRequired: false,
   
   randomDeployment: { rolloutCode: "ur", minRoll: 1, maxRoll: 40},
 
@@ -28,7 +28,7 @@ exports.experimentInfo = {
      .getService(Ci.fuelIApplication);
    return (Application.prefs.getValue("app.update.channel", "") != "release");
  }
- */
+
 };
 
 // METHOD CODES:
@@ -135,13 +135,41 @@ BaseClasses.extend(NewTabWindowObserver,
 
 // -----------------------------
 
+NewTabWindowObserver.prototype.hashedString = function(str) {
+  try{
+    let converter = exports.handlers.converterService;
+    let md5 = exports.handlers.md5Service;
+    //let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+    //converter.charset = "UTF-8";
+    //let md5 = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+    //md5.init(md5.MD5);
+    let result = {};
+    let data = converter.convertToByteArray(str, result);
+    md5.update(data, data.length);
+    let hash = md5.finish(false);
+    
+    let toHexString = function(charCode) {
+      return ("0"+charCode.toString(16)).slice(-2);
+    }
+    
+    let s = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+    dump("hashed: "+str+"-->"+s+"\n");
+    return s;
+  }catch(err){
+    dump("[hashedString() ERROR] "+err+'\n');
+    return "";
+  }
+  
+}
+
 // Get URL string from the url bar
 NewTabWindowObserver.prototype.getUrlBarString = function() {
   try{
     let urlBar = this.window.document.getElementById("urlbar");
     let iOService = exports.handlers.iOService;
     let parsedUrl = iOService.newURI(urlBar.value, null, null);
-    return parsedUrl.scheme+"://"+parsedUrl.host;
+    //return parsedUrl.scheme+"://"+parsedUrl.host;
+    return this.hashedString(parsedUrl.host);
   }catch(err){
     //dump("[ERROR] getUrlBarString(): "+err+"\n");
   }
@@ -212,68 +240,65 @@ NewTabWindowObserver.prototype.setCurrentTabID = function(){
 // tab id is saved in session for this tab
 // if no id, it is a new tab; otherwise it is old.
 NewTabWindowObserver.prototype.newTabSelected = function(event) {
-
+  
   var prevTabID = UserAction.getTabID();
   var currentMethod = UserAction.getMethod();
   var tabID = this.getCurrentTabID();
   var domain = this.getUrlBarString();
-
+  
   dump("-[TabSelected] current tabID: " + tabID + "; prev tabID: "+prevTabID+"; domain: "+domain+", method: "+currentMethod+"\n");
   
   UserAction.clearTabID();
   UserAction.clearAction();
   
   try{
-
-
-  if( tabID <= 0 && domain.length <= 0) {
-    // START a new blank tab
-    // so we give it an unique id    
-    let newTabID = this.setCurrentTabID();
-    UserAction.setTabID(newTabID);
-    dump(Date.now() + " > new tab created: set tab id as "+newTabID+"\n");
-    let clip = this.getClipboard();
+  
+    if( tabID <= 0 && domain.length <= 0) {
+      // START a new blank tab
+      // so we give it an unique id    
+      let newTabID = this.setCurrentTabID();
+      UserAction.setTabID(newTabID);
+      dump(Date.now() + " > new tab created: set tab id as "+newTabID+"\n");
+      let clip = this.getClipboard();
+      
+      let startMethod = currentMethod;
+      if(!startMethod)
+        startMethod = "unknown";
+      else if (startMethod == "close")
+        startMethod = "unknown";
+      
+      dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
+      this.record ({
+        timestamp:  Date.now(), 
+        tab_id:    newTabID,
+        event:    "start", 
+        method:    startMethod, 
+        url:    "",
+        clipboard:  clip.content,
+        is_clipboard_url: clip.isUrl
+      });
+    }
     
-    let startMethod = currentMethod;
-    if(!startMethod)
-      startMethod = "unknown";
-    else if (startMethod == "close")
-      startMethod = "unknown";
-    
-    dump(Date.now()+"-[START] " + startMethod + "; clipboard: " + clip.content + "\n");
-    this.record ({
-      timestamp:  Date.now(), 
-      tab_id:    newTabID,
-      event:    "start", 
-      method:    startMethod, 
-      url:    "",
-      clipboard:  clip.content,
-      is_clipboard_url: clip.isUrl
-    });
-  }
-  
-  
-  if(prevTabID>0) {      
-    ///// LEAVE
-    let leaveMethod = currentMethod;
-    if(leaveMethod != "leave" && leaveMethod != "close")
-      leaveMethod = "leave";
-
-    dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
-    this.record ({
-      timestamp:  Date.now(), 
-      tab_id:    prevTabID, 
-      event:    "leave", 
-      method:    leaveMethod, 
-      url:    domain,
-      clipboard:  "",
-      is_clipboard_url: -1
-    });
-  }
-  
+    if(prevTabID>0) {      
+      ///// LEAVE
+      let leaveMethod = currentMethod;
+      if(leaveMethod != "leave" && leaveMethod != "close")
+        leaveMethod = "leave";
+      
+      dump("-[LEAVE]" + leaveMethod + ", domain: " + domain + "\n");
+      this.record ({
+        timestamp:  Date.now(), 
+        tab_id:    prevTabID, 
+        event:    "leave", 
+        method:    leaveMethod, 
+        url:    domain,
+        clipboard:  "",
+        is_clipboard_url: -1
+      });
+    }
   
   }catch(err) {
-  	dump("[newTabSelected ERROR] "+err+"\n");
+    dump("[newTabSelected ERROR] "+err+"\n");
   }
 
 };
@@ -314,7 +339,6 @@ NewTabWindowObserver.prototype.newPageLoad = function(event) {
 
 //.install() method will get called whenever a new window is opened
 NewTabWindowObserver.prototype.install = function() {
-
   let window = this.window;
   let self = this;
   
@@ -328,11 +352,11 @@ NewTabWindowObserver.prototype.install = function() {
   window.gBrowser.tabContainer.addEventListener("TabSelect", function() {self.newTabSelected();}, true);
   //window.gBrowser.tabContainer.addEventListener("TabOpen", function(evt){ dump("[open a tab]\n");}, false);
   window.gBrowser.tabContainer.addEventListener("TabClose", function(evt){
-                          dump(" > close a tab\n");
-                          if(UserAction.getMethod() != "double_click")
-                          	UserAction.setMethod("close");
-                        }, false);
-    
+              dump(" > close a tab\n");
+              if(UserAction.getMethod() != "double_click")
+              UserAction.setMethod("close");
+            }, false);
+  
   
   
   // ------------------------------------------------
@@ -539,17 +563,20 @@ NewTabGlobalObserver.prototype.onExperimentStartup = function(store) {
   let wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
   
-  this.iOService = Cc["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+  this.iOService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
   
-  this.clipService = Cc["@mozilla.org/widget/clipboard;1"].getService(Components.interfaces.nsIClipboard);
-  
-  this.transService = Cc["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
-  
+  this.clipService = Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
+  this.transService = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
   this.transService.addDataFlavor("text/unicode");
   
-  this.sessionService = Cc["@mozilla.org/browser/sessionstore;1"].getService(Components.interfaces.nsISessionStore);
+  this.sessionService = Cc["@mozilla.org/browser/sessionstore;1"].getService(Ci.nsISessionStore);
   
-  //dump("onExperimentStartup finished!\n");
+  //// for hash
+  this.converterService = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+  this.converterService.charset = "UTF-8";
+  this.md5Service = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+  this.md5Service.init(this.md5Service.MD5);
+
 
 };
 
@@ -600,7 +627,6 @@ NewTabWebContent.prototype.__defineGetter__("dataViewExplanation",
   function() {
     return "<p>The study is used to collect data about how users behave after opening a new tab.</p>"
     +"<p>During the study from <span id='study-start-date-span'></span> to <span id='study-end-date-span'></span>, you have opened <span id='new-tab-num-span'></span> new tabs and loaded pages in new tabs for <span id='pageload-num-span'></span> times.</p>"
-    +"<p>The browsing frequency of the main domains:<div id='main-domain-num-span'></div></p>"
     +"<p>The frequency of loading a new page with different methods:<div id='method-freq-div'></div></p>"
     +"<p>Does the clipboard contain a URL when opening a new tab:<div id='clipboard-freq-div'></div></p>";
   });
@@ -704,11 +730,11 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
        }
        
     // preparing data for domain counting
-    let domainString = "<ul>";
-    for(let url in domainHash)
-      domainString += "<li>"+url+":"+domainHash[url]+"</li>";
+    //let domainString = "<ul>";
+    //for(let url in domainHash)
+    //  domainString += "<li>"+url+":"+domainHash[url]+"</li>";
+    //domainString += "</ul>";
     
-    domainString += "</ul>";
     let domainFreq = [];
     let domainData = [];
     let domainAxisLabels = [];
@@ -746,8 +772,8 @@ NewTabWebContent.prototype.onPageLoad = function(experiment,
     let pageloadSpan = document.getElementById("pageload-num-span");
     if(pageloadSpan) pageloadSpan.innerHTML = pageloadCounter;
     
-    let numDomainSpan = document.getElementById("main-domain-num-span");
-    if(numDomainSpan) numDomainSpan.innerHTML = domainString;
+    //let numDomainSpan = document.getElementById("main-domain-num-span");
+    //if(numDomainSpan) numDomainSpan.innerHTML = domainString;
     
     let clipboardFreqDiv = document.getElementById("clipboard-freq-div");
     if(clipboardFreqDiv) clipboardFreqDiv.innerHTML = "<ul><li>Yes: " + clipUrl.yes + "</li><li>No:  " + clipUrl.no + "</li></ul>";

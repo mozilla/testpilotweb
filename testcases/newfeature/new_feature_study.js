@@ -7,7 +7,7 @@ exports.experimentInfo = {
   summary: "This study will help us understand the technology adoption of our Firefox users. As always, no sensitive or personally identifiable data is recorded.",
   thumbnail: "https://testpilot.mozillalabs.com/testcases/newfeature/firefox-thumbnail.png",
   versionNumber: 1,
-  duration: 3, // a number of days - fractions OK.
+  duration: 6, // a number of days - fractions OK.
   minTPVersion: "1.1", // Test Pilot versions older than this
     // will not run the study.
   minFXVersion: "4.0",
@@ -18,7 +18,7 @@ exports.experimentInfo = {
   optInRequired: false,
 
   randomDeployment: { rolloutCode: "ur",
-                      minRoll: 1, maxRoll: 30},
+                      minRoll: 31, maxRoll: 60},
 
   runOrNotFunc: function() {
     // Don't run for users on Firefox 4 release channel

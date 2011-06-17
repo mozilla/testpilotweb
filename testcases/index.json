@@ -70,7 +70,16 @@
      "studyfile": "new_feature_study.js",
      "hash": "230febc3b195b5cbfb45ab497b0e230a349c3bbc639c428d88edf4710dbc4c98"
     }
+  },
+  
+  {"default":
+    {"name": "New Tab Study",
+     "jarfile": "new-tab-study/new_tab_study.jar",
+     "studyfile": "new_tab_study.js",
+     "hash": "642497ec326be784c5c3b9d033ea212755389d4fb52db6f2732d8557420f4882"
+    }
   }
+  
 ],
 
 "legacy": [

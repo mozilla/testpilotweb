@@ -12,7 +12,7 @@ exports.experimentInfo = {
   versionNumber: 1, 
   duration: 5,       // days
   minTPVersion: "1.0a1",
-  minFXVersion: "4.0b", 
+  minFXVersion: "4.0b1", 
   
   recursAutomatically: false,
   recurrenceInterval: 60, // days
@@ -20,7 +20,7 @@ exports.experimentInfo = {
   startDate: null, 
   optInRequired: false,
   
-  randomDeployment: { rolloutCode: "ur", minRoll: 1, maxRoll: 40},
+  randomDeployment: { rolloutCode: "ur", minRoll: 20, maxRoll: 30},
 
   runOrNotFunc: function() {
    // Don't run for users on release channel
@@ -612,7 +612,7 @@ BaseClasses.extend(NewTabWebContent, BaseClasses.GenericWebContent);
 NewTabWebContent.prototype.__defineGetter__("dataCanvas",
   function() {
       return '<h4>Everyday activity:</h4><div id="data-plot-div1"></div>'+this.saveButtons + '</div>'
-      + '<h4>Frequencies of Domains (we do not collect actual domains but the hashed strings which cannot be recovered back to the real domain names):</h4><div id="data-plot-div2"></div>'+this.saveButtons+'</div>'
+      + '<h4>Frequencies of Domains (The actual domain names are not recorded. We encrypt the domain names in a way that it is impossible for us to recover the domain names.):</h4><div id="data-plot-div2"></div>'+this.saveButtons+'</div>'
       + '<h4>Browsing methods:</h4><div id="data-plot-div3"></div>'+this.saveButtons + '</div>'
       + '<div class="dataBox"><h3>View Your Data:</h3>' +
         this.dataViewExplanation +

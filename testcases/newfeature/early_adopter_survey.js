@@ -59,8 +59,8 @@ exports.surveyInfo = {
   ],
 
   randomDeployment: { rolloutCode: "ur",
-                      minRoll: 31, maxRoll: 60},
-  
+                      minRoll: 31, maxRoll: 50},
+
   runOrNotFunc: function() {
     // Don't run for users on Firefox 4 release channel
     let Application = Cc["@mozilla.org/fuel/application;1"]

@@ -12,7 +12,7 @@ exports.experimentInfo = {
   versionNumber: 1, 
   duration: 5,       // days
   minTPVersion: "1.0a1",
-  minFXVersion: "4.0", 
+  minFXVersion: "4.0b", 
   
   recursAutomatically: false,
   recurrenceInterval: 60, // days
@@ -139,10 +139,12 @@ NewTabWindowObserver.prototype.hashedString = function(str) {
   try{
     let converter = exports.handlers.converterService;
     let md5 = exports.handlers.md5Service;
+    
     //let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
-    //converter.charset = "UTF-8";
+    converter.charset = "UTF-8";
     //let md5 = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
-    //md5.init(md5.MD5);
+    md5.init(md5.MD5);
+    
     let result = {};
     let data = converter.convertToByteArray(str, result);
     md5.update(data, data.length);

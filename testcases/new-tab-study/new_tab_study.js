@@ -20,7 +20,7 @@ exports.experimentInfo = {
   startDate: null,
   optInRequired: false,
 
-  randomDeployment: { rolloutCode: "ur", minRoll: 61, maxRoll: 70},
+  randomDeployment: { rolloutCode: "ur", minRoll: 61, maxRoll: 90},
 
   runOrNotFunc: function() {
    // Don't run for users on release channel

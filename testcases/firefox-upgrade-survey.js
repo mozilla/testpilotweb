@@ -6,12 +6,12 @@ exports.surveyInfo = {
   thumbnail: "https://testpilot.mozillalabs.com/testcases/pilot-survey-thumbnail.png",
   
   runOrNotFunc: function() {
-    // Don't run for users on Firefox 4 release channel
     let Application = Cc["@mozilla.org/fuel/application;1"]
                       .getService(Ci.fuelIApplication);
     let versionComparator = Cc["@mozilla.org/xpcom/version-comparator;1"]
                             .getService(Ci.nsIVersionComparator);
-    if(versionComparator.compare(Application.version, "3.6")>=0 && versionComparator.compare(Application.version, "3.7")<0)
+    let ver = Application.version;
+    if( versionComparator.compare(ver, "3.6")>=0 && versionComparator.compare(ver, "3.7")<0 )
     	return true;
     else
     	return false;

@@ -89,8 +89,8 @@
   
   {"default":
     {"name": "Firefox Upgrade Survey",
-     "jarfile": "firefox_upgrade_survey.jar",
-     "studyfile": "firefox_upgrade_survey.js",
+     "jarfile": "firefox-upgrade-survey.jar",
+     "studyfile": "firefox-upgrade-survey.js",
      "hash": "ce95cd377f6a6968168fd8b31d8f8d15d5a1ad10cf5ec1b432ec8a147d5bd118"
     }
   }

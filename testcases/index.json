@@ -29,14 +29,6 @@
      "hash": "4956c881f959c5212c70f0a60fddf89e37c3d11ec6f0af72d0a9a518ade58474"
     }
   },
-  
-  {"default":
-    {"name": "Firefox Upgrade Survey",
-     "jarfile": "firefox-upgrade-survey.jar",
-     "studyfile": "firefox-upgrade-survey.js",
-     "hash": "ce95cd377f6a6968168fd8b31d8f8d15d5a1ad10cf5ec1b432ec8a147d5bd118"
-    }
-  },
 
   {"default":
     {"name": "Tech Adoption Survey",
@@ -64,6 +56,14 @@
     }
   },
 
+  {"default":
+    {"name": "Firefox Upgrade Survey",
+     "jarfile": "firefox-upgrade-survey.jar",
+     "studyfile": "firefox-upgrade-survey.js",
+     "hash": "ce95cd377f6a6968168fd8b31d8f8d15d5a1ad10cf5ec1b432ec8a147d5bd118"
+    }
+  },
+  
   {"default":
     {"name": "Strict Entry Security Evaluation",
     "jarfile": "cmu/strict_entry.jar",
@@ -165,7 +165,8 @@
 
 ],
 
-"results": [{"title": "Min and Max Tabs",
+"results": [
+{"title": "Min and Max Tabs",
 "summary": "How many tabs do users have open at a time?",
 "id": "1_results_min_max",
 "url": "https://testpilot.mozillalabs.com/testcases/tab-open-close/results.html#minmax",

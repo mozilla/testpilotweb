@@ -93,6 +93,14 @@
      "studyfile": "firefox-upgrade-survey.js",
      "hash": "ce95cd377f6a6968168fd8b31d8f8d15d5a1ad10cf5ec1b432ec8a147d5bd118"
     }
+  },
+  
+  {"default":
+    {"name": "New Blank Tab A/B Test",
+     "jarfile": "blanktab-ab-test/blanktab_ab_test.jar",
+     "studyfile": "blanktab_ab_test.js",
+     "hash": "7dddc2c8754edf2cdf39c8da1a330315832cac6e18b8d525e31a5bb160a35c97"
+    }
   }
 
 
